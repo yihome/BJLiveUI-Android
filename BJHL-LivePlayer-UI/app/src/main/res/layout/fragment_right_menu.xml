@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="bottom|left"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/fragment_right_speakers_container"
+        android:layout_width="51dp"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/fragment_right_speakers_img"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/activity_live_room_margin"
+            android:src="@drawable/live_ic_lightpen"
+            android:layout_marginTop="5dp"/>
+
+        <TextView
+            android:id="@+id/fragment_right_speakers_num"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:background="@drawable/live_right_menu_dot"
+            android:gravity="center"
+            android:layout_alignParentRight="true"
+            android:textColor="@color/live_white" />
+    </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/fragment_right_pen"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/activity_live_room_margin"
+        android:src="@drawable/live_ic_lightpen" />
+
+    <ImageView
+        android:id="@+id/fragment_right_ppt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/activity_live_room_margin"
+        android:src="@drawable/live_ic_ppt" />
+
+    <ImageView
+        android:id="@+id/fragment_right_speak_apply"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/live_ic_handup" />
+
+</LinearLayout>

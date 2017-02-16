@@ -4,6 +4,8 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/BJHL-LivePlayer-UI.iml" filepath="$PROJECT_DIR$/BJHL-LivePlayer-UI.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../liveplayer-android-sdk-core/BJHL-LivePlayer/liveplayer-sdk-core/liveplayer-sdk-core.iml" filepath="$PROJECT_DIR$/../../liveplayer-android-sdk-core/BJHL-LivePlayer/liveplayer-sdk-core/liveplayer-sdk-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../liveplayer-android-sdk-core/BJHL-LivePlayer/liveplayer-sdk-core-ppt/liveplayer-sdk-core-ppt.iml" filepath="$PROJECT_DIR$/../../liveplayer-android-sdk-core/BJHL-LivePlayer/liveplayer-sdk-core-ppt/liveplayer-sdk-core-ppt.iml" />
     </modules>
   </component>
 </project>

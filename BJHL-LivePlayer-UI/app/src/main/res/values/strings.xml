@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">BJHL-LivePlayer-UI</string>
+
+    <string name="on_line_user_count">%1$d人在线</string>
 </resources>
