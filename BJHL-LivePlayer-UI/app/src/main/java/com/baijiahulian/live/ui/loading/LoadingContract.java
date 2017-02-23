@@ -1,7 +1,7 @@
 package com.baijiahulian.live.ui.loading;
 
-import com.baijiahulian.live.ui.BasePresenter;
-import com.baijiahulian.live.ui.BaseView;
+import com.baijiahulian.live.ui.base.BasePresenter;
+import com.baijiahulian.live.ui.base.BaseView;
 import com.baijiahulian.livecore.context.LPError;
 import com.baijiahulian.livecore.launch.LPLaunchListener;
 

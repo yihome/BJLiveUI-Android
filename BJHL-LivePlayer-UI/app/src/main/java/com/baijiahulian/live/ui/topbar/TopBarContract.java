@@ -1,7 +1,7 @@
 package com.baijiahulian.live.ui.topbar;
 
-import com.baijiahulian.live.ui.BasePresenter;
-import com.baijiahulian.live.ui.BaseView;
+import com.baijiahulian.live.ui.base.BasePresenter;
+import com.baijiahulian.live.ui.base.BaseView;
 
 /**
  * Created by Shubo on 2017/2/13.

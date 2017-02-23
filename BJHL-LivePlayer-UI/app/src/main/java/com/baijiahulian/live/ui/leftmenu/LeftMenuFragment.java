@@ -3,7 +3,7 @@ package com.baijiahulian.live.ui.leftmenu;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.baijiahulian.live.ui.BaseFragment;
+import com.baijiahulian.live.ui.base.BaseFragment;
 import com.baijiahulian.live.ui.R;
 
 import butterknife.BindView;

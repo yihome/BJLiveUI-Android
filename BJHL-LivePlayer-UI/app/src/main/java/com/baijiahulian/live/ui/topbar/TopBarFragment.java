@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
-import com.baijiahulian.live.ui.BaseFragment;
+import com.baijiahulian.live.ui.base.BaseFragment;
 import com.baijiahulian.live.ui.R;
 
 import butterknife.BindView;

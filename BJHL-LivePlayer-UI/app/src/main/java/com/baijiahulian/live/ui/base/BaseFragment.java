@@ -1,4 +1,4 @@
-package com.baijiahulian.live.ui;
+package com.baijiahulian.live.ui.base;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import butterknife.ButterKnife;
+
+import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 
 /**
  * Created by Shubo on 2017/2/13.
@@ -22,7 +24,13 @@ public abstract class BaseFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        view = inflater.inflate(getLayoutId(), container, false);
+        int res = getLayoutId();
+        if(res != 0) {
+            view = inflater.inflate(res, container, false);
+        }else {
+            view = getContentView();
+        }
+        checkNotNull(view);
         ButterKnife.bind(this, view);
         init(savedInstanceState);
         return view;
@@ -33,6 +41,10 @@ public abstract class BaseFragment extends Fragment {
     public void init(Bundle savedInstanceState){
 
     };
+
+    protected View getContentView(){
+        return null;
+    }
 
     public void setBasePresenter(BasePresenter presenter) {
         basePresenter = presenter;

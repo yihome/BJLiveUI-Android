@@ -1,4 +1,4 @@
-package com.baijiahulian.live.ui;
+package com.baijiahulian.live.ui.base;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 

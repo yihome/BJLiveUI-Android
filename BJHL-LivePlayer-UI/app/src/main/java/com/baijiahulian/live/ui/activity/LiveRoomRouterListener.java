@@ -19,4 +19,20 @@ public interface LiveRoomRouterListener {
     void unClearScreen();
 
     void navigateToMessageInput();
+
+    void navigateToPPTDrawing();
+
+    void navigateToSpeakers();
+
+    void navigateToPPTWareHouse();
+
+    void disableSpeakerMode();
+
+    void enableSpeakerMode();
+
+    void maximiseRecorderView();
+
+    void maximisePlayerView();
+
+    void maximisePPTView();
 }

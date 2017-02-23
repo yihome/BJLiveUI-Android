@@ -2,7 +2,7 @@ package com.baijiahulian.live.ui.loading;
 
 import android.os.Bundle;
 
-import com.baijiahulian.live.ui.BaseFragment;
+import com.baijiahulian.live.ui.base.BaseFragment;
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.livecore.LiveSDK;
 import com.baijiahulian.livecore.context.LPError;

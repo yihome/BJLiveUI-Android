@@ -5,7 +5,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.baijiahulian.live.ui.BaseFragment;
+import com.baijiahulian.live.ui.base.BaseFragment;
 import com.baijiahulian.live.ui.R;
 
 import butterknife.BindView;
@@ -69,12 +69,12 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
 
     @Override
     public void showTeacherRightMenu() {
-
+        fragmentRightSpeakApply.setVisibility(View.GONE);
     }
 
     @Override
     public void showStudentRightMenu() {
-
+        fragmentRightPpt.setVisibility(View.GONE);
     }
 
     @Override
@@ -89,8 +89,10 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
             case R.id.fragment_right_speakers_container:
                 break;
             case R.id.fragment_right_pen:
+                presenter.drawing();
                 break;
             case R.id.fragment_right_ppt:
+                presenter.managePPT();
                 break;
             case R.id.fragment_right_speak_apply:
                 break;

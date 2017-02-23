@@ -1,4 +1,4 @@
-package com.baijiahulian.live.ui;
+package com.baijiahulian.live.ui.base;
 
 /**
  * Created by Shubo on 2017/2/13.

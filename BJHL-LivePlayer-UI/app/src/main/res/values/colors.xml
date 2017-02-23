@@ -11,8 +11,8 @@
 
     <color name="live_white">#FFFFFF</color>
     <color name="live_red">#FF5850</color>
+    <color name="live_fail">#EDEDEE</color>
     <color name="live_top_bar_gradient_start">#CC000000</color>
     <color name="live_top_bar_gradient_end">#00000000</color>
-
 
 </resources>
