@@ -13,6 +13,7 @@ interface TopBarContract {
         void showOnlineUserCount(int count);
 
         void showRoomTitle(String roomTitle);
+
     }
 
     interface Presenter extends BasePresenter {

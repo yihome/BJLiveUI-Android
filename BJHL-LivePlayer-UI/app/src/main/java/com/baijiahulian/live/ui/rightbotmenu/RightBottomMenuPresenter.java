@@ -23,7 +23,6 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
 
     @Override
     public void changeAudio() {
-
     }
 
     @Override

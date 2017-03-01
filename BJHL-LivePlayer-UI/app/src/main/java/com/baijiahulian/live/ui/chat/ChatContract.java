@@ -11,7 +11,7 @@ import com.baijiahulian.livecore.models.imodels.IMessageModel;
 interface ChatContract {
 
     interface View extends BaseView<Presenter>{
-        void appendNewMessage(IMessageModel model);
+        void notifyDataChanged();
 
         void clearScreen();
 
@@ -19,6 +19,8 @@ interface ChatContract {
     }
 
     interface Presenter extends BasePresenter{
+        int getCount();
 
+        IMessageModel getMessage(int position);
     }
 }

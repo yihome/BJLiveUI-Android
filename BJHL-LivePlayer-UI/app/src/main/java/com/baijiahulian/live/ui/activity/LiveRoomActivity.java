@@ -1,19 +1,17 @@
 package com.baijiahulian.live.ui.activity;
 
-import android.animation.Animator;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.content.res.Configuration;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
-import com.baijiahulian.common.utils.DisplayUtils;
 import com.baijiahulian.live.ui.R;
+import com.baijiahulian.live.ui.base.BasePresenter;
+import com.baijiahulian.live.ui.base.BaseView;
+import com.baijiahulian.live.ui.chat.ChatFragment;
+import com.baijiahulian.live.ui.chat.ChatPresenter;
 import com.baijiahulian.live.ui.leftmenu.LeftMenuFragment;
 import com.baijiahulian.live.ui.leftmenu.LeftMenuPresenter;
 import com.baijiahulian.live.ui.loading.LoadingFragment;
@@ -39,12 +37,12 @@ import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 
 public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRouterListener {
 
-    @BindView(R.id.activity_live_room_ppt_container)
-    FrameLayout flPPT;
-    @BindView(R.id.activity_live_room_recorder_container)
-    FrameLayout flRecorder;
-    @BindView(R.id.activity_live_room_player_container)
-    FrameLayout flPlayer;
+    @BindView(R.id.activity_live_room_background_container)
+    FrameLayout flBackground;
+    @BindView(R.id.activity_live_room_foreground_left_container)
+    FrameLayout flForegroundLeft;
+    @BindView(R.id.activity_live_room_foreground_right_container)
+    FrameLayout flForegroundRight;
     @BindView(R.id.activity_live_room_chat)
     FrameLayout flChat;
     @BindView(R.id.activity_live_room_top)
@@ -61,12 +59,14 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private LiveRoom liveRoom;
 
     private LoadingFragment loadingFragment;
+    private TopBarFragment topBarFragment;
 
     private MyPPTFragment lppptFragment;
-
     private RecorderFragment recorderFragment;
-
-    private boolean isSwitchAnimationRunning = false;
+    private ChatFragment chatFragment;
+    private RightBottomMenuFragment rightBottomMenuFragment;
+    private LeftMenuFragment leftMenuFragment;
+    private RightMenuFragment rightMenuFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,14 +74,16 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         setContentView(R.layout.activity_live_room);
         ButterKnife.bind(this);
 
-        onInitConfiguration(getResources().getConfiguration());
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            onConfigurationChanged(getResources().getConfiguration());
+        }
 
         String code = getIntent().getStringExtra("code");
         String name = getIntent().getStringExtra("name");
 
-        LiveSDK.init("", LPConstants.LPDeployType.Test);
+        LiveSDK.init(LPConstants.LPDeployType.Test);
 
-        code = "kjs0en";
+        code = "6tlfmz";
         name = "Shubo";
 
         loadingFragment = new LoadingFragment();
@@ -91,76 +93,46 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         addFragment(R.id.activity_live_room_loading, loadingFragment);
     }
 
-    private void onInitConfiguration(Configuration configuration) {
-        onConfigurationMaximise(configuration, flPPT);
-        onConfigurationNormal(configuration, flRecorder);
-        onConfigurationNormal(configuration, flPlayer);
-    }
-
-    private void onConfigurationNormal(Configuration configuration, FrameLayout layout) {
-        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) layout.getLayoutParams();
-        if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            lp.setMargins(lp.leftMargin, DisplayUtils.dip2px(this, 52), lp.rightMargin, lp.bottomMargin);
-        } else if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            int screenWidth = DisplayUtils.getScreenWidthPixels(this);
-            int screenHeight = DisplayUtils.getScreenHeightPixels(this);
-            int pptHeight = (int) (screenWidth * (screenWidth / (float) screenHeight));
-            lp.setMargins(lp.leftMargin, pptHeight + DisplayUtils.dip2px(this, 10), lp.rightMargin, lp.bottomMargin);
-        }
-        layout.setLayoutParams(lp);
-    }
-
-    private void onConfigurationMaximise(Configuration configuration, FrameLayout layout) {
-        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) layout.getLayoutParams();
-        lp.setMargins(0, 0, 0, 0);
-        if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            lp.width = RelativeLayout.LayoutParams.MATCH_PARENT;
-            lp.height = RelativeLayout.LayoutParams.MATCH_PARENT;
-        } else if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            lp.width = RelativeLayout.LayoutParams.MATCH_PARENT;
-            int screenWidth = DisplayUtils.getScreenWidthPixels(this);
-            int screenHeight = DisplayUtils.getScreenHeightPixels(this);
-            lp.height = (int) (screenWidth * (screenWidth / (float) screenHeight));
-        }
-        layout.setLayoutParams(lp);
-    }
-
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        onPPTContainerConfigurationChanged(newConfig);
-        onRecorderContainerConfigurationChanged(newConfig);
-        onPlayerContainerConfigurationChanged(newConfig);
+        onBackgroundContainerConfigurationChanged(newConfig);
+        onForegroundLeftContainerConfigurationChanged(newConfig);
+        onForegroundRightContainerConfigurationChanged(newConfig);
     }
 
-    private void onPlayerContainerConfigurationChanged(Configuration newConfig) {
-        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) flPlayer.getLayoutParams();
+    private void onForegroundRightContainerConfigurationChanged(Configuration newConfig) {
+        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) flForegroundRight.getLayoutParams();
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-//            lp.removeRule(RelativeLayout.BELOW);
-//            lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_top);
+            lp.removeRule(RelativeLayout.BELOW);
+            lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_top);
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-//            lp.removeRule(RelativeLayout.BELOW);
-//            lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_ppt_container);
+            lp.removeRule(RelativeLayout.BELOW);
+            lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_background_container);
         }
-        flPlayer.setLayoutParams(lp);
+        flForegroundRight.setLayoutParams(lp);
     }
 
-    private void onRecorderContainerConfigurationChanged(Configuration newConfig) {
-        if (recorderFragment == null) return;
-        if (recorderFragment.isMaximised()) {
-            onConfigurationMaximise(newConfig, flRecorder);
-        } else {
-            onConfigurationNormal(newConfig, flRecorder);
+    private void onForegroundLeftContainerConfigurationChanged(Configuration newConfig) {
+        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) flForegroundLeft.getLayoutParams();
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            lp.removeRule(RelativeLayout.BELOW);
+            lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_top);
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            lp.removeRule(RelativeLayout.BELOW);
+            lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_background_container);
         }
+        flForegroundLeft.setLayoutParams(lp);
     }
 
-    private void onPPTContainerConfigurationChanged(Configuration newConfig) {
-        if (lppptFragment == null) return;
-        if (lppptFragment.isMaximised()) {
-            onConfigurationMaximise(newConfig, flPPT);
-        } else {
-            onConfigurationNormal(newConfig, flPPT);
+    private void onBackgroundContainerConfigurationChanged(Configuration newConfig) {
+        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) flBackground.getLayoutParams();
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            lp.removeRule(RelativeLayout.ABOVE);
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            lp.addRule(RelativeLayout.ABOVE, R.id.activity_live_room_center_anchor);
         }
+        flBackground.setLayoutParams(lp);
     }
 
     @Override
@@ -179,56 +151,39 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
         lppptFragment = new MyPPTFragment();
         lppptFragment.setLiveRoom(getLiveRoom());
-        final PPTPresenter pptPresenter = new PPTPresenter(lppptFragment);
-        pptPresenter.setRouter(this);
-        lppptFragment.setPresenter(pptPresenter);
-        addFragment(R.id.activity_live_room_ppt_container, lppptFragment);
+        bindVP(lppptFragment, new PPTPresenter(lppptFragment));
+        addFragment(R.id.activity_live_room_background_container, lppptFragment);
 
-        TopBarFragment topBarFragment = new TopBarFragment();
-        TopBarPresenter topBarPresenter = new TopBarPresenter(topBarFragment);
-        topBarPresenter.setRouter(this);
-        topBarFragment.setPresenter(topBarPresenter);
+        topBarFragment = new TopBarFragment();
+        bindVP(topBarFragment, new TopBarPresenter(topBarFragment));
         addFragment(R.id.activity_live_room_top, topBarFragment);
 
-        LeftMenuFragment leftMenuFragment = new LeftMenuFragment();
-        LeftMenuPresenter leftMenuPresenter = new LeftMenuPresenter(leftMenuFragment);
-        leftMenuPresenter.setRouter(this);
-        leftMenuFragment.setPresenter(leftMenuPresenter);
+        leftMenuFragment = new LeftMenuFragment();
+        bindVP(leftMenuFragment, new LeftMenuPresenter(leftMenuFragment));
         addFragment(R.id.activity_live_room_bottom_left, leftMenuFragment);
 
-        RightMenuFragment rightMenuFragment = new RightMenuFragment();
-        RightMenuPresenter rightMenuPresenter = new RightMenuPresenter(rightMenuFragment);
-        rightMenuPresenter.setRouter(this);
-        rightMenuFragment.setPresenter(rightMenuPresenter);
+        rightMenuFragment = new RightMenuFragment();
+        bindVP(rightMenuFragment, new RightMenuPresenter(rightMenuFragment));
         addFragment(R.id.activity_live_room_right, rightMenuFragment);
 
-        RightBottomMenuFragment rightBottomMenuFragment = new RightBottomMenuFragment();
-        RightBottomMenuPresenter rightBottomMenuPresenter = new RightBottomMenuPresenter(rightBottomMenuFragment);
-        rightBottomMenuPresenter.setRouter(this);
-        rightBottomMenuFragment.setPresenter(rightBottomMenuPresenter);
+        rightBottomMenuFragment = new RightBottomMenuFragment();
+        bindVP(rightBottomMenuFragment, new RightBottomMenuPresenter(rightBottomMenuFragment));
         addFragment(R.id.activity_live_room_bottom_right, rightBottomMenuFragment);
 
         recorderFragment = new RecorderFragment();
-        RecorderPresenter recorderPresenter = new RecorderPresenter(recorderFragment);
-        recorderPresenter.setRouter(this);
-        recorderFragment.setPresenter(recorderPresenter);
-        addFragment(R.id.activity_live_room_recorder_container, recorderFragment);
+        bindVP(recorderFragment, new RecorderPresenter(recorderFragment));
+        addFragment(R.id.activity_live_room_foreground_left_container, recorderFragment);
+
+        chatFragment = new ChatFragment();
+        bindVP(chatFragment, new ChatPresenter(chatFragment));
+        addFragment(R.id.activity_live_room_chat, chatFragment);
 
         // might delay 500ms to process
         removeFragment(loadingFragment);
         flLoading.setVisibility(View.GONE);
-
-//        Observable.timer(5, TimeUnit.SECONDS).observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(new LPErrorPrintSubscriber<Long>() {
-//                    @Override
-//                    public void call(Long aLong) {
-//                        removeFragment(recorderFragment);
-//                        addFragment(R.id.activity_live_room_player_container, recorderFragment);
-//                        flPlayer.setVisibility(View.VISIBLE);
-//                    }
-//                });
     }
 
+    /*
     private void switchContainer(final ViewGroup toZoomOut, final ViewGroup toZoomIn) {
         if (isSwitchAnimationRunning) {
             return;
@@ -273,8 +228,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
             @Override
             public void onAnimationEnd(Animator animation) {
                 isSwitchAnimationRunning = false;
-                flPPT.measure(View.MeasureSpec.AT_MOST, View.MeasureSpec.AT_MOST);
-                flPPT.forceLayout();
+                flBackground.measure(View.MeasureSpec.AT_MOST, View.MeasureSpec.AT_MOST);
+                flBackground.forceLayout();
             }
 
             @Override
@@ -289,17 +244,23 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         });
         animatorSet.start();
 
-
     }
+    */
 
     @Override
     public void clearScreen() {
-
+        chatFragment.clearScreen();
+        rightBottomMenuFragment.clearScreen();
+        hideFragment(topBarFragment);
+        hideFragment(rightMenuFragment);
     }
 
     @Override
     public void unClearScreen() {
-
+        chatFragment.unClearScreen();
+        rightBottomMenuFragment.unClearScreen();
+        showFragment(topBarFragment);
+        showFragment(rightMenuFragment);
     }
 
     @Override
@@ -336,18 +297,14 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public void maximiseRecorderView() {
         if (recorderFragment.isMaximised()) return;
-//        sendViewToBack(flRecorder);
-        switchContainer(flRecorder, getCurrentMaximisedView());
+//        switchContainer(flForegroundLeft, getCurrentMaximisedView());
         lppptFragment.setIsDisplayMaximised(false);
         recorderFragment.setIsDisplayMaximised(true);
-
-//        flRecorder.bringToFront();
     }
 
     @Override
     public void maximisePlayerView() {
-        switchContainer(flPlayer, getCurrentMaximisedView());
-
+//        switchContainer(flForegroundRight, getCurrentMaximisedView());
     }
 
     public static void sendViewToBack(final View child) {
@@ -361,26 +318,31 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public void maximisePPTView() {
         if (lppptFragment.isMaximised()) return;
-//        sendViewToBack(flPPT);
-        switchContainer(flPPT, getCurrentMaximisedView());
+//        sendViewToBack(flBackground);
+//        switchContainer(flBackground, getCurrentMaximisedView());
         lppptFragment.setIsDisplayMaximised(true);
         recorderFragment.setIsDisplayMaximised(false);
-//        flPPT.bringToFront();
+//        flBackground.bringToFront();
 
     }
 
     private FrameLayout getCurrentMaximisedView() {
         if (lppptFragment.isMaximised()) {
-            return flPPT;
+            return flBackground;
         }
         if (recorderFragment != null && recorderFragment.isMaximised()) {
-            return flRecorder;
+            return flForegroundLeft;
         }
-//        flPlayer
+//        flForegroundRight
 //        if(recorderFragment!=null && recorderFragment.isMaximised()){
-//            return flPlayer;
+//            return flForegroundRight;
 //        }
         return null;
+    }
+
+    private <V extends BaseView, P extends BasePresenter> void bindVP(V view, P presenter) {
+        presenter.setRouter(this);
+        view.setPresenter(presenter);
     }
 
     @Override

@@ -5,25 +5,35 @@
 
     <!--切换的时候切换容器-->
     <FrameLayout
-        android:id="@+id/activity_live_room_ppt_container"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:id="@+id/activity_live_room_background_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/activity_live_room_center_anchor"
+        android:background="@color/primary_light" />
+
+    <View
+        android:id="@+id/activity_live_room_center_anchor"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_centerInParent="true" />
 
     <FrameLayout
-        android:id="@+id/activity_live_room_recorder_container"
+        android:id="@+id/activity_live_room_foreground_left_container"
         android:layout_width="92dp"
         android:layout_height="69dp"
+        android:layout_below="@+id/activity_live_room_background_container"
         android:layout_marginLeft="@dimen/activity_live_room_margin"
         android:layout_marginTop="@dimen/activity_live_room_margin"
         android:background="@color/primary" />
 
     <FrameLayout
-        android:id="@+id/activity_live_room_player_container"
+        android:id="@+id/activity_live_room_foreground_right_container"
         android:layout_width="92dp"
         android:layout_height="69dp"
-        android:layout_marginLeft="112dp"
+        android:layout_below="@+id/activity_live_room_background_container"
+        android:layout_marginLeft="@dimen/activity_live_room_margin"
         android:layout_marginTop="@dimen/activity_live_room_margin"
-        android:visibility="gone"
+        android:layout_toRightOf="@+id/activity_live_room_foreground_left_container"
         android:background="@color/primary" />
 
     <LinearLayout
@@ -35,7 +45,6 @@
         android:layout_marginRight="20dp"
         android:layout_marginTop="@dimen/activity_live_room_margin"
         android:background="@color/primary_dark"
-        android:visibility="gone"
         android:orientation="horizontal"></LinearLayout>
 
     <FrameLayout
@@ -43,12 +52,10 @@
         android:layout_width="268dp"
         android:layout_height="match_parent"
         android:layout_above="@+id/activity_live_room_bottom_left"
-        android:layout_below="@+id/activity_live_room_recorder_container"
+        android:layout_below="@+id/activity_live_room_foreground_left_container"
         android:layout_marginBottom="@dimen/activity_live_room_margin"
         android:layout_marginLeft="@dimen/activity_live_room_margin"
-        android:layout_marginTop="@dimen/activity_live_room_margin"
-        android:visibility="gone"
-        android:background="@color/primary" />
+        android:layout_marginTop="@dimen/activity_live_room_margin" />
 
     <FrameLayout
         android:id="@+id/activity_live_room_top"
@@ -79,14 +86,12 @@
         android:layout_above="@+id/activity_live_room_bottom_right"
         android:layout_alignParentRight="true"
         android:layout_marginBottom="@dimen/activity_live_room_margin"
-        android:layout_marginRight="@dimen/activity_live_room_margin"
-        android:minHeight="142dp" />
+        android:layout_marginRight="@dimen/activity_live_room_margin" />
 
     <FrameLayout
         android:id="@+id/activity_live_room_loading"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/accent"
-        android:visibility="gone" />
+        android:background="@color/accent" />
 
 </RelativeLayout>
