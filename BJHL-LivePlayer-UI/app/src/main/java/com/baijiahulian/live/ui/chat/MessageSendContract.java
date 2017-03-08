@@ -1,19 +1,21 @@
-package com.baijiahulian.live.ui.ppt;
+package com.baijiahulian.live.ui.chat;
 
 import com.baijiahulian.live.ui.base.BasePresenter;
 import com.baijiahulian.live.ui.base.BaseView;
 
 /**
- * Created by Shubo on 2017/2/18.
+ * Created by Shubo on 2017/3/4.
  */
 
-interface PPTContract {
+interface MessageSendContract {
 
     interface View extends BaseView<Presenter> {
-
+        void showMessageSuccess();
     }
 
     interface Presenter extends BasePresenter {
-        void switchWithMaximum();
+        void sendMessage(String message);
+
+        void choosePhoto();
     }
 }

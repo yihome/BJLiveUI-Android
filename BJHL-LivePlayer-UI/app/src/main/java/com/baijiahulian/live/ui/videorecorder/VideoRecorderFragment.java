@@ -1,5 +1,6 @@
 package com.baijiahulian.live.ui.videorecorder;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.View;
 
@@ -10,11 +11,9 @@ import com.baijiahulian.live.ui.base.BaseFragment;
  * Created by Shubo on 2017/2/18.
  */
 
-public class RecorderFragment extends BaseFragment implements RecorderContract.View {
+public class VideoRecorderFragment extends BaseFragment implements VideoRecorderContract.View {
 
-    private RecorderContract.Presenter presenter;
-
-    private boolean isMaximised = false;
+    private VideoRecorderContract.Presenter presenter;
 
     @Override
     public int getLayoutId() {
@@ -36,24 +35,19 @@ public class RecorderFragment extends BaseFragment implements RecorderContract.V
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!isMaximised)
-                    presenter.switchWithMaximum();
+                presenter.switchWithMaximum();
             }
         });
     }
 
     @Override
-    public boolean isMaximised() {
-        return isMaximised;
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        presenter.getRecorder().invalidVideo();
     }
 
     @Override
-    public void setIsDisplayMaximised(boolean maximised) {
-        this.isMaximised = maximised;
-    }
-
-    @Override
-    public void setPresenter(RecorderContract.Presenter presenter) {
+    public void setPresenter(VideoRecorderContract.Presenter presenter) {
         super.setBasePresenter(presenter);
         this.presenter = presenter;
     }

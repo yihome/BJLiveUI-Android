@@ -4,10 +4,16 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/live_ic_back"/>
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="@string/enter_live_room" />
+        android:layout_centerInParent="true"
+        android:text="@string/enter_live_room"
+        android:textColor="@color/live_text_color_light"/>
 
 </RelativeLayout>

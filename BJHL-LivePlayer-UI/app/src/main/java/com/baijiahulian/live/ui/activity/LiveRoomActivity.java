@@ -3,7 +3,6 @@ package com.baijiahulian.live.ui.activity;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
@@ -24,8 +23,10 @@ import com.baijiahulian.live.ui.rightmenu.RightMenuFragment;
 import com.baijiahulian.live.ui.rightmenu.RightMenuPresenter;
 import com.baijiahulian.live.ui.topbar.TopBarFragment;
 import com.baijiahulian.live.ui.topbar.TopBarPresenter;
-import com.baijiahulian.live.ui.videorecorder.RecorderFragment;
-import com.baijiahulian.live.ui.videorecorder.RecorderPresenter;
+import com.baijiahulian.live.ui.videoplayer.VideoPlayerFragment;
+import com.baijiahulian.live.ui.videoplayer.VideoPlayerPresenter;
+import com.baijiahulian.live.ui.videorecorder.VideoRecorderFragment;
+import com.baijiahulian.live.ui.videorecorder.VideoRecorderPresenter;
 import com.baijiahulian.livecore.LiveSDK;
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.context.LiveRoom;
@@ -62,7 +63,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private TopBarFragment topBarFragment;
 
     private MyPPTFragment lppptFragment;
-    private RecorderFragment recorderFragment;
+    private VideoRecorderFragment recorderFragment;
     private ChatFragment chatFragment;
     private RightBottomMenuFragment rightBottomMenuFragment;
     private LeftMenuFragment leftMenuFragment;
@@ -83,7 +84,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
         LiveSDK.init(LPConstants.LPDeployType.Test);
 
-        code = "6tlfmz";
+        code = "idh852";
         name = "Shubo";
 
         loadingFragment = new LoadingFragment();
@@ -170,82 +171,27 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         bindVP(rightBottomMenuFragment, new RightBottomMenuPresenter(rightBottomMenuFragment));
         addFragment(R.id.activity_live_room_bottom_right, rightBottomMenuFragment);
 
-        recorderFragment = new RecorderFragment();
-        bindVP(recorderFragment, new RecorderPresenter(recorderFragment));
+        recorderFragment = new VideoRecorderFragment();
+        bindVP(recorderFragment, new VideoRecorderPresenter(recorderFragment));
         addFragment(R.id.activity_live_room_foreground_left_container, recorderFragment);
 
         chatFragment = new ChatFragment();
         bindVP(chatFragment, new ChatPresenter(chatFragment));
         addFragment(R.id.activity_live_room_chat, chatFragment);
 
+        playerFragment = new VideoPlayerFragment();
+        playerPresenter = new VideoPlayerPresenter(playerFragment);
+        bindVP(playerFragment, playerPresenter);
+        addFragment(R.id.activity_live_room_foreground_right_container, playerFragment);
+
         // might delay 500ms to process
         removeFragment(loadingFragment);
         flLoading.setVisibility(View.GONE);
     }
 
-    /*
-    private void switchContainer(final ViewGroup toZoomOut, final ViewGroup toZoomIn) {
-        if (isSwitchAnimationRunning) {
-            return;
-        }
-        isSwitchAnimationRunning = true;
-        Rect zoomOutRect = new Rect();
-        toZoomOut.getGlobalVisibleRect(zoomOutRect);
+    private VideoPlayerFragment playerFragment;
+    private VideoPlayerPresenter playerPresenter;
 
-        Rect zoomInRect = new Rect();
-        toZoomIn.getGlobalVisibleRect(zoomInRect);
-
-        RelativeLayout.LayoutParams lp = ((RelativeLayout.LayoutParams) toZoomOut.getLayoutParams());
-        lp.removeRule(RelativeLayout.BELOW);
-        lp.setMargins(lp.leftMargin, zoomOutRect.top - zoomInRect.top, lp.rightMargin, lp.bottomMargin);
-
-        RelativeLayout.LayoutParams lp1 = ((RelativeLayout.LayoutParams) toZoomIn.getLayoutParams());
-        lp1.removeRule(RelativeLayout.ABOVE);
-
-        AnimatorSet animatorSet = new AnimatorSet();
-        ObjectAnimator scaleX = ObjectAnimator.ofFloat(toZoomOut, "scaleX", 1f, (zoomInRect.right - zoomInRect.left) / (float) (zoomOutRect.right - zoomOutRect.left));
-        ObjectAnimator scaleY = ObjectAnimator.ofFloat(toZoomOut, "scaleY", 1f, (zoomInRect.bottom - zoomInRect.top) / (float) (zoomOutRect.bottom - zoomOutRect.top));
-        ObjectAnimator translationX = ObjectAnimator.ofFloat(toZoomOut, "translationX", (zoomInRect.right - zoomInRect.left) / 2 - (zoomOutRect.right - zoomOutRect.left) / 2 - ((RelativeLayout.LayoutParams) toZoomOut.getLayoutParams()).leftMargin);
-        ObjectAnimator translationY = ObjectAnimator.ofFloat(toZoomOut, "translationY", (zoomInRect.bottom - zoomInRect.top) / 2 - (zoomOutRect.bottom - zoomOutRect.top) / 2 - ((RelativeLayout.LayoutParams) toZoomOut.getLayoutParams()).topMargin);
-
-        ObjectAnimator scaleX1 = ObjectAnimator.ofFloat(toZoomIn, "scaleX", 1f, (zoomOutRect.right - zoomOutRect.left) / (float) (zoomInRect.right - zoomInRect.left));
-        ObjectAnimator scaleY1 = ObjectAnimator.ofFloat(toZoomIn, "scaleY", 1f, (zoomOutRect.bottom - zoomOutRect.top) / (float) (zoomInRect.bottom - zoomInRect.top));
-        ObjectAnimator translationX1 = ObjectAnimator.ofFloat(toZoomIn, "translationX", (zoomOutRect.right - zoomOutRect.left) / 2 - (zoomInRect.right - zoomInRect.left) / 2 + ((RelativeLayout.LayoutParams) toZoomOut.getLayoutParams()).leftMargin);
-        ObjectAnimator translationY1 = ObjectAnimator.ofFloat(toZoomIn, "translationY", (zoomOutRect.bottom - zoomOutRect.top) / 2 - (zoomInRect.bottom - zoomInRect.top) / 2 + ((RelativeLayout.LayoutParams) toZoomOut.getLayoutParams()).topMargin);
-
-        animatorSet.setDuration(2000);
-        animatorSet.play(scaleX).with(scaleY).with(translationX).with(translationY)
-                .with(scaleX1).with(scaleY1).with(translationX1).with(translationY1);
-//        animatorSet.play(scaleX1).with(scaleY1).with(translationX1).with(translationY1);
-
-        animatorSet.setInterpolator(new DecelerateInterpolator());
-
-        animatorSet.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                isSwitchAnimationRunning = false;
-                flBackground.measure(View.MeasureSpec.AT_MOST, View.MeasureSpec.AT_MOST);
-                flBackground.forceLayout();
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
-            }
-        });
-        animatorSet.start();
-
-    }
-    */
 
     @Override
     public void clearScreen() {
@@ -296,48 +242,49 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void maximiseRecorderView() {
-        if (recorderFragment.isMaximised()) return;
-//        switchContainer(flForegroundLeft, getCurrentMaximisedView());
-        lppptFragment.setIsDisplayMaximised(false);
-        recorderFragment.setIsDisplayMaximised(true);
+        View max = flBackground.getChildAt(0);
+        if (recorderFragment.getView() == max) return;
+        boolean isPPT = max == lppptFragment.getView();
+        if (isPPT)
+            lppptFragment.onPause();
+        switchView(recorderFragment.getView(), max);
+        if (isPPT)
+            lppptFragment.onResume();
+        liveRoom.getRecorder().invalidVideo();
     }
 
     @Override
     public void maximisePlayerView() {
-//        switchContainer(flForegroundRight, getCurrentMaximisedView());
-    }
-
-    public static void sendViewToBack(final View child) {
-        final ViewGroup parent = (ViewGroup) child.getParent();
-        if (null != parent) {
-            parent.removeView(child);
-            parent.addView(child, 0);
-        }
+        View max = flBackground.getChildAt(0);
+        if(playerFragment.getView() == max) return;
+        boolean isPPT = max == lppptFragment.getView();
+        if (isPPT)
+            lppptFragment.onPause();
+        switchView(playerFragment.getView(), max);
+        if (isPPT)
+            lppptFragment.onResume();
+        if(max == recorderFragment.getView())
+            liveRoom.getRecorder().invalidVideo();
     }
 
     @Override
     public void maximisePPTView() {
-        if (lppptFragment.isMaximised()) return;
-//        sendViewToBack(flBackground);
-//        switchContainer(flBackground, getCurrentMaximisedView());
-        lppptFragment.setIsDisplayMaximised(true);
-        recorderFragment.setIsDisplayMaximised(false);
-//        flBackground.bringToFront();
-
+        View max = flBackground.getChildAt(0);
+        if(lppptFragment.getView() == max) return;
+        lppptFragment.onPause();
+        switchView(lppptFragment.getView(), max);
+        lppptFragment.onResume();
+        if(max == recorderFragment.getView())
+            liveRoom.getRecorder().invalidVideo();
     }
 
-    private FrameLayout getCurrentMaximisedView() {
-        if (lppptFragment.isMaximised()) {
-            return flBackground;
-        }
-        if (recorderFragment != null && recorderFragment.isMaximised()) {
-            return flForegroundLeft;
-        }
-//        flForegroundRight
-//        if(recorderFragment!=null && recorderFragment.isMaximised()){
-//            return flForegroundRight;
-//        }
-        return null;
+    private void switchView(View view1, View view2) {
+        FrameLayout fl1 = (FrameLayout) view1.getParent();
+        FrameLayout fl2 = (FrameLayout) view2.getParent();
+        fl1.removeView(view1);
+        fl2.removeView(view2);
+        fl1.addView(view2);
+        fl2.addView(view1);
     }
 
     private <V extends BaseView, P extends BasePresenter> void bindVP(V view, P presenter) {

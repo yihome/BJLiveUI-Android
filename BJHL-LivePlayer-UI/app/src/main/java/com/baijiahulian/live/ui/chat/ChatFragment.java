@@ -1,5 +1,6 @@
 package com.baijiahulian.live.ui.chat;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -29,7 +30,7 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
     RecyclerView recyclerView;
     private MessageAdapter adapter;
     private ChatContract.Presenter presenter;
-
+    LinearLayoutManager mLayoutManager;
     @Override
     public int getLayoutId() {
         return R.layout.fragment_chat;
@@ -39,8 +40,9 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
     public void init(Bundle savedInstanceState) {
         super.init(savedInstanceState);
         adapter = new MessageAdapter();
-        LinearLayoutManager mLayoutManager = new LinearLayoutManager(getContext());
+        mLayoutManager = new LinearLayoutManager(getContext());
         mLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        mLayoutManager.setStackFromEnd(true);
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setAdapter(adapter);
     }
@@ -48,6 +50,12 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
     @Override
     public void notifyDataChanged() {
         adapter.notifyItemInserted(adapter.getItemCount());
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+//        recyclerView.setLayoutManager(mLayoutManager);
     }
 
     @Override

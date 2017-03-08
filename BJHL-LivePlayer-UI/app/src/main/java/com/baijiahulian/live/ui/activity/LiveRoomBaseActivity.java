@@ -64,6 +64,7 @@ public abstract class LiveRoomBaseActivity extends AppCompatActivity {
 //        }
         transaction.remove(fragment);
         transaction.commitAllowingStateLoss();
+
     }
 
     protected void hideFragment(Fragment fragment) {

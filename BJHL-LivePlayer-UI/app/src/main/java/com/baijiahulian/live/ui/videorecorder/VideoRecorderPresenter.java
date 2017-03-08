@@ -9,12 +9,12 @@ import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
  * Created by Shubo on 2017/2/18.
  */
 
-public class RecorderPresenter implements RecorderContract.Presenter {
+public class VideoRecorderPresenter implements VideoRecorderContract.Presenter {
 
-    private RecorderContract.View view;
+    private VideoRecorderContract.View view;
     private LiveRoomRouterListener routerListener;
 
-    public RecorderPresenter(RecorderContract.View view) {
+    public VideoRecorderPresenter(VideoRecorderContract.View view) {
         this.view = view;
     }
 
