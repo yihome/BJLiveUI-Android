@@ -31,6 +31,7 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
     private MessageAdapter adapter;
     private ChatContract.Presenter presenter;
     LinearLayoutManager mLayoutManager;
+
     @Override
     public int getLayoutId() {
         return R.layout.fragment_chat;
@@ -43,6 +44,7 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
         mLayoutManager = new LinearLayoutManager(getContext());
         mLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         mLayoutManager.setStackFromEnd(true);
+//        mLayoutManager.setReverseLayout(true);
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setAdapter(adapter);
     }
@@ -50,6 +52,7 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
     @Override
     public void notifyDataChanged() {
         adapter.notifyItemInserted(adapter.getItemCount());
+//        recyclerView.scrollToPosition(adapter.getItemCount());
     }
 
     @Override
