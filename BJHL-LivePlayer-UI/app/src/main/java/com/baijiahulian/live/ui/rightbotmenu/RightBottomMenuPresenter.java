@@ -1,6 +1,11 @@
 package com.baijiahulian.live.ui.rightbotmenu;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
+import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
+import com.baijiahulian.livecore.utils.LPRxUtils;
+
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
 
 /**
  * Created by Shubo on 2017/2/16.
@@ -11,6 +16,8 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
     private RightBottomMenuContract.View view;
 
     private LiveRoomRouterListener liveRoomRouterListener;
+
+    private Subscription subscriptionOfCamera;
 
     public RightBottomMenuPresenter(RightBottomMenuContract.View view) {
         this.view = view;
@@ -27,7 +34,10 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
 
     @Override
     public void changeVideo() {
-
+        if(liveRoomRouterListener.getLiveRoom().getRecorder().isVideoAttached())
+            liveRoomRouterListener.getLiveRoom().getRecorder().detachVideo();
+        else
+            liveRoomRouterListener.getLiveRoom().getRecorder().attachVideo();
     }
 
     @Override
@@ -42,12 +52,19 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
 
     @Override
     public void subscribe() {
-
+        subscriptionOfCamera = liveRoomRouterListener.getLiveRoom().getRecorder().getObservableOfCameraOn()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<Boolean>() {
+                    @Override
+                    public void call(Boolean aBoolean) {
+                        view.showVideoStatus(aBoolean);
+                    }
+                });
     }
 
     @Override
     public void unSubscribe() {
-
+        LPRxUtils.unSubscribe(subscriptionOfCamera);
     }
 
     @Override

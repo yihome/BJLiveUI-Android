@@ -27,8 +27,6 @@ import com.baijiahulian.live.ui.videoplayer.VideoPlayerFragment;
 import com.baijiahulian.live.ui.videoplayer.VideoPlayerPresenter;
 import com.baijiahulian.live.ui.videorecorder.VideoRecorderFragment;
 import com.baijiahulian.live.ui.videorecorder.VideoRecorderPresenter;
-import com.baijiahulian.livecore.LiveSDK;
-import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.context.LiveRoom;
 
 import butterknife.BindView;
@@ -82,9 +80,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         String code = getIntent().getStringExtra("code");
         String name = getIntent().getStringExtra("name");
 
-        LiveSDK.init(LPConstants.LPDeployType.Test);
+//        LiveSDK.init(LPConstants.LPDeployType.Test);
 
-        code = "idh852";
+        code = "epznlk";
         name = "Shubo";
 
         loadingFragment = new LoadingFragment();
@@ -192,7 +190,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private VideoPlayerFragment playerFragment;
     private VideoPlayerPresenter playerPresenter;
 
-
     @Override
     public void clearScreen() {
         chatFragment.clearScreen();
@@ -247,12 +244,12 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         boolean isPPT = max == lppptFragment.getView();
         if (isPPT)
             lppptFragment.onPause();
-        getLiveRoom().getRecorder().detachVideo();
+//        getLiveRoom().getRecorder().detachVideo();
         switchView(recorderFragment.getView(), max);
         if (isPPT)
             lppptFragment.onResume();
-        getLiveRoom().getRecorder().attachVideo();
-//        liveRoom.getRecorder().invalidVideo();
+//        getLiveRoom().getRecorder().attachVideo();
+        liveRoom.getRecorder().invalidVideo();
     }
 
     @Override
@@ -262,14 +259,14 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         boolean isPPT = max == lppptFragment.getView();
         if (isPPT)
             lppptFragment.onPause();
-        else
-            getLiveRoom().getRecorder().detachVideo();
+//        else
+//            getLiveRoom().getRecorder().detachVideo();
         switchView(playerFragment.getView(), max);
         if (isPPT)
             lppptFragment.onResume();
-        if(max == recorderFragment.getView())
-            getLiveRoom().getRecorder().attachVideo();
-//            liveRoom.getRecorder().invalidVideo();
+//        if(max == recorderFragment.getView())
+//            getLiveRoom().getRecorder().attachVideo();
+            liveRoom.getRecorder().invalidVideo();
     }
 
     @Override
@@ -277,13 +274,13 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         View max = flBackground.getChildAt(0);
         if(lppptFragment.getView() == max) return;
         lppptFragment.onPause();
-        if(max == recorderFragment.getView())
-            getLiveRoom().getRecorder().detachVideo();
+//        if(max == recorderFragment.getView())
+//            getLiveRoom().getRecorder().detachVideo();
         switchView(lppptFragment.getView(), max);
         lppptFragment.onResume();
-        if(max == recorderFragment.getView())
-            getLiveRoom().getRecorder().attachVideo();
-//            liveRoom.getRecorder().invalidVideo();
+//        if(max == recorderFragment.getView())
+//            getLiveRoom().getRecorder().attachVideo();
+            liveRoom.getRecorder().invalidVideo();
     }
 
     private void switchView(View view1, View view2) {

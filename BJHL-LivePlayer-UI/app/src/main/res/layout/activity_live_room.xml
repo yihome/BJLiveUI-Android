@@ -45,6 +45,7 @@
         android:layout_marginRight="20dp"
         android:layout_marginTop="@dimen/activity_live_room_margin"
         android:background="@color/primary_dark"
+        android:visibility="gone"
         android:orientation="horizontal"></LinearLayout>
 
     <FrameLayout
