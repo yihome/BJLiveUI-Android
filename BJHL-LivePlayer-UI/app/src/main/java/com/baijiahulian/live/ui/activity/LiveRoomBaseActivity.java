@@ -1,5 +1,6 @@
 package com.baijiahulian.live.ui.activity;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -7,6 +8,8 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.inputmethod.InputMethodManager;
+
+import com.baijiahulian.live.ui.base.BaseDialogFragment;
 
 
 public abstract class LiveRoomBaseActivity extends AppCompatActivity {
@@ -46,7 +49,7 @@ public abstract class LiveRoomBaseActivity extends AppCompatActivity {
         addFragment(layoutId, fragment, false, tag);
     }
 
-    public void addFragment(int layoutId, Fragment fragment) {
+    protected void addFragment(int layoutId, Fragment fragment) {
         addFragment(layoutId, fragment, false);
     }
 
@@ -97,7 +100,7 @@ public abstract class LiveRoomBaseActivity extends AppCompatActivity {
         transaction.commitAllowingStateLoss();
     }
 
-    public void switchFragment(Fragment from, Fragment to, int layoutId) {
+    protected void switchFragment(Fragment from, Fragment to, int layoutId) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 //        int inAnim = LPFragmentAnimUtil.getInAnim(from);
 //        int outAnim = LPFragmentAnimUtil.getOutAnim(from);
@@ -121,6 +124,23 @@ public abstract class LiveRoomBaseActivity extends AppCompatActivity {
             return mInputMethodManager.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), 0);
         }
         return super.onTouchEvent(event);
+    }
+
+    protected void showDialogFragment(final BaseDialogFragment dialogFragment) {
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        dialogFragment.show(ft, dialogFragment.getClass().getSimpleName());
+        getSupportFragmentManager().executePendingTransactions();
+        dialogFragment.getDialog().setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                if (isFinishing()) return;
+                FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                Fragment prev = getSupportFragmentManager().findFragmentByTag(dialogFragment.getClass().getSimpleName());
+                if (prev != null)
+                    ft.remove(prev);
+                ft.commitAllowingStateLoss();
+            }
+        });
     }
 
 }

@@ -43,7 +43,7 @@ public class VideoRecorderFragment extends BaseFragment implements VideoRecorder
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        presenter.getRecorder().invalidVideo();
+//        presenter.getRecorder().invalidVideo();
     }
 
     @Override

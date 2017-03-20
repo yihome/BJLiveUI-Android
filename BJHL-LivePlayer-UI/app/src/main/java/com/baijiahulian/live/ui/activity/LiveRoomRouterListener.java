@@ -35,4 +35,6 @@ public interface LiveRoomRouterListener {
     void maximisePlayerView();
 
     void maximisePPTView();
+
+    void showMorePanel(int anchorX, int anchorY);
 }

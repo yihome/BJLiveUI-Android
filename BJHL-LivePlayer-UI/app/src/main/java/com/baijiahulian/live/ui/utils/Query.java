@@ -9,9 +9,9 @@ import android.widget.TextView;
  */
 public class Query {
     private final View contentView;
-    private View view;
+    protected View view;
 
-    private Query(View contentView) {
+    Query(View contentView) {
         this.contentView = contentView;
     }
 

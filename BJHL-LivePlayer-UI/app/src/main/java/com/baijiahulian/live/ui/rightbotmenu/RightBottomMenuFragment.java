@@ -3,9 +3,9 @@ package com.baijiahulian.live.ui.rightbotmenu;
 import android.os.Bundle;
 import android.view.View;
 
-import com.baijiahulian.live.ui.base.BaseFragment;
 import com.baijiahulian.live.ui.R;
-import com.baijiahulian.live.ui.utils.Query;
+import com.baijiahulian.live.ui.base.BaseFragment;
+import com.baijiahulian.live.ui.utils.QueryPlus;
 
 /**
  * Created by Shubo on 2017/2/16.
@@ -14,7 +14,7 @@ import com.baijiahulian.live.ui.utils.Query;
 public class RightBottomMenuFragment extends BaseFragment implements RightBottomMenuContract.View {
 
     private RightBottomMenuContract.Presenter presenter;
-    private Query $;
+    private QueryPlus $;
 
     @Override
     public int getLayoutId() {
@@ -24,7 +24,7 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
     @Override
     public void init(Bundle savedInstanceState) {
         super.init(savedInstanceState);
-        $ = Query.with(view);
+        $ = QueryPlus.with(view);
 
         $.id(R.id.fragment_right_bottom_video).clicked(new View.OnClickListener() {
             @Override
@@ -39,19 +39,27 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
                 presenter.changeAudio();
             }
         });
+        $.id(R.id.fragment_right_bottom_more).clicked(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int location[] = new int[2];
+                $.id(R.id.fragment_right_bottom_more).view().getLocationInWindow(location);
+                presenter.more(location[0], location[1]);
+            }
+        });
     }
 
     @Override
     public void showVideoStatus(boolean isOn) {
-        if(isOn)
-            $.id(R.id.fragment_right_bottom_audio).image(R.drawable.live_ic_stopvideo);
+        if (isOn)
+            $.id(R.id.fragment_right_bottom_video).image(R.drawable.live_ic_stopvideo);
         else
-            $.id(R.id.fragment_right_bottom_audio).image(R.drawable.live_ic_stopvideo_on);
+            $.id(R.id.fragment_right_bottom_video).image(R.drawable.live_ic_stopvideo_on);
     }
 
     @Override
     public void showAudioStatus(boolean isOn) {
-        if(isOn)
+        if (isOn)
             $.id(R.id.fragment_right_bottom_audio).image(R.drawable.live_ic_stopaudio);
         else
             $.id(R.id.fragment_right_bottom_audio).image(R.drawable.live_ic_audio_on);

@@ -17,7 +17,7 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
 
     private LiveRoomRouterListener liveRoomRouterListener;
 
-    private Subscription subscriptionOfCamera;
+    private Subscription subscriptionOfCamera, subscriptionOfMic;
 
     public RightBottomMenuPresenter(RightBottomMenuContract.View view) {
         this.view = view;
@@ -30,6 +30,10 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
 
     @Override
     public void changeAudio() {
+        if(liveRoomRouterListener.getLiveRoom().getRecorder().isAudioAttached())
+            liveRoomRouterListener.getLiveRoom().getRecorder().detachAudio();
+        else
+            liveRoomRouterListener.getLiveRoom().getRecorder().attachAudio();
     }
 
     @Override
@@ -42,7 +46,7 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
 
     @Override
     public void more(int anchorX, int anchorY) {
-
+        liveRoomRouterListener.showMorePanel(anchorX, anchorY);
     }
 
     @Override
@@ -60,15 +64,25 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
                         view.showVideoStatus(aBoolean);
                     }
                 });
+        subscriptionOfMic = liveRoomRouterListener.getLiveRoom().getRecorder().getObservableOfMicOn()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<Boolean>() {
+                    @Override
+                    public void call(Boolean aBoolean) {
+                        view.showAudioStatus(aBoolean);
+                    }
+                });
     }
 
     @Override
     public void unSubscribe() {
         LPRxUtils.unSubscribe(subscriptionOfCamera);
+        LPRxUtils.unSubscribe(subscriptionOfMic);
     }
 
     @Override
     public void destroy() {
-
+        liveRoomRouterListener = null;
+        view = null;
     }
 }

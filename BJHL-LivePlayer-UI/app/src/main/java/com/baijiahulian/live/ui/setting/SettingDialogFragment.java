@@ -7,7 +7,7 @@ import android.widget.Button;
 
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseDialogFragment;
-import com.baijiahulian.live.ui.utils.Query;
+import com.baijiahulian.live.ui.utils.QueryPlus;
 
 /**
  * Created by Shubo on 2017/3/2.
@@ -15,8 +15,13 @@ import com.baijiahulian.live.ui.utils.Query;
 
 public class SettingDialogFragment extends BaseDialogFragment implements SettingContract.View {
 
-    private Query $;
+    private QueryPlus $;
     private SettingContract.Presenter presenter;
+
+    public static SettingDialogFragment newInstance(){
+        SettingDialogFragment dialog = new SettingDialogFragment();
+        return dialog;
+    }
 
     @Override
     protected int getLayoutId() {
@@ -26,7 +31,7 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
     @Override
     protected void init(Bundle savedInstanceState, Bundle arguments) {
         super.title(getString(R.string.live_setting)).editable(false);
-        $ = Query.with(contentView);
+        $ = QueryPlus.with(contentView);
         $.id(R.id.dialog_setting_mic).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

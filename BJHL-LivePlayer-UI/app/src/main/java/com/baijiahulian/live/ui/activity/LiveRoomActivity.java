@@ -1,8 +1,12 @@
 package com.baijiahulian.live.ui.activity;
 
+import android.content.Context;
 import android.content.res.Configuration;
+import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.view.OrientationEventListener;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
@@ -21,6 +25,8 @@ import com.baijiahulian.live.ui.rightbotmenu.RightBottomMenuFragment;
 import com.baijiahulian.live.ui.rightbotmenu.RightBottomMenuPresenter;
 import com.baijiahulian.live.ui.rightmenu.RightMenuFragment;
 import com.baijiahulian.live.ui.rightmenu.RightMenuPresenter;
+import com.baijiahulian.live.ui.setting.SettingDialogFragment;
+import com.baijiahulian.live.ui.setting.SettingPresenter;
 import com.baijiahulian.live.ui.topbar.TopBarFragment;
 import com.baijiahulian.live.ui.topbar.TopBarPresenter;
 import com.baijiahulian.live.ui.videoplayer.VideoPlayerFragment;
@@ -66,6 +72,10 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private RightBottomMenuFragment rightBottomMenuFragment;
     private LeftMenuFragment leftMenuFragment;
     private RightMenuFragment rightMenuFragment;
+    private WindowManager windowManager;
+
+    private OrientationEventListener orientationEventListener; //处理屏幕旋转时本地录制视频的方向
+    private int oldRotation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +100,34 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         loadingPresenter.setRouter(this);
         loadingFragment.setPresenter(loadingPresenter);
         addFragment(R.id.activity_live_room_loading, loadingFragment);
+
+        windowManager = (WindowManager) this
+                .getSystemService(Context.WINDOW_SERVICE);
+        oldRotation = windowManager.getDefaultDisplay().getRotation();
+
+        orientationEventListener = new OrientationEventListener(this, SensorManager.SENSOR_DELAY_NORMAL) {
+            @Override
+            public void onOrientationChanged(int orientation) {
+                int newRotation = windowManager.getDefaultDisplay().getRotation();
+                if (newRotation != oldRotation) {
+                    oldRotation = newRotation;
+                    if (liveRoom.getRecorder().isVideoAttached())
+                        liveRoom.getRecorder().invalidVideo();
+                }
+            }
+        };
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        orientationEventListener.enable();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        orientationEventListener.disable();
     }
 
     @Override
@@ -244,43 +282,41 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         boolean isPPT = max == lppptFragment.getView();
         if (isPPT)
             lppptFragment.onPause();
-//        getLiveRoom().getRecorder().detachVideo();
         switchView(recorderFragment.getView(), max);
         if (isPPT)
             lppptFragment.onResume();
-//        getLiveRoom().getRecorder().attachVideo();
         liveRoom.getRecorder().invalidVideo();
     }
 
     @Override
     public void maximisePlayerView() {
         View max = flBackground.getChildAt(0);
-        if(playerFragment.getView() == max) return;
+        if (playerFragment.getView() == max) return;
         boolean isPPT = max == lppptFragment.getView();
         if (isPPT)
             lppptFragment.onPause();
-//        else
-//            getLiveRoom().getRecorder().detachVideo();
         switchView(playerFragment.getView(), max);
         if (isPPT)
             lppptFragment.onResume();
-//        if(max == recorderFragment.getView())
-//            getLiveRoom().getRecorder().attachVideo();
-            liveRoom.getRecorder().invalidVideo();
+        liveRoom.getRecorder().invalidVideo();
     }
 
     @Override
     public void maximisePPTView() {
         View max = flBackground.getChildAt(0);
-        if(lppptFragment.getView() == max) return;
+        if (lppptFragment.getView() == max) return;
         lppptFragment.onPause();
-//        if(max == recorderFragment.getView())
-//            getLiveRoom().getRecorder().detachVideo();
         switchView(lppptFragment.getView(), max);
         lppptFragment.onResume();
-//        if(max == recorderFragment.getView())
-//            getLiveRoom().getRecorder().attachVideo();
-            liveRoom.getRecorder().invalidVideo();
+        liveRoom.getRecorder().invalidVideo();
+    }
+
+    @Override
+    public void showMorePanel(int anchorX, int anchorY) {
+        SettingDialogFragment settingFragment = SettingDialogFragment.newInstance();
+        SettingPresenter settingPresenter = new SettingPresenter(settingFragment);
+        bindVP(settingFragment, settingPresenter);
+        showDialogFragment(settingFragment);
     }
 
     private void switchView(View view1, View view2) {
