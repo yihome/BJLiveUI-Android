@@ -1,9 +1,9 @@
 package com.baijiahulian.live.ui.chat;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
+import com.baijiahulian.live.ui.utils.RxUtils;
 import com.baijiahulian.livecore.models.imodels.IMessageModel;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
-import com.baijiahulian.livecore.utils.LPRxUtils;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -44,7 +44,7 @@ public class ChatPresenter implements ChatContract.Presenter {
 
     @Override
     public void unSubscribe() {
-        LPRxUtils.unSubscribe(subscriptionOfDataChange);
+        RxUtils.unSubscribe(subscriptionOfDataChange);
     }
 
     @Override

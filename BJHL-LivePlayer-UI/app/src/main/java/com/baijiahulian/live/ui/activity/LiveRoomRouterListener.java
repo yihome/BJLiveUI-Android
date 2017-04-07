@@ -24,6 +24,8 @@ public interface LiveRoomRouterListener {
 
     void navigateToSpeakers();
 
+    void navigateToUserList();
+
     void navigateToPPTWareHouse();
 
     void disableSpeakerMode();
@@ -37,4 +39,7 @@ public interface LiveRoomRouterListener {
     void maximisePPTView();
 
     void showMorePanel(int anchorX, int anchorY);
+
+    void navigateToShare();
+
 }

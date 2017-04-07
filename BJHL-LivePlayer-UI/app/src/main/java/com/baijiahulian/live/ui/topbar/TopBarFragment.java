@@ -2,13 +2,10 @@ package com.baijiahulian.live.ui.topbar;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.TextView;
 
-import com.baijiahulian.live.ui.base.BaseFragment;
 import com.baijiahulian.live.ui.R;
-
-import butterknife.BindView;
-import butterknife.OnClick;
+import com.baijiahulian.live.ui.base.BaseFragment;
+import com.baijiahulian.live.ui.utils.Query;
 
 /**
  * Created by Shubo on 2017/2/13.
@@ -16,10 +13,7 @@ import butterknife.OnClick;
 
 public class TopBarFragment extends BaseFragment implements TopBarContract.View {
 
-    @BindView(R.id.fragment_top_bar_title)
-    TextView fragmentTopBarTitle;
-    @BindView(R.id.fragment_top_bar_user_count)
-    TextView fragmentTopBarUserCount;
+    private Query $;
 
     private TopBarContract.Presenter presenter;
 
@@ -30,7 +24,26 @@ public class TopBarFragment extends BaseFragment implements TopBarContract.View 
 
     @Override
     public void init(Bundle savedInstanceState) {
+        $ = Query.with(view);
 
+        $.id(R.id.fragment_top_bar_user_count).clicked(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                presenter.navigateToUserList();
+            }
+        });
+        $.id(R.id.fragment_top_bar_back).clicked(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().finish();
+            }
+        });
+        $.id(R.id.fragment_top_bar_share).clicked(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                presenter.navigateToShare();
+            }
+        });
     }
 
     @Override
@@ -41,28 +54,17 @@ public class TopBarFragment extends BaseFragment implements TopBarContract.View 
 
     @Override
     public void showOnlineUserCount(int count) {
-        fragmentTopBarUserCount.setText(getString(R.string.on_line_user_count, count));
+        $.id(R.id.fragment_top_bar_user_count).text(getString(R.string.on_line_user_count, count));
     }
 
     @Override
     public void showRoomTitle(String roomTitle) {
-        fragmentTopBarTitle.setText(roomTitle);
+        $.id(R.id.fragment_top_bar_title).text(roomTitle);
     }
 
-    @OnClick({R.id.fragment_top_bar_back, R.id.fragment_top_bar_user_count_container, R.id.fragment_top_bar_share})
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.fragment_top_bar_back:
-                getActivity().finish();
-                break;
-            case R.id.fragment_top_bar_user_count_container:
-                presenter.navigateToUserList();
-                break;
-            case R.id.fragment_top_bar_share:
-                presenter.navigateToShare();
-                break;
-        }
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        $ = null;
     }
-
-
 }

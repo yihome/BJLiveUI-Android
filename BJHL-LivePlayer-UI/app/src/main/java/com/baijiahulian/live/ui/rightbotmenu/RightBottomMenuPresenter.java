@@ -1,8 +1,8 @@
 package com.baijiahulian.live.ui.rightbotmenu;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
+import com.baijiahulian.live.ui.utils.RxUtils;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
-import com.baijiahulian.livecore.utils.LPRxUtils;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -76,8 +76,8 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
 
     @Override
     public void unSubscribe() {
-        LPRxUtils.unSubscribe(subscriptionOfCamera);
-        LPRxUtils.unSubscribe(subscriptionOfMic);
+        RxUtils.unSubscribe(subscriptionOfCamera);
+        RxUtils.unSubscribe(subscriptionOfMic);
     }
 
     @Override

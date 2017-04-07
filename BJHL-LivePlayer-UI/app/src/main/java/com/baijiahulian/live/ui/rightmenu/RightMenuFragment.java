@@ -1,15 +1,13 @@
 package com.baijiahulian.live.ui.rightmenu;
 
+import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
-import com.baijiahulian.live.ui.base.BaseFragment;
 import com.baijiahulian.live.ui.R;
-
-import butterknife.BindView;
-import butterknife.OnClick;
+import com.baijiahulian.live.ui.base.BaseFragment;
+import com.baijiahulian.live.ui.utils.AliCloudImageUtil;
+import com.squareup.picasso.Picasso;
 
 /**
  * Created by Shubo on 2017/2/15.
@@ -17,20 +15,36 @@ import butterknife.OnClick;
 
 public class RightMenuFragment extends BaseFragment implements RightMenuContract.View {
 
-    @BindView(R.id.fragment_right_speakers_img)
-    ImageView fragmentRightSpeakersImg;
-    @BindView(R.id.fragment_right_speakers_num)
-    TextView fragmentRightSpeakersNum;
-    @BindView(R.id.fragment_right_speakers_container)
-    RelativeLayout fragmentRightSpeakersContainer;
-    @BindView(R.id.fragment_right_pen)
-    ImageView fragmentRightPen;
-    @BindView(R.id.fragment_right_ppt)
-    ImageView fragmentRightPpt;
-    @BindView(R.id.fragment_right_speak_apply)
-    ImageView fragmentRightSpeakApply;
-
     private RightMenuContract.Presenter presenter;
+
+    @Override
+    protected void init(Bundle savedInstanceState) {
+        super.init(savedInstanceState);
+        $.id(R.id.fragment_right_pen).clicked(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                presenter.drawing();
+            }
+        });
+        $.id(R.id.fragment_right_ppt).clicked(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                presenter.managePPT();
+            }
+        });
+        $.id(R.id.fragment_right_speakers_container).clicked(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                presenter.visitSpeakers();
+            }
+        });
+        $.id(R.id.fragment_right_speak_apply).clicked(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                presenter.speakApply();
+            }
+        });
+    }
 
     @Override
     public int getLayoutId() {
@@ -39,17 +53,21 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
 
     @Override
     public void showSpeakApplyImage(String imgUrl) {
-
+        Picasso.with(getActivity()).load(AliCloudImageUtil.getRoundedAvatarUrl(imgUrl, 46))
+                .into((ImageView) $.id(R.id.fragment_right_speakers_img).view());
     }
 
     @Override
     public void showSpeakApplyCount(int count) {
-
+        $.id(R.id.fragment_right_speakers_num).text(String.valueOf(count));
     }
 
     @Override
     public void showDrawingStatus(boolean isEnable) {
-
+        if (isEnable)
+            $.id(R.id.fragment_right_pen).image(R.drawable.live_ic_lightpen_on);
+        else
+            $.id(R.id.fragment_right_pen).image(R.drawable.live_ic_lightpen);
     }
 
     @Override
@@ -69,33 +87,23 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
 
     @Override
     public void showTeacherRightMenu() {
-        fragmentRightSpeakApply.setVisibility(View.GONE);
+        $.id(R.id.fragment_right_pen).visible();
+        $.id(R.id.fragment_right_ppt).visible();
+        $.id(R.id.fragment_right_speakers_num).visible();
+        $.id(R.id.fragment_right_speak_apply).gone();
     }
 
     @Override
     public void showStudentRightMenu() {
-        fragmentRightPpt.setVisibility(View.GONE);
+        $.id(R.id.fragment_right_pen).gone();
+        $.id(R.id.fragment_right_ppt).gone();
+        $.id(R.id.fragment_right_speakers_num).gone();
+        $.id(R.id.fragment_right_speak_apply).visible();
     }
 
     @Override
     public void setPresenter(RightMenuContract.Presenter presenter) {
         super.setBasePresenter(presenter);
         this.presenter = presenter;
-    }
-
-    @OnClick({R.id.fragment_right_speakers_container, R.id.fragment_right_pen, R.id.fragment_right_ppt, R.id.fragment_right_speak_apply})
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.fragment_right_speakers_container:
-                break;
-            case R.id.fragment_right_pen:
-                presenter.drawing();
-                break;
-            case R.id.fragment_right_ppt:
-                presenter.managePPT();
-                break;
-            case R.id.fragment_right_speak_apply:
-                break;
-        }
     }
 }

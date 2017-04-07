@@ -56,11 +56,11 @@ public class TopBarPresenter implements TopBarContract.Presenter {
 
     @Override
     public void navigateToShare() {
-
+        routerListener.navigateToShare();
     }
 
     @Override
     public void navigateToUserList() {
-
+        routerListener.navigateToUserList();
     }
 }

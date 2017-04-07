@@ -8,6 +8,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.baijiahulian.live.ui.utils.QueryPlus;
+
 import butterknife.ButterKnife;
 
 import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
@@ -18,19 +20,21 @@ import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 
 public abstract class BaseFragment extends Fragment {
 
-    protected View view;
+    protected QueryPlus $;
     private BasePresenter basePresenter;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         int res = getLayoutId();
-        if(res != 0) {
+        View view;
+        if (res != 0) {
             view = inflater.inflate(res, container, false);
-        }else {
+        } else {
             view = getContentView();
         }
         checkNotNull(view);
+        $ = QueryPlus.with(view);
         ButterKnife.bind(this, view);
         init(savedInstanceState);
         return view;
@@ -38,11 +42,13 @@ public abstract class BaseFragment extends Fragment {
 
     public abstract int getLayoutId();
 
-    public void init(Bundle savedInstanceState){
+    protected void init(Bundle savedInstanceState) {
 
-    };
+    }
 
-    protected View getContentView(){
+    ;
+
+    protected View getContentView() {
         return null;
     }
 
@@ -87,5 +93,6 @@ public abstract class BaseFragment extends Fragment {
         super.onDestroy();
         basePresenter.destroy();
         basePresenter = null;
+        $ = null;
     }
 }

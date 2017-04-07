@@ -4,21 +4,9 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/dialog_online_user_count"
-        android:layout_width="wrap_content"
-        android:layout_height="45dp"
-        android:layout_marginLeft="@dimen/activity_live_room_dialog_margin"
-        android:textColor="@color/live_text_color"
-        android:text="@string/on_line_user_count_dialog"
-        android:gravity="center_vertical"
-        android:textSize="16sp" />
-
-    <View
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/dialog_online_user_recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:layout_marginLeft="@dimen/activity_live_room_dialog_margin"
-        android:background="@color/live_fail" />
+        android:layout_height="match_parent" />
 
-    <!--load_more_recycler-->
 </LinearLayout>

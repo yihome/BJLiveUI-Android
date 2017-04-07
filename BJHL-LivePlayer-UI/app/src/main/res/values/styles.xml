@@ -32,4 +32,9 @@
         <item name="android:layout_width">wrap_content</item>
     </style>
 
+    <style name="LiveBaseDialogAnim">
+        <item name="android:windowEnterAnimation">@anim/live_dialog_enter</item>
+        <item name="android:windowExitAnimation">@anim/live_dialog_exit</item>
+    </style>
+
 </resources>

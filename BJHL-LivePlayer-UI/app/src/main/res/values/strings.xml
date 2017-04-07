@@ -3,7 +3,7 @@
 
     <string name="on_line_user_count">%1$d人在线</string>
     <string name="enter_live_room">进入直播教室</string>
-    <string name="on_line_user_count_dialog">在线人数（%1$d人）</string>
+    <string name="live_on_line_user_count_dialog">在线人数（%1$d人）</string>
     <string name="speaker_dialog">举手发言</string>
     <string name="video_on">视频中</string>
     <string name="close_speaking">结束发言</string>
@@ -30,5 +30,6 @@
     <string name="live_setting_link_type_down2">下载2</string>
     <string name="live_media_visitor_fail">游客不能举手发言</string>
     <string name="live_media_student_fail">请先举手发言，并等待老师同意</string>
+    <string name="live_loading_more">加载更多…</string>
 
 </resources>

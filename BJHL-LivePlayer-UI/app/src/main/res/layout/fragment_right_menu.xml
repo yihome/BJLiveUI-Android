@@ -12,8 +12,8 @@
 
         <ImageView
             android:id="@+id/fragment_right_speakers_img"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
             android:layout_marginBottom="@dimen/activity_live_room_margin"
             android:src="@drawable/live_ic_lightpen"
             android:layout_marginTop="5dp"/>

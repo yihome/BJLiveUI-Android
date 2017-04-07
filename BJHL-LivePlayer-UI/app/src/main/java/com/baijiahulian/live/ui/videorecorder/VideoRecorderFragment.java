@@ -4,6 +4,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.View;
 
+import com.baijiahulian.avsdk.liveplayer.CameraGLSurfaceView;
 import com.baijiahulian.avsdk.liveplayer.CameraGLTextureView;
 import com.baijiahulian.live.ui.base.BaseFragment;
 
@@ -23,7 +24,7 @@ public class VideoRecorderFragment extends BaseFragment implements VideoRecorder
     @Override
     protected View getContentView() {
         if (view == null) {
-            view = new CameraGLTextureView(getActivity());
+            view = new CameraGLSurfaceView(getActivity());
         }
         return view;
     }

@@ -35,7 +35,7 @@ public class VideoRecorderPresenter implements VideoRecorderContract.Presenter {
         }
         if(!routerListener.getLiveRoom().getRecorder().isVideoAttached()) {
             routerListener.getLiveRoom().getRecorder().attachVideo();
-            routerListener.getLiveRoom().getRecorder().openBeautyFilter();
+//            routerListener.getLiveRoom().getRecorder().openBeautyFilter();
         }
     }
 

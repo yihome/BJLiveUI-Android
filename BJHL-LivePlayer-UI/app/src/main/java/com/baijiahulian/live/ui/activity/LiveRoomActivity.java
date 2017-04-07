@@ -15,6 +15,8 @@ import com.baijiahulian.live.ui.base.BasePresenter;
 import com.baijiahulian.live.ui.base.BaseView;
 import com.baijiahulian.live.ui.chat.ChatFragment;
 import com.baijiahulian.live.ui.chat.ChatPresenter;
+import com.baijiahulian.live.ui.chat.MessageSendPresenter;
+import com.baijiahulian.live.ui.chat.MessageSentFragment;
 import com.baijiahulian.live.ui.leftmenu.LeftMenuFragment;
 import com.baijiahulian.live.ui.leftmenu.LeftMenuPresenter;
 import com.baijiahulian.live.ui.loading.LoadingFragment;
@@ -29,10 +31,13 @@ import com.baijiahulian.live.ui.setting.SettingDialogFragment;
 import com.baijiahulian.live.ui.setting.SettingPresenter;
 import com.baijiahulian.live.ui.topbar.TopBarFragment;
 import com.baijiahulian.live.ui.topbar.TopBarPresenter;
+import com.baijiahulian.live.ui.users.OnlineUserDialogFragment;
+import com.baijiahulian.live.ui.users.OnlineUserPresenter;
 import com.baijiahulian.live.ui.videoplayer.VideoPlayerFragment;
 import com.baijiahulian.live.ui.videoplayer.VideoPlayerPresenter;
 import com.baijiahulian.live.ui.videorecorder.VideoRecorderFragment;
-import com.baijiahulian.live.ui.videorecorder.VideoRecorderPresenter;
+import com.baijiahulian.livecore.LiveSDK;
+import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.context.LiveRoom;
 
 import butterknife.BindView;
@@ -74,6 +79,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private RightMenuFragment rightMenuFragment;
     private WindowManager windowManager;
 
+    private VideoPlayerFragment playerFragment;
+    private VideoPlayerPresenter playerPresenter;
+
     private OrientationEventListener orientationEventListener; //处理屏幕旋转时本地录制视频的方向
     private int oldRotation;
 
@@ -90,9 +98,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         String code = getIntent().getStringExtra("code");
         String name = getIntent().getStringExtra("name");
 
-//        LiveSDK.init(LPConstants.LPDeployType.Test);
+        LiveSDK.init(LPConstants.LPDeployType.Test);
 
-        code = "epznlk";
+        code = "lz0u1c";
         name = "Shubo";
 
         loadingFragment = new LoadingFragment();
@@ -207,26 +215,23 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         bindVP(rightBottomMenuFragment, new RightBottomMenuPresenter(rightBottomMenuFragment));
         addFragment(R.id.activity_live_room_bottom_right, rightBottomMenuFragment);
 
-        recorderFragment = new VideoRecorderFragment();
-        bindVP(recorderFragment, new VideoRecorderPresenter(recorderFragment));
-        addFragment(R.id.activity_live_room_foreground_left_container, recorderFragment);
+//        recorderFragment = new VideoRecorderFragment();
+//        bindVP(recorderFragment, new VideoRecorderPresenter(recorderFragment));
+//        addFragment(R.id.activity_live_room_foreground_left_container, recorderFragment);
 
         chatFragment = new ChatFragment();
         bindVP(chatFragment, new ChatPresenter(chatFragment));
         addFragment(R.id.activity_live_room_chat, chatFragment);
 
-        playerFragment = new VideoPlayerFragment();
-        playerPresenter = new VideoPlayerPresenter(playerFragment);
-        bindVP(playerFragment, playerPresenter);
-        addFragment(R.id.activity_live_room_foreground_right_container, playerFragment);
+//        playerFragment = new VideoPlayerFragment();
+//        playerPresenter = new VideoPlayerPresenter(playerFragment);
+//        bindVP(playerFragment, playerPresenter);
+//        addFragment(R.id.activity_live_room_foreground_right_container, playerFragment);
 
         // might delay 500ms to process
         removeFragment(loadingFragment);
         flLoading.setVisibility(View.GONE);
     }
-
-    private VideoPlayerFragment playerFragment;
-    private VideoPlayerPresenter playerPresenter;
 
     @Override
     public void clearScreen() {
@@ -246,7 +251,10 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void navigateToMessageInput() {
-
+        MessageSentFragment fragment = MessageSentFragment.newInstance();
+        MessageSendPresenter presenter = new MessageSendPresenter(fragment);
+        bindVP(fragment, presenter);
+        showDialogFragment(fragment);
     }
 
     @Override
@@ -258,6 +266,14 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public void navigateToSpeakers() {
 
+    }
+
+    @Override
+    public void navigateToUserList() {
+        OnlineUserDialogFragment userListFragment = OnlineUserDialogFragment.newInstance();
+        OnlineUserPresenter userPresenter = new OnlineUserPresenter(userListFragment);
+        bindVP(userListFragment, userPresenter);
+        showDialogFragment(userListFragment);
     }
 
     @Override
@@ -317,6 +333,11 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         SettingPresenter settingPresenter = new SettingPresenter(settingFragment);
         bindVP(settingFragment, settingPresenter);
         showDialogFragment(settingFragment);
+    }
+
+    @Override
+    public void navigateToShare() {
+
     }
 
     private void switchView(View view1, View view2) {
