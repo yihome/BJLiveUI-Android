@@ -133,6 +133,14 @@ public abstract class BaseDialogFragment extends DialogFragment {
         return this;
     }
 
+    protected void hideTitleBar() {
+        $.id(R.id.dialog_base_title_container).gone();
+    }
+
+    protected void showTitleBar() {
+        $.id(R.id.dialog_base_title_container).visible();
+    }
+
     protected boolean isEditing() {
         return isEditing;
     }

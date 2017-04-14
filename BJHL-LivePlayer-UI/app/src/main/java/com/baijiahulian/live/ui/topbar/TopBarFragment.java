@@ -5,15 +5,12 @@ import android.view.View;
 
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseFragment;
-import com.baijiahulian.live.ui.utils.Query;
 
 /**
  * Created by Shubo on 2017/2/13.
  */
 
 public class TopBarFragment extends BaseFragment implements TopBarContract.View {
-
-    private Query $;
 
     private TopBarContract.Presenter presenter;
 
@@ -24,7 +21,6 @@ public class TopBarFragment extends BaseFragment implements TopBarContract.View 
 
     @Override
     public void init(Bundle savedInstanceState) {
-        $ = Query.with(view);
 
         $.id(R.id.fragment_top_bar_user_count).clicked(new View.OnClickListener() {
             @Override

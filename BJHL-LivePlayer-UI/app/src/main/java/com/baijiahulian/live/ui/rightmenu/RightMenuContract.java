@@ -14,6 +14,8 @@ interface RightMenuContract {
 
         void showSpeakApplyCount(int count);
 
+        void showEmptySpeakers();
+
         void showDrawingStatus(boolean isEnable);
 
         void showSpeakApplyCountDown(int countDownTime);
@@ -30,7 +32,7 @@ interface RightMenuContract {
     interface Presenter extends BasePresenter{
         void visitSpeakers();
 
-        void drawing();
+        void changeDrawing();
 
         void managePPT();
 

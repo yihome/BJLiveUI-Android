@@ -14,7 +14,7 @@ import com.baijiahulian.live.ui.activity.LiveRoomActivity;
 
 public class LiveSDKWithUI {
 
-    public static void enterRoom(@NonNull Context context, String name, String code, LiveSDKEnterRoomListener listener) {
+    public static void enterRoom(@NonNull Context context,@NonNull String name,@NonNull String code,@NonNull LiveSDKEnterRoomListener listener) {
         if (TextUtils.isEmpty(name)) {
             listener.onError("name is empty");
             return;

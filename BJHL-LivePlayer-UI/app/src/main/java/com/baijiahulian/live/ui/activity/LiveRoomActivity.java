@@ -87,6 +87,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_live_room);
         ButterKnife.bind(this);
@@ -100,7 +101,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
         LiveSDK.init(LPConstants.LPDeployType.Test);
 
-        code = "lz0u1c";
+        code = "tvjpxj";
         name = "Shubo";
 
         loadingFragment = new LoadingFragment();
@@ -338,6 +339,12 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public void navigateToShare() {
 
+    }
+
+    @Override
+    public boolean isTeacherOrAssistant() {
+        return getLiveRoom().getCurrentUser().getType() == LPConstants.LPUserType.Teacher ||
+                getLiveRoom().getCurrentUser().getType() == LPConstants.LPUserType.Assistant;
     }
 
     private void switchView(View view1, View view2) {

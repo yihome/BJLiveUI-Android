@@ -20,6 +20,7 @@ import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 
 public abstract class BaseFragment extends Fragment {
 
+    protected View view;
     protected QueryPlus $;
     private BasePresenter basePresenter;
 
@@ -27,7 +28,7 @@ public abstract class BaseFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         int res = getLayoutId();
-        View view;
+
         if (res != 0) {
             view = inflater.inflate(res, container, false);
         } else {
@@ -45,8 +46,6 @@ public abstract class BaseFragment extends Fragment {
     protected void init(Bundle savedInstanceState) {
 
     }
-
-    ;
 
     protected View getContentView() {
         return null;

@@ -23,7 +23,7 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
         $.id(R.id.fragment_right_pen).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                presenter.drawing();
+                presenter.changeDrawing();
             }
         });
         $.id(R.id.fragment_right_ppt).clicked(new View.OnClickListener() {
@@ -60,6 +60,11 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
     @Override
     public void showSpeakApplyCount(int count) {
         $.id(R.id.fragment_right_speakers_num).text(String.valueOf(count));
+    }
+
+    @Override
+    public void showEmptySpeakers() {
+
     }
 
     @Override

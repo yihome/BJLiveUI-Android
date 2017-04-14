@@ -5,6 +5,7 @@
     android:orientation="vertical">
 
     <RelativeLayout
+        android:id="@+id/dialog_base_title_container"
         android:layout_width="match_parent"
         android:layout_height="45dp"
         android:paddingLeft="@dimen/activity_live_room_dialog_margin">

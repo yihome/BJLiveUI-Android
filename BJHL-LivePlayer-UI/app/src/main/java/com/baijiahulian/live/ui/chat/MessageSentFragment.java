@@ -1,9 +1,12 @@
 package com.baijiahulian.live.ui.chat;
 
 import android.os.Bundle;
+import android.support.v4.view.GravityCompat;
 import android.text.Editable;
 import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 
 import com.baijiahulian.live.ui.R;
@@ -34,7 +37,15 @@ public class MessageSentFragment extends BaseDialogFragment implements MessageSe
     }
 
     @Override
+    protected void setWindowParams(WindowManager.LayoutParams windowParams) {
+        windowParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+        windowParams.width = WindowManager.LayoutParams.MATCH_PARENT;
+        windowParams.gravity = Gravity.BOTTOM | GravityCompat.END;
+    }
+
+    @Override
     protected void init(Bundle savedInstanceState, Bundle arguments) {
+        super.hideTitleBar();
         $ = QueryPlus.with(contentView);
         textWatcher = new MessageTextWatcher();
         ((EditText) $.id(R.id.dialog_message_send_et).view()).addTextChangedListener(textWatcher);

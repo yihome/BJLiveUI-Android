@@ -42,4 +42,6 @@ public interface LiveRoomRouterListener {
 
     void navigateToShare();
 
+    boolean isTeacherOrAssistant();
+
 }
