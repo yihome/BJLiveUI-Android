@@ -66,6 +66,7 @@ public class Query {
         }
         return this;
     }
+
     public Query text(CharSequence text) {
         if (view != null && view instanceof TextView) {
             ((TextView) view).setText(text);
@@ -86,6 +87,5 @@ public class Query {
         }
         return this;
     }
-
 
 }

@@ -42,6 +42,22 @@ public interface LiveRoomRouterListener {
 
     void navigateToShare();
 
+    void navigateToAnnouncement();
+
+    void navigateToCloudRecord();
+
+    boolean getCloudRecordStatus();
+
+    void navigateToHelp();
+
+    void navigateToSetting();
+
     boolean isTeacherOrAssistant();
+
+    String getCurrentVideoPlayingUserId();
+
+    void playVideo(String userId);
+
+    void playVideoClose(String userId);
 
 }

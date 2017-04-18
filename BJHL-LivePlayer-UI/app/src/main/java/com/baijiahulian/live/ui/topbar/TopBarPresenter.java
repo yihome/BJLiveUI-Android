@@ -40,6 +40,7 @@ public class TopBarPresenter implements TopBarContract.Presenter {
                         view.showOnlineUserCount(integer);
                     }
                 });
+        view.showOnlineUserCount(routerListener.getLiveRoom().getOnlineUserVM().getUserCount());
         // TODO: 2017/2/13 增加教室信息接口（名称）
     }
 

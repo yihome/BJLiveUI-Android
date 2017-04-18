@@ -5,7 +5,6 @@ import android.view.View;
 
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseFragment;
-import com.baijiahulian.live.ui.utils.QueryPlus;
 
 /**
  * Created by Shubo on 2017/2/16.
@@ -14,7 +13,6 @@ import com.baijiahulian.live.ui.utils.QueryPlus;
 public class RightBottomMenuFragment extends BaseFragment implements RightBottomMenuContract.View {
 
     private RightBottomMenuContract.Presenter presenter;
-    private QueryPlus $;
 
     @Override
     public int getLayoutId() {
@@ -24,7 +22,6 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
     @Override
     public void init(Bundle savedInstanceState) {
         super.init(savedInstanceState);
-        $ = QueryPlus.with(view);
 
         $.id(R.id.fragment_right_bottom_video).clicked(new View.OnClickListener() {
             @Override
@@ -47,22 +44,28 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
                 presenter.more(location[0], location[1]);
             }
         });
+        $.id(R.id.fragment_right_bottom_zoom).clicked(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                presenter.changeZoom();
+            }
+        });
     }
 
     @Override
     public void showVideoStatus(boolean isOn) {
         if (isOn)
-            $.id(R.id.fragment_right_bottom_video).image(R.drawable.live_ic_stopvideo);
-        else
             $.id(R.id.fragment_right_bottom_video).image(R.drawable.live_ic_stopvideo_on);
+        else
+            $.id(R.id.fragment_right_bottom_video).image(R.drawable.live_ic_stopvideo);
     }
 
     @Override
     public void showAudioStatus(boolean isOn) {
         if (isOn)
-            $.id(R.id.fragment_right_bottom_audio).image(R.drawable.live_ic_stopaudio);
+            $.id(R.id.fragment_right_bottom_audio).image(R.drawable.live_ic_stopaudio_1);
         else
-            $.id(R.id.fragment_right_bottom_audio).image(R.drawable.live_ic_audio_on);
+            $.id(R.id.fragment_right_bottom_audio).image(R.drawable.live_ic_stopaudio);
     }
 
     @Override
@@ -89,6 +92,37 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
         $.id(R.id.fragment_right_bottom_video).visible();
         $.id(R.id.fragment_right_bottom_audio).visible();
         $.id(R.id.fragment_right_bottom_zoom).visible();
+    }
+
+    @Override
+    public void showVolume(int level) {
+        // [0,9]
+        switch (level) {
+            case 0:
+                $.id(R.id.fragment_right_bottom_audio).image(R.drawable.live_ic_stopaudio_1);
+                break;
+            case 1:
+            case 2:
+                $.id(R.id.fragment_right_bottom_audio).image(R.drawable.live_ic_stopaudio_2);
+                break;
+            case 3:
+            case 4:
+                $.id(R.id.fragment_right_bottom_audio).image(R.drawable.live_ic_stopaudio_3);
+                break;
+            case 5:
+            case 6:
+                $.id(R.id.fragment_right_bottom_audio).image(R.drawable.live_ic_stopaudio_4);
+                break;
+            case 7:
+            case 8:
+                $.id(R.id.fragment_right_bottom_audio).image(R.drawable.live_ic_stopaudio_5);
+                break;
+            case 9:
+                $.id(R.id.fragment_right_bottom_audio).image(R.drawable.live_ic_stopaudio_6);
+                break;
+            default:
+                break;
+        }
     }
 
     @Override

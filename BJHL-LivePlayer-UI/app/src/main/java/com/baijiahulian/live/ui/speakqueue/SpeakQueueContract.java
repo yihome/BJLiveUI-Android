@@ -18,14 +18,23 @@ public interface SpeakQueueContract {
     }
 
     interface Presenter extends BasePresenter {
+
+        int getCount();
+
+        Object getItem(int position);
+
         void agreeSpeakApply(int position);
 
         void disagreeSpeakApply(int position);
 
         void closeSpeaking(int position);
 
-        void openCamera(int position);
+        void openVideo(int position);
 
-        void closeCamera(int position);
+        void closeVideo(int position);
+
+        boolean isCurrentVideoPlayingUser(int position);
+
+        boolean isTeacherOrAssistant();
     }
 }

@@ -21,6 +21,8 @@ import com.baijiahulian.live.ui.leftmenu.LeftMenuFragment;
 import com.baijiahulian.live.ui.leftmenu.LeftMenuPresenter;
 import com.baijiahulian.live.ui.loading.LoadingFragment;
 import com.baijiahulian.live.ui.loading.LoadingPresenter;
+import com.baijiahulian.live.ui.more.MoreMenuDialogFragment;
+import com.baijiahulian.live.ui.more.MoreMenuPresenter;
 import com.baijiahulian.live.ui.ppt.MyPPTFragment;
 import com.baijiahulian.live.ui.ppt.PPTPresenter;
 import com.baijiahulian.live.ui.rightbotmenu.RightBottomMenuFragment;
@@ -29,6 +31,8 @@ import com.baijiahulian.live.ui.rightmenu.RightMenuFragment;
 import com.baijiahulian.live.ui.rightmenu.RightMenuPresenter;
 import com.baijiahulian.live.ui.setting.SettingDialogFragment;
 import com.baijiahulian.live.ui.setting.SettingPresenter;
+import com.baijiahulian.live.ui.speakqueue.SpeakQueueDialogFragment;
+import com.baijiahulian.live.ui.speakqueue.SpeakQueuePresenter;
 import com.baijiahulian.live.ui.topbar.TopBarFragment;
 import com.baijiahulian.live.ui.topbar.TopBarPresenter;
 import com.baijiahulian.live.ui.users.OnlineUserDialogFragment;
@@ -101,7 +105,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
         LiveSDK.init(LPConstants.LPDeployType.Test);
 
-        code = "tvjpxj";
+        code = "e6n6dt";
         name = "Shubo";
 
         loadingFragment = new LoadingFragment();
@@ -150,10 +154,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private void onForegroundRightContainerConfigurationChanged(Configuration newConfig) {
         RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) flForegroundRight.getLayoutParams();
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            lp.removeRule(RelativeLayout.BELOW);
             lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_top);
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            lp.removeRule(RelativeLayout.BELOW);
             lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_background_container);
         }
         flForegroundRight.setLayoutParams(lp);
@@ -162,10 +164,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private void onForegroundLeftContainerConfigurationChanged(Configuration newConfig) {
         RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) flForegroundLeft.getLayoutParams();
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            lp.removeRule(RelativeLayout.BELOW);
             lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_top);
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            lp.removeRule(RelativeLayout.BELOW);
             lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_background_container);
         }
         flForegroundLeft.setLayoutParams(lp);
@@ -174,7 +174,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private void onBackgroundContainerConfigurationChanged(Configuration newConfig) {
         RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) flBackground.getLayoutParams();
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            lp.removeRule(RelativeLayout.ABOVE);
+            lp.addRule(RelativeLayout.ABOVE, 0); // lp.removeRule()
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
             lp.addRule(RelativeLayout.ABOVE, R.id.activity_live_room_center_anchor);
         }
@@ -224,14 +224,13 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         bindVP(chatFragment, new ChatPresenter(chatFragment));
         addFragment(R.id.activity_live_room_chat, chatFragment);
 
-//        playerFragment = new VideoPlayerFragment();
-//        playerPresenter = new VideoPlayerPresenter(playerFragment);
-//        bindVP(playerFragment, playerPresenter);
-//        addFragment(R.id.activity_live_room_foreground_right_container, playerFragment);
-
         // might delay 500ms to process
         removeFragment(loadingFragment);
         flLoading.setVisibility(View.GONE);
+
+        if (getLiveRoom().getCurrentUser().getType() == LPConstants.LPUserType.Teacher) {
+            liveRoom.requestClassStart();
+        }
     }
 
     @Override
@@ -266,7 +265,10 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void navigateToSpeakers() {
-
+        SpeakQueueDialogFragment fragment = SpeakQueueDialogFragment.newInstance();
+        SpeakQueuePresenter presenter = new SpeakQueuePresenter(fragment);
+        bindVP(fragment, presenter);
+        showDialogFragment(fragment);
     }
 
     @Override
@@ -284,12 +286,12 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void disableSpeakerMode() {
-
+        rightBottomMenuFragment.hideAVButton();
     }
 
     @Override
     public void enableSpeakerMode() {
-
+        rightBottomMenuFragment.showAVButton();
     }
 
     @Override
@@ -330,10 +332,10 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void showMorePanel(int anchorX, int anchorY) {
-        SettingDialogFragment settingFragment = SettingDialogFragment.newInstance();
-        SettingPresenter settingPresenter = new SettingPresenter(settingFragment);
-        bindVP(settingFragment, settingPresenter);
-        showDialogFragment(settingFragment);
+        MoreMenuDialogFragment fragment = MoreMenuDialogFragment.newInstance(anchorX, anchorY);
+        MoreMenuPresenter presenter = new MoreMenuPresenter(fragment);
+        bindVP(fragment, presenter);
+        showDialogFragment(fragment);
     }
 
     @Override
@@ -342,9 +344,60 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     }
 
     @Override
+    public void navigateToAnnouncement() {
+
+    }
+
+    @Override
+    public void navigateToCloudRecord() {
+
+    }
+
+    @Override
+    public boolean getCloudRecordStatus() {
+        return false;
+    }
+
+    @Override
+    public void navigateToHelp() {
+
+    }
+
+    @Override
+    public void navigateToSetting() {
+        SettingDialogFragment settingFragment = SettingDialogFragment.newInstance();
+        SettingPresenter settingPresenter = new SettingPresenter(settingFragment);
+        bindVP(settingFragment, settingPresenter);
+        showDialogFragment(settingFragment);
+    }
+
+    @Override
     public boolean isTeacherOrAssistant() {
         return getLiveRoom().getCurrentUser().getType() == LPConstants.LPUserType.Teacher ||
                 getLiveRoom().getCurrentUser().getType() == LPConstants.LPUserType.Assistant;
+    }
+
+    @Override
+    public String getCurrentVideoPlayingUserId() {
+        if (playerPresenter == null) return null;
+        else return playerPresenter.getCurrentPlayingUserId();
+    }
+
+    @Override
+    public void playVideo(String userId) {
+        if (playerPresenter == null) {
+            playerFragment = new VideoPlayerFragment();
+            playerPresenter = new VideoPlayerPresenter(playerFragment);
+            bindVP(playerFragment, playerPresenter);
+            addFragment(R.id.activity_live_room_foreground_right_container, playerFragment);
+        }
+        playerPresenter.playVideo(userId);
+    }
+
+    @Override
+    public void playVideoClose(String userId) {
+        checkNotNull(playerPresenter);
+        playerPresenter.playAVClose(userId);
     }
 
     private void switchView(View view1, View view2) {
@@ -364,6 +417,11 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        orientationEventListener = null;
+        if (getLiveRoom().getCurrentUser().getType() == LPConstants.LPUserType.Teacher) {
+            liveRoom.requestClassEnd();
+        }
         getLiveRoom().quitRoom();
+
     }
 }

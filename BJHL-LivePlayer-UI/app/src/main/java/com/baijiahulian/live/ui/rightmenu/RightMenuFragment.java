@@ -64,7 +64,8 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
 
     @Override
     public void showEmptySpeakers() {
-
+        $.id(R.id.fragment_right_speakers_num).gone();
+        $.id(R.id.fragment_right_speakers_img).gone();
     }
 
     @Override
@@ -82,12 +83,12 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
 
     @Override
     public void showSpeakApplyAgreed() {
-
+        showToast(getString(R.string.live_media_speak_apply_agree));
     }
 
     @Override
     public void showSpeakApplyDisagreed() {
-
+        showToast(getString(R.string.live_media_speak_apply_disagree));
     }
 
     @Override

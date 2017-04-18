@@ -41,6 +41,7 @@ public class MessageSentFragment extends BaseDialogFragment implements MessageSe
         windowParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
         windowParams.width = WindowManager.LayoutParams.MATCH_PARENT;
         windowParams.gravity = Gravity.BOTTOM | GravityCompat.END;
+        windowParams.windowAnimations = R.style.LiveBaseSendMsgDialogAnim;
     }
 
     @Override

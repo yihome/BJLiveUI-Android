@@ -25,7 +25,6 @@ public abstract class LiveRoomBaseActivity extends AppCompatActivity {
         super.onCreate(bundle);
     }
 
-
     protected void addFragment(int layoutId, Fragment fragment, boolean addToBackStack, String fragmentTag) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 //        int inAnim = LPFragmentAnimUtil.getInAnim(fragment);

@@ -20,6 +20,8 @@ interface RightBottomMenuContract {
         void clearScreen();
 
         void unClearScreen();
+
+        void showVolume(int level);
     }
 
     interface Presenter extends BasePresenter {

@@ -59,10 +59,8 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
 
     @Override
     public void speakApply() {
-        if (currentUserType == LPConstants.LPUserType.Teacher
-                || currentUserType == LPConstants.LPUserType.Assistant)
-            return;
         checkNotNull(liveRoomRouterListener);
+        if (liveRoomRouterListener.isTeacherOrAssistant()) return;
         liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().requestSpeakApply();
     }
 
@@ -92,23 +90,6 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
             }
         };
 
-        subscriptionOfMediaControl = liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getObservableOfMediaControl()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<IMediaControlModel>() {
-                    @Override
-                    public void call(IMediaControlModel iMediaControlModel) {
-                        if (iMediaControlModel.isApplyAgreed()) {
-                            // 进入发言模式
-                            liveRoomRouterListener.enableSpeakerMode();
-                        } else {
-                            // 结束发言模式
-                            liveRoomRouterListener.disableSpeakerMode();
-                            if (isDrawing) {
-                                changeDrawing();
-                            }
-                        }
-                    }
-                });
         final LPErrorPrintSubscriber<List<IMediaModel>> activeUserSubscriber = new LPErrorPrintSubscriber<List<IMediaModel>>() {
             @Override
             public void call(List<IMediaModel> iMediaModels) {
@@ -157,7 +138,7 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                     });
         }
 
-        liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getObservableOfMediaControl()
+        subscriptionOfMediaControl = liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getObservableOfMediaControl()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new LPErrorPrintSubscriber<IMediaControlModel>() {
                     @Override
@@ -175,10 +156,21 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                             if (iMediaControlModel.getUser().getUserId()
                                     .equals(liveRoomRouterListener.getLiveRoom().getCurrentUser().getUserId())) {
                                 // 请求发言的用户自己
-                                if(iMediaControlModel.isApplyAgreed()){
+                                if (iMediaControlModel.isApplyAgreed()) {
+                                    // 进入发言模式
+                                    liveRoomRouterListener.enableSpeakerMode();
                                     view.showSpeakApplyAgreed();
-                                }else{
-                                    view.showSpeakApplyDisagreed();
+                                } else {
+                                    // 结束发言模式
+                                    liveRoomRouterListener.disableSpeakerMode();
+                                    if (isDrawing) {
+                                        // 如果画笔打开 关闭画笔模式
+                                        changeDrawing();
+                                    }
+                                    if (!iMediaControlModel.getSenderUserId().equals(liveRoomRouterListener.getLiveRoom().getCurrentUser().getUserId())) {
+                                        // 不是自己结束发言的
+                                        view.showSpeakApplyDisagreed();
+                                    }
                                 }
                             }
                         }

@@ -10,8 +10,6 @@ import android.widget.Toast;
 
 import com.baijiahulian.live.ui.utils.QueryPlus;
 
-import butterknife.ButterKnife;
-
 import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 
 /**
@@ -36,7 +34,6 @@ public abstract class BaseFragment extends Fragment {
         }
         checkNotNull(view);
         $ = QueryPlus.with(view);
-        ButterKnife.bind(this, view);
         init(savedInstanceState);
         return view;
     }
