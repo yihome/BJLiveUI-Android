@@ -11,6 +11,8 @@ import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 import com.baijiahulian.live.ui.R;
+import com.baijiahulian.live.ui.announcement.AnnouncementFragment;
+import com.baijiahulian.live.ui.announcement.AnnouncementPresenter;
 import com.baijiahulian.live.ui.base.BasePresenter;
 import com.baijiahulian.live.ui.base.BaseView;
 import com.baijiahulian.live.ui.chat.ChatFragment;
@@ -40,6 +42,7 @@ import com.baijiahulian.live.ui.users.OnlineUserPresenter;
 import com.baijiahulian.live.ui.videoplayer.VideoPlayerFragment;
 import com.baijiahulian.live.ui.videoplayer.VideoPlayerPresenter;
 import com.baijiahulian.live.ui.videorecorder.VideoRecorderFragment;
+import com.baijiahulian.live.ui.videorecorder.VideoRecorderPresenter;
 import com.baijiahulian.livecore.LiveSDK;
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.context.LiveRoom;
@@ -105,7 +108,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
         LiveSDK.init(LPConstants.LPDeployType.Test);
 
-        code = "e6n6dt";
+        code = "pajg4e";
         name = "Shubo";
 
         loadingFragment = new LoadingFragment();
@@ -118,7 +121,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                 .getSystemService(Context.WINDOW_SERVICE);
         oldRotation = windowManager.getDefaultDisplay().getRotation();
 
-        orientationEventListener = new OrientationEventListener(this, SensorManager.SENSOR_DELAY_NORMAL) {
+        orientationEventListener = new OrientationEventListener(this, SensorManager.SENSOR_DELAY_FASTEST) {
             @Override
             public void onOrientationChanged(int orientation) {
                 int newRotation = windowManager.getDefaultDisplay().getRotation();
@@ -215,10 +218,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         rightBottomMenuFragment = new RightBottomMenuFragment();
         bindVP(rightBottomMenuFragment, new RightBottomMenuPresenter(rightBottomMenuFragment));
         addFragment(R.id.activity_live_room_bottom_right, rightBottomMenuFragment);
-
-//        recorderFragment = new VideoRecorderFragment();
-//        bindVP(recorderFragment, new VideoRecorderPresenter(recorderFragment));
-//        addFragment(R.id.activity_live_room_foreground_left_container, recorderFragment);
 
         chatFragment = new ChatFragment();
         bindVP(chatFragment, new ChatPresenter(chatFragment));
@@ -345,7 +344,10 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void navigateToAnnouncement() {
-
+        AnnouncementFragment fragment = AnnouncementFragment.newInstance();
+        AnnouncementPresenter presenter = new AnnouncementPresenter(fragment);
+        bindVP(fragment, presenter);
+        showDialogFragment(fragment);
     }
 
     @Override
@@ -398,6 +400,25 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     public void playVideoClose(String userId) {
         checkNotNull(playerPresenter);
         playerPresenter.playAVClose(userId);
+        removeFragment(playerFragment);
+        playerFragment = null;
+        playerPresenter = null;
+    }
+
+    @Override
+    public void attachVideo() {
+        if (recorderFragment == null) {
+            recorderFragment = new VideoRecorderFragment();
+            bindVP(recorderFragment, new VideoRecorderPresenter(recorderFragment));
+            addFragment(R.id.activity_live_room_foreground_left_container, recorderFragment);
+        }
+    }
+
+    @Override
+    public void detachVideo() {
+        checkNotNull(recorderFragment);
+        removeFragment(recorderFragment);
+        recorderFragment = null;
     }
 
     private void switchView(View view1, View view2) {

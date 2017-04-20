@@ -25,7 +25,6 @@ import com.squareup.picasso.Picasso;
 public class SpeakQueueDialogFragment extends BaseDialogFragment implements SpeakQueueContract.View {
 
     private SpeakQueueContract.Presenter presenter;
-    private RecyclerView recyclerView;
     private SpeakQueueAdapter adapter;
 
     public static SpeakQueueDialogFragment newInstance() {
@@ -44,7 +43,7 @@ public class SpeakQueueDialogFragment extends BaseDialogFragment implements Spea
     @Override
     protected void init(Bundle savedInstanceState, Bundle arguments) {
         QueryPlus $ = QueryPlus.with(contentView);
-        recyclerView = (RecyclerView) $.id(R.id.dialog_speaker_rv).view();
+        RecyclerView recyclerView = (RecyclerView) $.id(R.id.dialog_speaker_rv).view();
         super.title(getString(R.string.live_speaker_dialog)).editable(false);
         adapter = new SpeakQueueAdapter();
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -111,7 +110,7 @@ public class SpeakQueueDialogFragment extends BaseDialogFragment implements Spea
 
         @Override
         public int getItemViewType(int position) {
-            return presenter.getItem(position) instanceof IUserModel ? VIEW_TYPE_APPLY : VIEW_TYPE_SPEAK;
+            return presenter.isApplying(position) ? VIEW_TYPE_APPLY : VIEW_TYPE_SPEAK;
         }
 
         @Override

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#4CAF50</color>
-    <color name="primary_dark">#388E3C</color>
+    <color name="primary">#1D1D1E</color>
+    <color name="primary_dark">#0D0D0E</color>
     <color name="primary_light">#C8E6C9</color>
     <color name="accent">#FFC107</color>
     <color name="primary_text">#212121</color>
@@ -21,6 +21,7 @@
     <color name="live_half_transparent">#88000000</color>
 
     <color name="live_blue">#37A4F5</color>
+    <color name="live_blue_half_transparent">#7737A4F5</color>
     <color name="live_blue_press">#2794E5</color>
     <color name="live_yellow">#FF9100</color>
     <color name="live_transparent">#00000000</color>

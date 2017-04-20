@@ -152,12 +152,14 @@ public class SpeakQueuePresenter implements SpeakQueueContract.Presenter {
 
     @Override
     public void closeSpeaking(int position) {
+        routerListener.playVideoClose(speakList.get(position - applyList.size()).getUser().getUserId());
         routerListener.getLiveRoom().getSpeakQueueVM().closeOtherSpeak(speakList.get(position - applyList.size()).getUser().getUserId());
     }
 
     @Override
     public void openVideo(int position) {
         routerListener.playVideo(speakList.get(position - applyList.size()).getUser().getUserId());
+        view.notifyItemChanged(position);
     }
 
     @Override
@@ -165,6 +167,7 @@ public class SpeakQueuePresenter implements SpeakQueueContract.Presenter {
         String userId = speakList.get(position - applyList.size()).getUser().getUserId();
         routerListener.playVideoClose(userId);
         routerListener.getLiveRoom().getPlayer().playAudio(userId);
+        view.notifyItemChanged(position);
     }
 
     @Override
@@ -175,5 +178,10 @@ public class SpeakQueuePresenter implements SpeakQueueContract.Presenter {
     @Override
     public boolean isTeacherOrAssistant() {
         return routerListener.isTeacherOrAssistant();
+    }
+
+    @Override
+    public boolean isApplying(int position) {
+        return position < applyList.size();
     }
 }

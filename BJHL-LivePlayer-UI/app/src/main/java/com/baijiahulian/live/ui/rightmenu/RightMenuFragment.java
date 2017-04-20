@@ -53,13 +53,19 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
 
     @Override
     public void showSpeakApplyImage(String imgUrl) {
+        $.id(R.id.fragment_right_speakers_img).visible();
         Picasso.with(getActivity()).load(AliCloudImageUtil.getRoundedAvatarUrl(imgUrl, 46))
                 .into((ImageView) $.id(R.id.fragment_right_speakers_img).view());
     }
 
     @Override
     public void showSpeakApplyCount(int count) {
-        $.id(R.id.fragment_right_speakers_num).text(String.valueOf(count));
+        if(count >0) {
+            $.id(R.id.fragment_right_speakers_num).visible();
+            $.id(R.id.fragment_right_speakers_num).text(String.valueOf(count));
+        }else{
+            $.id(R.id.fragment_right_speakers_num).gone();
+        }
     }
 
     @Override
@@ -95,7 +101,6 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
     public void showTeacherRightMenu() {
         $.id(R.id.fragment_right_pen).visible();
         $.id(R.id.fragment_right_ppt).visible();
-        $.id(R.id.fragment_right_speakers_num).visible();
         $.id(R.id.fragment_right_speak_apply).gone();
     }
 
@@ -103,7 +108,6 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
     public void showStudentRightMenu() {
         $.id(R.id.fragment_right_pen).gone();
         $.id(R.id.fragment_right_ppt).gone();
-        $.id(R.id.fragment_right_speakers_num).gone();
         $.id(R.id.fragment_right_speak_apply).visible();
     }
 

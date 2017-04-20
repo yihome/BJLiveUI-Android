@@ -36,5 +36,7 @@ public interface SpeakQueueContract {
         boolean isCurrentVideoPlayingUser(int position);
 
         boolean isTeacherOrAssistant();
+
+        boolean isApplying(int position);
     }
 }

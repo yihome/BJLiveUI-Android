@@ -39,5 +39,11 @@
     <string name="live_cloud_record">录课</string>
     <string name="live_cloud_recording">录课中</string>
     <string name="live_help">求助</string>
+    <string name="live_optional_input">选填</string>
+    <string name="live_save">保存</string>
+    <string name="live_saved">已保存</string>
+    <string name="live_announcement_hint">输入公告内容</string>
+    <string name="live_announcement_url_hint">为公告添加跳转网址</string>
+    <string name="live_announcement_view_url_hint">点击公告可以跳转</string>
 
 </resources>

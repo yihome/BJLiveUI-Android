@@ -60,4 +60,7 @@ public interface LiveRoomRouterListener {
 
     void playVideoClose(String userId);
 
+    void attachVideo();
+
+    void detachVideo();
 }

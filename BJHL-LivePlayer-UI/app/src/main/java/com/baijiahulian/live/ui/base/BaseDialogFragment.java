@@ -20,6 +20,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baijiahulian.live.ui.R;
@@ -147,12 +148,23 @@ public abstract class BaseDialogFragment extends DialogFragment {
         return this;
     }
 
-    protected void hideTitleBar() {
-        $.id(dialog_base_title_container).gone();
+    public BaseDialogFragment editText(String text) {
+        $.id(R.id.dialog_base_edit).text(text);
+        return this;
     }
 
-    protected void showTitleBar() {
-        $.id(dialog_base_title_container).visible();
+    public BaseDialogFragment editColor(int color) {
+        ((TextView) $.id(R.id.dialog_base_edit).view()).setTextColor(color);
+        return this;
+    }
+
+    public BaseDialogFragment editClick(View.OnClickListener listener){
+        $.id(R.id.dialog_base_edit).clicked(listener);
+        return this;
+    }
+
+    protected void hideTitleBar() {
+        $.id(dialog_base_title_container).gone();
     }
 
     protected boolean isEditing() {
