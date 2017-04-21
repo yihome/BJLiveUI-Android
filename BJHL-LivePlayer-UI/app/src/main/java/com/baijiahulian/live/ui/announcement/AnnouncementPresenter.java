@@ -55,22 +55,14 @@ public class AnnouncementPresenter implements AnnouncementContract.Presenter {
                         checkInput(content, link);
                     }
                 });
-        routerListener.getLiveRoom().requestAnnouncement(new LPErrorPrintSubscriber<IAnnouncementModel>() {
-            @Override
-            public void call(IAnnouncementModel iAnnouncementModel) {
-                content = iAnnouncementModel.getContent();
-                link = iAnnouncementModel.getLink();
-                view.showAnnouncementText(content);
-                view.showAnnouncementUrl(link);
-                checkInput(content, link);
-            }
-        });
 
         if (routerListener.isTeacherOrAssistant()) {
             view.showTeacherView();
         } else {
             view.showStudentView();
         }
+
+        routerListener.getLiveRoom().requestAnnouncement();
     }
 
     @Override

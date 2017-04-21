@@ -61,6 +61,7 @@ public class MessageSentFragment extends BaseDialogFragment implements MessageSe
             @Override
             public void onClick(View v) {
                 presenter.choosePhoto();
+                showToast("开发中...");
             }
         });
     }

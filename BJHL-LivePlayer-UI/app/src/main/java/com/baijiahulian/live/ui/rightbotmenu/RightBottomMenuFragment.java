@@ -85,13 +85,13 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
     }
 
     @Override
-    public void showAVButton() {
+    public void enableSpeakerMode() {
         $.id(R.id.fragment_right_bottom_video).visible();
         $.id(R.id.fragment_right_bottom_audio).visible();
     }
 
     @Override
-    public void hideAVButton() {
+    public void disableSpeakerMode() {
         $.id(R.id.fragment_right_bottom_video).gone();
         $.id(R.id.fragment_right_bottom_audio).gone();
     }

@@ -43,7 +43,6 @@ import com.baijiahulian.live.ui.videoplayer.VideoPlayerFragment;
 import com.baijiahulian.live.ui.videoplayer.VideoPlayerPresenter;
 import com.baijiahulian.live.ui.videorecorder.VideoRecorderFragment;
 import com.baijiahulian.live.ui.videorecorder.VideoRecorderPresenter;
-import com.baijiahulian.livecore.LiveSDK;
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.context.LiveRoom;
 
@@ -106,11 +105,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         String code = getIntent().getStringExtra("code");
         String name = getIntent().getStringExtra("name");
 
-        LiveSDK.init(LPConstants.LPDeployType.Test);
-
-        code = "pajg4e";
-        name = "Shubo";
-
         loadingFragment = new LoadingFragment();
         LoadingPresenter loadingPresenter = new LoadingPresenter(loadingFragment, code, name);
         loadingPresenter.setRouter(this);
@@ -149,6 +143,11 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE)
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        else
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         onBackgroundContainerConfigurationChanged(newConfig);
         onForegroundLeftContainerConfigurationChanged(newConfig);
         onForegroundRightContainerConfigurationChanged(newConfig);
@@ -260,6 +259,17 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     public void navigateToPPTDrawing() {
         checkNotNull(lppptFragment);
         lppptFragment.changePPTCanvasMode();
+        lppptFragment.setPPTShowWay(LPConstants.LPPPTShowWay.SHOW_COVERED);
+    }
+
+    @Override
+    public LPConstants.LPPPTShowWay getPPTShowType() {
+        return lppptFragment.getPPTShowWay();
+    }
+
+    @Override
+    public void setPPTShowType(LPConstants.LPPPTShowWay type) {
+        lppptFragment.setPPTShowWay(type);
     }
 
     @Override
@@ -285,12 +295,17 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void disableSpeakerMode() {
-        rightBottomMenuFragment.hideAVButton();
+        rightBottomMenuFragment.disableSpeakerMode();
+        if (recorderFragment != null) {
+            detachVideo();
+        }
+        if (getLiveRoom().getRecorder().isPublishing())
+            getLiveRoom().getRecorder().stopPublishing();
     }
 
     @Override
     public void enableSpeakerMode() {
-        rightBottomMenuFragment.showAVButton();
+        rightBottomMenuFragment.enableSpeakerMode();
     }
 
     @Override
@@ -418,6 +433,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     public void detachVideo() {
         checkNotNull(recorderFragment);
         removeFragment(recorderFragment);
+        getSupportFragmentManager().executePendingTransactions();
         recorderFragment = null;
     }
 

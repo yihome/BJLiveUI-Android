@@ -9,12 +9,18 @@ import com.baijiahulian.live.ui.base.BaseView;
 
 interface RightMenuContract {
 
-    interface View extends BaseView<Presenter>{
-        void showSpeakApplyImage(String imgUrl);
+    int STUDENT_SPEAK_APPLY_NONE = 0;
+    int STUDENT_SPEAK_APPLY_APPLYING = 1;
+    int STUDENT_SPEAK_APPLY_SPEAKING = 2;
 
-        void showSpeakApplyCount(int count);
+    interface View extends BaseView<Presenter> {
+        void showSpeakQueueImage(String imgUrl);
 
-        void showEmptySpeakers();
+        void showSpeakQueueCount(int count);
+
+        void showEmptyQueue();
+
+        void showSpeakClosedByTeacher();
 
         void showDrawingStatus(boolean isEnable);
 
@@ -24,12 +30,14 @@ interface RightMenuContract {
 
         void showSpeakApplyDisagreed();
 
+        void showSpeakApplyCanceled();
+
         void showTeacherRightMenu();
 
         void showStudentRightMenu();
     }
 
-    interface Presenter extends BasePresenter{
+    interface Presenter extends BasePresenter {
         void visitSpeakers();
 
         void changeDrawing();

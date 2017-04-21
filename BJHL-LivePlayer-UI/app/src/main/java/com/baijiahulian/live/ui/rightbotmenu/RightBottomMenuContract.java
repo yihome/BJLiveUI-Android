@@ -13,9 +13,9 @@ interface RightBottomMenuContract {
 
         void showAudioStatus(boolean isOn);
 
-        void showAVButton();
+        void enableSpeakerMode();
 
-        void hideAVButton();
+        void disableSpeakerMode();
 
         void clearScreen();
 

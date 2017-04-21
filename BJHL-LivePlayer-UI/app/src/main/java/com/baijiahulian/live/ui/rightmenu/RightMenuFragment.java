@@ -30,6 +30,7 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
             @Override
             public void onClick(View v) {
                 presenter.managePPT();
+                showToast("开发中");
             }
         });
         $.id(R.id.fragment_right_speakers_container).clicked(new View.OnClickListener() {
@@ -52,24 +53,24 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
     }
 
     @Override
-    public void showSpeakApplyImage(String imgUrl) {
+    public void showSpeakQueueImage(String imgUrl) {
         $.id(R.id.fragment_right_speakers_img).visible();
         Picasso.with(getActivity()).load(AliCloudImageUtil.getRoundedAvatarUrl(imgUrl, 46))
                 .into((ImageView) $.id(R.id.fragment_right_speakers_img).view());
     }
 
     @Override
-    public void showSpeakApplyCount(int count) {
-        if(count >0) {
+    public void showSpeakQueueCount(int count) {
+        if (count > 0) {
             $.id(R.id.fragment_right_speakers_num).visible();
             $.id(R.id.fragment_right_speakers_num).text(String.valueOf(count));
-        }else{
+        } else {
             $.id(R.id.fragment_right_speakers_num).gone();
         }
     }
 
     @Override
-    public void showEmptySpeakers() {
+    public void showEmptyQueue() {
         $.id(R.id.fragment_right_speakers_num).gone();
         $.id(R.id.fragment_right_speakers_img).gone();
     }
@@ -90,11 +91,27 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
     @Override
     public void showSpeakApplyAgreed() {
         showToast(getString(R.string.live_media_speak_apply_agree));
+        $.id(R.id.fragment_right_speak_apply).image(R.drawable.live_ic_handup_on);
+        $.id(R.id.fragment_right_pen).visible();
+    }
+
+    @Override
+    public void showSpeakClosedByTeacher() {
+        showToast(getString(R.string.live_media_speak_closed_by_teacher));
+        $.id(R.id.fragment_right_speak_apply).image(R.drawable.live_ic_handup);
+        $.id(R.id.fragment_right_pen).gone();
     }
 
     @Override
     public void showSpeakApplyDisagreed() {
         showToast(getString(R.string.live_media_speak_apply_disagree));
+        $.id(R.id.fragment_right_speak_apply).image(R.drawable.live_ic_handup);
+    }
+
+    @Override
+    public void showSpeakApplyCanceled() {
+        $.id(R.id.fragment_right_speak_apply).image(R.drawable.live_ic_handup);
+        $.id(R.id.fragment_right_pen).gone();
     }
 
     @Override

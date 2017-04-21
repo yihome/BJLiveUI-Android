@@ -35,6 +35,7 @@
     <string name="live_loading_more">正在加载更多…</string>
     <string name="live_media_speak_apply_agree">老师同意了您的发言</string>
     <string name="live_media_speak_apply_disagree">老师拒绝了您的发言</string>
+    <string name="live_media_speak_closed_by_teacher">老师结束了您的发言</string>
     <string name="live_announcement">公告</string>
     <string name="live_cloud_record">录课</string>
     <string name="live_cloud_recording">录课中</string>

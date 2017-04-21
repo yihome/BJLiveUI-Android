@@ -39,11 +39,9 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
     @Override
     public void changeVideo() {
         if (liveRoomRouterListener.getLiveRoom().getRecorder().isVideoAttached()) {
-//            liveRoomRouterListener.getLiveRoom().getRecorder().detachVideo();
             liveRoomRouterListener.detachVideo();
         } else {
             liveRoomRouterListener.attachVideo();
-//            liveRoomRouterListener.getLiveRoom().getRecorder().attachVideo();
         }
     }
 
@@ -84,6 +82,9 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
                             view.showVolume(integer);
                     }
                 });
+        if (!liveRoomRouterListener.isTeacherOrAssistant()) {
+            liveRoomRouterListener.disableSpeakerMode();
+        }
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.baijiahulian.live.ui.activity;
 
+import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.context.LiveRoom;
 
 /**
@@ -21,6 +22,10 @@ public interface LiveRoomRouterListener {
     void navigateToMessageInput();
 
     void navigateToPPTDrawing();
+
+    LPConstants.LPPPTShowWay getPPTShowType();
+
+    void setPPTShowType(LPConstants.LPPPTShowWay type);
 
     void navigateToSpeakers();
 
