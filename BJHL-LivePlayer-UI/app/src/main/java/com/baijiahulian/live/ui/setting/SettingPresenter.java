@@ -2,6 +2,7 @@ package com.baijiahulian.live.ui.setting;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 import com.baijiahulian.livecore.context.LPConstants;
+import com.baijiahulian.livecore.context.LiveRoom;
 import com.baijiahulian.livecore.wrapper.LPPlayer;
 import com.baijiahulian.livecore.wrapper.LPRecorder;
 
@@ -17,6 +18,7 @@ public class SettingPresenter implements SettingContract.Presenter {
     private LiveRoomRouterListener routerListener;
     private LPRecorder recorder;
     private LPPlayer player;
+    private LiveRoom liveRoom;
 
     public SettingPresenter(SettingContract.View view) {
         this.view = view;
@@ -27,6 +29,7 @@ public class SettingPresenter implements SettingContract.Presenter {
         this.routerListener = liveRoomRouterListener;
         recorder = routerListener.getLiveRoom().getRecorder();
         player = routerListener.getLiveRoom().getPlayer();
+        liveRoom = routerListener.getLiveRoom();
     }
 
     @Override
@@ -74,6 +77,19 @@ public class SettingPresenter implements SettingContract.Presenter {
             view.showCameraBack();
         }
 
+        view.showCameraSwitchStatus(recorder.isVideoAttached());
+
+        if (recorder.getCameraOrientation()) {
+            view.showCameraFront();
+        } else {
+            view.showCameraBack();
+        }
+
+        if (liveRoom.getForbidStatus()) {
+            view.showForbidden();
+        } else {
+            view.showNotForbidden();
+        }
 
     }
 
@@ -221,9 +237,9 @@ public class SettingPresenter implements SettingContract.Presenter {
     }
 
     @Override
-    public void updateCameraSwitchStatus() {
+    public void switchCamera() {
         if (recorder != null) {
-            view.showCameraSwitchStatus(recorder.isVideoAttached());
+            recorder.switchCamera();
             if (recorder.getCameraOrientation()) {
                 view.showCameraFront();
             } else {
@@ -233,14 +249,13 @@ public class SettingPresenter implements SettingContract.Presenter {
     }
 
     @Override
-    public void switchCamera() {
-        if (recorder != null) {
-            recorder.switchCamera();
-            if (recorder.getCameraOrientation()) {
-                view.showCameraFront();
-            } else {
-                view.showCameraBack();
-            }
+    public void switchForbidStatus() {
+        if (liveRoom.getForbidStatus()) {
+            liveRoom.requestForbidAllChat(false);
+            view.showNotForbidden();
+        } else {
+            liveRoom.requestForbidAllChat(true);
+            view.showForbidden();
         }
     }
 }

@@ -6,8 +6,11 @@ import android.view.View;
 import android.widget.Button;
 
 import com.baijiahulian.live.ui.R;
+import com.baijiahulian.live.ui.activity.LiveRoomActivity;
 import com.baijiahulian.live.ui.base.BaseDialogFragment;
 import com.baijiahulian.live.ui.utils.QueryPlus;
+
+import rx.functions.Action1;
 
 /**
  * Created by Shubo on 2017/3/2.
@@ -110,6 +113,13 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
             @Override
             public void onClick(View v) {
                 presenter.switchCamera();
+            }
+        });
+
+        $.id(R.id.dialog_setting_forbid_all_speak).clicked(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                presenter.switchForbidStatus();
             }
         });
 
@@ -246,16 +256,19 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
     }
 
     @Override
-    public void setPresenter(SettingContract.Presenter presenter) {
-        super.setBasePresenter(presenter);
-        this.presenter = presenter;
+    public void showForbidden() {
+        $.id(R.id.dialog_setting_forbid_all_speak).image(R.drawable.ic_on_switch);
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        //切换摄像头是否可见，没开摄像头不可见
-        presenter.updateCameraSwitchStatus();
+    public void showNotForbidden() {
+        $.id(R.id.dialog_setting_forbid_all_speak).image(R.drawable.ic_off_switch);
+    }
+
+    @Override
+    public void setPresenter(SettingContract.Presenter presenter) {
+        super.setBasePresenter(presenter);
+        this.presenter = presenter;
     }
 
     @Override

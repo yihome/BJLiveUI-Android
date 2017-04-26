@@ -48,6 +48,10 @@ interface SettingContract {
 
         void showCameraSwitchStatus(boolean whetherShow);
 
+        void showForbidden();
+
+        void showNotForbidden();
+
     }
 
     interface Presenter extends BasePresenter {
@@ -73,9 +77,9 @@ interface SettingContract {
 
         void setDownLinkUDP();
 
-        void updateCameraSwitchStatus();
-
         void switchCamera();
+
+        void switchForbidStatus();
 
     }
 }
