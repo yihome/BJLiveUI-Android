@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/primary">
@@ -46,15 +47,35 @@
         android:orientation="horizontal"
         android:visibility="gone"></LinearLayout>
 
-    <FrameLayout
-        android:id="@+id/activity_live_room_chat"
-        android:layout_width="268dp"
+    <!--<FrameLayout-->
+    <!--android:id="@+id/activity_live_room_chat"-->
+    <!--android:layout_width="268dp"-->
+    <!--android:layout_height="match_parent"-->
+    <!--android:layout_above="@+id/activity_live_room_bottom_left"-->
+    <!--android:layout_below="@+id/activity_live_room_foreground_left_container"-->
+    <!--android:layout_marginBottom="@dimen/activity_live_room_margin"-->
+    <!--android:layout_marginLeft="@dimen/activity_live_room_margin"-->
+    <!--android:layout_marginTop="@dimen/activity_live_room_margin" />-->
+
+    <com.baijiahulian.live.ui.chat.AutoExitDrawerLayout
+        android:id="@+id/activity_live_room_chat_drawer"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/activity_live_room_bottom_left"
         android:layout_below="@+id/activity_live_room_foreground_left_container"
         android:layout_marginBottom="@dimen/activity_live_room_margin"
         android:layout_marginLeft="@dimen/activity_live_room_margin"
-        android:layout_marginTop="@dimen/activity_live_room_margin" />
+        android:layout_marginTop="@dimen/activity_live_room_margin">
+
+        <FrameLayout
+            android:id="@+id/activity_live_room_chat"
+            android:layout_width="268dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            android:visibility="visible" />
+
+
+    </com.baijiahulian.live.ui.chat.AutoExitDrawerLayout>
 
     <FrameLayout
         android:id="@+id/activity_live_room_top"

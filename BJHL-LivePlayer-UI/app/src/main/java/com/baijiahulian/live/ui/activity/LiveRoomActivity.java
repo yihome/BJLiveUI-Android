@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
+import android.view.Gravity;
 import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.WindowManager;
@@ -71,6 +73,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     FrameLayout flBottomRight;
     @BindView(R.id.activity_live_room_loading)
     FrameLayout flLoading;
+    @BindView(R.id.activity_live_room_chat_drawer)
+    DrawerLayout dlChat;
 
     private LiveRoom liveRoom;
 
@@ -126,6 +130,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                 }
             }
         };
+        dlChat.openDrawer(Gravity.START);
+        checkScreenOrientationInit();
     }
 
     @Override
@@ -143,11 +149,14 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE)
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                     WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        else
+            dlChat.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        } else {
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            dlChat.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN);
+        }
         onBackgroundContainerConfigurationChanged(newConfig);
         onForegroundLeftContainerConfigurationChanged(newConfig);
         onForegroundRightContainerConfigurationChanged(newConfig);
@@ -460,5 +469,16 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         }
         getLiveRoom().quitRoom();
 
+    }
+
+    //初始化时检测屏幕方向，以此设置聊天页面是否可隐藏
+    private void checkScreenOrientationInit() {
+        Configuration configuration = this.getResources().getConfiguration();
+        int orientation = configuration.orientation;
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            dlChat.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        } else {
+            dlChat.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN);
+        }
     }
 }
