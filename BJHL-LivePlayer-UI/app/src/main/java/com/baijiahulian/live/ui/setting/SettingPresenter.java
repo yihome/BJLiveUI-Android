@@ -33,25 +33,40 @@ public class SettingPresenter implements SettingContract.Presenter {
     public void subscribe() {
         checkNotNull(routerListener);
 
-        if (routerListener.getLiveRoom().getRecorder().getLinkType() == LPConstants.LPLinkType.TCP)
+        if (recorder.getLinkType() == LPConstants.LPLinkType.TCP)
             view.showUpLinkTCP();
         else
             view.showUpLinkUDP();
 
-        if (routerListener.getLiveRoom().getPlayer().getLinkType() == LPConstants.LPLinkType.TCP)
+        if (player.getLinkType() == LPConstants.LPLinkType.TCP)
             view.showDownLinkTCP();
         else
             view.showDownLinkUDP();
 
-        if (routerListener.getLiveRoom().getRecorder().isAudioAttached())
+        if (recorder.isAudioAttached())
             view.showMicOpen();
         else
             view.showMicClosed();
 
-        if (routerListener.getLiveRoom().getRecorder().isVideoAttached())
+        if (recorder.isVideoAttached())
             view.showCameraOpen();
         else
             view.showCameraClosed();
+
+        if (recorder.isBeautyFilterOn())
+            view.showBeautyFilterEnable();
+        else
+            view.showBeautyFilterDisable();
+
+        if (recorder.getVideoDefinition() == LPConstants.LPResolutionType.HIGH)
+            view.showDefinitionHigh();
+        else
+            view.showDefinitionLow();
+
+        if (routerListener.getPPTShowType() == LPConstants.LPPPTShowWay.SHOW_FULL_SCREEN)
+            view.showPPTFullScreen();
+        else
+            view.showPPTOverspread();
     }
 
     @Override
@@ -63,6 +78,7 @@ public class SettingPresenter implements SettingContract.Presenter {
     public void destroy() {
         routerListener = null;
         recorder = null;
+        player = null;
         view = null;
     }
 
@@ -85,6 +101,7 @@ public class SettingPresenter implements SettingContract.Presenter {
             case Student:
                 if (!recorder.isPublishing()) {
                     view.showStudentFail();
+                    return;
                 }
                 if (recorder.isAudioAttached()) {
                     recorder.detachAudio();
@@ -120,12 +137,13 @@ public class SettingPresenter implements SettingContract.Presenter {
             case Student:
                 if (!recorder.isPublishing()) {
                     view.showStudentFail();
+                    return;
                 }
                 if (recorder.isVideoAttached()) {
-                    recorder.detachVideo();
+                    routerListener.detachVideo();
                     view.showCameraClosed();
                 } else {
-                    recorder.attachVideo();
+                    routerListener.attachVideo();
                     view.showCameraOpen();
                 }
                 break;
@@ -137,54 +155,60 @@ public class SettingPresenter implements SettingContract.Presenter {
 
     @Override
     public void changeBeautyFilter() {
-//        if (isBeautyFilterOn) {
-//            recorder.closeBeautyFilter();
-//            view.showBeautyFilterDisable();
-//        } else {
-//            recorder.openBeautyFilter();
-//            view.showBeautyFilterEnable();
-//        }
+        if (recorder.isBeautyFilterOn()) {
+            recorder.closeBeautyFilter();
+            view.showBeautyFilterDisable();
+        } else {
+            recorder.openBeautyFilter();
+            view.showBeautyFilterEnable();
+        }
     }
 
     @Override
     public void setPPTFullScreen() {
-//        LPConstants.LPPPTShowWay.
+        routerListener.setPPTShowType(LPConstants.LPPPTShowWay.SHOW_FULL_SCREEN);
+        view.showPPTFullScreen();
     }
 
     @Override
     public void setPPTOverspread() {
-
+        routerListener.setPPTShowType(LPConstants.LPPPTShowWay.SHOW_COVERED);
+        view.showPPTOverspread();
     }
 
     @Override
     public void setDefinitionLow() {
-
+        recorder.setCaptureVideoDefinition(LPConstants.LPResolutionType.LOW);
+        view.showDefinitionLow();
     }
 
     @Override
     public void setDefinitionHigh() {
-
+        recorder.setCaptureVideoDefinition(LPConstants.LPResolutionType.HIGH);
+        view.showDefinitionHigh();
     }
 
     @Override
     public void setUpLinkTCP() {
         recorder.setLinkType(LPConstants.LPLinkType.TCP);
+        view.showUpLinkTCP();
     }
 
     @Override
     public void setUpLinkUDP() {
         recorder.setLinkType(LPConstants.LPLinkType.UDP);
+        view.showUpLinkUDP();
     }
 
     @Override
     public void setDownLinkTCP() {
         player.setLinkType(LPConstants.LPLinkType.TCP);
+        view.showDownLinkTCP();
     }
 
     @Override
     public void setDownLinkUDP() {
         player.setLinkType(LPConstants.LPLinkType.UDP);
+        view.showDownLinkUDP();
     }
-
-
 }

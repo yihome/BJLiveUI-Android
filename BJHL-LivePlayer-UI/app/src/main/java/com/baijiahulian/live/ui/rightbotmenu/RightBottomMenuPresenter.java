@@ -17,7 +17,7 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
 
     private LiveRoomRouterListener liveRoomRouterListener;
 
-    private Subscription subscriptionOfCamera, subscriptionOfMic;
+    private Subscription subscriptionOfCamera, subscriptionOfMic, subscriptionOfVolume;
 
     public RightBottomMenuPresenter(RightBottomMenuContract.View view) {
         this.view = view;
@@ -30,7 +30,7 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
 
     @Override
     public void changeAudio() {
-        if(liveRoomRouterListener.getLiveRoom().getRecorder().isAudioAttached())
+        if (liveRoomRouterListener.getLiveRoom().getRecorder().isAudioAttached())
             liveRoomRouterListener.getLiveRoom().getRecorder().detachAudio();
         else
             liveRoomRouterListener.getLiveRoom().getRecorder().attachAudio();
@@ -38,10 +38,11 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
 
     @Override
     public void changeVideo() {
-        if(liveRoomRouterListener.getLiveRoom().getRecorder().isVideoAttached())
-            liveRoomRouterListener.getLiveRoom().getRecorder().detachVideo();
-        else
-            liveRoomRouterListener.getLiveRoom().getRecorder().attachVideo();
+        if (liveRoomRouterListener.getLiveRoom().getRecorder().isVideoAttached()) {
+            liveRoomRouterListener.detachVideo();
+        } else {
+            liveRoomRouterListener.attachVideo();
+        }
     }
 
     @Override
@@ -72,12 +73,25 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
                         view.showAudioStatus(aBoolean);
                     }
                 });
+        subscriptionOfVolume = liveRoomRouterListener.getLiveRoom().getRecorder().getObservableOfVolume()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<Integer>() {
+                    @Override
+                    public void call(Integer integer) {
+                        if (liveRoomRouterListener.getLiveRoom().getRecorder().isAudioAttached())
+                            view.showVolume(integer);
+                    }
+                });
+        if (!liveRoomRouterListener.isTeacherOrAssistant()) {
+            liveRoomRouterListener.disableSpeakerMode();
+        }
     }
 
     @Override
     public void unSubscribe() {
         RxUtils.unSubscribe(subscriptionOfCamera);
         RxUtils.unSubscribe(subscriptionOfMic);
+        RxUtils.unSubscribe(subscriptionOfVolume);
     }
 
     @Override

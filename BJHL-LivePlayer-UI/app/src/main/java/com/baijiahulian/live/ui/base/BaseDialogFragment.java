@@ -20,12 +20,14 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.utils.Query;
 import com.baijiahulian.livecore.utils.DisplayUtils;
 
+import static com.baijiahulian.live.ui.R.id.dialog_base_title_container;
 import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 
 /**
@@ -38,6 +40,7 @@ public abstract class BaseDialogFragment extends DialogFragment {
     protected View contentView;
     private boolean isEditing;
     private Query $;
+    private int contentBackgroundColor = -1;
 
     @Nullable
     @Override
@@ -79,7 +82,9 @@ public abstract class BaseDialogFragment extends DialogFragment {
         super.onStart();
         Window window = getDialog().getWindow();
         checkNotNull(window);
-        window.setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(getContext(), R.color.live_white)));
+        if (contentBackgroundColor == -1)
+            contentBackgroundColor = ContextCompat.getColor(getContext(), R.color.live_white);
+        window.setBackgroundDrawable(new ColorDrawable(contentBackgroundColor));
         WindowManager.LayoutParams windowParams = window.getAttributes();
         windowParams.dimAmount = 0.50f;
         windowParams.flags |= WindowManager.LayoutParams.FLAG_DIM_BEHIND;
@@ -115,6 +120,16 @@ public abstract class BaseDialogFragment extends DialogFragment {
         return this;
     }
 
+    public BaseDialogFragment hideBackground() {
+        $.id(R.id.dialog_base_title_container).gone();
+        return this;
+    }
+
+    public BaseDialogFragment contentBackgroundColor(int color) {
+        contentBackgroundColor = color;
+        return this;
+    }
+
     public BaseDialogFragment editable(boolean editable) {
         $.id(R.id.dialog_base_edit).visibility(editable ? View.VISIBLE : View.GONE);
         $.id(R.id.dialog_base_edit).clicked(new View.OnClickListener() {
@@ -133,12 +148,23 @@ public abstract class BaseDialogFragment extends DialogFragment {
         return this;
     }
 
-    protected void hideTitleBar() {
-        $.id(R.id.dialog_base_title_container).gone();
+    public BaseDialogFragment editText(String text) {
+        $.id(R.id.dialog_base_edit).text(text);
+        return this;
     }
 
-    protected void showTitleBar() {
-        $.id(R.id.dialog_base_title_container).visible();
+    public BaseDialogFragment editColor(int color) {
+        ((TextView) $.id(R.id.dialog_base_edit).view()).setTextColor(color);
+        return this;
+    }
+
+    public BaseDialogFragment editClick(View.OnClickListener listener){
+        $.id(R.id.dialog_base_edit).clicked(listener);
+        return this;
+    }
+
+    protected void hideTitleBar() {
+        $.id(dialog_base_title_container).gone();
     }
 
     protected boolean isEditing() {

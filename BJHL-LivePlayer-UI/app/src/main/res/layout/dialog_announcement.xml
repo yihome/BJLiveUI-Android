@@ -4,13 +4,69 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-
-
-    <Button
-        android:id="@+id/dialog_announcement_publish"
-        style="@style/LiveBlueButtonEnable"
+    <EditText
+        android:id="@+id/dialog_announcement_et"
         android:layout_width="match_parent"
-        android:layout_height="44dp"
-        android:layout_alignParentBottom="true"
-        android:text="@string/live_publish" />
+        android:layout_height="100dp"
+        android:layout_margin="@dimen/activity_live_room_dialog_margin"
+        android:background="@drawable/shape_edittext_send_msg"
+        android:gravity="top"
+        android:hint="@string/live_announcement_url_hint"
+        android:inputType="text"
+        android:padding="4dp"
+        android:textSize="14sp"
+        android:visibility="gone" />
+
+    <RelativeLayout
+        android:id="@+id/dialog_announcement_url_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/dialog_announcement_et"
+        android:layout_marginLeft="@dimen/activity_live_room_dialog_margin"
+        android:layout_marginRight="@dimen/activity_live_room_dialog_margin"
+        android:background="@drawable/shape_edittext_send_msg"
+        android:visibility="gone">
+
+        <EditText
+            android:id="@+id/dialog_announcement_url_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/dialog_announcement_url_label"
+            android:background="@null"
+            android:hint="@string/live_announcement_url_hint"
+            android:padding="4dp"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/dialog_announcement_url_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true" />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/dialog_announcement_view_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/activity_live_room_dialog_margin"
+        android:background="@drawable/live_announcement_view_bg">
+
+        <TextView
+            android:id="@+id/dialog_announcement_view_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="6dp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/dialog_announcement_view_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/dialog_announcement_view_container"
+        android:layout_below="@+id/dialog_announcement_view_container"
+        android:text="@string/live_announcement_view_url_hint"
+        android:textColor="@color/live_text_color_light"
+        android:textSize="12sp" />
+
 </RelativeLayout>

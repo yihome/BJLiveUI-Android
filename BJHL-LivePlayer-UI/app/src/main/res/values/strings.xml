@@ -4,10 +4,11 @@
     <string name="on_line_user_count">%1$d人在线</string>
     <string name="enter_live_room">进入直播教室</string>
     <string name="live_on_line_user_count_dialog">在线人数（%1$d人）</string>
-    <string name="speaker_dialog">举手发言</string>
+    <string name="live_speaker_dialog">举手发言</string>
     <string name="video_on">视频中</string>
     <string name="close_speaking">结束发言</string>
-    <string name="open_video">打开视频</string>
+    <string name="live_open_video">打开视频</string>
+    <string name="live_close_video">关闭视频</string>
     <string name="live_agree">同意</string>
     <string name="live_disagree">拒绝</string>
     <string name="live_publish">发布</string>
@@ -31,6 +32,19 @@
     <string name="live_setting_link_type_down2">下载2</string>
     <string name="live_media_visitor_fail">游客不能举手发言</string>
     <string name="live_media_student_fail">请先举手发言，并等待老师同意</string>
-    <string name="live_loading_more">加载更多…</string>
+    <string name="live_loading_more">正在加载更多…</string>
+    <string name="live_media_speak_apply_agree">老师同意了您的发言</string>
+    <string name="live_media_speak_apply_disagree">老师拒绝了您的发言</string>
+    <string name="live_media_speak_closed_by_teacher">老师结束了您的发言</string>
+    <string name="live_announcement">公告</string>
+    <string name="live_cloud_record">录课</string>
+    <string name="live_cloud_recording">录课中</string>
+    <string name="live_help">求助</string>
+    <string name="live_optional_input">选填</string>
+    <string name="live_save">保存</string>
+    <string name="live_saved">已保存</string>
+    <string name="live_announcement_hint">输入公告内容</string>
+    <string name="live_announcement_url_hint">为公告添加跳转网址</string>
+    <string name="live_announcement_view_url_hint">点击公告可以跳转</string>
 
 </resources>

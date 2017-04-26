@@ -37,4 +37,14 @@
         <item name="android:windowExitAnimation">@anim/live_dialog_exit</item>
     </style>
 
+    <style name="LiveBaseSendMsgDialogAnim">
+        <item name="android:windowEnterAnimation">@anim/live_dialog_send_msg_enter</item>
+        <item name="android:windowExitAnimation">@anim/live_dialog_send_msg_exit</item>
+    </style>
+
+    <style name="LiveMoreDialogAnim">
+        <item name="android:windowEnterAnimation">@anim/live_dialog_more_enter</item>
+        <item name="android:windowExitAnimation">@anim/live_dialog_more_exit</item>
+    </style>
+
 </resources>

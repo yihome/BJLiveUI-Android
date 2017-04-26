@@ -102,94 +102,94 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
 
     @Override
     public void showMicOpen() {
-        $.id(R.id.dialog_setting_mic).enable(true);
+        $.id(R.id.dialog_setting_mic).image(R.drawable.ic_on_switch);
     }
 
     @Override
     public void showMicClosed() {
-        $.id(R.id.dialog_setting_mic).enable(false);
+        $.id(R.id.dialog_setting_mic).image(R.drawable.ic_off_switch);
     }
 
     @Override
     public void showCameraOpen() {
-        $.id(R.id.dialog_setting_camera).enable(true);
+        $.id(R.id.dialog_setting_camera).image(R.drawable.ic_on_switch);
     }
 
     @Override
     public void showCameraClosed() {
-        $.id(R.id.dialog_setting_camera).enable(false);
+        $.id(R.id.dialog_setting_camera).image(R.drawable.ic_off_switch);
     }
 
     @Override
     public void showBeautyFilterEnable() {
-        $.id(R.id.dialog_setting_beauty_filter).enable(true);
+        $.id(R.id.dialog_setting_beauty_filter).image(R.drawable.ic_on_switch);
     }
 
     @Override
     public void showBeautyFilterDisable() {
-        $.id(R.id.dialog_setting_beauty_filter).enable(false);
+        $.id(R.id.dialog_setting_beauty_filter).image(R.drawable.ic_off_switch);
     }
 
     @Override
     public void showPPTFullScreen() {
-        $.id(R.id.dialog_setting_radio_ppt_fs).enable(true);
-        $.id(R.id.dialog_setting_radio_ppt_os).enable(false);
+        $.id(R.id.dialog_setting_radio_ppt_fs).enable(false);
+        $.id(R.id.dialog_setting_radio_ppt_os).enable(true);
         ((Button) $.id(R.id.dialog_setting_radio_ppt_fs).view()).setTextColor(ContextCompat.getColor(getContext(), R.color.live_white));
         ((Button) $.id(R.id.dialog_setting_radio_ppt_os).view()).setTextColor(ContextCompat.getColor(getContext(), R.color.live_text_color));
     }
 
     @Override
     public void showPPTOverspread() {
-        $.id(R.id.dialog_setting_radio_ppt_fs).enable(false);
-        $.id(R.id.dialog_setting_radio_ppt_os).enable(true);
+        $.id(R.id.dialog_setting_radio_ppt_fs).enable(true);
+        $.id(R.id.dialog_setting_radio_ppt_os).enable(false);
         ((Button) $.id(R.id.dialog_setting_radio_ppt_fs).view()).setTextColor(ContextCompat.getColor(getContext(), R.color.live_text_color));
         ((Button) $.id(R.id.dialog_setting_radio_ppt_os).view()).setTextColor(ContextCompat.getColor(getContext(), R.color.live_white));
     }
 
     @Override
     public void showDefinitionLow() {
-        $.id(R.id.dialog_setting_radio_definition_low).enable(true);
-        $.id(R.id.dialog_setting_radio_definition_high).enable(false);
+        $.id(R.id.dialog_setting_radio_definition_low).enable(false);
+        $.id(R.id.dialog_setting_radio_definition_high).enable(true);
         ((Button) $.id(R.id.dialog_setting_radio_definition_low).view()).setTextColor(ContextCompat.getColor(getContext(), R.color.live_white));
         ((Button) $.id(R.id.dialog_setting_radio_definition_high).view()).setTextColor(ContextCompat.getColor(getContext(), R.color.live_text_color));
     }
 
     @Override
     public void showDefinitionHigh() {
-        $.id(R.id.dialog_setting_radio_definition_low).enable(false);
-        $.id(R.id.dialog_setting_radio_definition_high).enable(true);
+        $.id(R.id.dialog_setting_radio_definition_low).enable(true);
+        $.id(R.id.dialog_setting_radio_definition_high).enable(false);
         ((Button) $.id(R.id.dialog_setting_radio_definition_low).view()).setTextColor(ContextCompat.getColor(getContext(), R.color.live_text_color));
         ((Button) $.id(R.id.dialog_setting_radio_definition_high).view()).setTextColor(ContextCompat.getColor(getContext(), R.color.live_white));
     }
 
     @Override
     public void showUpLinkTCP() {
-        $.id(R.id.dialog_setting_radio_link_up_1).enable(true);
-        $.id(R.id.dialog_setting_radio_link_up_2).enable(false);
+        $.id(R.id.dialog_setting_radio_link_up_1).enable(false);
+        $.id(R.id.dialog_setting_radio_link_up_2).enable(true);
         ((Button) $.id(R.id.dialog_setting_radio_link_up_1).view()).setTextColor(ContextCompat.getColor(getContext(), R.color.live_white));
         ((Button) $.id(R.id.dialog_setting_radio_link_up_2).view()).setTextColor(ContextCompat.getColor(getContext(), R.color.live_text_color));
     }
 
     @Override
     public void showUpLinkUDP() {
-        $.id(R.id.dialog_setting_radio_link_up_1).enable(false);
-        $.id(R.id.dialog_setting_radio_link_up_2).enable(true);
+        $.id(R.id.dialog_setting_radio_link_up_1).enable(true);
+        $.id(R.id.dialog_setting_radio_link_up_2).enable(false);
         ((Button) $.id(R.id.dialog_setting_radio_link_up_1).view()).setTextColor(ContextCompat.getColor(getContext(), R.color.live_text_color));
         ((Button) $.id(R.id.dialog_setting_radio_link_up_2).view()).setTextColor(ContextCompat.getColor(getContext(), R.color.live_white));
     }
 
     @Override
     public void showDownLinkTCP() {
-        $.id(R.id.dialog_setting_radio_link_down_1).enable(true);
-        $.id(R.id.dialog_setting_radio_link_down_2).enable(false);
+        $.id(R.id.dialog_setting_radio_link_down_1).enable(false);
+        $.id(R.id.dialog_setting_radio_link_down_2).enable(true);
         ((Button) $.id(R.id.dialog_setting_radio_link_down_1).view()).setTextColor(ContextCompat.getColor(getContext(), R.color.live_white));
         ((Button) $.id(R.id.dialog_setting_radio_link_down_2).view()).setTextColor(ContextCompat.getColor(getContext(), R.color.live_text_color));
     }
 
     @Override
     public void showDownLinkUDP() {
-        $.id(R.id.dialog_setting_radio_link_down_1).enable(false);
-        $.id(R.id.dialog_setting_radio_link_down_2).enable(true);
+        $.id(R.id.dialog_setting_radio_link_down_1).enable(true);
+        $.id(R.id.dialog_setting_radio_link_down_2).enable(false);
         ((Button) $.id(R.id.dialog_setting_radio_link_down_1).view()).setTextColor(ContextCompat.getColor(getContext(), R.color.live_text_color));
         ((Button) $.id(R.id.dialog_setting_radio_link_down_2).view()).setTextColor(ContextCompat.getColor(getContext(), R.color.live_white));
     }

@@ -1,5 +1,6 @@
 package com.baijiahulian.live.ui.activity;
 
+import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.context.LiveRoom;
 
 /**
@@ -22,6 +23,10 @@ public interface LiveRoomRouterListener {
 
     void navigateToPPTDrawing();
 
+    LPConstants.LPPPTShowWay getPPTShowType();
+
+    void setPPTShowType(LPConstants.LPPPTShowWay type);
+
     void navigateToSpeakers();
 
     void navigateToUserList();
@@ -42,6 +47,25 @@ public interface LiveRoomRouterListener {
 
     void navigateToShare();
 
+    void navigateToAnnouncement();
+
+    void navigateToCloudRecord();
+
+    boolean getCloudRecordStatus();
+
+    void navigateToHelp();
+
+    void navigateToSetting();
+
     boolean isTeacherOrAssistant();
 
+    String getCurrentVideoPlayingUserId();
+
+    void playVideo(String userId);
+
+    void playVideoClose(String userId);
+
+    void attachVideo();
+
+    void detachVideo();
 }

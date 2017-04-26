@@ -49,7 +49,7 @@ public class OnlineUserPresenter implements OnlineUserContract.Presenter {
                 .subscribe(new LPBackPressureBufferedSubscriber<List<IUserModel>>() {
                     @Override
                     public void call(List<IUserModel> iUserModels) {
-                        // TODO: 2017/4/6 应该暴露loadMore的返回，先这样处理
+                        // iUserModels == null   no more data
                         if (isLoading)
                             isLoading = false;
                         view.notifyDataChanged();
@@ -73,7 +73,7 @@ public class OnlineUserPresenter implements OnlineUserContract.Presenter {
     @Override
     public int getCount() {
         int count = routerListener.getLiveRoom().getOnlineUserVM().getUserCount();
-        return isLoading ? count + 1 : count;
+        return isLoading ? count + 1: count;
     }
 
     @Override

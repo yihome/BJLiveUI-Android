@@ -18,16 +18,13 @@ import com.baijiahulian.live.ui.base.BaseFragment;
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.models.imodels.IMessageModel;
 
-import butterknife.BindView;
-
 /**
  * Created by Shubo on 2017/2/23.
  */
 
 public class ChatFragment extends BaseFragment implements ChatContract.View {
 
-    @BindView(R.id.fragment_chat_recycler)
-    RecyclerView recyclerView;
+    private RecyclerView recyclerView;
     private MessageAdapter adapter;
     private ChatContract.Presenter presenter;
     LinearLayoutManager mLayoutManager;
@@ -44,7 +41,8 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
         mLayoutManager = new LinearLayoutManager(getContext());
         mLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         mLayoutManager.setStackFromEnd(true);
-//        mLayoutManager.setReverseLayout(true);
+
+        recyclerView = (RecyclerView) $.id(R.id.fragment_chat_recycler).view();
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setAdapter(adapter);
     }
@@ -52,7 +50,7 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
     @Override
     public void notifyDataChanged() {
         adapter.notifyItemInserted(adapter.getItemCount());
-//        recyclerView.scrollToPosition(adapter.getItemCount());
+        recyclerView.smoothScrollToPosition(adapter.getItemCount());
     }
 
     @Override
@@ -77,7 +75,7 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
         super.setBasePresenter(presenter);
     }
 
-    class MessageAdapter extends RecyclerView.Adapter<ViewHolder> {
+    private class MessageAdapter extends RecyclerView.Adapter<ViewHolder> {
 
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
