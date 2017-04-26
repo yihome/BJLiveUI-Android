@@ -18,7 +18,7 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
     private QueryPlus $;
     private SettingContract.Presenter presenter;
 
-    public static SettingDialogFragment newInstance(){
+    public static SettingDialogFragment newInstance() {
         SettingDialogFragment dialog = new SettingDialogFragment();
         return dialog;
     }
@@ -205,9 +205,30 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
     }
 
     @Override
+    public void showCameraFront() {
+
+    }
+
+    @Override
+    public void showCameraBack() {
+
+    }
+
+    @Override
+    public void showCameraSwitchStatus(boolean whetherShow) {
+        if (whetherShow) {
+            $.id(R.id.dialog_setting_camera_switch_wrapper).visible();
+        } else {
+            $.id(R.id.dialog_setting_camera_switch_wrapper).gone();
+        }
+    }
+
+    @Override
     public void setPresenter(SettingContract.Presenter presenter) {
         super.setBasePresenter(presenter);
         this.presenter = presenter;
+        //切换摄像头是否可见，没开摄像头不可见
+        presenter.updateCameraSwitchStatus();
     }
 
     @Override

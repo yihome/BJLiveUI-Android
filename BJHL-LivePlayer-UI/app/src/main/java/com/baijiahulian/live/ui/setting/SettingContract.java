@@ -42,6 +42,12 @@ interface SettingContract {
 
         void showStudentFail();
 
+        void showCameraFront();
+
+        void showCameraBack();
+
+        void showCameraSwitchStatus(boolean whetherShow);
+
     }
 
     interface Presenter extends BasePresenter {
@@ -66,6 +72,8 @@ interface SettingContract {
         void setDownLinkTCP();
 
         void setDownLinkUDP();
+
+        void updateCameraSwitchStatus();
 
     }
 }

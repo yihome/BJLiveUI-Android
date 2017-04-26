@@ -67,6 +67,8 @@ public class SettingPresenter implements SettingContract.Presenter {
             view.showPPTFullScreen();
         else
             view.showPPTOverspread();
+
+
     }
 
     @Override
@@ -210,5 +212,10 @@ public class SettingPresenter implements SettingContract.Presenter {
     public void setDownLinkUDP() {
         player.setLinkType(LPConstants.LPLinkType.UDP);
         view.showDownLinkUDP();
+    }
+
+    @Override
+    public void updateCameraSwitchStatus() {
+        view.showCameraSwitchStatus(recorder.isVideoAttached());
     }
 }
