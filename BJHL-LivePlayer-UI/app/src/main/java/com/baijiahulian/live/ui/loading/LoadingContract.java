@@ -3,6 +3,7 @@ package com.baijiahulian.live.ui.loading;
 import com.baijiahulian.live.ui.base.BasePresenter;
 import com.baijiahulian.live.ui.base.BaseView;
 import com.baijiahulian.livecore.context.LPError;
+import com.baijiahulian.livecore.context.LiveRoom;
 import com.baijiahulian.livecore.launch.LPLaunchListener;
 
 /**
@@ -22,5 +23,7 @@ interface LoadingContract {
         String getCode();
 
         String getName();
+
+        void setLiveRoom(LiveRoom liveRoom);
     }
 }
