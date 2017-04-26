@@ -16,9 +16,9 @@ public class App extends Application{
         super.onCreate();
 
         // catch捕获的异常
-        CrashHandler crashHandler = CrashHandler.getInstance();
-        crashHandler.init(this);
-        Thread.setDefaultUncaughtExceptionHandler(crashHandler);
+//        CrashHandler crashHandler = CrashHandler.getInstance();
+//        crashHandler.init(this);
+//        Thread.setDefaultUncaughtExceptionHandler(crashHandler);
 
         LiveSDK.init(LPConstants.LPDeployType.Test);
     }

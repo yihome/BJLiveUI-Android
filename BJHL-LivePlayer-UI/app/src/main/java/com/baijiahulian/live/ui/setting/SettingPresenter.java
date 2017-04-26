@@ -68,6 +68,12 @@ public class SettingPresenter implements SettingContract.Presenter {
         else
             view.showPPTOverspread();
 
+        if (recorder.getCameraOrientation()) {
+            view.showCameraFront();
+        } else {
+            view.showCameraBack();
+        }
+
 
     }
 
@@ -216,6 +222,25 @@ public class SettingPresenter implements SettingContract.Presenter {
 
     @Override
     public void updateCameraSwitchStatus() {
-        view.showCameraSwitchStatus(recorder.isVideoAttached());
+        if (recorder != null) {
+            view.showCameraSwitchStatus(recorder.isVideoAttached());
+            if (recorder.getCameraOrientation()) {
+                view.showCameraFront();
+            } else {
+                view.showCameraBack();
+            }
+        }
+    }
+
+    @Override
+    public void switchCamera() {
+        if (recorder != null) {
+            recorder.switchCamera();
+            if (recorder.getCameraOrientation()) {
+                view.showCameraFront();
+            } else {
+                view.showCameraBack();
+            }
+        }
     }
 }

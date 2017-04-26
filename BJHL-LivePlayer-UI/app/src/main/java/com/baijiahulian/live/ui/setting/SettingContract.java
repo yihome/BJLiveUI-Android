@@ -75,5 +75,7 @@ interface SettingContract {
 
         void updateCameraSwitchStatus();
 
+        void switchCamera();
+
     }
 }

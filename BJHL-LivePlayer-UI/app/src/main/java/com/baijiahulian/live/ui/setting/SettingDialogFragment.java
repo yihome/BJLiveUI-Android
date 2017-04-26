@@ -98,6 +98,22 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
                 presenter.setDownLinkUDP();
             }
         });
+
+        $.id(R.id.dialog_setting_radio_camera_front).clicked(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                presenter.switchCamera();
+            }
+        });
+
+        $.id(R.id.dialog_setting_radio_camera_back).clicked(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                presenter.switchCamera();
+            }
+        });
+
+
     }
 
     @Override
@@ -206,12 +222,18 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
 
     @Override
     public void showCameraFront() {
-
+        $.id(R.id.dialog_setting_radio_camera_front).enable(false);
+        $.id(R.id.dialog_setting_radio_camera_back).enable(true);
+        ((Button) $.id(R.id.dialog_setting_radio_camera_front).view()).setTextColor(ContextCompat.getColor(getContext(), R.color.live_white));
+        ((Button) $.id(R.id.dialog_setting_radio_camera_back).view()).setTextColor(ContextCompat.getColor(getContext(), R.color.live_text_color));
     }
 
     @Override
     public void showCameraBack() {
-
+        $.id(R.id.dialog_setting_radio_camera_front).enable(true);
+        $.id(R.id.dialog_setting_radio_camera_back).enable(false);
+        ((Button) $.id(R.id.dialog_setting_radio_camera_front).view()).setTextColor(ContextCompat.getColor(getContext(), R.color.live_text_color));
+        ((Button) $.id(R.id.dialog_setting_radio_camera_back).view()).setTextColor(ContextCompat.getColor(getContext(), R.color.live_white));
     }
 
     @Override
@@ -227,6 +249,11 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
     public void setPresenter(SettingContract.Presenter presenter) {
         super.setBasePresenter(presenter);
         this.presenter = presenter;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
         //切换摄像头是否可见，没开摄像头不可见
         presenter.updateCameraSwitchStatus();
     }
