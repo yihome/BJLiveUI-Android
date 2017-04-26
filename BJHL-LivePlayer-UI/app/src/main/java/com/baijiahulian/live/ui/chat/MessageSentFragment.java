@@ -1,5 +1,6 @@
 package com.baijiahulian.live.ui.chat;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.text.Editable;
@@ -7,6 +8,7 @@ import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.baijiahulian.live.ui.R;
@@ -22,6 +24,7 @@ public class MessageSentFragment extends BaseDialogFragment implements MessageSe
     private MessageSendContract.Presenter presenter;
     private QueryPlus $;
     private MessageTextWatcher textWatcher;
+    private InputMethodManager imm;
 
     public static MessageSentFragment newInstance() {
         Bundle args = new Bundle();
@@ -50,11 +53,15 @@ public class MessageSentFragment extends BaseDialogFragment implements MessageSe
         $ = QueryPlus.with(contentView);
         textWatcher = new MessageTextWatcher();
         ((EditText) $.id(R.id.dialog_message_send_et).view()).addTextChangedListener(textWatcher);
+        imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         $.id(R.id.dialog_message_send_btn).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 presenter.sendMessage(((EditText) $.id(R.id.dialog_message_send_et).view())
                         .getEditableText().toString());
+                if (imm!=null && imm.isActive()) {
+                    imm.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);
+                }
             }
         });
         $.id(R.id.dialog_message_send_pic).clicked(new View.OnClickListener() {
@@ -64,6 +71,11 @@ public class MessageSentFragment extends BaseDialogFragment implements MessageSe
                 showToast("开发中...");
             }
         });
+        $.id(R.id.dialog_message_send_btn).enable(false);
+
+//        if (!imm.isActive()) {
+        imm.showSoftInput($.id(R.id.dialog_message_send_et).view(), InputMethodManager.SHOW_FORCED);
+//        }
     }
 
     @Override

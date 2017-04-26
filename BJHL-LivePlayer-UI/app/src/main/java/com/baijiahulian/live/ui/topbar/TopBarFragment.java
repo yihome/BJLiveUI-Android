@@ -22,7 +22,7 @@ public class TopBarFragment extends BaseFragment implements TopBarContract.View 
     @Override
     public void init(Bundle savedInstanceState) {
 
-        $.id(R.id.fragment_top_bar_user_count).clicked(new View.OnClickListener() {
+        $.id(R.id.fragment_top_bar_user_count_container).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 presenter.navigateToUserList();

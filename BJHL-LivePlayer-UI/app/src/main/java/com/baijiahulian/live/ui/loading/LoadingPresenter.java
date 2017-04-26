@@ -60,6 +60,11 @@ public class LoadingPresenter implements LoadingContract.Presenter {
     }
 
     @Override
+    public void setLiveRoom(LiveRoom liveRoom) {
+        routerListener.setLiveRoom(liveRoom);
+    }
+
+    @Override
     public void subscribe() {
 
     }

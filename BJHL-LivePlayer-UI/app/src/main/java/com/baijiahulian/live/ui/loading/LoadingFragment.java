@@ -2,10 +2,11 @@ package com.baijiahulian.live.ui.loading;
 
 import android.os.Bundle;
 
-import com.baijiahulian.live.ui.base.BaseFragment;
 import com.baijiahulian.live.ui.R;
+import com.baijiahulian.live.ui.base.BaseFragment;
 import com.baijiahulian.livecore.LiveSDK;
 import com.baijiahulian.livecore.context.LPError;
+import com.baijiahulian.livecore.context.LiveRoom;
 
 import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 
@@ -31,7 +32,8 @@ public class LoadingFragment extends BaseFragment implements LoadingContract.Vie
     @Override
     public void init(Bundle savedInstanceState) {
         checkNotNull(presenter);
-        LiveSDK.enterRoom(getActivity(), presenter.getCode(), presenter.getName(), presenter.getLaunchListener());
+        LiveRoom room = LiveSDK.enterRoom(getActivity(), presenter.getCode(), presenter.getName(), presenter.getLaunchListener());
+        presenter.setLiveRoom(room);
     }
 
     @Override
