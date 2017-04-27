@@ -20,6 +20,6 @@ public class App extends Application{
 //        crashHandler.init(this);
 //        Thread.setDefaultUncaughtExceptionHandler(crashHandler);
 
-        LiveSDK.init(LPConstants.LPDeployType.Test);
+//        LiveSDK.init(LPConstants.LPDeployType.Test);
     }
 }
