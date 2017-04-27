@@ -7,6 +7,7 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/fragment_chat_recycler"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_marginLeft="@dimen/activity_live_room_margin" />
 
 </LinearLayout>
