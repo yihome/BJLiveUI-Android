@@ -1,11 +1,9 @@
-package com.baijiahulian.live.ui.recorderdialog;
+package com.baijiahulian.live.ui.pptdialog;
 
 import android.os.Bundle;
-import android.support.v4.view.GravityCompat;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.TextView;
 
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseDialogFragment;
@@ -14,16 +12,15 @@ import com.baijiahulian.live.ui.utils.QueryPlus;
 
 /**
  * Created by wangkangfei on 17/4/27.
- * 点击自己的图像采集窗口，可以是老师或者学生
  */
 
-public class RecorderDialogFragment extends BaseDialogFragment implements RecorderDialogContract.View {
+public class PPTDialogFragment extends BaseDialogFragment implements PPTDialogContract.View {
     private QueryPlus $;
-    private RecorderDialogContract.Presenter presenter;
+    private PPTDialogContract.Presenter presenter;
 
     @Override
     protected int getLayoutId() {
-        return R.layout.dialog_recorder;
+        return R.layout.dialog_ppt;
     }
 
     @Override
@@ -36,38 +33,17 @@ public class RecorderDialogFragment extends BaseDialogFragment implements Record
     protected void init(Bundle savedInstanceState, Bundle arguments) {
         hideTitleBar();
         $ = QueryPlus.with(contentView);
-        $.id(R.id.dialog_recorder_fullscreen).clicked(new View.OnClickListener() {
+        $.id(R.id.dialog_ppt_fullscreen).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 presenter.switchFullscreen();
                 dismiss();
             }
         });
-        $.id(R.id.dialog_recorder_switch_camera).clicked(new View.OnClickListener() {
+        $.id(R.id.dialog_ppt_manage).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                presenter.switchCamera();
-                dismiss();
-            }
-        });
-        $.id(R.id.dialog_recorder_pretty_filter_switch).clicked(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                presenter.switchPrettyFilter();
-                dismiss();
-            }
-        });
-        $.id(R.id.dialog_recorder_turnoff_camera).clicked(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                presenter.turnOffCamera();
-                dismiss();
-            }
-        });
-
-        $.id(R.id.dialog_recorder_cancel).clicked(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+                presenter.managePPT();
                 dismiss();
             }
         });
@@ -87,34 +63,24 @@ public class RecorderDialogFragment extends BaseDialogFragment implements Record
     }
 
     @Override
-    public void setPresenter(RecorderDialogContract.Presenter presenter) {
+    public void setPresenter(PPTDialogContract.Presenter presenter) {
         super.setBasePresenter(presenter);
         this.presenter = presenter;
     }
 
     @Override
-    public void showFullscreen() {
+    public void showFullScreen() {
 
     }
 
     @Override
-    public void showSwitchCamera() {
-
+    public void showManagePPT() {
+        $.id(R.id.dialog_ppt_manage).visible();
     }
 
     @Override
-    public void showSwitchPrettyFilterOn() {
-        ((TextView) $.id(R.id.dialog_recorder_pretty_filter_switch).view()).setText(R.string.live_recorder_pretty_filter_on);
-    }
-
-    @Override
-    public void showSwitchPrettyFilterOff() {
-        ((TextView) $.id(R.id.dialog_recorder_pretty_filter_switch).view()).setText(R.string.live_recorder_pretty_filter_off);
-    }
-
-    @Override
-    public void showTurnOffCamera() {
-
+    public void hideManagePPT() {
+        $.id(R.id.dialog_ppt_manage).gone();
     }
 
     @Override

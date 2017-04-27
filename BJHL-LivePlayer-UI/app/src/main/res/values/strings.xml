@@ -59,5 +59,6 @@
     <string name="live_recorder_camera_switch_off">关闭摄像头</string>
 
     <string name="live_ppt_manage">管理课件</string>
+    <string name="live_ppt_title">PPT</string>
 
 </resources>

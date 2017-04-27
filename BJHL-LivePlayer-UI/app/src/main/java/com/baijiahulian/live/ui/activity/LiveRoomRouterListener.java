@@ -70,4 +70,6 @@ public interface LiveRoomRouterListener {
     void detachVideo();
 
     void showRecorderDialogFragment();
+
+    void showPPTDialogFragment();
 }

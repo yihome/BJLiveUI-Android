@@ -30,6 +30,8 @@ import com.baijiahulian.live.ui.more.MoreMenuDialogFragment;
 import com.baijiahulian.live.ui.more.MoreMenuPresenter;
 import com.baijiahulian.live.ui.ppt.MyPPTFragment;
 import com.baijiahulian.live.ui.ppt.PPTPresenter;
+import com.baijiahulian.live.ui.pptdialog.PPTDialogFragment;
+import com.baijiahulian.live.ui.pptdialog.PPTDialogPresenter;
 import com.baijiahulian.live.ui.recorderdialog.RecorderDialogFragment;
 import com.baijiahulian.live.ui.recorderdialog.RecorderDialogPresenter;
 import com.baijiahulian.live.ui.rightbotmenu.RightBottomMenuFragment;
@@ -455,6 +457,14 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         RecorderDialogPresenter recorderPresenter = new RecorderDialogPresenter(recorderFragment);
         bindVP(recorderFragment, recorderPresenter);
         showDialogFragment(recorderFragment);
+    }
+
+    @Override
+    public void showPPTDialogFragment() {
+        PPTDialogFragment pptFragment = new PPTDialogFragment();
+        PPTDialogPresenter pptPresenter = new PPTDialogPresenter(pptFragment);
+        bindVP(pptFragment, pptPresenter);
+        showDialogFragment(pptFragment);
     }
 
     private void switchView(View view1, View view2) {

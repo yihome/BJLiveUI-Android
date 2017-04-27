@@ -17,7 +17,7 @@ public class PPTPresenter implements PPTContract.Presenter {
 
     @Override
     public void switchWithMaximum() {
-        routerListener.maximisePPTView();
+        routerListener.showPPTDialogFragment();
     }
 
     @Override
