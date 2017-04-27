@@ -24,6 +24,15 @@ public class AutoExitDrawerLayout extends DrawerLayout {
     }
 
     @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        widthMeasureSpec = MeasureSpec.makeMeasureSpec(
+                MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.EXACTLY);
+        heightMeasureSpec = MeasureSpec.makeMeasureSpec(
+                MeasureSpec.getSize(heightMeasureSpec), MeasureSpec.EXACTLY);
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
+    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         return false;
     }

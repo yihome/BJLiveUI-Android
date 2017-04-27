@@ -8,6 +8,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.view.Gravity;
 import android.view.OrientationEventListener;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;

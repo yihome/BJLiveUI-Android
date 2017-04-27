@@ -59,13 +59,13 @@
 
     <com.baijiahulian.live.ui.chat.AutoExitDrawerLayout
         android:id="@+id/activity_live_room_chat_drawer"
-        android:layout_width="match_parent"
+        android:layout_width="268dp"
         android:layout_height="match_parent"
         android:layout_above="@+id/activity_live_room_bottom_left"
         android:layout_below="@+id/activity_live_room_foreground_left_container"
         android:layout_marginBottom="@dimen/activity_live_room_margin"
-        android:paddingLeft="@dimen/activity_live_room_margin"
-        android:layout_marginTop="@dimen/activity_live_room_margin">
+        android:layout_marginTop="@dimen/activity_live_room_margin"
+        android:paddingLeft="@dimen/activity_live_room_margin">
 
         <FrameLayout
             android:id="@+id/activity_live_room_chat"
