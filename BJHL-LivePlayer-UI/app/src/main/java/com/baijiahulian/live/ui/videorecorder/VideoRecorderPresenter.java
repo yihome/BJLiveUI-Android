@@ -20,7 +20,8 @@ public class VideoRecorderPresenter implements VideoRecorderContract.Presenter {
 
     @Override
     public void switchWithMaximum() {
-        routerListener.maximiseRecorderView();
+//        routerListener.maximiseRecorderView();
+        routerListener.showRecorderDialogFragment();
     }
 
     @Override
@@ -30,10 +31,10 @@ public class VideoRecorderPresenter implements VideoRecorderContract.Presenter {
 
     @Override
     public void subscribe() {
-        if(!routerListener.getLiveRoom().getRecorder().isPublishing()) {
+        if (!routerListener.getLiveRoom().getRecorder().isPublishing()) {
             routerListener.getLiveRoom().getRecorder().publish();
         }
-        if(!routerListener.getLiveRoom().getRecorder().isVideoAttached()) {
+        if (!routerListener.getLiveRoom().getRecorder().isVideoAttached()) {
             routerListener.getLiveRoom().getRecorder().attachVideo();
 //            routerListener.getLiveRoom().getRecorder().openBeautyFilter();
         }
@@ -41,7 +42,7 @@ public class VideoRecorderPresenter implements VideoRecorderContract.Presenter {
 
     @Override
     public void unSubscribe() {
-        if(routerListener.getLiveRoom().getRecorder().isVideoAttached()) {
+        if (routerListener.getLiveRoom().getRecorder().isVideoAttached()) {
             routerListener.getLiveRoom().getRecorder().detachVideo();
         }
     }

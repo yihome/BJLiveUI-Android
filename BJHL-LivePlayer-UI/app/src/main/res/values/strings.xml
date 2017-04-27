@@ -52,4 +52,12 @@
     <string name="live_announcement_url_hint">为公告添加跳转网址</string>
     <string name="live_announcement_view_url_hint">点击公告可以跳转</string>
 
+    <string name="live_recorder_title">采集视频</string>
+    <string name="live_recorder_switch_camera">切换摄像头</string>
+    <string name="live_recorder_pretty_filter_on">开启美颜</string>
+    <string name="live_recorder_pretty_filter_off">关闭美颜</string>
+    <string name="live_recorder_camera_switch_off">关闭摄像头</string>
+
+    <string name="live_ppt_manage">管理课件</string>
+
 </resources>

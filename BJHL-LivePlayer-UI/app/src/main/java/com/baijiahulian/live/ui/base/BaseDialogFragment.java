@@ -158,7 +158,7 @@ public abstract class BaseDialogFragment extends DialogFragment {
         return this;
     }
 
-    public BaseDialogFragment editClick(View.OnClickListener listener){
+    public BaseDialogFragment editClick(View.OnClickListener listener) {
         $.id(R.id.dialog_base_edit).clicked(listener);
         return this;
     }
