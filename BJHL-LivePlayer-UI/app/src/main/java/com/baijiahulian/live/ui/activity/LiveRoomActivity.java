@@ -173,29 +173,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         }
         onBackgroundContainerConfigurationChanged(newConfig);
         onForegroundContainerConfigurationChanged(newConfig);
-//        onForegroundLeftContainerConfigurationChanged(newConfig);
-//        onForegroundRightContainerConfigurationChanged(newConfig);
     }
-
-//    private void onForegroundRightContainerConfigurationChanged(Configuration newConfig) {
-//        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) flForegroundRight.getLayoutParams();
-//        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-//            lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_top);
-//        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-//            lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_background_container);
-//        }
-//        flForegroundRight.setLayoutParams(lp);
-//    }
-//
-//    private void onForegroundLeftContainerConfigurationChanged(Configuration newConfig) {
-//        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) flForegroundLeft.getLayoutParams();
-//        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-//            lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_top);
-//        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-//            lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_background_container);
-//        }
-//        flForegroundLeft.setLayoutParams(lp);
-//    }
 
     private void onForegroundContainerConfigurationChanged(Configuration newConfig) {
         RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) llVideoContainer.getLayoutParams();
@@ -267,7 +245,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void clearScreen() {
-        chatFragment.clearScreen();
+//        chatFragment.clearScreen();
+        dlChat.setVisibility(View.GONE);
         rightBottomMenuFragment.clearScreen();
         hideFragment(topBarFragment);
         hideFragment(rightMenuFragment);
@@ -275,7 +254,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void unClearScreen() {
-        chatFragment.unClearScreen();
+//        chatFragment.unClearScreen();
+        dlChat.setVisibility(View.VISIBLE);
         rightBottomMenuFragment.unClearScreen();
         showFragment(topBarFragment);
         showFragment(rightMenuFragment);
