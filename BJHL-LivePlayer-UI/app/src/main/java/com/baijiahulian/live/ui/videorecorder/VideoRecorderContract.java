@@ -18,5 +18,7 @@ interface VideoRecorderContract {
         LPRecorder getRecorder();
 
         void switchWithMaximum();
+
+        void popUpRecorderDialog();
     }
 }

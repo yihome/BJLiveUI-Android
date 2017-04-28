@@ -20,7 +20,11 @@ public class VideoRecorderPresenter implements VideoRecorderContract.Presenter {
 
     @Override
     public void switchWithMaximum() {
-//        routerListener.maximiseRecorderView();
+        routerListener.maximiseRecorderView();
+    }
+
+    @Override
+    public void popUpRecorderDialog() {
         routerListener.showRecorderDialogFragment();
     }
 
