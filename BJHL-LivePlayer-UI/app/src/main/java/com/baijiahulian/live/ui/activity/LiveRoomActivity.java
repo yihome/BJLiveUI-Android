@@ -461,6 +461,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void showRecorderDialogFragment() {
+        View max = flBackground.getChildAt(0);
+        if (max == recorderFragment.getView()) return;
         RecorderDialogFragment recorderFragment = new RecorderDialogFragment();
         RecorderDialogPresenter recorderPresenter = new RecorderDialogPresenter(recorderFragment);
         bindVP(recorderFragment, recorderPresenter);
@@ -469,6 +471,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void showPPTDialogFragment() {
+        View max = flBackground.getChildAt(0);
+        if (max == lppptFragment.getView()) return;
         PPTDialogFragment pptFragment = new PPTDialogFragment();
         PPTDialogPresenter pptPresenter = new PPTDialogPresenter(pptFragment);
         bindVP(pptFragment, pptPresenter);
@@ -477,6 +481,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void showRemoteVideoPlayer() {
+        View max = flBackground.getChildAt(0);
+        if (max == playerFragment.getView()) return;
         RemoteVideoDialogFragment remoteVideoFragment = new RemoteVideoDialogFragment();
         RemoteVideoDialogPresenter remoteVideoPresenter = new RemoteVideoDialogPresenter(remoteVideoFragment);
         bindVP(remoteVideoFragment, remoteVideoPresenter);
