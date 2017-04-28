@@ -3,6 +3,7 @@ package com.baijiahulian.live.ui.activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.hardware.SensorManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Gravity;
@@ -34,6 +35,8 @@ import com.baijiahulian.live.ui.pptdialog.PPTDialogFragment;
 import com.baijiahulian.live.ui.pptdialog.PPTDialogPresenter;
 import com.baijiahulian.live.ui.recorderdialog.RecorderDialogFragment;
 import com.baijiahulian.live.ui.recorderdialog.RecorderDialogPresenter;
+import com.baijiahulian.live.ui.remotevideodialog.RemoteVideoDialogFragment;
+import com.baijiahulian.live.ui.remotevideodialog.RemoteVideoDialogPresenter;
 import com.baijiahulian.live.ui.rightbotmenu.RightBottomMenuFragment;
 import com.baijiahulian.live.ui.rightbotmenu.RightBottomMenuPresenter;
 import com.baijiahulian.live.ui.rightmenu.RightMenuFragment;
@@ -52,6 +55,7 @@ import com.baijiahulian.live.ui.videorecorder.VideoRecorderFragment;
 import com.baijiahulian.live.ui.videorecorder.VideoRecorderPresenter;
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.context.LiveRoom;
+import com.baijiahulian.livecore.models.imodels.IMediaModel;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -99,6 +103,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     private OrientationEventListener orientationEventListener; //处理屏幕旋转时本地录制视频的方向
     private int oldRotation;
+
+    private IMediaModel currentRemoteMediaUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -447,7 +453,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     public void detachVideo() {
         checkNotNull(recorderFragment);
         removeFragment(recorderFragment);
-        getSupportFragmentManager().executePendingTransactions();
+        if (Build.VERSION.SDK_INT < 24) {
+            getSupportFragmentManager().executePendingTransactions();
+        }
         recorderFragment = null;
     }
 
@@ -465,6 +473,29 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         PPTDialogPresenter pptPresenter = new PPTDialogPresenter(pptFragment);
         bindVP(pptFragment, pptPresenter);
         showDialogFragment(pptFragment);
+    }
+
+    @Override
+    public void showRemoteVideoPlayer() {
+        RemoteVideoDialogFragment remoteVideoFragment = new RemoteVideoDialogFragment();
+        RemoteVideoDialogPresenter remoteVideoPresenter = new RemoteVideoDialogPresenter(remoteVideoFragment);
+        bindVP(remoteVideoFragment, remoteVideoPresenter);
+        showDialogFragment(remoteVideoFragment);
+    }
+
+    /**
+     * 当前正在互动的用户多媒体对象
+     *
+     * @param mediaModel
+     */
+    @Override
+    public void setCurrentVideoUser(IMediaModel mediaModel) {
+        this.currentRemoteMediaUser = mediaModel;
+    }
+
+    @Override
+    public IMediaModel getCurrentVideoUser() {
+        return currentRemoteMediaUser;
     }
 
     private void switchView(View view1, View view2) {

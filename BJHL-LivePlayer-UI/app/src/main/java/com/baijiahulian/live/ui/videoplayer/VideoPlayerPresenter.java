@@ -24,7 +24,7 @@ public class VideoPlayerPresenter implements VideoPlayerContract.Presenter {
 
     @Override
     public void switchWithMaximum() {
-        routerListener.maximisePlayerView();
+        routerListener.showRemoteVideoPlayer();
     }
 
     @Override

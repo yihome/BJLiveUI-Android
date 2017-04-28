@@ -2,6 +2,7 @@ package com.baijiahulian.live.ui.activity;
 
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.context.LiveRoom;
+import com.baijiahulian.livecore.models.imodels.IMediaModel;
 
 /**
  * Created by Shubo on 2017/2/15.
@@ -72,4 +73,13 @@ public interface LiveRoomRouterListener {
     void showRecorderDialogFragment();
 
     void showPPTDialogFragment();
+
+    void showRemoteVideoPlayer();
+
+    /**
+     * 当前正在互动的用户多媒体对象
+     */
+    void setCurrentVideoUser(IMediaModel mediaModel);
+
+    IMediaModel getCurrentVideoUser();
 }
