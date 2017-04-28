@@ -19,50 +19,38 @@
         android:layout_height="0dp"
         android:layout_centerInParent="true" />
 
-    <FrameLayout
-        android:id="@+id/activity_live_room_foreground_left_container"
-        android:layout_width="92dp"
-        android:layout_height="69dp"
-        android:layout_below="@+id/activity_live_room_background_container"
-        android:layout_marginLeft="@dimen/activity_live_room_margin"
-        android:layout_marginTop="@dimen/activity_live_room_margin" />
-
-    <FrameLayout
-        android:id="@+id/activity_live_room_foreground_right_container"
-        android:layout_width="92dp"
-        android:layout_height="69dp"
-        android:layout_below="@+id/activity_live_room_background_container"
-        android:layout_marginLeft="@dimen/activity_live_room_margin"
-        android:layout_marginTop="@dimen/activity_live_room_margin"
-        android:layout_toRightOf="@+id/activity_live_room_foreground_left_container" />
 
     <LinearLayout
-        android:id="@+id/activity_live_room_course_recorder_container"
-        android:layout_width="130dp"
-        android:layout_height="42dp"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/activity_live_room_top"
-        android:layout_marginRight="20dp"
+        android:id="@+id/activity_live_room_video_recorder_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/activity_live_room_background_container"
+        android:layout_marginLeft="@dimen/activity_live_room_margin"
         android:layout_marginTop="@dimen/activity_live_room_margin"
-        android:orientation="horizontal"
-        android:visibility="gone"></LinearLayout>
+        android:background="@android:color/transparent"
+        android:orientation="horizontal">
 
-    <!--<FrameLayout-->
-    <!--android:id="@+id/activity_live_room_chat"-->
-    <!--android:layout_width="268dp"-->
-    <!--android:layout_height="match_parent"-->
-    <!--android:layout_above="@+id/activity_live_room_bottom_left"-->
-    <!--android:layout_below="@+id/activity_live_room_foreground_left_container"-->
-    <!--android:layout_marginBottom="@dimen/activity_live_room_margin"-->
-    <!--android:layout_marginLeft="@dimen/activity_live_room_margin"-->
-    <!--android:layout_marginTop="@dimen/activity_live_room_margin" />-->
+        <FrameLayout
+            android:id="@+id/activity_live_room_foreground_left_container"
+            android:layout_width="92dp"
+            android:layout_height="69dp"
+            android:visibility="gone" />
+
+        <FrameLayout
+            android:id="@+id/activity_live_room_foreground_right_container"
+            android:layout_width="92dp"
+            android:layout_height="69dp"
+            android:layout_marginLeft="@dimen/activity_live_room_margin"
+            android:visibility="gone" />
+    </LinearLayout>
+
 
     <com.baijiahulian.live.ui.chat.AutoExitDrawerLayout
         android:id="@+id/activity_live_room_chat_drawer"
         android:layout_width="268dp"
         android:layout_height="match_parent"
         android:layout_above="@+id/activity_live_room_bottom_left"
-        android:layout_below="@+id/activity_live_room_foreground_left_container"
+        android:layout_below="@+id/activity_live_room_video_recorder_container"
         android:layout_marginBottom="@dimen/activity_live_room_margin"
         android:layout_marginTop="@dimen/activity_live_room_margin"
         android:paddingLeft="@dimen/activity_live_room_margin">

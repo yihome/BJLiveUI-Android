@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.baijiahulian.live.ui.R;
@@ -84,6 +85,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     FrameLayout flLoading;
     @BindView(R.id.activity_live_room_chat_drawer)
     DrawerLayout dlChat;
+    @BindView(R.id.activity_live_room_video_recorder_container)
+    LinearLayout llVideoContainer;
 
     private LiveRoom liveRoom;
 
@@ -169,28 +172,39 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
             dlChat.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN);
         }
         onBackgroundContainerConfigurationChanged(newConfig);
-        onForegroundLeftContainerConfigurationChanged(newConfig);
-        onForegroundRightContainerConfigurationChanged(newConfig);
+        onForegroundContainerConfigurationChanged(newConfig);
+//        onForegroundLeftContainerConfigurationChanged(newConfig);
+//        onForegroundRightContainerConfigurationChanged(newConfig);
     }
 
-    private void onForegroundRightContainerConfigurationChanged(Configuration newConfig) {
-        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) flForegroundRight.getLayoutParams();
+//    private void onForegroundRightContainerConfigurationChanged(Configuration newConfig) {
+//        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) flForegroundRight.getLayoutParams();
+//        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+//            lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_top);
+//        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+//            lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_background_container);
+//        }
+//        flForegroundRight.setLayoutParams(lp);
+//    }
+//
+//    private void onForegroundLeftContainerConfigurationChanged(Configuration newConfig) {
+//        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) flForegroundLeft.getLayoutParams();
+//        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+//            lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_top);
+//        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+//            lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_background_container);
+//        }
+//        flForegroundLeft.setLayoutParams(lp);
+//    }
+
+    private void onForegroundContainerConfigurationChanged(Configuration newConfig) {
+        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) llVideoContainer.getLayoutParams();
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_top);
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
             lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_background_container);
         }
-        flForegroundRight.setLayoutParams(lp);
-    }
-
-    private void onForegroundLeftContainerConfigurationChanged(Configuration newConfig) {
-        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) flForegroundLeft.getLayoutParams();
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_top);
-        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_background_container);
-        }
-        flForegroundLeft.setLayoutParams(lp);
+        llVideoContainer.setLayoutParams(lp);
     }
 
     private void onBackgroundContainerConfigurationChanged(Configuration newConfig) {
@@ -427,6 +441,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
             playerPresenter = new VideoPlayerPresenter(playerFragment);
             bindVP(playerFragment, playerPresenter);
             addFragment(R.id.activity_live_room_foreground_right_container, playerFragment);
+            flForegroundRight.setVisibility(View.VISIBLE);
         }
         playerPresenter.playVideo(userId);
     }
@@ -436,6 +451,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         checkNotNull(playerPresenter);
         playerPresenter.playAVClose(userId);
         removeFragment(playerFragment);
+        flForegroundRight.setVisibility(View.GONE);
         playerFragment = null;
         playerPresenter = null;
     }
@@ -446,6 +462,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
             recorderFragment = new VideoRecorderFragment();
             bindVP(recorderFragment, new VideoRecorderPresenter(recorderFragment));
             addFragment(R.id.activity_live_room_foreground_left_container, recorderFragment);
+            flForegroundLeft.setVisibility(View.VISIBLE);
         }
     }
 
@@ -453,6 +470,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     public void detachVideo() {
         checkNotNull(recorderFragment);
         removeFragment(recorderFragment);
+        flForegroundLeft.setVisibility(View.GONE);
         if (Build.VERSION.SDK_INT < 24) {
             getSupportFragmentManager().executePendingTransactions();
         }
