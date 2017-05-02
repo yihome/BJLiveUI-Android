@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.announcement.AnnouncementFragment;
@@ -27,6 +28,8 @@ import com.baijiahulian.live.ui.more.MoreMenuDialogFragment;
 import com.baijiahulian.live.ui.more.MoreMenuPresenter;
 import com.baijiahulian.live.ui.ppt.MyPPTFragment;
 import com.baijiahulian.live.ui.ppt.PPTPresenter;
+import com.baijiahulian.live.ui.pptmanage.PPTManageFragment;
+import com.baijiahulian.live.ui.pptmanage.PPTManagePresenter;
 import com.baijiahulian.live.ui.rightbotmenu.RightBottomMenuFragment;
 import com.baijiahulian.live.ui.rightbotmenu.RightBottomMenuPresenter;
 import com.baijiahulian.live.ui.rightmenu.RightMenuFragment;
@@ -39,15 +42,20 @@ import com.baijiahulian.live.ui.topbar.TopBarFragment;
 import com.baijiahulian.live.ui.topbar.TopBarPresenter;
 import com.baijiahulian.live.ui.users.OnlineUserDialogFragment;
 import com.baijiahulian.live.ui.users.OnlineUserPresenter;
+import com.baijiahulian.live.ui.utils.RxUtils;
 import com.baijiahulian.live.ui.videoplayer.VideoPlayerFragment;
 import com.baijiahulian.live.ui.videoplayer.VideoPlayerPresenter;
 import com.baijiahulian.live.ui.videorecorder.VideoRecorderFragment;
 import com.baijiahulian.live.ui.videorecorder.VideoRecorderPresenter;
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.context.LiveRoom;
+import com.baijiahulian.livecore.models.imodels.ILoginConflictModel;
+import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
 
 import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 
@@ -87,9 +95,13 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     private VideoPlayerFragment playerFragment;
     private VideoPlayerPresenter playerPresenter;
+    private PPTManageFragment pptManageFragment;
+    private PPTManagePresenter pptManagePresenter;
 
     private OrientationEventListener orientationEventListener; //处理屏幕旋转时本地录制视频的方向
     private int oldRotation;
+
+    private Subscription subscriptionOfLoginConflict;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -226,6 +238,16 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         removeFragment(loadingFragment);
         flLoading.setVisibility(View.GONE);
 
+        subscriptionOfLoginConflict = getLiveRoom().getObservableOfLoginConflict().observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<ILoginConflictModel>() {
+                    @Override
+                    public void call(ILoginConflictModel iLoginConflictModel) {
+                        // todo 登录冲突
+                        Toast.makeText(LiveRoomActivity.this, "登录冲突", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                });
+
         if (getLiveRoom().getCurrentUser().getType() == LPConstants.LPUserType.Teacher) {
             liveRoom.requestClassStart();
         }
@@ -290,7 +312,12 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void navigateToPPTWareHouse() {
-
+        if (pptManageFragment == null) {
+            pptManageFragment = PPTManageFragment.newInstance();
+            pptManagePresenter = new PPTManagePresenter(pptManageFragment);
+            bindVP(pptManageFragment, pptManagePresenter);
+        }
+        showDialogFragment(pptManageFragment);
     }
 
     @Override
@@ -454,11 +481,13 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
+        RxUtils.unSubscribe(subscriptionOfLoginConflict);
+
         orientationEventListener = null;
         if (getLiveRoom().getCurrentUser().getType() == LPConstants.LPUserType.Teacher) {
             liveRoom.requestClassEnd();
         }
         getLiveRoom().quitRoom();
-
     }
 }

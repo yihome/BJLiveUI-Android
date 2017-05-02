@@ -107,6 +107,20 @@ public abstract class BaseDialogFragment extends DialogFragment {
         windowParams.gravity = Gravity.BOTTOM | GravityCompat.END;
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        Window window = getDialog().getWindow();
+        checkNotNull(window);
+        WindowManager.LayoutParams windowParams = window.getAttributes();
+        resetWindowParams(windowParams);
+        window.setAttributes(windowParams);
+    }
+
+    protected void resetWindowParams(WindowManager.LayoutParams windowParams){
+        setWindowParams(windowParams);
+    }
+
     protected abstract int getLayoutId();
 
     protected abstract void init(Bundle savedInstanceState, Bundle arguments);
@@ -158,7 +172,7 @@ public abstract class BaseDialogFragment extends DialogFragment {
         return this;
     }
 
-    public BaseDialogFragment editClick(View.OnClickListener listener){
+    public BaseDialogFragment editClick(View.OnClickListener listener) {
         $.id(R.id.dialog_base_edit).clicked(listener);
         return this;
     }

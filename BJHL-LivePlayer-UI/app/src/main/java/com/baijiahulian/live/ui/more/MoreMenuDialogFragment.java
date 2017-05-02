@@ -94,6 +94,11 @@ public class MoreMenuDialogFragment extends BaseDialogFragment implements MoreMe
     }
 
     @Override
+    protected void resetWindowParams(WindowManager.LayoutParams windowParams) {
+        // do nothing
+    }
+
+    @Override
     public void setPresenter(MoreMenuContract.Presenter presenter) {
         super.setBasePresenter(presenter);
         this.presenter = presenter;
