@@ -1,6 +1,8 @@
 package com.baijiahulian.live.ui.videoplayer;
 
 import android.os.Bundle;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 
 import com.baijiahulian.avsdk.liveplayer.GLTextureView;
@@ -14,6 +16,7 @@ import com.baijiahulian.live.ui.base.BaseFragment;
 public class VideoPlayerFragment extends BaseFragment implements VideoPlayerContract.View {
 
     VideoPlayerContract.Presenter presenter;
+    private GestureDetector gestureDetector;
 
     @Override
     public void setPresenter(VideoPlayerContract.Presenter presenter) {
@@ -37,12 +40,28 @@ public class VideoPlayerFragment extends BaseFragment implements VideoPlayerCont
     @Override
     public void init(Bundle savedInstanceState) {
         super.init(savedInstanceState);
-        presenter.getPlayer().setVideoView((GLTextureView)view);
-        view.setOnClickListener(new View.OnClickListener() {
+        presenter.getPlayer().setVideoView((GLTextureView) view);
+        gestureDetector = new GestureDetector(getContext(), new MyGestureListener());
+        view.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onClick(View v) {
-                presenter.switchWithMaximum();
+            public boolean onTouch(View v, MotionEvent event) {
+                gestureDetector.onTouchEvent(event);
+                return true;
             }
         });
+    }
+
+    private class MyGestureListener extends GestureDetector.SimpleOnGestureListener {
+        @Override
+        public boolean onDoubleTap(MotionEvent e) {
+            presenter.switchWithMaximum();
+            return super.onDoubleTap(e);
+        }
+
+        @Override
+        public boolean onSingleTapConfirmed(MotionEvent e) {
+            presenter.popUpRemoteVideoDialog();
+            return super.onSingleTapConfirmed(e);
+        }
     }
 }

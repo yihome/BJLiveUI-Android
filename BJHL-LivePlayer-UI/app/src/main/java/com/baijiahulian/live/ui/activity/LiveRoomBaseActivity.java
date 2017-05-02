@@ -1,6 +1,7 @@
 package com.baijiahulian.live.ui.activity;
 
 import android.content.DialogInterface;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -65,7 +66,11 @@ public abstract class LiveRoomBaseActivity extends AppCompatActivity {
 //            transaction.setCustomAnimations(inAnim, outAnim);
 //        }
         transaction.remove(fragment);
-        transaction.commitAllowingStateLoss();
+        if (Build.VERSION.SDK_INT >= 24) {
+            transaction.commitNowAllowingStateLoss();
+        } else {
+            transaction.commitAllowingStateLoss();
+        }
 
     }
 

@@ -6,8 +6,11 @@ import android.view.View;
 import android.widget.Button;
 
 import com.baijiahulian.live.ui.R;
+import com.baijiahulian.live.ui.activity.LiveRoomActivity;
 import com.baijiahulian.live.ui.base.BaseDialogFragment;
 import com.baijiahulian.live.ui.utils.QueryPlus;
+
+import rx.functions.Action1;
 
 /**
  * Created by Shubo on 2017/3/2.
@@ -18,7 +21,7 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
     private QueryPlus $;
     private SettingContract.Presenter presenter;
 
-    public static SettingDialogFragment newInstance(){
+    public static SettingDialogFragment newInstance() {
         SettingDialogFragment dialog = new SettingDialogFragment();
         return dialog;
     }
@@ -98,6 +101,29 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
                 presenter.setDownLinkUDP();
             }
         });
+
+        $.id(R.id.dialog_setting_radio_camera_front).clicked(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                presenter.switchCamera();
+            }
+        });
+
+        $.id(R.id.dialog_setting_radio_camera_back).clicked(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                presenter.switchCamera();
+            }
+        });
+
+        $.id(R.id.dialog_setting_forbid_all_speak).clicked(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                presenter.switchForbidStatus();
+            }
+        });
+
+
     }
 
     @Override
@@ -202,6 +228,41 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
     @Override
     public void showStudentFail() {
         showToast(getString(R.string.live_media_student_fail));
+    }
+
+    @Override
+    public void showCameraFront() {
+        $.id(R.id.dialog_setting_radio_camera_front).enable(false);
+        $.id(R.id.dialog_setting_radio_camera_back).enable(true);
+        ((Button) $.id(R.id.dialog_setting_radio_camera_front).view()).setTextColor(ContextCompat.getColor(getContext(), R.color.live_white));
+        ((Button) $.id(R.id.dialog_setting_radio_camera_back).view()).setTextColor(ContextCompat.getColor(getContext(), R.color.live_text_color));
+    }
+
+    @Override
+    public void showCameraBack() {
+        $.id(R.id.dialog_setting_radio_camera_front).enable(true);
+        $.id(R.id.dialog_setting_radio_camera_back).enable(false);
+        ((Button) $.id(R.id.dialog_setting_radio_camera_front).view()).setTextColor(ContextCompat.getColor(getContext(), R.color.live_text_color));
+        ((Button) $.id(R.id.dialog_setting_radio_camera_back).view()).setTextColor(ContextCompat.getColor(getContext(), R.color.live_white));
+    }
+
+    @Override
+    public void showCameraSwitchStatus(boolean whetherShow) {
+        if (whetherShow) {
+            $.id(R.id.dialog_setting_camera_switch_wrapper).visible();
+        } else {
+            $.id(R.id.dialog_setting_camera_switch_wrapper).gone();
+        }
+    }
+
+    @Override
+    public void showForbidden() {
+        $.id(R.id.dialog_setting_forbid_all_speak).image(R.drawable.ic_on_switch);
+    }
+
+    @Override
+    public void showNotForbidden() {
+        $.id(R.id.dialog_setting_forbid_all_speak).image(R.drawable.ic_off_switch);
     }
 
     @Override

@@ -3,11 +3,15 @@ package com.baijiahulian.live.ui.activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.hardware.SensorManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
+import android.view.Gravity;
 import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -28,8 +32,14 @@ import com.baijiahulian.live.ui.more.MoreMenuDialogFragment;
 import com.baijiahulian.live.ui.more.MoreMenuPresenter;
 import com.baijiahulian.live.ui.ppt.MyPPTFragment;
 import com.baijiahulian.live.ui.ppt.PPTPresenter;
+import com.baijiahulian.live.ui.pptdialog.PPTDialogFragment;
+import com.baijiahulian.live.ui.pptdialog.PPTDialogPresenter;
 import com.baijiahulian.live.ui.pptmanage.PPTManageFragment;
 import com.baijiahulian.live.ui.pptmanage.PPTManagePresenter;
+import com.baijiahulian.live.ui.recorderdialog.RecorderDialogFragment;
+import com.baijiahulian.live.ui.recorderdialog.RecorderDialogPresenter;
+import com.baijiahulian.live.ui.remotevideodialog.RemoteVideoDialogFragment;
+import com.baijiahulian.live.ui.remotevideodialog.RemoteVideoDialogPresenter;
 import com.baijiahulian.live.ui.rightbotmenu.RightBottomMenuFragment;
 import com.baijiahulian.live.ui.rightbotmenu.RightBottomMenuPresenter;
 import com.baijiahulian.live.ui.rightmenu.RightMenuFragment;
@@ -50,6 +60,7 @@ import com.baijiahulian.live.ui.videorecorder.VideoRecorderPresenter;
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.context.LiveRoom;
 import com.baijiahulian.livecore.models.imodels.ILoginConflictModel;
+import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 
 import butterknife.BindView;
@@ -79,6 +90,10 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     FrameLayout flBottomRight;
     @BindView(R.id.activity_live_room_loading)
     FrameLayout flLoading;
+    @BindView(R.id.activity_live_room_chat_drawer)
+    DrawerLayout dlChat;
+    @BindView(R.id.activity_live_room_video_recorder_container)
+    LinearLayout llVideoContainer;
 
     private LiveRoom liveRoom;
 
@@ -102,6 +117,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private int oldRotation;
 
     private Subscription subscriptionOfLoginConflict;
+    private IMediaModel currentRemoteMediaUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,6 +154,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                 }
             }
         };
+        dlChat.openDrawer(Gravity.START);
+        checkScreenOrientationInit();
     }
 
     @Override
@@ -155,34 +173,26 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE)
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                     WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        else
+            dlChat.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        } else {
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            dlChat.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN);
+        }
         onBackgroundContainerConfigurationChanged(newConfig);
-        onForegroundLeftContainerConfigurationChanged(newConfig);
-        onForegroundRightContainerConfigurationChanged(newConfig);
+        onForegroundContainerConfigurationChanged(newConfig);
     }
 
-    private void onForegroundRightContainerConfigurationChanged(Configuration newConfig) {
-        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) flForegroundRight.getLayoutParams();
+    private void onForegroundContainerConfigurationChanged(Configuration newConfig) {
+        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) llVideoContainer.getLayoutParams();
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_top);
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
             lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_background_container);
         }
-        flForegroundRight.setLayoutParams(lp);
-    }
-
-    private void onForegroundLeftContainerConfigurationChanged(Configuration newConfig) {
-        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) flForegroundLeft.getLayoutParams();
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_top);
-        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_background_container);
-        }
-        flForegroundLeft.setLayoutParams(lp);
+        llVideoContainer.setLayoutParams(lp);
     }
 
     private void onBackgroundContainerConfigurationChanged(Configuration newConfig) {
@@ -255,7 +265,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void clearScreen() {
-        chatFragment.clearScreen();
+//        chatFragment.clearScreen();
+        dlChat.setVisibility(View.GONE);
         rightBottomMenuFragment.clearScreen();
         hideFragment(topBarFragment);
         hideFragment(rightMenuFragment);
@@ -263,7 +274,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void unClearScreen() {
-        chatFragment.unClearScreen();
+//        chatFragment.unClearScreen();
+        dlChat.setVisibility(View.VISIBLE);
         rightBottomMenuFragment.unClearScreen();
         showFragment(topBarFragment);
         showFragment(rightMenuFragment);
@@ -434,6 +446,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
             playerPresenter = new VideoPlayerPresenter(playerFragment);
             bindVP(playerFragment, playerPresenter);
             addFragment(R.id.activity_live_room_foreground_right_container, playerFragment);
+            flForegroundRight.setVisibility(View.VISIBLE);
         }
         playerPresenter.playVideo(userId);
     }
@@ -443,6 +456,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         checkNotNull(playerPresenter);
         playerPresenter.playAVClose(userId);
         removeFragment(playerFragment);
+        flForegroundRight.setVisibility(View.GONE);
         playerFragment = null;
         playerPresenter = null;
     }
@@ -453,6 +467,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
             recorderFragment = new VideoRecorderFragment();
             bindVP(recorderFragment, new VideoRecorderPresenter(recorderFragment));
             addFragment(R.id.activity_live_room_foreground_left_container, recorderFragment);
+            flForegroundLeft.setVisibility(View.VISIBLE);
         }
     }
 
@@ -460,8 +475,56 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     public void detachVideo() {
         checkNotNull(recorderFragment);
         removeFragment(recorderFragment);
-        getSupportFragmentManager().executePendingTransactions();
+        flForegroundLeft.setVisibility(View.GONE);
+        if (Build.VERSION.SDK_INT < 24) {
+            getSupportFragmentManager().executePendingTransactions();
+        }
         recorderFragment = null;
+    }
+
+    @Override
+    public void showRecorderDialogFragment() {
+        View max = flBackground.getChildAt(0);
+        if (max == recorderFragment.getView()) return;
+        RecorderDialogFragment recorderFragment = new RecorderDialogFragment();
+        RecorderDialogPresenter recorderPresenter = new RecorderDialogPresenter(recorderFragment);
+        bindVP(recorderFragment, recorderPresenter);
+        showDialogFragment(recorderFragment);
+    }
+
+    @Override
+    public void showPPTDialogFragment() {
+        View max = flBackground.getChildAt(0);
+        if (max == lppptFragment.getView()) return;
+        PPTDialogFragment pptFragment = new PPTDialogFragment();
+        PPTDialogPresenter pptPresenter = new PPTDialogPresenter(pptFragment);
+        bindVP(pptFragment, pptPresenter);
+        showDialogFragment(pptFragment);
+    }
+
+    @Override
+    public void showRemoteVideoPlayer() {
+        View max = flBackground.getChildAt(0);
+        if (max == playerFragment.getView()) return;
+        RemoteVideoDialogFragment remoteVideoFragment = new RemoteVideoDialogFragment();
+        RemoteVideoDialogPresenter remoteVideoPresenter = new RemoteVideoDialogPresenter(remoteVideoFragment);
+        bindVP(remoteVideoFragment, remoteVideoPresenter);
+        showDialogFragment(remoteVideoFragment);
+    }
+
+    /**
+     * 当前正在互动的用户多媒体对象
+     *
+     * @param mediaModel
+     */
+    @Override
+    public void setCurrentVideoUser(IMediaModel mediaModel) {
+        this.currentRemoteMediaUser = mediaModel;
+    }
+
+    @Override
+    public IMediaModel getCurrentVideoUser() {
+        return currentRemoteMediaUser;
     }
 
     private void switchView(View view1, View view2) {
@@ -489,5 +552,16 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
             liveRoom.requestClassEnd();
         }
         getLiveRoom().quitRoom();
+    }
+
+    //初始化时检测屏幕方向，以此设置聊天页面是否可隐藏
+    private void checkScreenOrientationInit() {
+        Configuration configuration = this.getResources().getConfiguration();
+        int orientation = configuration.orientation;
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            dlChat.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        } else {
+            dlChat.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN);
+        }
     }
 }

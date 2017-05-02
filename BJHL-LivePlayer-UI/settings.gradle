@@ -2,4 +2,6 @@ include ':app', ':liveplayer-sdk-core', ':liveplayer-sdk-core-ppt'//, ':liveplay
 
 project(':liveplayer-sdk-core').projectDir = new File('/Users/Shubo/Desktop/workspace/liveplayer/liveplayer-android-sdk-core/BJHL-LivePlayer/liveplayer-sdk-core')
 project(':liveplayer-sdk-core-ppt').projectDir = new File('/Users/Shubo/Desktop/workspace/liveplayer/liveplayer-android-sdk-core/BJHL-LivePlayer/liveplayer-sdk-core-ppt')
-//project(':liveplayer').projectDir = new File('/Users/Shubo/Desktop/workspace/player-avsdk-live/liveplayer')
+
+//project(':liveplayer-sdk-core').projectDir = new File('/Users/wangkangfei/project/player/android-live-core/BJHL-LivePlayer/liveplayer-sdk-core')
+//project(':liveplayer-sdk-core-ppt').projectDir = new File('/Users/wangkangfei/project/player/android-live-core/BJHL-LivePlayer/liveplayer-sdk-core-ppt')

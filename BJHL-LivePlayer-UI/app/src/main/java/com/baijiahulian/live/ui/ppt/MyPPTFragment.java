@@ -1,5 +1,8 @@
 package com.baijiahulian.live.ui.ppt;
 
+import android.view.GestureDetector;
+import android.view.MotionEvent;
+
 import com.baijiahulian.livecore.ppt.LPPPTFragment;
 import com.baijiahulian.livecore.ppt.whiteboard.LPWhiteBoardView;
 
@@ -22,10 +25,17 @@ public class MyPPTFragment extends LPPPTFragment implements PPTContract.View {
         super.setOnSingleTapListener(new LPWhiteBoardView.OnSingleTapListener() {
             @Override
             public void onSingleTap(LPWhiteBoardView whiteBoardView) {
+                presenter.popUpPPTDialog();
+            }
+        });
+        super.setOnDoubleTapListener(new LPWhiteBoardView.OnDoubleTapListener() {
+            @Override
+            public void onDoubleTap(LPWhiteBoardView whiteBoardView) {
                 presenter.switchWithMaximum();
             }
         });
     }
+
 
     @Override
     public void onDestroy() {

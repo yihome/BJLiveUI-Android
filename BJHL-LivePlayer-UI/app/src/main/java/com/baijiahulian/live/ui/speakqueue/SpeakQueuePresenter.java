@@ -154,11 +154,14 @@ public class SpeakQueuePresenter implements SpeakQueueContract.Presenter {
     public void closeSpeaking(int position) {
         routerListener.playVideoClose(speakList.get(position - applyList.size()).getUser().getUserId());
         routerListener.getLiveRoom().getSpeakQueueVM().closeOtherSpeak(speakList.get(position - applyList.size()).getUser().getUserId());
+        routerListener.setCurrentVideoUser(null);
     }
 
     @Override
     public void openVideo(int position) {
-        routerListener.playVideo(speakList.get(position - applyList.size()).getUser().getUserId());
+        IMediaModel mediaModel = speakList.get(position - applyList.size());
+        routerListener.playVideo(mediaModel.getUser().getUserId());
+        routerListener.setCurrentVideoUser(mediaModel);
         view.notifyItemChanged(position);
     }
 

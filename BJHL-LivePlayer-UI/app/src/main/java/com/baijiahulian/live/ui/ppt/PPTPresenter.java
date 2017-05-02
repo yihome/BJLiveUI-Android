@@ -21,6 +21,11 @@ public class PPTPresenter implements PPTContract.Presenter {
     }
 
     @Override
+    public void popUpPPTDialog() {
+        routerListener.showPPTDialogFragment();
+    }
+
+    @Override
     public void setRouter(LiveRoomRouterListener liveRoomRouterListener) {
         routerListener = liveRoomRouterListener;
     }

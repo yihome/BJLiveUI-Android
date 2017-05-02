@@ -18,5 +18,7 @@ interface VideoPlayerContract {
         LPPlayer getPlayer();
 
         void switchWithMaximum();
+
+        void popUpRemoteVideoDialog();
     }
 }

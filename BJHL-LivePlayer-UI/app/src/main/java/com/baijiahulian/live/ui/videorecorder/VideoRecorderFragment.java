@@ -2,6 +2,8 @@ package com.baijiahulian.live.ui.videorecorder;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 
 import com.baijiahulian.avsdk.liveplayer.CameraGLTextureView;
@@ -14,6 +16,7 @@ import com.baijiahulian.live.ui.base.BaseFragment;
 public class VideoRecorderFragment extends BaseFragment implements VideoRecorderContract.View {
 
     private VideoRecorderContract.Presenter presenter;
+    private GestureDetector gestureDetector;
 
     @Override
     public int getLayoutId() {
@@ -32,12 +35,30 @@ public class VideoRecorderFragment extends BaseFragment implements VideoRecorder
     public void init(Bundle savedInstanceState) {
         super.init(savedInstanceState);
         presenter.getRecorder().setPreview((CameraGLTextureView) view);
-        view.setOnClickListener(new View.OnClickListener() {
+
+        gestureDetector = new GestureDetector(getContext(), new MyGestureListener());
+
+        view.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onClick(View v) {
-                presenter.switchWithMaximum();
+            public boolean onTouch(View v, MotionEvent event) {
+                gestureDetector.onTouchEvent(event);
+                return true;
             }
         });
+    }
+
+    private class MyGestureListener extends GestureDetector.SimpleOnGestureListener {
+        @Override
+        public boolean onDoubleTap(MotionEvent e) {
+            presenter.switchWithMaximum();
+            return super.onDoubleTap(e);
+        }
+
+        @Override
+        public boolean onSingleTapConfirmed(MotionEvent e) {
+            presenter.popUpRecorderDialog();
+            return super.onSingleTapConfirmed(e);
+        }
     }
 
     @Override

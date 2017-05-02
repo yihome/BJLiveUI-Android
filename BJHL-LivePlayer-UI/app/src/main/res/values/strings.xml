@@ -30,6 +30,11 @@
     <string name="live_setting_link_type_up2">上传2</string>
     <string name="live_setting_link_type_down1">下载1</string>
     <string name="live_setting_link_type_down2">下载2</string>
+    <string name="live_setting_camera_switch">摄像头切换：</string>
+    <string name="live_setting_camera_switch_front">前</string>
+    <string name="live_setting_camera_switch_back">后</string>
+    <string name="live_setting_camera_forbid_all">全体禁言</string>
+
     <string name="live_media_visitor_fail">游客不能举手发言</string>
     <string name="live_media_student_fail">请先举手发言，并等待老师同意</string>
     <string name="live_loading_more">正在加载更多…</string>
@@ -51,5 +56,14 @@
     <string name="live_announcement_hint">输入公告内容</string>
     <string name="live_announcement_url_hint">为公告添加跳转网址</string>
     <string name="live_announcement_view_url_hint">点击公告可以跳转</string>
+
+    <string name="live_recorder_title">采集视频</string>
+    <string name="live_recorder_switch_camera">切换摄像头</string>
+    <string name="live_recorder_pretty_filter_on">开启美颜</string>
+    <string name="live_recorder_pretty_filter_off">关闭美颜</string>
+    <string name="live_recorder_camera_switch_off">关闭摄像头</string>
+
+    <string name="live_ppt_manage">管理课件</string>
+    <string name="live_ppt_title">PPT</string>
 
 </resources>

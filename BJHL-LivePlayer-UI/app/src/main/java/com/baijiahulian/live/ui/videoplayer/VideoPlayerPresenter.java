@@ -28,6 +28,11 @@ public class VideoPlayerPresenter implements VideoPlayerContract.Presenter {
     }
 
     @Override
+    public void popUpRemoteVideoDialog() {
+        routerListener.showRemoteVideoPlayer();
+    }
+
+    @Override
     public void setRouter(LiveRoomRouterListener liveRoomRouterListener) {
         this.routerListener = liveRoomRouterListener;
         this.player = routerListener.getLiveRoom().getPlayer();
