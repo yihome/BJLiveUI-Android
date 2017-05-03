@@ -138,6 +138,18 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
     }
 
     @Override
+    public void showForbiddenHand() {
+        $.id(R.id.fragment_right_speak_apply).image(R.drawable.live_ic_handup_forbid);
+        $.id(R.id.fragment_right_speak_apply).enable(false);
+    }
+
+    @Override
+    public void showNotForbiddenHand() {
+        $.id(R.id.fragment_right_speak_apply).image(R.drawable.live_ic_handup);
+        $.id(R.id.fragment_right_speak_apply).enable(true);
+    }
+
+    @Override
     public void setPresenter(RightMenuContract.Presenter presenter) {
         super.setBasePresenter(presenter);
         this.presenter = presenter;

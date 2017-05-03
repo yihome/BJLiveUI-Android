@@ -35,6 +35,10 @@ interface RightMenuContract {
         void showTeacherRightMenu();
 
         void showStudentRightMenu();
+
+        void showForbiddenHand();
+
+        void showNotForbiddenHand();
     }
 
     interface Presenter extends BasePresenter {

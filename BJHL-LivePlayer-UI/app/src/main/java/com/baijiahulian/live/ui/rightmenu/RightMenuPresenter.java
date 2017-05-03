@@ -3,6 +3,8 @@ package com.baijiahulian.live.ui.rightmenu;
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 import com.baijiahulian.live.ui.utils.RxUtils;
 import com.baijiahulian.livecore.context.LPConstants;
+import com.baijiahulian.livecore.context.LiveRoom;
+import com.baijiahulian.livecore.models.imodels.IForbidChatModel;
 import com.baijiahulian.livecore.models.imodels.IMediaControlModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
@@ -35,6 +37,7 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
             subscriptionOfSpeakApplyResponse;
     private int speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_NONE;
     private boolean isDrawing = false;
+    private LiveRoom liveRoom;
 
     public RightMenuPresenter(RightMenuContract.View view) {
         this.view = view;
@@ -115,6 +118,7 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
     @Override
     public void setRouter(LiveRoomRouterListener liveRoomRouterListener) {
         this.liveRoomRouterListener = liveRoomRouterListener;
+        this.liveRoom = liveRoomRouterListener.getLiveRoom();
     }
 
     @Override
@@ -228,6 +232,17 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
         }
 
         liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().requestActiveUsers();
+        liveRoom.getObservableOfForbidAllChatStatus()
+                .subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean aBoolean) {
+                        if (aBoolean) {
+                            view.showForbiddenHand();
+                        } else {
+                            view.showNotForbiddenHand();
+                        }
+                    }
+                });
     }
 
     private void refreshSpeakQueueBtnStatus() {
