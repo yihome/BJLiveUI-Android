@@ -33,6 +33,7 @@
         android:id="@+id/fragment_right_pen"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="2dp"
         android:layout_marginBottom="@dimen/activity_live_room_margin"
         android:src="@drawable/live_ic_lightpen" />
 
@@ -40,13 +41,28 @@
         android:id="@+id/fragment_right_ppt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="2dp"
         android:layout_marginBottom="@dimen/activity_live_room_margin"
         android:src="@drawable/live_ic_ppt" />
 
-    <ImageView
-        android:id="@+id/fragment_right_speak_apply"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/live_ic_handup" />
+    <FrameLayout
+        android:id="@+id/fragment_right_speak_wrapper"
+        android:layout_width="48dp"
+        android:layout_height="48dp">
+
+        <com.baijiahulian.live.ui.viewsupport.CountdownCircleView
+            android:id="@+id/fragment_right_hand_countdown"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="invisible" />
+
+        <ImageView
+            android:id="@+id/fragment_right_speak_apply"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:layout_gravity="center"
+            android:src="@drawable/live_ic_handup" />
+
+    </FrameLayout>
 
 </LinearLayout>

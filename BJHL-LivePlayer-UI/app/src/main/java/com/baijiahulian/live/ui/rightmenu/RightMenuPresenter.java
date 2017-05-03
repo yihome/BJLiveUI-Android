@@ -14,6 +14,9 @@ import java.util.concurrent.TimeUnit;
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
+import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.observables.ConnectableObservable;
 
 import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
@@ -64,16 +67,35 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
         if (speakApplyStatus == RightMenuContract.STUDENT_SPEAK_APPLY_NONE) {
             liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().requestSpeakApply();
             speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_APPLYING;
-            subscriptionOfSpeakApplyCounter = Observable.timer(1, TimeUnit.SECONDS)
-                    .repeat(30)
+            subscriptionOfSpeakApplyCounter = Observable.interval(0, 100, TimeUnit.MILLISECONDS)
+                    .take(300)
+                    .map(new Func1<Long, Long>() {
+                        @Override
+                        public Long call(Long aLong) {
+                            return 30000L - aLong.intValue() * 100;
+                        }
+                    })
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new LPErrorPrintSubscriber<Long>() {
+                    .subscribe(new Action1<Long>() {
                         @Override
                         public void call(Long aLong) {
-                            view.showSpeakApplyCountDown(30 - aLong.intValue());
+                            view.showSpeakApplyCountDown(aLong.intValue());
+                        }
+                    }, new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+
+                        }
+                    }, new Action0() {
+                        @Override
+                        public void call() {
+                            // 倒计时结束，取消发言请求
+                            speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_NONE;
+                            RxUtils.unSubscribe(subscriptionOfSpeakApplyCounter);
+                            liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().cancelSpeakApply();
+                            view.showSpeakApplyCanceled();
                         }
                     });
-            view.showSpeakApplyCountDown(30);
         } else if (speakApplyStatus == RightMenuContract.STUDENT_SPEAK_APPLY_APPLYING) {
             // 取消发言请求
             speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_NONE;

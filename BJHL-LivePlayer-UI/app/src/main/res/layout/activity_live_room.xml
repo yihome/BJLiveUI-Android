@@ -45,7 +45,7 @@
     </LinearLayout>
 
 
-    <com.baijiahulian.live.ui.chat.AutoExitDrawerLayout
+    <com.baijiahulian.live.ui.viewsupport.AutoExitDrawerLayout
         android:id="@+id/activity_live_room_chat_drawer"
         android:layout_width="268dp"
         android:layout_height="match_parent"
@@ -63,7 +63,7 @@
             android:visibility="visible" />
 
 
-    </com.baijiahulian.live.ui.chat.AutoExitDrawerLayout>
+    </com.baijiahulian.live.ui.viewsupport.AutoExitDrawerLayout>
 
     <FrameLayout
         android:id="@+id/activity_live_room_top"

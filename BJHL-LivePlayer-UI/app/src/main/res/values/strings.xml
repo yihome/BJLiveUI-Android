@@ -60,5 +60,6 @@
 
     <string name="live_ppt_manage">管理课件</string>
     <string name="live_ppt_title">PPT</string>
+    <string name="live_forbid_raise_hand">禁止举手</string>
 
 </resources>
