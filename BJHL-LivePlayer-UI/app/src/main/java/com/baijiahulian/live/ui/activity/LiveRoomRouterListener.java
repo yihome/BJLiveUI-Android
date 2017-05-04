@@ -83,4 +83,6 @@ public interface LiveRoomRouterListener {
     void setCurrentVideoUser(IMediaModel mediaModel);
 
     IMediaModel getCurrentVideoUser();
+
+    void clearPPTAllShapes();
 }

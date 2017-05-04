@@ -13,6 +13,18 @@
         android:layout_above="@+id/activity_live_room_center_anchor"
         android:background="@color/live_white" />
 
+    <FrameLayout
+        android:id="@+id/activity_live_room_ppt_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/activity_live_room_background_container"
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="@dimen/activity_live_room_margin"
+        android:layout_marginLeft="@dimen/activity_live_room_margin"
+        android:visibility="gone">
+
+    </FrameLayout>
+
     <View
         android:id="@+id/activity_live_room_center_anchor"
         android:layout_width="0dp"

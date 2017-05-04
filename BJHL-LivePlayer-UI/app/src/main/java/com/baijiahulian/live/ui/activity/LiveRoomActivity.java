@@ -33,6 +33,8 @@ import com.baijiahulian.live.ui.ppt.MyPPTFragment;
 import com.baijiahulian.live.ui.ppt.PPTPresenter;
 import com.baijiahulian.live.ui.pptdialog.PPTDialogFragment;
 import com.baijiahulian.live.ui.pptdialog.PPTDialogPresenter;
+import com.baijiahulian.live.ui.pptleftmenu.PPTLeftFragment;
+import com.baijiahulian.live.ui.pptleftmenu.PPTLeftPresenter;
 import com.baijiahulian.live.ui.recorderdialog.RecorderDialogFragment;
 import com.baijiahulian.live.ui.recorderdialog.RecorderDialogPresenter;
 import com.baijiahulian.live.ui.remotevideodialog.RemoteVideoDialogFragment;
@@ -89,6 +91,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     LinearLayout llVideoContainer;
     @BindView(R.id.activity_live_room_top_right)
     FrameLayout flTopRight;
+    @BindView(R.id.activity_live_room_ppt_left)
+    FrameLayout flPPTLeft;
 
     private LiveRoom liveRoom;
 
@@ -101,6 +105,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private ChatFragment chatFragment;
     private RightBottomMenuFragment rightBottomMenuFragment;
     private LeftMenuFragment leftMenuFragment;
+    private PPTLeftFragment pptLeftFragment;
     private RightMenuFragment rightMenuFragment;
     private WindowManager windowManager;
 
@@ -176,6 +181,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         }
         onBackgroundContainerConfigurationChanged(newConfig);
         onForegroundContainerConfigurationChanged(newConfig);
+        onPPTLeftMenuConfigurationChanged(newConfig);
     }
 
     private void onForegroundContainerConfigurationChanged(Configuration newConfig) {
@@ -196,6 +202,18 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
             lp.addRule(RelativeLayout.ABOVE, R.id.activity_live_room_center_anchor);
         }
         flBackground.setLayoutParams(lp);
+    }
+
+    private void onPPTLeftMenuConfigurationChanged(Configuration newConfig) {
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            if (lppptFragment != null && lppptFragment.isEditable()) {
+                flLeft.setVisibility(View.GONE);
+                dlChat.setVisibility(View.GONE);
+            }
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            flLeft.setVisibility(View.VISIBLE);
+            dlChat.setVisibility(View.VISIBLE);
+        }
     }
 
     //录课中ui调整
@@ -238,6 +256,10 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         leftMenuFragment = new LeftMenuFragment();
         bindVP(leftMenuFragment, new LeftMenuPresenter(leftMenuFragment));
         addFragment(R.id.activity_live_room_bottom_left, leftMenuFragment);
+
+        pptLeftFragment = new PPTLeftFragment();
+        bindVP(pptLeftFragment, new PPTLeftPresenter(pptLeftFragment));
+        addFragment(R.id.activity_live_room_ppt_left, pptLeftFragment);
 
         rightMenuFragment = new RightMenuFragment();
         bindVP(rightMenuFragment, new RightMenuPresenter(rightMenuFragment));
@@ -293,6 +315,22 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         checkNotNull(lppptFragment);
         lppptFragment.changePPTCanvasMode();
         lppptFragment.setPPTShowWay(LPConstants.LPPPTShowWay.SHOW_COVERED);
+
+        int currentOrientation = getResources().getConfiguration().orientation;
+        if (lppptFragment.isEditable()) {
+            flTop.setVisibility(View.GONE);
+            if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+                checkNotNull(leftMenuFragment);
+                flLeft.setVisibility(View.GONE);
+                dlChat.setVisibility(View.GONE);
+            }
+            flPPTLeft.setVisibility(View.VISIBLE);
+        } else {
+            flTop.setVisibility(View.VISIBLE);
+            flLeft.setVisibility(View.VISIBLE);
+            dlChat.setVisibility(View.VISIBLE);
+            flPPTLeft.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -528,6 +566,12 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public IMediaModel getCurrentVideoUser() {
         return currentRemoteMediaUser;
+    }
+
+    @Override
+    public void clearPPTAllShapes() {
+        checkNotNull(lppptFragment);
+        lppptFragment.deleteAllShape();
     }
 
     private void switchView(View view1, View view2) {
