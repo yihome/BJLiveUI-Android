@@ -9,7 +9,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.view.Gravity;
 import android.view.OrientationEventListener;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -42,6 +41,7 @@ import com.baijiahulian.live.ui.rightbotmenu.RightBottomMenuFragment;
 import com.baijiahulian.live.ui.rightbotmenu.RightBottomMenuPresenter;
 import com.baijiahulian.live.ui.rightmenu.RightMenuFragment;
 import com.baijiahulian.live.ui.rightmenu.RightMenuPresenter;
+import com.baijiahulian.live.ui.righttopmenu.RightTopMenuFragment;
 import com.baijiahulian.live.ui.setting.SettingDialogFragment;
 import com.baijiahulian.live.ui.setting.SettingPresenter;
 import com.baijiahulian.live.ui.speakqueue.SpeakQueueDialogFragment;
@@ -87,11 +87,14 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     DrawerLayout dlChat;
     @BindView(R.id.activity_live_room_video_recorder_container)
     LinearLayout llVideoContainer;
+    @BindView(R.id.activity_live_room_top_right)
+    FrameLayout flTopRight;
 
     private LiveRoom liveRoom;
 
     private LoadingFragment loadingFragment;
     private TopBarFragment topBarFragment;
+    private RightTopMenuFragment topRightFragment;
 
     private MyPPTFragment lppptFragment;
     private VideoRecorderFragment recorderFragment;
@@ -195,6 +198,17 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         flBackground.setLayoutParams(lp);
     }
 
+    //录课中ui调整
+    private void onRecordFullScreenConfigurationChanged(boolean isClear) {
+        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) flTopRight.getLayoutParams();
+        if (isClear) {
+            lp.addRule(RelativeLayout.BELOW, 0);
+        } else {
+            lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_top);
+        }
+        flTopRight.setLayoutParams(lp);
+    }
+
     @Override
     public LiveRoom getLiveRoom() {
         checkNotNull(liveRoom);
@@ -217,6 +231,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         topBarFragment = new TopBarFragment();
         bindVP(topBarFragment, new TopBarPresenter(topBarFragment));
         addFragment(R.id.activity_live_room_top, topBarFragment);
+
+        topRightFragment = new RightTopMenuFragment();
+        addFragment(R.id.activity_live_room_top_right, topRightFragment);
 
         leftMenuFragment = new LeftMenuFragment();
         bindVP(leftMenuFragment, new LeftMenuPresenter(leftMenuFragment));
@@ -250,6 +267,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         rightBottomMenuFragment.clearScreen();
         hideFragment(topBarFragment);
         hideFragment(rightMenuFragment);
+        onRecordFullScreenConfigurationChanged(true);
     }
 
     @Override
@@ -259,6 +277,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         rightBottomMenuFragment.unClearScreen();
         showFragment(topBarFragment);
         showFragment(rightMenuFragment);
+        onRecordFullScreenConfigurationChanged(false);
     }
 
     @Override
@@ -379,9 +398,18 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         showDialogFragment(fragment);
     }
 
+    /**
+     * @param recordStatus 当前的状态 1:正在录制 0:未录制
+     */
     @Override
-    public void navigateToCloudRecord() {
-
+    public void navigateToCloudRecord(boolean recordStatus) {
+        if (recordStatus) {
+            flTopRight.setVisibility(View.VISIBLE);
+            showFragment(topRightFragment);
+        } else {
+            flTopRight.setVisibility(View.GONE);
+            hideFragment(topRightFragment);
+        }
     }
 
     @Override

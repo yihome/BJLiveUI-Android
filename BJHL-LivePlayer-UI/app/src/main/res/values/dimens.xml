@@ -6,4 +6,6 @@
     <dimen name="activity_live_room_margin">10dp</dimen>
     <dimen name="activity_live_room_dialog_margin">15dp</dimen>
     <dimen name="view_circle_wrapper">3dp</dimen>
+    <dimen name="distance_left_right">12dp</dimen>
+    <dimen name="distance_top_bottom">4dp</dimen>
 </resources>

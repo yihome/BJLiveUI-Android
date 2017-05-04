@@ -16,6 +16,7 @@ public class MoreMenuPresenter implements MoreMenuContract.Presenter {
     private MoreMenuContract.View view;
     private LiveRoomRouterListener routerListener;
     private Subscription subscriptionOfCloudRecord;
+    private boolean recordStatus;
 
     public MoreMenuPresenter(MoreMenuContract.View view) {
         this.view = view;
@@ -33,17 +34,19 @@ public class MoreMenuPresenter implements MoreMenuContract.Presenter {
                 .subscribe(new LPErrorPrintSubscriber<Boolean>() {
                     @Override
                     public void call(Boolean aBoolean) {
+                        recordStatus = aBoolean;
                         if (aBoolean)
                             view.showCloudRecordOn();
                         else
                             view.showCloudRecordOff();
                     }
                 });
-
-        if (routerListener.getCloudRecordStatus())
+        recordStatus = routerListener.getLiveRoom().getCloudRecordStatus();
+        if (recordStatus)
             view.showCloudRecordOn();
         else
             view.showCloudRecordOff();
+
     }
 
     @Override
@@ -64,7 +67,10 @@ public class MoreMenuPresenter implements MoreMenuContract.Presenter {
 
     @Override
     public void switchCloudRecord() {
-        routerListener.navigateToCloudRecord();
+        //ui
+        routerListener.navigateToCloudRecord(!recordStatus);
+        //logic
+        routerListener.getLiveRoom().requestCloudRecord(!recordStatus);
     }
 
     @Override

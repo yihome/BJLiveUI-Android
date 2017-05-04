@@ -50,8 +50,9 @@ public interface LiveRoomRouterListener {
 
     void navigateToAnnouncement();
 
-    void navigateToCloudRecord();
+    void navigateToCloudRecord(boolean recordStatus);
 
+    @Deprecated
     boolean getCloudRecordStatus();
 
     void navigateToHelp();
