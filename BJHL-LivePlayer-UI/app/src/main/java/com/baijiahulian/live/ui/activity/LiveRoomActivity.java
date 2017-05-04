@@ -302,6 +302,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         showFragment(topBarFragment);
         showFragment(rightMenuFragment);
         onRecordFullScreenConfigurationChanged(false);
+        dlChat.openDrawer(Gravity.START);
     }
 
     @Override
@@ -331,6 +332,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
             flTop.setVisibility(View.VISIBLE);
             flLeft.setVisibility(View.VISIBLE);
             dlChat.setVisibility(View.VISIBLE);
+            dlChat.openDrawer(Gravity.START);
             flPPTLeft.setVisibility(View.GONE);
         }
     }
