@@ -65,7 +65,7 @@ public class RecorderDialogPresenter implements RecorderDialogContract.Presenter
     @Override
     public void turnOffCamera() {
         if (recorder.isVideoAttached()) {
-            recorder.detachVideo();
+            routerListener.detachVideo();
         }
     }
 }

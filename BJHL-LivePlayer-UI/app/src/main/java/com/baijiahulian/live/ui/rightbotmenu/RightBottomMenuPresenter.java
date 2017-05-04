@@ -25,7 +25,12 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
 
     @Override
     public void changeZoom() {
-
+        if (liveRoomRouterListener.getCurrentScreenOrientation() == 2) {
+            view.showZoomIn();
+        } else if (liveRoomRouterListener.getCurrentScreenOrientation() == 1) {
+            view.showZoomOut();
+        }
+        liveRoomRouterListener.changeScreenOrientation();
     }
 
     @Override
@@ -84,6 +89,13 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
                 });
         if (!liveRoomRouterListener.isTeacherOrAssistant()) {
             liveRoomRouterListener.disableSpeakerMode();
+        }
+        //横屏
+        if (liveRoomRouterListener.getCurrentScreenOrientation() == 2) {
+            view.showZoomOut();
+        } else if (liveRoomRouterListener.getCurrentScreenOrientation() == 1) {
+            //竖屏
+            view.showZoomIn();
         }
     }
 

@@ -85,4 +85,8 @@ public interface LiveRoomRouterListener {
     IMediaModel getCurrentVideoUser();
 
     void clearPPTAllShapes();
+
+    void changeScreenOrientation();
+
+    int getCurrentScreenOrientation();
 }

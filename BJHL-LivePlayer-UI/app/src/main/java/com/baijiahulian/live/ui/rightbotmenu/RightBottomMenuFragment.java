@@ -142,6 +142,16 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
     }
 
     @Override
+    public void showZoomIn() {
+        $.id(R.id.fragment_right_bottom_zoom).image(R.drawable.live_ic_zoomin);
+    }
+
+    @Override
+    public void showZoomOut() {
+        $.id(R.id.fragment_right_bottom_zoom).image(R.drawable.live_ic_zoomout);
+    }
+
+    @Override
     public void setPresenter(RightBottomMenuContract.Presenter presenter) {
         super.setBasePresenter(presenter);
         this.presenter = presenter;

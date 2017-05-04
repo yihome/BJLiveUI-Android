@@ -1,10 +1,12 @@
 package com.baijiahulian.live.ui.activity;
 
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Gravity;
 import android.view.OrientationEventListener;
@@ -183,6 +185,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         onBackgroundContainerConfigurationChanged(newConfig);
         onForegroundContainerConfigurationChanged(newConfig);
         onPPTLeftMenuConfigurationChanged(newConfig);
+
     }
 
     private void onForegroundContainerConfigurationChanged(Configuration newConfig) {
@@ -587,6 +590,28 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     public void clearPPTAllShapes() {
         checkNotNull(lppptFragment);
         lppptFragment.deleteAllShape();
+    }
+
+    @Override
+    public void changeScreenOrientation() {
+        int currentOrientation = getResources().getConfiguration().orientation;
+        if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        } else if (currentOrientation == Configuration.ORIENTATION_PORTRAIT) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        }
+        flBackground.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
+            }
+        }, 1000);
+
+    }
+
+    @Override
+    public int getCurrentScreenOrientation() {
+        return getResources().getConfiguration().orientation;
     }
 
     private void switchView(View view1, View view2) {
