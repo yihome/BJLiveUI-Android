@@ -111,6 +111,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     private VideoPlayerFragment playerFragment;
     private VideoPlayerPresenter playerPresenter;
+    private RightMenuPresenter rightMenuPresenter;
 
     private OrientationEventListener orientationEventListener; //处理屏幕旋转时本地录制视频的方向
     private int oldRotation;
@@ -262,7 +263,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         addFragment(R.id.activity_live_room_ppt_left, pptLeftFragment);
 
         rightMenuFragment = new RightMenuFragment();
-        bindVP(rightMenuFragment, new RightMenuPresenter(rightMenuFragment));
+        rightMenuPresenter = new RightMenuPresenter(rightMenuFragment);
+        bindVP(rightMenuFragment, rightMenuPresenter);
         addFragment(R.id.activity_live_room_right, rightMenuFragment);
 
         rightBottomMenuFragment = new RightBottomMenuFragment();
@@ -390,6 +392,11 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         if (isPPT)
             lppptFragment.onResume();
         liveRoom.getRecorder().invalidVideo();
+
+        if (lppptFragment != null && lppptFragment.isEditable()) {
+            rightMenuPresenter.changeDrawing();
+        }
+        rightMenuPresenter.changePPTDrawBtnStatus(false);
     }
 
     @Override
@@ -403,6 +410,11 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         if (isPPT)
             lppptFragment.onResume();
         liveRoom.getRecorder().invalidVideo();
+
+        if (lppptFragment != null && lppptFragment.isEditable()) {
+            rightMenuPresenter.changeDrawing();
+        }
+        rightMenuPresenter.changePPTDrawBtnStatus(false);
     }
 
     @Override
@@ -413,6 +425,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         switchView(lppptFragment.getView(), max);
         lppptFragment.onResume();
         liveRoom.getRecorder().invalidVideo();
+        rightMenuPresenter.changePPTDrawBtnStatus(true);
     }
 
     @Override

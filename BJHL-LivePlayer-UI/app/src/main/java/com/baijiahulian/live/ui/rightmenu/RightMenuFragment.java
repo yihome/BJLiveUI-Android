@@ -150,6 +150,16 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
     }
 
     @Override
+    public void hidePPTDrawBtn() {
+        $.id(R.id.fragment_right_pen).gone();
+    }
+
+    @Override
+    public void showPPTDrawBtn() {
+        $.id(R.id.fragment_right_pen).visible();
+    }
+
+    @Override
     public void setPresenter(RightMenuContract.Presenter presenter) {
         super.setBasePresenter(presenter);
         this.presenter = presenter;

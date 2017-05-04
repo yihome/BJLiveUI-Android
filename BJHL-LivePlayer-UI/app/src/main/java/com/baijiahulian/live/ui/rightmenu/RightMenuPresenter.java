@@ -116,6 +116,15 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
     }
 
     @Override
+    public void changePPTDrawBtnStatus(boolean shouldShow) {
+        if (shouldShow) {
+            view.showPPTDrawBtn();
+        } else {
+            view.hidePPTDrawBtn();
+        }
+    }
+
+    @Override
     public void setRouter(LiveRoomRouterListener liveRoomRouterListener) {
         this.liveRoomRouterListener = liveRoomRouterListener;
         this.liveRoom = liveRoomRouterListener.getLiveRoom();
