@@ -56,6 +56,27 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
     }
 
     @Override
+    public void getSysRotationSetting() {
+        if (liveRoomRouterListener.getSysRotationSetting() == 1) {
+            //可自由转屏
+            view.hideZoom();
+            liveRoomRouterListener.letScreenRotateItself();
+        } else if (liveRoomRouterListener.getSysRotationSetting() == 0) {
+            //不可自由转屏
+            view.showZoom();
+            liveRoomRouterListener.forbidScreenRotateItself();
+        }
+
+        //横屏
+        if (liveRoomRouterListener.getCurrentScreenOrientation() == 2) {
+            view.showZoomOut();
+        } else if (liveRoomRouterListener.getCurrentScreenOrientation() == 1) {
+            //竖屏
+            view.showZoomIn();
+        }
+    }
+
+    @Override
     public void setRouter(LiveRoomRouterListener liveRoomRouterListener) {
         this.liveRoomRouterListener = liveRoomRouterListener;
     }
@@ -90,6 +111,7 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
         if (!liveRoomRouterListener.isTeacherOrAssistant()) {
             liveRoomRouterListener.disableSpeakerMode();
         }
+        getSysRotationSetting();
         //横屏
         if (liveRoomRouterListener.getCurrentScreenOrientation() == 2) {
             view.showZoomOut();

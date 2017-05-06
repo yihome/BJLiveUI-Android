@@ -1,10 +1,12 @@
 package com.baijiahulian.live.ui.rightbotmenu;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseFragment;
+import com.baijiahulian.live.ui.utils.RotationObserver;
 import com.baijiahulian.live.ui.utils.RxUtils;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 
@@ -17,10 +19,12 @@ import rx.android.schedulers.AndroidSchedulers;
  * Created by Shubo on 2017/2/16.
  */
 
-public class RightBottomMenuFragment extends BaseFragment implements RightBottomMenuContract.View {
+public class RightBottomMenuFragment extends BaseFragment implements RightBottomMenuContract.View,
+        RotationObserver.OnRotationSettingChangedListener {
 
     private RightBottomMenuContract.Presenter presenter;
     private Subscription subscriptionOfVideoClick, subscriptionOfAudioClick;
+    private RotationObserver rotationObserver;
 
     @Override
     public int getLayoutId() {
@@ -66,6 +70,10 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
                 presenter.changeZoom();
             }
         });
+
+        rotationObserver = new RotationObserver(new Handler(), getActivity().getContentResolver());
+        rotationObserver.startObserver();
+        rotationObserver.setOnRotationSettingChangedListener(this);
     }
 
     @Override
@@ -152,6 +160,16 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
     }
 
     @Override
+    public void showZoom() {
+        $.id(R.id.fragment_right_bottom_zoom).visible();
+    }
+
+    @Override
+    public void hideZoom() {
+        $.id(R.id.fragment_right_bottom_zoom).gone();
+    }
+
+    @Override
     public void setPresenter(RightBottomMenuContract.Presenter presenter) {
         super.setBasePresenter(presenter);
         this.presenter = presenter;
@@ -162,6 +180,13 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
         super.onDestroy();
         RxUtils.unSubscribe(subscriptionOfAudioClick);
         RxUtils.unSubscribe(subscriptionOfVideoClick);
+        rotationObserver.stopObserver();
         presenter = null;
+    }
+
+    @Override
+    public void onRotationSettingChanged() {
+        //TODO:主动获取自动旋转设置
+        presenter.getSysRotationSetting();
     }
 }

@@ -89,4 +89,12 @@ public interface LiveRoomRouterListener {
     void changeScreenOrientation();
 
     int getCurrentScreenOrientation();
+
+    int getSysRotationSetting();
+
+    //允许自由转屏
+    void letScreenRotateItself();
+
+    //不允许自由转屏
+    void forbidScreenRotateItself();
 }

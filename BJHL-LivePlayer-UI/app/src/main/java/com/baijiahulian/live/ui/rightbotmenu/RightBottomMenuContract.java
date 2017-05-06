@@ -26,6 +26,10 @@ interface RightBottomMenuContract {
         void showZoomIn();
 
         void showZoomOut();
+
+        void showZoom();
+
+        void hideZoom();
     }
 
     interface Presenter extends BasePresenter {
@@ -36,5 +40,7 @@ interface RightBottomMenuContract {
         void changeVideo();
 
         void more(int anchorX, int anchorY);
+
+        void getSysRotationSetting();
     }
 }

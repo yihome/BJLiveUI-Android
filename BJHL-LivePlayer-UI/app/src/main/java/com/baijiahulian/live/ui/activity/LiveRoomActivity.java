@@ -8,6 +8,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.OrientationEventListener;
 import android.view.View;
@@ -656,18 +657,33 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         } else if (currentOrientation == Configuration.ORIENTATION_PORTRAIT) {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
-        flBackground.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
-            }
-        }, 1000);
-
     }
 
     @Override
     public int getCurrentScreenOrientation() {
         return getResources().getConfiguration().orientation;
+    }
+
+    @Override
+    public int getSysRotationSetting() {
+        int status = 0;
+        try {
+            status = Settings.System.getInt(getContentResolver(),
+                    Settings.System.ACCELEROMETER_ROTATION);
+        } catch (Settings.SettingNotFoundException e) {
+            e.printStackTrace();
+        }
+        return status;
+    }
+
+    @Override
+    public void letScreenRotateItself() {
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
+    }
+
+    @Override
+    public void forbidScreenRotateItself() {
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_USER);
     }
 
     private void switchView(View view1, View view2) {
