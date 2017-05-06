@@ -11,6 +11,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.view.Gravity;
 import android.view.OrientationEventListener;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -504,8 +505,15 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
             playerFragment = new VideoPlayerFragment();
             playerPresenter = new VideoPlayerPresenter(playerFragment);
             bindVP(playerFragment, playerPresenter);
-            addFragment(R.id.activity_live_room_foreground_right_container, playerFragment);
-            flForegroundRight.setVisibility(View.VISIBLE);
+            if (flForegroundLeft.getVisibility() == View.GONE) {
+                //左侧闲置
+                addFragment(R.id.activity_live_room_foreground_left_container, playerFragment);
+                flForegroundLeft.setVisibility(View.VISIBLE);
+            } else if (flForegroundRight.getVisibility() == View.GONE) {
+                //右侧闲置
+                addFragment(R.id.activity_live_room_foreground_right_container, playerFragment);
+                flForegroundRight.setVisibility(View.VISIBLE);
+            }
         }
         playerPresenter.playVideo(userId);
     }
@@ -513,9 +521,29 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public void playVideoClose(String userId) {
         checkNotNull(playerPresenter);
+        checkNotNull(playerFragment.getView());
+        checkNotNull(lppptFragment.getView());
+        int playerParentId = ((ViewGroup) playerFragment.getView().getParent()).getId();
+        int pptParentId = ((ViewGroup) lppptFragment.getView().getParent()).getId();
+        if (playerParentId == R.id.activity_live_room_foreground_left_container) {
+            //视频在左边
+            flForegroundLeft.setVisibility(View.GONE);
+        } else if (playerParentId == R.id.activity_live_room_foreground_right_container) {
+            //视频在右边
+            flForegroundRight.setVisibility(View.GONE);
+        } else if (playerParentId == R.id.activity_live_room_background_container) {
+            //视频已经最大化
+            if (pptParentId == R.id.activity_live_room_foreground_left_container) {
+                //ppt在左边
+                flForegroundLeft.setVisibility(View.GONE);
+            } else if (pptParentId == R.id.activity_live_room_foreground_right_container) {
+                //ppt在右边
+                flForegroundRight.setVisibility(View.GONE);
+            }
+            maximisePPTView();
+        }
         playerPresenter.playAVClose(userId);
         removeFragment(playerFragment);
-        flForegroundRight.setVisibility(View.GONE);
         playerFragment = null;
         playerPresenter = null;
     }
@@ -525,16 +553,44 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         if (recorderFragment == null) {
             recorderFragment = new VideoRecorderFragment();
             bindVP(recorderFragment, new VideoRecorderPresenter(recorderFragment));
-            addFragment(R.id.activity_live_room_foreground_left_container, recorderFragment);
-            flForegroundLeft.setVisibility(View.VISIBLE);
+            if (flForegroundLeft.getVisibility() == View.GONE) {
+                //左侧闲置
+                addFragment(R.id.activity_live_room_foreground_left_container, recorderFragment);
+                flForegroundLeft.setVisibility(View.VISIBLE);
+            } else if (flForegroundRight.getVisibility() == View.GONE) {
+                //右侧闲置
+                addFragment(R.id.activity_live_room_foreground_right_container, recorderFragment);
+                flForegroundRight.setVisibility(View.VISIBLE);
+            }
+
         }
     }
 
     @Override
     public void detachVideo() {
         checkNotNull(recorderFragment);
+        checkNotNull(recorderFragment.getView());
+        checkNotNull(lppptFragment.getView());
+        int recordParentId = ((ViewGroup) recorderFragment.getView().getParent()).getId();
+        int pptParentId = ((ViewGroup) lppptFragment.getView().getParent()).getId();
+        if (recordParentId == R.id.activity_live_room_foreground_left_container) {
+            //视频采集在左边
+            flForegroundLeft.setVisibility(View.GONE);
+        } else if (recordParentId == R.id.activity_live_room_foreground_right_container) {
+            //视频采集在右边
+            flForegroundRight.setVisibility(View.GONE);
+        } else if (recordParentId == R.id.activity_live_room_background_container) {
+            //视频采集已经最大化
+            if (pptParentId == R.id.activity_live_room_foreground_left_container) {
+                //ppt在左边
+                flForegroundLeft.setVisibility(View.GONE);
+            } else if (pptParentId == R.id.activity_live_room_foreground_right_container) {
+                //ppt在右边
+                flForegroundRight.setVisibility(View.GONE);
+            }
+            maximisePPTView();
+        }
         removeFragment(recorderFragment);
-        flForegroundLeft.setVisibility(View.GONE);
         if (Build.VERSION.SDK_INT < 24) {
             getSupportFragmentManager().executePendingTransactions();
         }
