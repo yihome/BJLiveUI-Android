@@ -15,6 +15,18 @@ interface PPTManageContract {
         void showPPTEmpty();
 
         void showPPTNotEmpty();
+
+        void notifyDataChange();
+
+        void notifyItemRemoved(int position);
+
+        void notifyItemChanged(int position);
+
+        void notifyItemInserted(int position);
+
+        void showRemoveBtnEnable();
+
+        void showRemoveBtnDisable();
     }
 
     interface Presenter extends BasePresenter {
@@ -29,5 +41,7 @@ interface PPTManageContract {
         void deselectItem(int position);
 
         void removeSelectedItems();
+
+        boolean isDocumentAdded(int position);
     }
 }

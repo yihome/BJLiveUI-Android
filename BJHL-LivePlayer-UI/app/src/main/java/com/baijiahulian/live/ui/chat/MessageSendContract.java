@@ -11,11 +11,18 @@ interface MessageSendContract {
 
     interface View extends BaseView<Presenter> {
         void showMessageSuccess();
+
+        void showEmojiPanel();
+
+//        void showPicture(int position);
+        void onPictureSend();
     }
 
     interface Presenter extends BasePresenter {
         void sendMessage(String message);
 
-        void choosePhoto();
+        void sendPicture(String path);
+
+        void chooseEmoji();
     }
 }

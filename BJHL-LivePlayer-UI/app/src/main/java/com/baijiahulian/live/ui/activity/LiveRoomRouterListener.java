@@ -82,4 +82,8 @@ public interface LiveRoomRouterListener {
     void setCurrentVideoUser(IMediaModel mediaModel);
 
     IMediaModel getCurrentVideoUser();
+
+    void showBigChatPic(String url);
+
+    void sendImageMessage(String path);
 }

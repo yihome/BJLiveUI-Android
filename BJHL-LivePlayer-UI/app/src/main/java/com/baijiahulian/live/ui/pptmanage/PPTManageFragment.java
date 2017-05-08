@@ -1,19 +1,28 @@
 package com.baijiahulian.live.ui.pptmanage;
 
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.baijiahulian.common.cropperv2.BJCommonImageCropHelper;
+import com.baijiahulian.common.cropperv2.ThemeConfig;
+import com.baijiahulian.common.cropperv2.model.PhotoInfo;
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseDialogFragment;
+import com.baijiahulian.live.ui.utils.AliCloudImageUtil;
 import com.baijiahulian.live.ui.utils.QueryPlus;
 import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Shubo on 2017/4/26.
@@ -47,14 +56,51 @@ public class PPTManageFragment extends BaseDialogFragment implements PPTManageCo
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new DocumentAdapter();
         recyclerView.setAdapter(adapter);
+
+        $.id(R.id.dialog_ppt_manage_btn).clicked(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isEditing()) {
+                    presenter.removeSelectedItems();
+                } else {
+                    ThemeConfig.Builder builder = new ThemeConfig.Builder();
+                    builder.setMainElementsColor(ContextCompat.getColor(getContext(), R.color.live_blue));
+                    BJCommonImageCropHelper.openImageMulti(getActivity(), 9, builder.build(), new BJCommonImageCropHelper.OnHandlerResultCallback() {
+                        @Override
+                        public void onHandlerSuccess(List<PhotoInfo> list) {
+                            List<String> pics = new ArrayList<>();
+                            for (PhotoInfo photoInfo : list) {
+                                pics.add(photoInfo.getPhotoPath());
+                            }
+                            presenter.uploadNewPics(pics);
+                        }
+
+                        @Override
+                        public void onHandlerFailure(String s) {
+                            showToast(s);
+                        }
+                    });
+                }
+            }
+        });
     }
 
     @Override
     protected void enableEdit() {
+        $.id(R.id.dialog_ppt_manage_btn)
+                .background(ContextCompat.getColor(getContext(), R.color.live_fail_dark))
+                .text(getString(R.string.live_remove))
+                .enable(false);
+        adapter.notifyDataSetChanged();
     }
 
     @Override
     protected void disableEdit() {
+        $.id(R.id.dialog_ppt_manage_btn)
+                .background(ContextCompat.getColor(getContext(), R.color.live_blue))
+                .text(getString(R.string.live_upload_new_file))
+                .enable(true);
+        adapter.notifyDataSetChanged();
     }
 
     @Override
@@ -73,6 +119,47 @@ public class PPTManageFragment extends BaseDialogFragment implements PPTManageCo
     public void showPPTNotEmpty() {
         $.id(R.id.dialog_ppt_manage_empty_container).gone();
         $.id(R.id.dialog_ppt_manage_rv).visible();
+    }
+
+    @Override
+    public void notifyDataChange() {
+        adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void notifyItemRemoved(int position) {
+        adapter.notifyItemRemoved(position);
+    }
+
+    @Override
+    public void notifyItemChanged(final int position) {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                adapter.notifyItemChanged(position);
+            }
+        });
+    }
+
+    @Override
+    public void notifyItemInserted(int position) {
+        adapter.notifyItemInserted(position);
+    }
+
+    @Override
+    public void showRemoveBtnEnable() {
+        $.id(R.id.dialog_ppt_manage_btn)
+                .background(ContextCompat.getColor(getContext(), R.color.live_red))
+                .text(getString(R.string.live_remove))
+                .enable(true);
+    }
+
+    @Override
+    public void showRemoveBtnDisable() {
+        $.id(R.id.dialog_ppt_manage_btn)
+                .background(ContextCompat.getColor(getContext(), R.color.live_fail_dark))
+                .text(getString(R.string.live_remove))
+                .enable(false);
     }
 
     @Override
@@ -119,7 +206,7 @@ public class PPTManageFragment extends BaseDialogFragment implements PPTManageCo
 
         @Override
         public int getItemViewType(int position) {
-            return super.getItemViewType(position);
+            return presenter.isDocumentAdded(position) ? ITEM_TYPE_NORMAL : ITEM_TYPE_UPLOADING;
         }
 
         @Override
@@ -135,11 +222,28 @@ public class PPTManageFragment extends BaseDialogFragment implements PPTManageCo
         }
 
         @Override
-        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
             if (holder instanceof DocViewHolder) {
                 DocViewHolder docViewHolder = (DocViewHolder) holder;
                 docViewHolder.tvTitle.setText(presenter.getItem(position).getFileName());
-                Picasso.with(getContext()).load(getDrawableResByFileExt(presenter.getItem(position).getFileExt())).into(docViewHolder.ivIcon);
+                if (isEditing()) {
+                    docViewHolder.checkBox.setVisibility(View.VISIBLE);
+                } else {
+                    docViewHolder.checkBox.setVisibility(View.GONE);
+                }
+                docViewHolder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if (isChecked)
+                            presenter.selectItem(holder.getLayoutPosition());
+                        else
+                            presenter.deselectItem(holder.getLayoutPosition());
+                    }
+                });
+//                AliCloudImageUtil.getRectScaledUrl()
+                String url = AliCloudImageUtil.getRectScaledUrl(getContext(), ((DocumentModel)presenter.getItem(position)).pageInfoModel.url, 24);
+//                int res = getDrawableResByFileExt(presenter.getItem(position).getFileExt());
+                Picasso.with(getContext()).load(url).into(docViewHolder.ivIcon);
             } else if (holder instanceof UploadingViewHolder) {
                 UploadingViewHolder viewHolder = (UploadingViewHolder) holder;
                 viewHolder.tvTitle.setText(presenter.getItem(position).getFileName());
@@ -148,10 +252,12 @@ public class PPTManageFragment extends BaseDialogFragment implements PPTManageCo
                     viewHolder.tvStatus.setText(getString(R.string.live_uploading));
                 } else if (presenter.getItem(position).getStatus() == DocumentUploadingModel.UPLOADED) {
                     viewHolder.tvStatus.setText(getString(R.string.live_queueing));
-                } else {
+                } else if (presenter.getItem(position).getStatus() == DocumentUploadingModel.UPLOAD_FAIL){
+                    viewHolder.tvStatus.setText(getString(R.string.live_upload_fail));
+                }else{
                     viewHolder.tvStatus.setText("");
                 }
-//                viewHolder.progress
+//                viewHolder.tvStatus.setText(String.valueOf(presenter.getItem(position).getUploadPercent()));
             }
         }
 
@@ -161,6 +267,7 @@ public class PPTManageFragment extends BaseDialogFragment implements PPTManageCo
         }
 
         private int getDrawableResByFileExt(String ext) {
+            if (ext == null) return R.drawable.live_ic_file_jpg;
             switch (ext) {
                 case ".doc":
                 case ".docx":

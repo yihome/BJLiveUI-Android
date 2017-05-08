@@ -21,6 +21,7 @@ import com.baijiahulian.live.ui.announcement.AnnouncementPresenter;
 import com.baijiahulian.live.ui.base.BasePresenter;
 import com.baijiahulian.live.ui.base.BaseView;
 import com.baijiahulian.live.ui.chat.ChatFragment;
+import com.baijiahulian.live.ui.chat.ChatPictureViewFragment;
 import com.baijiahulian.live.ui.chat.ChatPresenter;
 import com.baijiahulian.live.ui.chat.MessageSendPresenter;
 import com.baijiahulian.live.ui.chat.MessageSentFragment;
@@ -103,6 +104,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private MyPPTFragment lppptFragment;
     private VideoRecorderFragment recorderFragment;
     private ChatFragment chatFragment;
+    private ChatPresenter chatPresenter;
     private RightBottomMenuFragment rightBottomMenuFragment;
     private LeftMenuFragment leftMenuFragment;
     private RightMenuFragment rightMenuFragment;
@@ -241,7 +243,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         addFragment(R.id.activity_live_room_bottom_right, rightBottomMenuFragment);
 
         chatFragment = new ChatFragment();
-        bindVP(chatFragment, new ChatPresenter(chatFragment));
+        chatPresenter = new ChatPresenter(chatFragment);
+        bindVP(chatFragment, chatPresenter);
         addFragment(R.id.activity_live_room_chat, chatFragment);
 
         // might delay 500ms to process
@@ -324,11 +327,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void navigateToPPTWareHouse() {
-        if (pptManageFragment == null) {
-            pptManageFragment = PPTManageFragment.newInstance();
-            pptManagePresenter = new PPTManagePresenter(pptManageFragment);
-            bindVP(pptManageFragment, pptManagePresenter);
-        }
+        pptManageFragment = PPTManageFragment.newInstance();
+        pptManagePresenter = new PPTManagePresenter(pptManageFragment);
+        bindVP(pptManageFragment, pptManagePresenter);
         showDialogFragment(pptManageFragment);
     }
 
@@ -525,6 +526,17 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public IMediaModel getCurrentVideoUser() {
         return currentRemoteMediaUser;
+    }
+
+    @Override
+    public void showBigChatPic(String url) {
+        ChatPictureViewFragment fragment = ChatPictureViewFragment.newInstance(url);
+        showDialogFragment(fragment);
+    }
+
+    @Override
+    public void sendImageMessage(String path) {
+        chatPresenter.sendImageMessage(path);
     }
 
     private void switchView(View view1, View view2) {

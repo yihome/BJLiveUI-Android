@@ -25,7 +25,13 @@ public class MessageSendPresenter implements MessageSendContract.Presenter {
     }
 
     @Override
-    public void choosePhoto() {
+    public void sendPicture(String path) {
+        routerListener.sendImageMessage(path);
+        view.onPictureSend();
+    }
+
+    @Override
+    public void chooseEmoji() {
 
     }
 

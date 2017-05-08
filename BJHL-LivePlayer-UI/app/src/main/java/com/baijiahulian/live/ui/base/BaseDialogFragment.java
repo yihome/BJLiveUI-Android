@@ -74,6 +74,7 @@ public abstract class BaseDialogFragment extends DialogFragment {
                 wm.updateViewLayout(getDialog().getWindow().getDecorView(), getDialog().getWindow().getAttributes());
             }
         });
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         return dialog;
     }
 
@@ -117,7 +118,7 @@ public abstract class BaseDialogFragment extends DialogFragment {
         window.setAttributes(windowParams);
     }
 
-    protected void resetWindowParams(WindowManager.LayoutParams windowParams){
+    protected void resetWindowParams(WindowManager.LayoutParams windowParams) {
         setWindowParams(windowParams);
     }
 
@@ -150,11 +151,11 @@ public abstract class BaseDialogFragment extends DialogFragment {
             @Override
             public void onClick(View v) {
                 if (isEditing) {
-                    $.id(R.id.dialog_base_edit).text(getString(R.string.live_cancel));
-                    enableEdit();
-                } else {
                     $.id(R.id.dialog_base_edit).text(getString(R.string.live_edit));
                     disableEdit();
+                } else {
+                    $.id(R.id.dialog_base_edit).text(getString(R.string.live_cancel));
+                    enableEdit();
                 }
                 isEditing = !isEditing;
             }
@@ -205,20 +206,24 @@ public abstract class BaseDialogFragment extends DialogFragment {
     @Override
     public void onResume() {
         super.onResume();
-        basePresenter.subscribe();
+        if (basePresenter != null)
+            basePresenter.subscribe();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        basePresenter.unSubscribe();
+        if (basePresenter != null)
+            basePresenter.unSubscribe();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        basePresenter.destroy();
-        basePresenter = null;
+        if (basePresenter != null) {
+            basePresenter.destroy();
+            basePresenter = null;
+        }
         $ = null;
     }
 }
