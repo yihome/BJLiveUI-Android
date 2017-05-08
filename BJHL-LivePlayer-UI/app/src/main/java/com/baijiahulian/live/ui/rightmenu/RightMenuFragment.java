@@ -31,7 +31,6 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
             @Override
             public void onClick(View v) {
                 presenter.managePPT();
-                showToast("开发中");
             }
         });
         $.id(R.id.fragment_right_speakers_container).clicked(new View.OnClickListener() {

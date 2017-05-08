@@ -36,7 +36,6 @@
     <FrameLayout
         android:id="@+id/dialog_base_content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scrollbars="vertical" />
+        android:layout_height="match_parent" />
 
 </LinearLayout>

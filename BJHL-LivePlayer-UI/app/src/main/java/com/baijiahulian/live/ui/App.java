@@ -2,9 +2,6 @@ package com.baijiahulian.live.ui;
 
 import android.app.Application;
 
-import com.baijiahulian.livecore.LiveSDK;
-import com.baijiahulian.livecore.context.LPConstants;
-
 /**
  * Created by Shubo on 2017/4/21.
  */

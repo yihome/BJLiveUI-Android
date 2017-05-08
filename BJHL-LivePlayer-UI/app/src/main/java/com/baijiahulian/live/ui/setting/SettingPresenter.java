@@ -151,10 +151,10 @@ public class SettingPresenter implements SettingContract.Presenter {
                     recorder.publish();
                 }
                 if (recorder.isVideoAttached()) {
-                    recorder.detachVideo();
+                    routerListener.detachVideo();
                     view.showCameraClosed();
                 } else {
-                    recorder.attachVideo();
+                    routerListener.attachVideo();
                     view.showCameraOpen();
                 }
                 break;
