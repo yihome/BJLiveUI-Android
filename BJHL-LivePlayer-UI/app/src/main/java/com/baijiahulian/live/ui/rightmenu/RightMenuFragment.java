@@ -140,6 +140,7 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
     public void showForbiddenHand() {
         $.id(R.id.fragment_right_speak_apply).image(R.drawable.live_ic_handup_forbid);
         $.id(R.id.fragment_right_speak_apply).enable(false);
+        $.id(R.id.fragment_right_hand_countdown).invisible();
     }
 
     @Override

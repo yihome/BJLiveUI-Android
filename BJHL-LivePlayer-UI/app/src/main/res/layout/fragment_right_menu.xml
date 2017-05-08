@@ -47,8 +47,8 @@
 
     <FrameLayout
         android:id="@+id/fragment_right_speak_wrapper"
-        android:layout_width="48dp"
-        android:layout_height="48dp">
+        android:layout_width="50dp"
+        android:layout_height="50dp">
 
         <com.baijiahulian.live.ui.viewsupport.CountdownCircleView
             android:id="@+id/fragment_right_hand_countdown"

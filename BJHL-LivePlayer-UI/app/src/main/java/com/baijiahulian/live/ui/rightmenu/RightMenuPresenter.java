@@ -247,11 +247,22 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                     public void call(Boolean aBoolean) {
                         if (aBoolean) {
                             view.showForbiddenHand();
+                            if (speakApplyStatus == RightMenuContract.STUDENT_SPEAK_APPLY_APPLYING) {
+                                //正在请求发言
+                                speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_NONE;
+                                RxUtils.unSubscribe(subscriptionOfSpeakApplyCounter);
+                                liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().cancelSpeakApply();
+                            }
                         } else {
                             view.showNotForbiddenHand();
                         }
                     }
                 });
+//        if (liveRoom.getForbidStatus()) {
+//            view.showForbiddenHand();
+//        } else {
+//            view.showNotForbiddenHand();
+//        }
     }
 
     private void refreshSpeakQueueBtnStatus() {

@@ -8,7 +8,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.widget.DrawerLayout;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.OrientationEventListener;
 import android.view.View;
@@ -52,6 +51,7 @@ import com.baijiahulian.live.ui.rightbotmenu.RightBottomMenuPresenter;
 import com.baijiahulian.live.ui.rightmenu.RightMenuFragment;
 import com.baijiahulian.live.ui.rightmenu.RightMenuPresenter;
 import com.baijiahulian.live.ui.righttopmenu.RightTopMenuFragment;
+import com.baijiahulian.live.ui.righttopmenu.RightTopMenuPresenter;
 import com.baijiahulian.live.ui.setting.SettingDialogFragment;
 import com.baijiahulian.live.ui.setting.SettingPresenter;
 import com.baijiahulian.live.ui.speakqueue.SpeakQueueDialogFragment;
@@ -111,7 +111,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     private LoadingFragment loadingFragment;
     private TopBarFragment topBarFragment;
-    private RightTopMenuFragment topRightFragment;
+    private RightTopMenuFragment rightTopMenuFragment;
 
     private MyPPTFragment lppptFragment;
     private VideoRecorderFragment recorderFragment;
@@ -134,6 +134,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     private Subscription subscriptionOfLoginConflict;
     private IMediaModel currentRemoteMediaUser;
+    private boolean isClearScreen;//是否已经清屏，作用于视频采集和远程视频ui的调整
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -206,7 +207,11 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private void onForegroundContainerConfigurationChanged(Configuration newConfig) {
         RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) llVideoContainer.getLayoutParams();
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_top);
+            if (isClearScreen) {
+                lp.addRule(RelativeLayout.BELOW, 0);
+            } else {
+                lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_top);
+            }
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
             lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_background_container);
         }
@@ -235,7 +240,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         }
     }
 
-    //录课中ui调整
+    //录课中ui清屏调整
     private void onRecordFullScreenConfigurationChanged(boolean isClear) {
         RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) flTopRight.getLayoutParams();
         if (isClear) {
@@ -244,6 +249,17 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
             lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_top);
         }
         flTopRight.setLayoutParams(lp);
+    }
+
+    //视频采集和远程视频ui清屏调整
+    private void onVideoFullScreenConfigurationChanged(boolean isClear) {
+        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) llVideoContainer.getLayoutParams();
+        if (isClear) {
+            lp.addRule(RelativeLayout.BELOW, 0);
+        } else {
+            lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_top);
+        }
+        llVideoContainer.setLayoutParams(lp);
     }
 
     @Override
@@ -269,8 +285,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         bindVP(topBarFragment, new TopBarPresenter(topBarFragment));
         addFragment(R.id.activity_live_room_top, topBarFragment);
 
-        topRightFragment = new RightTopMenuFragment();
-        addFragment(R.id.activity_live_room_top_right, topRightFragment);
+        rightTopMenuFragment = new RightTopMenuFragment();
+        bindVP(rightTopMenuFragment, new RightTopMenuPresenter());
+        addFragment(R.id.activity_live_room_top_right, rightTopMenuFragment);
 
         leftMenuFragment = new LeftMenuFragment();
         bindVP(leftMenuFragment, new LeftMenuPresenter(leftMenuFragment));
@@ -316,21 +333,25 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public void clearScreen() {
 //        chatFragment.clearScreen();
+        isClearScreen = true;
         dlChat.setVisibility(View.GONE);
         rightBottomMenuFragment.clearScreen();
         hideFragment(topBarFragment);
         hideFragment(rightMenuFragment);
         onRecordFullScreenConfigurationChanged(true);
+        onVideoFullScreenConfigurationChanged(true);
     }
 
     @Override
     public void unClearScreen() {
 //        chatFragment.unClearScreen();
+        isClearScreen = false;
         dlChat.setVisibility(View.VISIBLE);
         rightBottomMenuFragment.unClearScreen();
         showFragment(topBarFragment);
         showFragment(rightMenuFragment);
         onRecordFullScreenConfigurationChanged(false);
+        onVideoFullScreenConfigurationChanged(false);
         dlChat.openDrawer(Gravity.START);
     }
 
@@ -490,10 +511,10 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     public void navigateToCloudRecord(boolean recordStatus) {
         if (recordStatus) {
             flTopRight.setVisibility(View.VISIBLE);
-            showFragment(topRightFragment);
+            showFragment(rightTopMenuFragment);
         } else {
             flTopRight.setVisibility(View.GONE);
-            hideFragment(topRightFragment);
+            hideFragment(rightTopMenuFragment);
         }
     }
 

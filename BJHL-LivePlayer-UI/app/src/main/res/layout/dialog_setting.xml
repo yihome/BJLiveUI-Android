@@ -8,15 +8,15 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingLeft="@dimen/activity_live_room_dialog_margin"
-        android:paddingRight="@dimen/activity_live_room_dialog_margin">
+        android:orientation="vertical">
 
         <!--上层横向4个按钮-->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/activity_live_room_dialog_margin"
+            android:layout_marginLeft="@dimen/activity_live_room_dialog_margin"
+            android:layout_marginRight="@dimen/activity_live_room_dialog_margin"
             android:layout_marginTop="@dimen/activity_live_room_dialog_margin"
             android:orientation="horizontal">
 
@@ -115,6 +115,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
+            android:paddingBottom="@dimen/activity_live_room_dialog_margin"
             android:paddingTop="@dimen/activity_live_room_dialog_margin">
 
             <RelativeLayout
@@ -143,7 +144,7 @@
                     android:layout_width="75dp"
                     android:layout_height="30dp"
                     android:layout_centerVertical="true"
-                    android:layout_marginLeft="40dp"
+                    android:layout_marginLeft="28dp"
                     android:layout_toRightOf="@+id/dialog_setting_radio_ppt_fs"
                     android:background="@drawable/live_radio_btn"
                     android:gravity="center"
@@ -178,7 +179,7 @@
                     android:layout_width="75dp"
                     android:layout_height="30dp"
                     android:layout_centerVertical="true"
-                    android:layout_marginLeft="40dp"
+                    android:layout_marginLeft="28dp"
                     android:layout_toRightOf="@+id/dialog_setting_radio_definition_low"
                     android:background="@drawable/live_radio_btn"
                     android:gravity="center"
@@ -208,7 +209,7 @@
                     android:layout_width="75dp"
                     android:layout_height="30dp"
                     android:layout_centerVertical="true"
-                    android:layout_marginLeft="40dp"
+                    android:layout_marginLeft="28dp"
                     android:layout_toRightOf="@+id/dialog_setting_radio_camera_front"
                     android:background="@drawable/live_radio_btn"
                     android:gravity="center"
@@ -252,7 +253,7 @@
                     android:layout_width="75dp"
                     android:layout_height="30dp"
                     android:layout_centerVertical="true"
-                    android:layout_marginLeft="40dp"
+                    android:layout_marginLeft="28dp"
                     android:layout_toRightOf="@+id/dialog_setting_radio_link_up_1"
                     android:background="@drawable/live_radio_btn"
                     android:gravity="center"
@@ -280,7 +281,7 @@
                     android:layout_width="75dp"
                     android:layout_height="30dp"
                     android:layout_centerVertical="true"
-                    android:layout_marginLeft="40dp"
+                    android:layout_marginLeft="28dp"
                     android:layout_toRightOf="@+id/dialog_setting_radio_link_down_1"
                     android:background="@drawable/live_radio_btn"
                     android:gravity="center"
