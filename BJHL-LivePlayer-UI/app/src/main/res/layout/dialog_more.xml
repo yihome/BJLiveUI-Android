@@ -36,7 +36,8 @@
         android:gravity="center"
         android:padding="@dimen/activity_live_room_margin"
         android:text="@string/live_help"
-        android:textColor="@color/live_text_color_mid_light" />
+        android:textColor="@color/live_text_color_mid_light"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/dialog_more_setting"

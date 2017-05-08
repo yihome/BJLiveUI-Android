@@ -34,7 +34,7 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
     private LPConstants.LPUserType currentUserType;
     private Subscription subscriptionOfMediaControl, subscriptionOfActiveUser, subscriptionOfMedia,
             subscriptionOfSpeakApply, subscriptionOfAvatarSwitcher, subscriptionOfSpeakApplyCounter,
-            subscriptionOfSpeakApplyResponse;
+            subscriptionOfSpeakApplyResponse, subscriptionOfMediaClose, subscriptionOfMediaChanged;
     private int speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_NONE;
     private boolean isDrawing = false;
     private LiveRoom liveRoom;
@@ -118,7 +118,12 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
     @Override
     public void changePPTDrawBtnStatus(boolean shouldShow) {
         if (shouldShow) {
-            view.showPPTDrawBtn();
+            //老师或者助教或者已同意发言的学生可以使用ppt
+            if (currentUserType == LPConstants.LPUserType.Teacher
+                    || currentUserType == LPConstants.LPUserType.Assistant
+                    || speakApplyStatus == RightMenuContract.STUDENT_SPEAK_APPLY_SPEAKING) {
+                view.showPPTDrawBtn();
+            }
         } else {
             view.hidePPTDrawBtn();
         }
@@ -160,6 +165,29 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                         refreshSpeakQueueBtnStatus();
                     }
                 });
+
+        //音视频都关闭
+        subscriptionOfMediaClose = liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getObservableOfMediaClose()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<IMediaModel>() {
+                    @Override
+                    public void call(IMediaModel iMediaModel) {
+                        liveRoomRouterListener.playVideoClose(liveRoomRouterListener.getCurrentVideoUser().getUser().getUserId());
+                    }
+                });
+        //音频或者视频状态变化
+        subscriptionOfMediaChanged = liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getObservableOfMediaChange()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<IMediaModel>() {
+                    @Override
+                    public void call(IMediaModel iMediaModel) {
+                        //视频已关闭
+                        if (!iMediaModel.isVideoOn()) {
+                            liveRoomRouterListener.playVideoClose(liveRoomRouterListener.getCurrentVideoUser().getUser().getUserId());
+                        }
+                    }
+                });
+
 
         if (liveRoomRouterListener.isTeacherOrAssistant()) {
             // 老师
@@ -295,6 +323,8 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
         RxUtils.unSubscribe(subscriptionOfSpeakApply);
         RxUtils.unSubscribe(subscriptionOfAvatarSwitcher);
         RxUtils.unSubscribe(subscriptionOfSpeakApplyCounter);
+        RxUtils.unSubscribe(subscriptionOfMediaChanged);
+        RxUtils.unSubscribe(subscriptionOfMediaClose);
     }
 
     @Override
