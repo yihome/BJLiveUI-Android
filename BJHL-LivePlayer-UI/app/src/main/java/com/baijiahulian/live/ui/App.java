@@ -2,6 +2,9 @@ package com.baijiahulian.live.ui;
 
 import android.app.Application;
 
+import com.baijiahulian.livecore.LiveSDK;
+import com.baijiahulian.livecore.context.LPConstants;
+
 /**
  * Created by Shubo on 2017/4/21.
  */
@@ -17,6 +20,6 @@ public class App extends Application{
 //        crashHandler.init(this);
 //        Thread.setDefaultUncaughtExceptionHandler(crashHandler);
 
-//        LiveSDK.init(LPConstants.LPDeployType.Test);
+        LiveSDK.init(LPConstants.LPDeployType.Test);
     }
 }

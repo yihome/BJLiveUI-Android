@@ -8,7 +8,7 @@
         android:id="@+id/dialog_ppt_manage_empty_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/dialog_ppt_btn"
+        android:layout_above="@+id/dialog_ppt_manage_btn"
         android:layout_centerInParent="true"
         android:gravity="center"
         android:orientation="vertical">
@@ -32,10 +32,10 @@
         android:id="@+id/dialog_ppt_manage_rv"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/dialog_ppt_btn" />
+        android:layout_above="@+id/dialog_ppt_manage_btn" />
 
     <Button
-        android:id="@+id/dialog_ppt_btn"
+        android:id="@+id/dialog_ppt_manage_btn"
         android:layout_width="match_parent"
         android:layout_height="44dp"
         android:layout_alignParentBottom="true"

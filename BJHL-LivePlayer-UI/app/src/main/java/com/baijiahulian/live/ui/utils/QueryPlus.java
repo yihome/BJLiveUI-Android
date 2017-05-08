@@ -49,4 +49,9 @@ public class QueryPlus extends Query {
     public Observable<Void> clicked() {
         return RxUtils.clicks(view);
     }
+
+    public QueryPlus background(int color) {
+        view.setBackgroundColor(color);
+        return this;
+    }
 }

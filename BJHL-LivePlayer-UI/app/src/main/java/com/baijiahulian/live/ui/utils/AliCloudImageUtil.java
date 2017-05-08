@@ -31,6 +31,23 @@ public class AliCloudImageUtil {
     }
 
     /**
+     * 正方形阿里云图片裁剪规则
+     *
+     * @param url
+     * @return
+     */
+    public static String getRectScaledUrl(Context context, String url, int dp) {
+        int px = DisplayUtils.dip2px(context, dp);
+        if (url.endsWith(".jpg") || url.endsWith(".jpeg") || url.endsWith(".png") || url.endsWith(".webp")
+                || url.endsWith(".bmp") || url.endsWith(".gif")) {
+            if (isFromAliCloud(url)) {
+                return url + "@" + px + "h_" + px + "w_1e_1l" + imageUrlSuffix();
+            }
+        }
+        return url;
+    }
+
+    /**
      * 屏幕长宽阿里云图片裁剪规则
      *
      * @param context

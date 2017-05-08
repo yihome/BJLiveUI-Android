@@ -4,7 +4,7 @@
     <string name="on_line_user_count">%1$d人在线</string>
     <string name="enter_live_room">进入直播教室</string>
     <string name="live_on_line_user_count_dialog">在线人数（%1$d人）</string>
-    <string name="live_speaker_dialog">举手发言</string>
+    <string name="live_speaker_dialog">发言用户</string>
     <string name="video_on">视频中</string>
     <string name="close_speaking">结束发言</string>
     <string name="live_open_video">打开视频</string>
@@ -34,7 +34,6 @@
     <string name="live_setting_camera_switch_front">前</string>
     <string name="live_setting_camera_switch_back">后</string>
     <string name="live_setting_camera_forbid_all">全体禁言</string>
-
     <string name="live_media_visitor_fail">游客不能举手发言</string>
     <string name="live_media_student_fail">请先举手发言，并等待老师同意</string>
     <string name="live_loading_more">正在加载更多…</string>
@@ -50,22 +49,25 @@
     <string name="live_save">保存</string>
     <string name="live_uploading">上传中</string>
     <string name="live_queueing">队列中</string>
+    <string name="live_upload_fail">上传失败</string>
     <string name="live_ppt_empty">课件都不给，上课全靠嘴？</string>
     <string name="live_saved">已保存</string>
     <string name="live_upload_new_file">上传新文件</string>
     <string name="live_announcement_hint">输入公告内容</string>
     <string name="live_announcement_url_hint">为公告添加跳转网址</string>
     <string name="live_announcement_view_url_hint">点击公告可以跳转</string>
-
     <string name="live_recorder_title">采集视频</string>
     <string name="live_recorder_switch_camera">切换摄像头</string>
     <string name="live_recorder_pretty_filter_on">开启美颜</string>
     <string name="live_recorder_pretty_filter_off">关闭美颜</string>
     <string name="live_recorder_camera_switch_off">关闭摄像头</string>
-
     <string name="live_ppt_manage">管理课件</string>
     <string name="live_ppt_title">PPT</string>
     <string name="live_forbid_raise_hand">禁止举手</string>
     <string name="live_ppt_clear_all">清除</string>
+    <string name="live_remove">移除</string>
+    <string name="live_image_loading">图片加载中…</string>
+    <string name="live_image_uploading">上传中…</string>
+    <string name="live_image_loading_fail">图片加载失败</string>
 
 </resources>

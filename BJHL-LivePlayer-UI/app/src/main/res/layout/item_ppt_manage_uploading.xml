@@ -22,7 +22,9 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginLeft="@dimen/activity_live_room_margin"
-        android:layout_toRightOf="@+id/item_ppt_manage_uploading_icon" />
+        android:layout_toRightOf="@+id/item_ppt_manage_uploading_icon"
+        android:layout_toLeftOf="@+id/item_ppt_manage_uploading_status"
+        android:lines="1" />
 
     <TextView
         android:id="@+id/item_ppt_manage_uploading_status"

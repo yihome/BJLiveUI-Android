@@ -3,10 +3,10 @@
     package="com.baijiahulian.live.ui">
 
     <application
+        android:name=".App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:name=".App">
+        android:label="@string/app_name">
         <activity
             android:name=".activity.EntryActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|layoutDirection"
@@ -20,9 +20,8 @@
 
         <activity
             android:name=".activity.LiveRoomActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize|layoutDirection"
-            android:theme="@style/LiveAppTheme">
-        </activity>
+            android:configChanges="orientation|screenSize|layoutDirection"
+            android:theme="@style/LiveAppTheme" />
 
     </application>
 

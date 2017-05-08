@@ -2,6 +2,8 @@ package com.baijiahulian.live.ui.pptmanage;
 
 import com.baijiahulian.livecore.models.LPUploadDocModel;
 
+import java.io.File;
+
 /**
  * Created by Shubo on 2017/5/2.
  */
@@ -11,9 +13,14 @@ class DocumentUploadingModel implements IDocumentModel {
     static final int UPLOADING = 1;
     static final int UPLOADED = 2;
     static final int WAIT_SIGNAL = 3;
+    static final int UPLOAD_FAIL = 4;
 
     DocumentUploadingModel(String imgPath) {
         this.imgPath = imgPath;
+        File file = new File(imgPath);
+        fileName = file.getName();
+        if (fileName.contains("."))
+            fileExt = fileName.substring(fileName.lastIndexOf("."));
         status = INITIAL;
     }
 

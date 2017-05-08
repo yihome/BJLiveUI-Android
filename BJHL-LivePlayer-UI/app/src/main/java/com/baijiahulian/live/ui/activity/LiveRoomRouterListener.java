@@ -97,4 +97,8 @@ public interface LiveRoomRouterListener {
 
     //不允许自由转屏
     void forbidScreenRotateItself();
+
+    void showBigChatPic(String url);
+
+    void sendImageMessage(String path);
 }

@@ -10,17 +10,25 @@ import com.baijiahulian.livecore.models.imodels.IMessageModel;
 
 interface ChatContract {
 
-    interface View extends BaseView<Presenter>{
+    interface View extends BaseView<Presenter> {
         void notifyDataChanged();
 
         void clearScreen();
 
         void unClearScreen();
+
+        void notifyItemChange(int position);
+
+        void notifyItemInserted(int position);
     }
 
-    interface Presenter extends BasePresenter{
+    interface Presenter extends BasePresenter {
         int getCount();
 
         IMessageModel getMessage(int position);
+
+        void showBigPic(int position);
+
+        void reUploadImage(int position);
     }
 }
