@@ -367,7 +367,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     public void navigateToPPTDrawing() {
         checkNotNull(lppptFragment);
         lppptFragment.changePPTCanvasMode();
-        lppptFragment.setPPTShowWay(LPConstants.LPPPTShowWay.SHOW_COVERED);
 
         int currentOrientation = getResources().getConfiguration().orientation;
         if (lppptFragment.isEditable()) {
@@ -694,7 +693,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public void clearPPTAllShapes() {
         checkNotNull(lppptFragment);
-        lppptFragment.deleteAllShape();
+        lppptFragment.eraseAllShape();
     }
 
     @Override
