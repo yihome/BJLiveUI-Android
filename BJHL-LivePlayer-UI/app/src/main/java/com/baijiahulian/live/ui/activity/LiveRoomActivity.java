@@ -60,6 +60,7 @@ import com.baijiahulian.live.ui.topbar.TopBarFragment;
 import com.baijiahulian.live.ui.topbar.TopBarPresenter;
 import com.baijiahulian.live.ui.users.OnlineUserDialogFragment;
 import com.baijiahulian.live.ui.users.OnlineUserPresenter;
+import com.baijiahulian.live.ui.utils.QueryPlus;
 import com.baijiahulian.live.ui.utils.RxUtils;
 import com.baijiahulian.live.ui.videoplayer.VideoPlayerFragment;
 import com.baijiahulian.live.ui.videoplayer.VideoPlayerPresenter;
@@ -73,8 +74,6 @@ import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 
 import java.util.concurrent.TimeUnit;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -83,32 +82,16 @@ import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 
 public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRouterListener {
 
-    @BindView(R.id.activity_live_room_background_container)
-    FrameLayout flBackground;
-    @BindView(R.id.activity_live_room_foreground_left_container)
-    FrameLayout flForegroundLeft;
-    @BindView(R.id.activity_live_room_foreground_right_container)
-    FrameLayout flForegroundRight;
-    @BindView(R.id.activity_live_room_chat)
-    FrameLayout flChat;
-    @BindView(R.id.activity_live_room_top)
-    FrameLayout flTop;
-    @BindView(R.id.activity_live_room_bottom_left)
-    FrameLayout flLeft;
-    @BindView(R.id.activity_live_room_right)
-    FrameLayout flRight;
-    @BindView(R.id.activity_live_room_bottom_right)
-    FrameLayout flBottomRight;
-    @BindView(R.id.activity_live_room_loading)
-    FrameLayout flLoading;
-    @BindView(R.id.activity_live_room_chat_drawer)
-    DrawerLayout dlChat;
-    @BindView(R.id.activity_live_room_video_recorder_container)
-    LinearLayout llVideoContainer;
-    @BindView(R.id.activity_live_room_top_right)
-    FrameLayout flTopRight;
-    @BindView(R.id.activity_live_room_ppt_left)
-    FrameLayout flPPTLeft;
+    private FrameLayout flBackground;
+    private FrameLayout flForegroundLeft;
+    private FrameLayout flForegroundRight;
+    private FrameLayout flTop;
+    private FrameLayout flLeft;
+    private FrameLayout flLoading;
+    private DrawerLayout dlChat;
+    private LinearLayout llVideoContainer;
+    private FrameLayout flTopRight;
+    private FrameLayout flPPTLeft;
 
     private LiveRoom liveRoom;
 
@@ -122,7 +105,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private ChatPresenter chatPresenter;
     private RightBottomMenuFragment rightBottomMenuFragment;
     private LeftMenuFragment leftMenuFragment;
-    private PPTLeftFragment pptLeftFragment;
     private RightMenuFragment rightMenuFragment;
     private WindowManager windowManager;
 
@@ -139,12 +121,15 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private IMediaModel currentRemoteMediaUser;
     private boolean isClearScreen;//是否已经清屏，作用于视频采集和远程视频ui的调整
 
+    private QueryPlus $;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_live_room);
-        ButterKnife.bind(this);
+
+        initViews();
 
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             onConfigurationChanged(getResources().getConfiguration());
@@ -176,6 +161,19 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         };
         dlChat.openDrawer(Gravity.START);
         checkScreenOrientationInit();
+    }
+
+    private void initViews() {
+        flBackground = (FrameLayout) findViewById(R.id.activity_live_room_background_container);
+        flForegroundLeft = (FrameLayout) findViewById(R.id.activity_live_room_foreground_left_container);
+        flForegroundRight = (FrameLayout) findViewById(R.id.activity_live_room_foreground_right_container);
+        flTop = (FrameLayout) findViewById(R.id.activity_live_room_top);
+        flLeft = (FrameLayout) findViewById(R.id.activity_live_room_bottom_left);
+        flLoading = (FrameLayout) findViewById(R.id.activity_live_room_loading);
+        dlChat = (DrawerLayout) findViewById(R.id.activity_live_room_chat_drawer);
+        llVideoContainer = (LinearLayout) findViewById(R.id.activity_live_room_video_recorder_container);
+        flTopRight = (FrameLayout) findViewById(R.id.activity_live_room_top_right);
+        flPPTLeft = (FrameLayout) findViewById(R.id.activity_live_room_ppt_left);
     }
 
     @Override
@@ -298,7 +296,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         bindVP(leftMenuFragment, new LeftMenuPresenter(leftMenuFragment));
         addFragment(R.id.activity_live_room_bottom_left, leftMenuFragment);
 
-        pptLeftFragment = new PPTLeftFragment();
+        PPTLeftFragment pptLeftFragment = new PPTLeftFragment();
         bindVP(pptLeftFragment, new PPTLeftPresenter(pptLeftFragment));
         addFragment(R.id.activity_live_room_ppt_left, pptLeftFragment);
 
