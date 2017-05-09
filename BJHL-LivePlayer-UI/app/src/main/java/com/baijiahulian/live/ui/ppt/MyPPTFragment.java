@@ -1,7 +1,6 @@
 package com.baijiahulian.live.ui.ppt;
 
-import android.view.GestureDetector;
-import android.view.MotionEvent;
+import android.os.Bundle;
 
 import com.baijiahulian.livecore.ppt.LPPPTFragment;
 import com.baijiahulian.livecore.ppt.whiteboard.LPWhiteBoardView;
@@ -36,6 +35,11 @@ public class MyPPTFragment extends LPPPTFragment implements PPTContract.View {
         });
     }
 
+    @Override
+    public void init(Bundle savedInstanceState) {
+        super.init(savedInstanceState);
+        showPPTPageView();
+    }
 
     @Override
     public void onDestroy() {

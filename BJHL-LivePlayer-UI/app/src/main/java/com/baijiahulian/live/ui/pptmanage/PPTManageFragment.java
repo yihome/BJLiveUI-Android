@@ -240,7 +240,7 @@ public class PPTManageFragment extends BaseDialogFragment implements PPTManageCo
                             presenter.deselectItem(holder.getLayoutPosition());
                     }
                 });
-//                AliCloudImageUtil.getRectScaledUrl()
+                docViewHolder.checkBox.setChecked(presenter.isItemSelected(position));
                 String url = AliCloudImageUtil.getRectScaledUrl(getContext(), ((DocumentModel)presenter.getItem(position)).pageInfoModel.url, 24);
 //                int res = getDrawableResByFileExt(presenter.getItem(position).getFileExt());
                 Picasso.with(getContext()).load(url).into(docViewHolder.ivIcon);

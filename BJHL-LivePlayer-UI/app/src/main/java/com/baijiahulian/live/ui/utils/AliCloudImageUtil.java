@@ -41,7 +41,7 @@ public class AliCloudImageUtil {
         if (url.endsWith(".jpg") || url.endsWith(".jpeg") || url.endsWith(".png") || url.endsWith(".webp")
                 || url.endsWith(".bmp") || url.endsWith(".gif")) {
             if (isFromAliCloud(url)) {
-                return url + "@" + px + "h_" + px + "w_1e_1l" + imageUrlSuffix();
+                return url + "@" + px + "h_" + px + "w_1c_1e_1l" + imageUrlSuffix();
             }
         }
         return url;

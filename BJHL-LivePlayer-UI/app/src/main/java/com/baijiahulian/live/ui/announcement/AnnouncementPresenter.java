@@ -31,7 +31,7 @@ public class AnnouncementPresenter implements AnnouncementContract.Presenter {
     private Pattern pattern;
 
     public AnnouncementPresenter(AnnouncementContract.View view) {
-        String mode = "(http|ftp|https):\\/\\/[\\w\\-_]+(\\.[\\w\\-_]+)+([\\w\\-\\.,@?^=%&amp;:/~\\+#]*[\\w\\-\\@?^=%&amp;/~\\+#])?";
+        String mode = "(http|https):\\/\\/[\\w\\-_]+(\\.[\\w\\-_]+)+([\\w\\-\\.,@?^=%&amp;:/~\\+#]*[\\w\\-\\@?^=%&amp;/~\\+#])?";
         pattern = Pattern.compile(mode);
         this.view = view;
     }
@@ -78,6 +78,9 @@ public class AnnouncementPresenter implements AnnouncementContract.Presenter {
 
     @Override
     public void saveAnnouncement(String text, String url) {
+        if (!url.startsWith("http://") && !url.startsWith("https://")) {
+            url = "http://" + url;
+        }
         routerListener.getLiveRoom().changeRoomAnnouncement(text, url);
     }
 
@@ -90,6 +93,9 @@ public class AnnouncementPresenter implements AnnouncementContract.Presenter {
         if (TextUtils.isEmpty(url)) {
             view.showCheckStatus(AnnouncementContract.STATUS_CHECKED_CAN_SAVE);
         } else {
+            if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                url = "http://" + url;
+            }
             if (pattern.matcher(url).find()) {
                 view.showCheckStatus(AnnouncementContract.STATUS_CHECKED_CAN_SAVE);
             } else {

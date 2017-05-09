@@ -18,7 +18,8 @@
         android:layout_height="24dp"
         android:layout_centerVertical="true"
         android:layout_marginLeft="@dimen/activity_live_room_dialog_margin"
-        android:layout_toRightOf="@+id/item_ppt_manage_normal_check_box" />
+        android:layout_toRightOf="@+id/item_ppt_manage_normal_check_box"
+        android:scaleType="fitCenter" />
 
     <TextView
         android:id="@+id/item_ppt_manage_normal_title"

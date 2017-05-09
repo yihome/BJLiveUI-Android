@@ -40,8 +40,11 @@ interface PPTManageContract {
 
         void deselectItem(int position);
 
+        boolean isItemSelected(int position);
+
         void removeSelectedItems();
 
         boolean isDocumentAdded(int position);
+
     }
 }

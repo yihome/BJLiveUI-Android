@@ -12,12 +12,13 @@ import android.widget.GridView;
 import android.widget.ImageView;
 
 import com.baijiahulian.live.ui.R;
+import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 import com.baijiahulian.live.ui.base.BaseFragment;
+import com.baijiahulian.live.ui.utils.DisplayUtils;
 import com.baijiahulian.livecore.models.imodels.IExpressionModel;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
-import java.util.List;
+import static android.support.v4.view.ViewPager.SCROLL_STATE_IDLE;
 
 /**
  * Created by Shubo on 2017/5/6.
@@ -27,7 +28,9 @@ public class EmojiFragment extends BaseFragment implements EmojiContract.View {
 
     private EmojiSelectCallBack callBack;
     private EmojiContract.Presenter presenter;
+    private ViewPager viewPager;
     private EmojiPagerAdapter pagerAdapter;
+    private int gridPadding;
     private int spanCount = 8;
     private int rouCount = 4;
 
@@ -42,13 +45,37 @@ public class EmojiFragment extends BaseFragment implements EmojiContract.View {
     @Override
     protected void init(Bundle savedInstanceState) {
         super.init(savedInstanceState);
-        spanCount = 8;
-        rouCount = 4;
+        gridPadding = DisplayUtils.dip2px(getContext(), 10);
+        adjustItemCount();
         presenter = new EmojiPresenter(this);
+        presenter.setRouter((LiveRoomRouterListener) getActivity());
         setPresenter(presenter);
-        ViewPager viewPager = (ViewPager) $.id(R.id.fragment_emoji_container_viewpager).view();
+        viewPager = (ViewPager) $.id(R.id.fragment_emoji_container_viewpager).view();
         pagerAdapter = new EmojiPagerAdapter();
         viewPager.setAdapter(pagerAdapter);
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+                if (state == SCROLL_STATE_IDLE){
+                    presenter.onPageSelected(viewPager.getCurrentItem());
+                }
+            }
+        });
+    }
+
+    private void adjustItemCount() {
+        int screenWidth = DisplayUtils.getScreenWidthPixels(getContext());
+        spanCount = (screenWidth - 2 * gridPadding) / DisplayUtils.dip2px(getContext(), 40);
     }
 
     @Override
@@ -84,16 +111,18 @@ public class EmojiFragment extends BaseFragment implements EmojiContract.View {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        spanCount = 16;
-
+        adjustItemCount();
+        presenter.onSizeChanged();
+        viewPager.setAdapter(new EmojiPagerAdapter());
+        viewPager.setCurrentItem(presenter.getPageOfCurrentFirstItem());
     }
 
     private class EmojiPagerAdapter extends PagerAdapter {
 
-        private List<View> viewList;
+        private View[] viewList;
 
-        public EmojiPagerAdapter() {
-            viewList = new ArrayList<>();
+        EmojiPagerAdapter() {
+            viewList = new View[getCount()];
         }
 
         @Override
@@ -108,19 +137,25 @@ public class EmojiFragment extends BaseFragment implements EmojiContract.View {
 
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
-            if (viewList.get(position) == null) {
+            if (viewList.length <= position || viewList[position] == null) {
                 GridView gridView = new GridView(getContext());
+                gridView.setPadding(gridPadding, 0, gridPadding, 0);
                 gridView.setNumColumns(spanCount);
                 gridView.setAdapter(new EmojiAdapter(position));
-                container.addView(gridView);
-                viewList.add(position, gridView);
+                viewList[position] = gridView;
             }
-            return viewList.get(position);
+            container.addView(viewList[position]);
+            return viewList[position];
         }
 
         @Override
         public void destroyItem(ViewGroup container, int position, Object object) {
-            container.removeView(viewList.get(position));
+            container.removeView(viewList[position]);
+        }
+
+        @Override
+        public void startUpdate(ViewGroup container) {
+            super.startUpdate(container);
         }
     }
 

@@ -1,5 +1,7 @@
 package com.baijiahulian.live.ui.chat;
 
+import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
@@ -9,6 +11,7 @@ import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.baijiahulian.common.cropperv2.BJCommonImageCropHelper;
@@ -17,11 +20,13 @@ import com.baijiahulian.common.cropperv2.model.PhotoInfo;
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseDialogFragment;
 import com.baijiahulian.live.ui.chat.emoji.EmojiFragment;
+import com.baijiahulian.live.ui.chat.emoji.EmojiSelectCallBack;
 import com.baijiahulian.live.ui.utils.QueryPlus;
+import com.baijiahulian.livecore.models.imodels.IExpressionModel;
 
 import java.util.List;
 
-import static android.R.attr.fragment;
+import static android.content.Context.INPUT_METHOD_SERVICE;
 
 /**
  * Created by Shubo on 2017/3/4.
@@ -61,6 +66,13 @@ public class MessageSentFragment extends BaseDialogFragment implements MessageSe
         $ = QueryPlus.with(contentView);
         textWatcher = new MessageTextWatcher();
         ((EditText) $.id(R.id.dialog_message_send_et).view()).addTextChangedListener(textWatcher);
+        $.id(R.id.dialog_message_send_et).view().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(INPUT_METHOD_SERVICE);
+                imm.showSoftInput($.id(R.id.dialog_message_send_et).view(), InputMethodManager.SHOW_IMPLICIT);
+            }
+        }, 100);
         $.id(R.id.dialog_message_send_btn).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -122,15 +134,47 @@ public class MessageSentFragment extends BaseDialogFragment implements MessageSe
     @Override
     public void showMessageSuccess() {
         $.id(R.id.dialog_message_send_et).text("");
+        dismissAllowingStateLoss();
     }
 
     @Override
     public void showEmojiPanel() {
-        if (emojiFragment == null)
-            emojiFragment = EmojiFragment.newInstance();
-        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-        transaction.add(R.id.dialog_message_send_emoji, emojiFragment);
-        transaction.commitAllowingStateLoss();
+        if (emojiFragment == null) {
+            // hide keyborad
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm.isActive()) {//isOpen若返回true，则表示输入法打开
+                imm.hideSoftInputFromWindow($.id(R.id.dialog_message_send_et).view().getWindowToken(), 0);
+            }
+            contentView.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    $.id(R.id.dialog_message_send_emoji).visible();
+                    emojiFragment = EmojiFragment.newInstance();
+                    emojiFragment.setCallBack(new EmojiSelectCallBack() {
+                        @Override
+                        public void onEmojiSelected(IExpressionModel emoji) {
+                            presenter.sendMessage("[" + emoji.getKey() + "]");
+                        }
+                    });
+                    FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+                    transaction.add(R.id.dialog_message_send_emoji, emojiFragment);
+                    transaction.commitAllowingStateLoss();
+                }
+            }, 100);
+        } else {
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.showSoftInput($.id(R.id.dialog_message_send_et).view(), InputMethodManager.SHOW_IMPLICIT);
+
+            $.id(R.id.dialog_message_send_emoji).gone();
+            FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+            transaction.remove(emojiFragment);
+            if (Build.VERSION.SDK_INT >= 24) {
+                transaction.commitNowAllowingStateLoss();
+            } else {
+                transaction.commitAllowingStateLoss();
+            }
+            emojiFragment = null;
+        }
     }
 
     @Override

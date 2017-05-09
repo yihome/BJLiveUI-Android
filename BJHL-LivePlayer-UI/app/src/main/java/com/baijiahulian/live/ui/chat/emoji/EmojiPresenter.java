@@ -15,20 +15,21 @@ public class EmojiPresenter implements EmojiContract.Presenter {
     private EmojiContract.View view;
     private int PAGE_SIZE;
     private List<IExpressionModel> emojiList;
+    private int currentPageFirstItem;
 
-    public EmojiPresenter(EmojiContract.View view) {
+    EmojiPresenter(EmojiContract.View view) {
         this.view = view;
+        PAGE_SIZE = view.getRowCount() * view.getSpanCount();
     }
 
     @Override
     public void setRouter(LiveRoomRouterListener liveRoomRouterListener) {
         routerListener = liveRoomRouterListener;
+        emojiList = routerListener.getLiveRoom().getChatVM().getExpressions();
     }
 
     @Override
     public void subscribe() {
-        PAGE_SIZE = view.getRowCount() * view.getSpanCount();
-        emojiList = routerListener.getLiveRoom().getChatVM().getExpressions();
     }
 
     @Override
@@ -58,5 +59,20 @@ public class EmojiPresenter implements EmojiContract.Presenter {
     @Override
     public int getPageCount() {
         return emojiList.size() % PAGE_SIZE == 0 ? emojiList.size() / PAGE_SIZE : emojiList.size() / PAGE_SIZE + 1;
+    }
+
+    @Override
+    public void onSizeChanged() {
+        PAGE_SIZE = view.getRowCount() * view.getSpanCount();
+    }
+
+    @Override
+    public int getPageOfCurrentFirstItem() {
+        return currentPageFirstItem / PAGE_SIZE;
+    }
+
+    @Override
+    public void onPageSelected(int page) {
+        currentPageFirstItem = page * PAGE_SIZE + 1;
     }
 }

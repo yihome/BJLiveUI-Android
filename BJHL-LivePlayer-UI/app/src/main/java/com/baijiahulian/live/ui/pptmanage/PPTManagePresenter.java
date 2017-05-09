@@ -59,7 +59,7 @@ public class PPTManagePresenter implements PPTManageContract.Presenter {
                 addedDocuments.add(new DocumentModel(m));
         }
 
-        if (addedDocuments.size() > 0) {
+        if (addedDocuments.size() > 0 || uploadingQueue.size() > 0) {
             view.showPPTNotEmpty();
         } else {
             view.showPPTEmpty();
@@ -94,6 +94,7 @@ public class PPTManagePresenter implements PPTManageContract.Presenter {
                             if (addedDocuments.get(i).id.equals(s)) {
                                 addedDocuments.remove(i);
                                 view.notifyItemRemoved(i);
+                                if (addedDocuments.size() == 0) view.showPPTEmpty();
                                 return;
                             }
                         }
@@ -214,6 +215,11 @@ public class PPTManagePresenter implements PPTManageContract.Presenter {
     public void deselectItem(int position) {
         deleteDocIds.remove(addedDocuments.get(position).id);
         if (deleteDocIds.size() == 0) view.showRemoveBtnDisable();
+    }
+
+    @Override
+    public boolean isItemSelected(int position) {
+        return deleteDocIds.contains(addedDocuments.get(position).id);
     }
 
     @Override

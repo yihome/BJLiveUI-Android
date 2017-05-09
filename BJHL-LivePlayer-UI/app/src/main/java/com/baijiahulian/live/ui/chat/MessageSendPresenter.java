@@ -32,7 +32,7 @@ public class MessageSendPresenter implements MessageSendContract.Presenter {
 
     @Override
     public void chooseEmoji() {
-
+        view.showEmojiPanel();
     }
 
     @Override

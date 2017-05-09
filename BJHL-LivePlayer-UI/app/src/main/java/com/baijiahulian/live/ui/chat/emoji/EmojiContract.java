@@ -26,6 +26,11 @@ interface EmojiContract {
 
         int getPageCount();
 
+        void onSizeChanged();
+
+        int getPageOfCurrentFirstItem();
+
+        void onPageSelected(int page);
     }
 
 }
