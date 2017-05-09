@@ -251,15 +251,17 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         flTopRight.setLayoutParams(lp);
     }
 
-    //视频采集和远程视频ui清屏调整
+    //视频采集和远程视频ui清屏调整,仅横屏
     private void onVideoFullScreenConfigurationChanged(boolean isClear) {
-        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) llVideoContainer.getLayoutParams();
-        if (isClear) {
-            lp.addRule(RelativeLayout.BELOW, 0);
-        } else {
-            lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_top);
+        if (getCurrentScreenOrientation() == Configuration.ORIENTATION_LANDSCAPE) {
+            RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) llVideoContainer.getLayoutParams();
+            if (isClear) {
+                lp.addRule(RelativeLayout.BELOW, 0);
+            } else {
+                lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_top);
+            }
+            llVideoContainer.setLayoutParams(lp);
         }
-        llVideoContainer.setLayoutParams(lp);
     }
 
     @Override
@@ -332,9 +334,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void clearScreen() {
-//        chatFragment.clearScreen();
+        chatFragment.clearScreen();
         isClearScreen = true;
-        dlChat.setVisibility(View.GONE);
+//        dlChat.setVisibility(View.GONE);
         rightBottomMenuFragment.clearScreen();
         hideFragment(topBarFragment);
         hideFragment(rightMenuFragment);
@@ -344,9 +346,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void unClearScreen() {
-//        chatFragment.unClearScreen();
+        chatFragment.unClearScreen();
         isClearScreen = false;
-        dlChat.setVisibility(View.VISIBLE);
+//        dlChat.setVisibility(View.VISIBLE);
         rightBottomMenuFragment.unClearScreen();
         showFragment(topBarFragment);
         showFragment(rightMenuFragment);
