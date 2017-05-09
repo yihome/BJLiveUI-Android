@@ -11,7 +11,7 @@ import com.baijiahulian.livecore.wrapper.LPPlayer;
 interface VideoPlayerContract {
 
     interface View extends BaseView<Presenter> {
-
+        void showCurrentVideoUserName(String name);
     }
 
     interface Presenter extends BasePresenter {

@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseFragment;
 import com.baijiahulian.live.ui.utils.AliCloudImageUtil;
+import com.baijiahulian.live.ui.viewsupport.CountdownCircleView;
 import com.squareup.picasso.Picasso;
 
 /**
@@ -44,6 +45,7 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
                 presenter.speakApply();
             }
         });
+
     }
 
     @Override
@@ -84,7 +86,9 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
 
     @Override
     public void showSpeakApplyCountDown(int countDownTime) {
-
+        $.id(R.id.fragment_right_hand_countdown).visible();
+        ((CountdownCircleView) $.id(R.id.fragment_right_hand_countdown).view()).setRatio(countDownTime / 30000.0f);
+        $.id(R.id.fragment_right_hand_countdown).view().invalidate();
     }
 
     @Override
@@ -92,6 +96,7 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
         showToast(getString(R.string.live_media_speak_apply_agree));
         $.id(R.id.fragment_right_speak_apply).image(R.drawable.live_ic_handup_on);
         $.id(R.id.fragment_right_pen).visible();
+        $.id(R.id.fragment_right_hand_countdown).invisible();
     }
 
     @Override
@@ -99,32 +104,59 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
         showToast(getString(R.string.live_media_speak_closed_by_teacher));
         $.id(R.id.fragment_right_speak_apply).image(R.drawable.live_ic_handup);
         $.id(R.id.fragment_right_pen).gone();
+        $.id(R.id.fragment_right_hand_countdown).invisible();
     }
 
     @Override
     public void showSpeakApplyDisagreed() {
+        $.id(R.id.fragment_right_speak_apply).enable(true);
         showToast(getString(R.string.live_media_speak_apply_disagree));
         $.id(R.id.fragment_right_speak_apply).image(R.drawable.live_ic_handup);
+        $.id(R.id.fragment_right_hand_countdown).invisible();
     }
 
     @Override
     public void showSpeakApplyCanceled() {
         $.id(R.id.fragment_right_speak_apply).image(R.drawable.live_ic_handup);
         $.id(R.id.fragment_right_pen).gone();
+        $.id(R.id.fragment_right_hand_countdown).invisible();
     }
 
     @Override
     public void showTeacherRightMenu() {
         $.id(R.id.fragment_right_pen).visible();
         $.id(R.id.fragment_right_ppt).visible();
-        $.id(R.id.fragment_right_speak_apply).gone();
+        $.id(R.id.fragment_right_speak_wrapper).gone();
     }
 
     @Override
     public void showStudentRightMenu() {
         $.id(R.id.fragment_right_pen).gone();
         $.id(R.id.fragment_right_ppt).gone();
-        $.id(R.id.fragment_right_speak_apply).visible();
+        $.id(R.id.fragment_right_speak_wrapper).visible();
+    }
+
+    @Override
+    public void showForbiddenHand() {
+        $.id(R.id.fragment_right_speak_apply).image(R.drawable.live_ic_handup_forbid);
+        $.id(R.id.fragment_right_speak_apply).enable(false);
+        $.id(R.id.fragment_right_hand_countdown).invisible();
+    }
+
+    @Override
+    public void showNotForbiddenHand() {
+        $.id(R.id.fragment_right_speak_apply).image(R.drawable.live_ic_handup);
+        $.id(R.id.fragment_right_speak_apply).enable(true);
+    }
+
+    @Override
+    public void hidePPTDrawBtn() {
+        $.id(R.id.fragment_right_pen).gone();
+    }
+
+    @Override
+    public void showPPTDrawBtn() {
+        $.id(R.id.fragment_right_pen).visible();
     }
 
     @Override

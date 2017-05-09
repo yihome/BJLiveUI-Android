@@ -57,7 +57,6 @@ public class MoreMenuDialogFragment extends BaseDialogFragment implements MoreMe
             @Override
             public void onClick(View v) {
                 presenter.switchCloudRecord();
-                dismissAllowingStateLoss();
             }
         });
         $.id(R.id.dialog_more_help).clicked(new View.OnClickListener() {

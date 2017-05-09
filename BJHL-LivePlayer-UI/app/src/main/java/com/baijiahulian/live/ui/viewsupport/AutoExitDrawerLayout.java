@@ -1,4 +1,4 @@
-package com.baijiahulian.live.ui.chat;
+package com.baijiahulian.live.ui.viewsupport;
 
 import android.content.Context;
 import android.support.v4.widget.DrawerLayout;

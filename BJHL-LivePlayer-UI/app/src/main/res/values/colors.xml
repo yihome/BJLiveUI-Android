@@ -29,5 +29,7 @@
     <color name="live_blue_press">#2794E5</color>
     <color name="live_yellow">#FF9100</color>
     <color name="live_transparent">#00000000</color>
+    <color name="live_transparent_opacity_02">#33000000</color>
+    <color name="live_transparent_opacity_06">#99000000</color>
 
 </resources>

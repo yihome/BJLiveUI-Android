@@ -50,8 +50,9 @@ public interface LiveRoomRouterListener {
 
     void navigateToAnnouncement();
 
-    void navigateToCloudRecord();
+    void navigateToCloudRecord(boolean recordStatus);
 
+    @Deprecated
     boolean getCloudRecordStatus();
 
     void navigateToHelp();
@@ -82,6 +83,20 @@ public interface LiveRoomRouterListener {
     void setCurrentVideoUser(IMediaModel mediaModel);
 
     IMediaModel getCurrentVideoUser();
+
+    void clearPPTAllShapes();
+
+    void changeScreenOrientation();
+
+    int getCurrentScreenOrientation();
+
+    int getSysRotationSetting();
+
+    //允许自由转屏
+    void letScreenRotateItself();
+
+    //不允许自由转屏
+    void forbidScreenRotateItself();
 
     void showBigChatPic(String url);
 

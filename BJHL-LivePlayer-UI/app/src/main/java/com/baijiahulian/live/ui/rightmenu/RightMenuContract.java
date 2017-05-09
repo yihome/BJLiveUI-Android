@@ -35,6 +35,14 @@ interface RightMenuContract {
         void showTeacherRightMenu();
 
         void showStudentRightMenu();
+
+        void showForbiddenHand();
+
+        void showNotForbiddenHand();
+
+        void hidePPTDrawBtn();
+
+        void showPPTDrawBtn();
     }
 
     interface Presenter extends BasePresenter {
@@ -45,6 +53,8 @@ interface RightMenuContract {
         void managePPT();
 
         void speakApply();
+
+        void changePPTDrawBtnStatus(boolean shouldShow);
 
     }
 }

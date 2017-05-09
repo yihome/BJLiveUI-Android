@@ -63,6 +63,8 @@
     <string name="live_recorder_camera_switch_off">关闭摄像头</string>
     <string name="live_ppt_manage">管理课件</string>
     <string name="live_ppt_title">PPT</string>
+    <string name="live_forbid_raise_hand">禁止举手</string>
+    <string name="live_ppt_clear_all">清除</string>
     <string name="live_remove">移除</string>
     <string name="live_image_loading">图片加载中…</string>
     <string name="live_image_uploading">上传中…</string>

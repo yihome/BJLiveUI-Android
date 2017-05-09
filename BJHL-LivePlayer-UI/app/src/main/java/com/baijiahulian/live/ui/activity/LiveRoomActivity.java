@@ -1,14 +1,17 @@
 package com.baijiahulian.live.ui.activity;
 
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Gravity;
 import android.view.OrientationEventListener;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -35,6 +38,8 @@ import com.baijiahulian.live.ui.ppt.MyPPTFragment;
 import com.baijiahulian.live.ui.ppt.PPTPresenter;
 import com.baijiahulian.live.ui.pptdialog.PPTDialogFragment;
 import com.baijiahulian.live.ui.pptdialog.PPTDialogPresenter;
+import com.baijiahulian.live.ui.pptleftmenu.PPTLeftFragment;
+import com.baijiahulian.live.ui.pptleftmenu.PPTLeftPresenter;
 import com.baijiahulian.live.ui.pptmanage.PPTManageFragment;
 import com.baijiahulian.live.ui.pptmanage.PPTManagePresenter;
 import com.baijiahulian.live.ui.recorderdialog.RecorderDialogFragment;
@@ -45,6 +50,8 @@ import com.baijiahulian.live.ui.rightbotmenu.RightBottomMenuFragment;
 import com.baijiahulian.live.ui.rightbotmenu.RightBottomMenuPresenter;
 import com.baijiahulian.live.ui.rightmenu.RightMenuFragment;
 import com.baijiahulian.live.ui.rightmenu.RightMenuPresenter;
+import com.baijiahulian.live.ui.righttopmenu.RightTopMenuFragment;
+import com.baijiahulian.live.ui.righttopmenu.RightTopMenuPresenter;
 import com.baijiahulian.live.ui.setting.SettingDialogFragment;
 import com.baijiahulian.live.ui.setting.SettingPresenter;
 import com.baijiahulian.live.ui.speakqueue.SpeakQueueDialogFragment;
@@ -95,11 +102,16 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     DrawerLayout dlChat;
     @BindView(R.id.activity_live_room_video_recorder_container)
     LinearLayout llVideoContainer;
+    @BindView(R.id.activity_live_room_top_right)
+    FrameLayout flTopRight;
+    @BindView(R.id.activity_live_room_ppt_left)
+    FrameLayout flPPTLeft;
 
     private LiveRoom liveRoom;
 
     private LoadingFragment loadingFragment;
     private TopBarFragment topBarFragment;
+    private RightTopMenuFragment rightTopMenuFragment;
 
     private MyPPTFragment lppptFragment;
     private VideoRecorderFragment recorderFragment;
@@ -107,11 +119,13 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private ChatPresenter chatPresenter;
     private RightBottomMenuFragment rightBottomMenuFragment;
     private LeftMenuFragment leftMenuFragment;
+    private PPTLeftFragment pptLeftFragment;
     private RightMenuFragment rightMenuFragment;
     private WindowManager windowManager;
 
     private VideoPlayerFragment playerFragment;
     private VideoPlayerPresenter playerPresenter;
+    private RightMenuPresenter rightMenuPresenter;
     private PPTManageFragment pptManageFragment;
     private PPTManagePresenter pptManagePresenter;
 
@@ -120,6 +134,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     private Subscription subscriptionOfLoginConflict;
     private IMediaModel currentRemoteMediaUser;
+    private boolean isClearScreen;//是否已经清屏，作用于视频采集和远程视频ui的调整
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -185,12 +200,18 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         }
         onBackgroundContainerConfigurationChanged(newConfig);
         onForegroundContainerConfigurationChanged(newConfig);
+        onPPTLeftMenuConfigurationChanged(newConfig);
+
     }
 
     private void onForegroundContainerConfigurationChanged(Configuration newConfig) {
         RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) llVideoContainer.getLayoutParams();
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_top);
+            if (isClearScreen) {
+                lp.addRule(RelativeLayout.BELOW, 0);
+            } else {
+                lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_top);
+            }
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
             lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_background_container);
         }
@@ -205,6 +226,40 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
             lp.addRule(RelativeLayout.ABOVE, R.id.activity_live_room_center_anchor);
         }
         flBackground.setLayoutParams(lp);
+    }
+
+    private void onPPTLeftMenuConfigurationChanged(Configuration newConfig) {
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            if (lppptFragment != null && lppptFragment.isEditable()) {
+                flLeft.setVisibility(View.GONE);
+                dlChat.setVisibility(View.GONE);
+            }
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            flLeft.setVisibility(View.VISIBLE);
+            dlChat.setVisibility(View.VISIBLE);
+        }
+    }
+
+    //录课中ui清屏调整
+    private void onRecordFullScreenConfigurationChanged(boolean isClear) {
+        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) flTopRight.getLayoutParams();
+        if (isClear) {
+            lp.addRule(RelativeLayout.BELOW, 0);
+        } else {
+            lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_top);
+        }
+        flTopRight.setLayoutParams(lp);
+    }
+
+    //视频采集和远程视频ui清屏调整
+    private void onVideoFullScreenConfigurationChanged(boolean isClear) {
+        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) llVideoContainer.getLayoutParams();
+        if (isClear) {
+            lp.addRule(RelativeLayout.BELOW, 0);
+        } else {
+            lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_top);
+        }
+        llVideoContainer.setLayoutParams(lp);
     }
 
     @Override
@@ -230,12 +285,21 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         bindVP(topBarFragment, new TopBarPresenter(topBarFragment));
         addFragment(R.id.activity_live_room_top, topBarFragment);
 
+        rightTopMenuFragment = new RightTopMenuFragment();
+        bindVP(rightTopMenuFragment, new RightTopMenuPresenter());
+        addFragment(R.id.activity_live_room_top_right, rightTopMenuFragment);
+
         leftMenuFragment = new LeftMenuFragment();
         bindVP(leftMenuFragment, new LeftMenuPresenter(leftMenuFragment));
         addFragment(R.id.activity_live_room_bottom_left, leftMenuFragment);
 
+        pptLeftFragment = new PPTLeftFragment();
+        bindVP(pptLeftFragment, new PPTLeftPresenter(pptLeftFragment));
+        addFragment(R.id.activity_live_room_ppt_left, pptLeftFragment);
+
         rightMenuFragment = new RightMenuFragment();
-        bindVP(rightMenuFragment, new RightMenuPresenter(rightMenuFragment));
+        rightMenuPresenter = new RightMenuPresenter(rightMenuFragment);
+        bindVP(rightMenuFragment, rightMenuPresenter);
         addFragment(R.id.activity_live_room_right, rightMenuFragment);
 
         rightBottomMenuFragment = new RightBottomMenuFragment();
@@ -269,19 +333,26 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public void clearScreen() {
 //        chatFragment.clearScreen();
+        isClearScreen = true;
         dlChat.setVisibility(View.GONE);
         rightBottomMenuFragment.clearScreen();
         hideFragment(topBarFragment);
         hideFragment(rightMenuFragment);
+        onRecordFullScreenConfigurationChanged(true);
+        onVideoFullScreenConfigurationChanged(true);
     }
 
     @Override
     public void unClearScreen() {
 //        chatFragment.unClearScreen();
+        isClearScreen = false;
         dlChat.setVisibility(View.VISIBLE);
         rightBottomMenuFragment.unClearScreen();
         showFragment(topBarFragment);
         showFragment(rightMenuFragment);
+        onRecordFullScreenConfigurationChanged(false);
+        onVideoFullScreenConfigurationChanged(false);
+        dlChat.openDrawer(Gravity.START);
     }
 
     @Override
@@ -297,6 +368,23 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         checkNotNull(lppptFragment);
         lppptFragment.changePPTCanvasMode();
         lppptFragment.setPPTShowWay(LPConstants.LPPPTShowWay.SHOW_COVERED);
+
+        int currentOrientation = getResources().getConfiguration().orientation;
+        if (lppptFragment.isEditable()) {
+            flTop.setVisibility(View.GONE);
+            if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+                checkNotNull(leftMenuFragment);
+                flLeft.setVisibility(View.GONE);
+                dlChat.setVisibility(View.GONE);
+            }
+            flPPTLeft.setVisibility(View.VISIBLE);
+        } else {
+            flTop.setVisibility(View.VISIBLE);
+            flLeft.setVisibility(View.VISIBLE);
+            dlChat.setVisibility(View.VISIBLE);
+            dlChat.openDrawer(Gravity.START);
+            flPPTLeft.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -359,6 +447,11 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         if (isPPT)
             lppptFragment.onResume();
         liveRoom.getRecorder().invalidVideo();
+
+        if (lppptFragment != null && lppptFragment.isEditable()) {
+            rightMenuPresenter.changeDrawing();
+        }
+        rightMenuPresenter.changePPTDrawBtnStatus(false);
     }
 
     @Override
@@ -372,6 +465,11 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         if (isPPT)
             lppptFragment.onResume();
         liveRoom.getRecorder().invalidVideo();
+
+        if (lppptFragment != null && lppptFragment.isEditable()) {
+            rightMenuPresenter.changeDrawing();
+        }
+        rightMenuPresenter.changePPTDrawBtnStatus(false);
     }
 
     @Override
@@ -382,6 +480,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         switchView(lppptFragment.getView(), max);
         lppptFragment.onResume();
         liveRoom.getRecorder().invalidVideo();
+        rightMenuPresenter.changePPTDrawBtnStatus(true);
     }
 
     @Override
@@ -405,9 +504,18 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         showDialogFragment(fragment);
     }
 
+    /**
+     * @param recordStatus 当前的状态 1:正在录制 0:未录制
+     */
     @Override
-    public void navigateToCloudRecord() {
-
+    public void navigateToCloudRecord(boolean recordStatus) {
+        if (recordStatus) {
+            flTopRight.setVisibility(View.VISIBLE);
+            showFragment(rightTopMenuFragment);
+        } else {
+            flTopRight.setVisibility(View.GONE);
+            hideFragment(rightTopMenuFragment);
+        }
     }
 
     @Override
@@ -446,8 +554,15 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
             playerFragment = new VideoPlayerFragment();
             playerPresenter = new VideoPlayerPresenter(playerFragment);
             bindVP(playerFragment, playerPresenter);
-            addFragment(R.id.activity_live_room_foreground_right_container, playerFragment);
-            flForegroundRight.setVisibility(View.VISIBLE);
+            if (flForegroundLeft.getVisibility() == View.GONE) {
+                //左侧闲置
+                addFragment(R.id.activity_live_room_foreground_left_container, playerFragment);
+                flForegroundLeft.setVisibility(View.VISIBLE);
+            } else if (flForegroundRight.getVisibility() == View.GONE) {
+                //右侧闲置
+                addFragment(R.id.activity_live_room_foreground_right_container, playerFragment);
+                flForegroundRight.setVisibility(View.VISIBLE);
+            }
         }
         playerPresenter.playVideo(userId);
     }
@@ -455,9 +570,29 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public void playVideoClose(String userId) {
         checkNotNull(playerPresenter);
+        checkNotNull(playerFragment.getView());
+        checkNotNull(lppptFragment.getView());
+        int playerParentId = ((ViewGroup) playerFragment.getView().getParent()).getId();
+        int pptParentId = ((ViewGroup) lppptFragment.getView().getParent()).getId();
+        if (playerParentId == R.id.activity_live_room_foreground_left_container) {
+            //视频在左边
+            flForegroundLeft.setVisibility(View.GONE);
+        } else if (playerParentId == R.id.activity_live_room_foreground_right_container) {
+            //视频在右边
+            flForegroundRight.setVisibility(View.GONE);
+        } else if (playerParentId == R.id.activity_live_room_background_container) {
+            //视频已经最大化
+            if (pptParentId == R.id.activity_live_room_foreground_left_container) {
+                //ppt在左边
+                flForegroundLeft.setVisibility(View.GONE);
+            } else if (pptParentId == R.id.activity_live_room_foreground_right_container) {
+                //ppt在右边
+                flForegroundRight.setVisibility(View.GONE);
+            }
+            maximisePPTView();
+        }
         playerPresenter.playAVClose(userId);
         removeFragment(playerFragment);
-        flForegroundRight.setVisibility(View.GONE);
         playerFragment = null;
         playerPresenter = null;
     }
@@ -467,16 +602,44 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         if (recorderFragment == null) {
             recorderFragment = new VideoRecorderFragment();
             bindVP(recorderFragment, new VideoRecorderPresenter(recorderFragment));
-            addFragment(R.id.activity_live_room_foreground_left_container, recorderFragment);
-            flForegroundLeft.setVisibility(View.VISIBLE);
+            if (flForegroundLeft.getVisibility() == View.GONE) {
+                //左侧闲置
+                addFragment(R.id.activity_live_room_foreground_left_container, recorderFragment);
+                flForegroundLeft.setVisibility(View.VISIBLE);
+            } else if (flForegroundRight.getVisibility() == View.GONE) {
+                //右侧闲置
+                addFragment(R.id.activity_live_room_foreground_right_container, recorderFragment);
+                flForegroundRight.setVisibility(View.VISIBLE);
+            }
+
         }
     }
 
     @Override
     public void detachVideo() {
         checkNotNull(recorderFragment);
+        checkNotNull(recorderFragment.getView());
+        checkNotNull(lppptFragment.getView());
+        int recordParentId = ((ViewGroup) recorderFragment.getView().getParent()).getId();
+        int pptParentId = ((ViewGroup) lppptFragment.getView().getParent()).getId();
+        if (recordParentId == R.id.activity_live_room_foreground_left_container) {
+            //视频采集在左边
+            flForegroundLeft.setVisibility(View.GONE);
+        } else if (recordParentId == R.id.activity_live_room_foreground_right_container) {
+            //视频采集在右边
+            flForegroundRight.setVisibility(View.GONE);
+        } else if (recordParentId == R.id.activity_live_room_background_container) {
+            //视频采集已经最大化
+            if (pptParentId == R.id.activity_live_room_foreground_left_container) {
+                //ppt在左边
+                flForegroundLeft.setVisibility(View.GONE);
+            } else if (pptParentId == R.id.activity_live_room_foreground_right_container) {
+                //ppt在右边
+                flForegroundRight.setVisibility(View.GONE);
+            }
+            maximisePPTView();
+        }
         removeFragment(recorderFragment);
-        flForegroundLeft.setVisibility(View.GONE);
         if (Build.VERSION.SDK_INT < 24) {
             getSupportFragmentManager().executePendingTransactions();
         }
@@ -526,6 +689,49 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public IMediaModel getCurrentVideoUser() {
         return currentRemoteMediaUser;
+    }
+
+    @Override
+    public void clearPPTAllShapes() {
+        checkNotNull(lppptFragment);
+        lppptFragment.deleteAllShape();
+    }
+
+    @Override
+    public void changeScreenOrientation() {
+        int currentOrientation = getResources().getConfiguration().orientation;
+        if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        } else if (currentOrientation == Configuration.ORIENTATION_PORTRAIT) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        }
+    }
+
+    @Override
+    public int getCurrentScreenOrientation() {
+        return getResources().getConfiguration().orientation;
+    }
+
+    @Override
+    public int getSysRotationSetting() {
+        int status = 0;
+        try {
+            status = Settings.System.getInt(getContentResolver(),
+                    Settings.System.ACCELEROMETER_ROTATION);
+        } catch (Settings.SettingNotFoundException e) {
+            e.printStackTrace();
+        }
+        return status;
+    }
+
+    @Override
+    public void letScreenRotateItself() {
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
+    }
+
+    @Override
+    public void forbidScreenRotateItself() {
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_USER);
     }
 
     @Override
