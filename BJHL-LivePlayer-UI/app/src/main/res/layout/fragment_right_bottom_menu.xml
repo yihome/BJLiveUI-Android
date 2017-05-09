@@ -24,7 +24,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginRight="@dimen/activity_live_room_margin"
-        android:src="@drawable/live_ic_zoomout" />
+        android:src="@drawable/live_ic_zoomout"
+        android:visibility="gone" />
 
     <ImageView
         android:id="@+id/fragment_right_bottom_more"
