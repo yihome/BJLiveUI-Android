@@ -61,6 +61,8 @@ public interface LiveRoomRouterListener {
 
     boolean isTeacherOrAssistant();
 
+    // caution: 就算在调用了playVideo后调用该方法，也可能不会及时返回正在播放视频的userId！
+    // 请调用同步方法 getCurrentVideoUser().getUser().getUserId()获取
     String getCurrentVideoPlayingUserId();
 
     void playVideo(String userId);

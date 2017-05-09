@@ -87,6 +87,7 @@ public class SpeakQueuePresenter implements SpeakQueueContract.Presenter {
                         @Override
                         public void call(IMediaModel iMediaModel) {
                             applyList.add(iMediaModel.getUser());
+                            view.notifyItemInserted(applyList.size() - 1);
                         }
                     });
             subscriptionSpeakResponse = routerListener.getLiveRoom().getSpeakQueueVM().getObservableOfSpeakResponse()
@@ -98,11 +99,11 @@ public class SpeakQueuePresenter implements SpeakQueueContract.Presenter {
                             int counter = 0;
                             while (iterator.hasNext()) {
                                 IUserModel model = iterator.next();
-                                counter++;
                                 if (model.getUserId().equals(iMediaControlModel.getUser().getUserId())) {
                                     iterator.remove();
                                     break;
                                 }
+                                counter++;
                             }
                             view.notifyItemDeleted(counter);
                         }
@@ -152,13 +153,19 @@ public class SpeakQueuePresenter implements SpeakQueueContract.Presenter {
 
     @Override
     public void closeSpeaking(int position) {
-        routerListener.playVideoClose(speakList.get(position - applyList.size()).getUser().getUserId());
+        if (speakList.get(position - applyList.size()).getUser().getUserId().equals(routerListener.getCurrentVideoPlayingUserId())) {
+            routerListener.playVideoClose(speakList.get(position - applyList.size()).getUser().getUserId());
+        }
         routerListener.getLiveRoom().getSpeakQueueVM().closeOtherSpeak(speakList.get(position - applyList.size()).getUser().getUserId());
-        routerListener.setCurrentVideoUser(null);
+//        routerListener.setCurrentVideoUser(null);
     }
 
     @Override
     public void openVideo(int position) {
+        IMediaModel formerVideoUser = routerListener.getCurrentVideoUser();
+        if (formerVideoUser != null) {
+            closeVideo(applyList.size() + speakList.indexOf(formerVideoUser));
+        }
         IMediaModel mediaModel = speakList.get(position - applyList.size());
         routerListener.playVideo(mediaModel.getUser().getUserId());
         routerListener.setCurrentVideoUser(mediaModel);
@@ -175,7 +182,7 @@ public class SpeakQueuePresenter implements SpeakQueueContract.Presenter {
 
     @Override
     public boolean isCurrentVideoPlayingUser(int position) {
-        return speakList.get(position - applyList.size()).getUser().getUserId().equals(routerListener.getCurrentVideoPlayingUserId());
+        return routerListener.getCurrentVideoUser() != null && speakList.get(position - applyList.size()).getUser().getUserId().equals(routerListener.getCurrentVideoUser().getUser().getUserId());
     }
 
     @Override

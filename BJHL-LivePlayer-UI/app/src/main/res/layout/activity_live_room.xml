@@ -56,7 +56,6 @@
             android:visibility="gone" />
     </LinearLayout>
 
-
     <com.baijiahulian.live.ui.viewsupport.AutoExitDrawerLayout
         android:id="@+id/activity_live_room_chat_drawer"
         android:layout_width="268dp"
@@ -123,7 +122,6 @@
     <FrameLayout
         android:id="@+id/activity_live_room_loading"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/accent" />
+        android:layout_height="match_parent" />
 
 </RelativeLayout>

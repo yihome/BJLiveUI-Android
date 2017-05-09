@@ -37,7 +37,7 @@
         android:layout_centerVertical="true"
         android:layout_marginLeft="1dp"
         android:layout_toRightOf="@+id/item_speaker_speaking_video_ic"
-        android:text="@string/video_on"
+        android:text="@string/live_video_on"
         android:textColor="@color/live_text_color_light"
         android:textSize="12sp" />
 
@@ -65,7 +65,7 @@
             android:layout_height="match_parent"
             android:layout_marginRight="@dimen/activity_live_room_margin"
             android:gravity="center_vertical"
-            android:text="@string/close_speaking"
+            android:text="@string/live_close_speaking"
             android:textColor="@color/live_blue" />
 
     </LinearLayout>

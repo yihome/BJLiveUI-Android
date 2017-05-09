@@ -78,7 +78,7 @@ public class AliCloudImageUtil {
             imageUrl = url.substring(0, url.indexOf("@"));
         }
         if (isFromAliCloud(imageUrl))
-            return imageUrl + "@" + radius + "-" + "1ci" + imageUrlSuffix();
+            return imageUrl + "@" + 2 * radius + "w_" + 2 * radius + "h_1e_1c_" + radius + "-" + "1ci" + imageUrlSuffix();
         else
             return imageUrl;
     }

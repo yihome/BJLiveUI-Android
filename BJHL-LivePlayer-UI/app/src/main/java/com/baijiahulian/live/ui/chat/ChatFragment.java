@@ -167,7 +167,7 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
                 Picasso.with(getContext()).load(message.getUrl())
                         .placeholder(failedColorDrawable)
                         .error(failedColorDrawable)
-                        .resize(emojiSize, emojiSize)
+//                        .resize(emojiSize, emojiSize)
                         .into(emojiViewHolder.ivEmoji);
             } else if (holder instanceof ImageViewHolder) {
                 ImageViewHolder imageViewHolder = (ImageViewHolder) holder;

@@ -1,10 +1,11 @@
 package com.baijiahulian.live.ui.rightmenu;
 
+import android.text.TextUtils;
+
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 import com.baijiahulian.live.ui.utils.RxUtils;
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.context.LiveRoom;
-import com.baijiahulian.livecore.models.imodels.IForbidChatModel;
 import com.baijiahulian.livecore.models.imodels.IMediaControlModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
@@ -172,7 +173,10 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                 .subscribe(new LPErrorPrintSubscriber<IMediaModel>() {
                     @Override
                     public void call(IMediaModel iMediaModel) {
-                        liveRoomRouterListener.playVideoClose(liveRoomRouterListener.getCurrentVideoUser().getUser().getUserId());
+                        if (TextUtils.isEmpty(liveRoomRouterListener.getCurrentVideoPlayingUserId()))
+                            return;
+                        if (liveRoomRouterListener.getCurrentVideoPlayingUserId().equals(iMediaModel.getUser().getUserId()))
+                            liveRoomRouterListener.playVideoClose(liveRoomRouterListener.getCurrentVideoPlayingUserId());
                     }
                 });
         //音频或者视频状态变化
@@ -182,7 +186,9 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                     @Override
                     public void call(IMediaModel iMediaModel) {
                         //视频已关闭
-                        if (!iMediaModel.isVideoOn()) {
+                        if (TextUtils.isEmpty(liveRoomRouterListener.getCurrentVideoPlayingUserId()))
+                            return;
+                        if (!iMediaModel.isVideoOn() && liveRoomRouterListener.getCurrentVideoPlayingUserId().equals(iMediaModel.getUser().getUserId())) {
                             liveRoomRouterListener.playVideoClose(liveRoomRouterListener.getCurrentVideoUser().getUser().getUserId());
                         }
                     }

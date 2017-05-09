@@ -71,8 +71,11 @@ import com.baijiahulian.livecore.models.imodels.ILoginConflictModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 
+import java.util.concurrent.TimeUnit;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 
@@ -312,8 +315,14 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         addFragment(R.id.activity_live_room_chat, chatFragment);
 
         // might delay 500ms to process
-        removeFragment(loadingFragment);
-        flLoading.setVisibility(View.GONE);
+        Observable.timer(500, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<Long>() {
+                    @Override
+                    public void call(Long aLong) {
+                        removeFragment(loadingFragment);
+                        flLoading.setVisibility(View.GONE);
+                    }
+                });
 
         subscriptionOfLoginConflict = getLiveRoom().getObservableOfLoginConflict().observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new LPErrorPrintSubscriber<ILoginConflictModel>() {
@@ -590,6 +599,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
             }
             maximisePPTView();
         }
+        setCurrentVideoUser(null);
         playerPresenter.playAVClose(userId);
         removeFragment(playerFragment);
         playerFragment = null;

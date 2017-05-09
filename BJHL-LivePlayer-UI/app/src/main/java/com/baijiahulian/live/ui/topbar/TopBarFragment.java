@@ -50,7 +50,7 @@ public class TopBarFragment extends BaseFragment implements TopBarContract.View 
 
     @Override
     public void showOnlineUserCount(int count) {
-        $.id(R.id.fragment_top_bar_user_count).text(getString(R.string.on_line_user_count, count));
+        $.id(R.id.fragment_top_bar_user_count).text(getString(R.string.live_on_line_user_count, count));
     }
 
     @Override

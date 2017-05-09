@@ -10,7 +10,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.baijiahulian.avsdk.liveplayer.GLTextureView;
-import com.baijiahulian.avsdk.liveplayer.ViERenderer;
+import com.baijiahulian.avsdk.liveplayer.ViETextureViewRenderer;
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseFragment;
 
@@ -42,7 +42,7 @@ public class VideoPlayerFragment extends BaseFragment implements VideoPlayerCont
         ViewGroup.LayoutParams flLp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         flContainer.setLayoutParams(flLp);
         //视频
-        View textureView = ViERenderer.CreateRenderer(getActivity(), true);
+        View textureView = ViETextureViewRenderer.CreateRenderer(getActivity(), true);
         flContainer.addView(textureView);
         //名字
         tvName = new TextView(getActivity());

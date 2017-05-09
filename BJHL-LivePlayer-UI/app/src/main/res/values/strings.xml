@@ -1,12 +1,13 @@
 <resources>
     <string name="app_name">BJHL-LivePlayer-UI</string>
 
-    <string name="on_line_user_count">%1$d人在线</string>
-    <string name="enter_live_room">进入直播教室</string>
+    <string name="live_on_line_user_count">%1$d人在线</string>
+    <string name="live_enter_live_room">进入直播教室</string>
+    <string name="live_loading">加载中…</string>
     <string name="live_on_line_user_count_dialog">在线人数（%1$d人）</string>
     <string name="live_speaker_dialog">发言用户</string>
-    <string name="video_on">视频中</string>
-    <string name="close_speaking">结束发言</string>
+    <string name="live_video_on">视频中</string>
+    <string name="live_close_speaking">结束发言</string>
     <string name="live_open_video">打开视频</string>
     <string name="live_close_video">关闭视频</string>
     <string name="live_agree">同意</string>
