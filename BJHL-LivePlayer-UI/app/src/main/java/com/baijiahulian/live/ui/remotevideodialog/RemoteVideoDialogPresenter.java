@@ -30,6 +30,7 @@ public class RemoteVideoDialogPresenter implements RemoteVideoDialogContract.Pre
         } else {
             view.hideCloseSpeaking();
         }
+        view.showCurrentRemoteUserName(routerListener.getCurrentVideoUser().getUser().getName());
     }
 
     @Override
