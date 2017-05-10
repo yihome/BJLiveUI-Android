@@ -32,3 +32,8 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile project(':liveplayer-sdk-ui')
 }
+android {
+    lintOptions {
+        abortOnError false
+    }
+}

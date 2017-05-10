@@ -1,5 +1,6 @@
 package com.baijiahulian.live.ui.activity;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -18,6 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.baijiahulian.common.permission.AppPermissions;
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.announcement.AnnouncementFragment;
 import com.baijiahulian.live.ui.announcement.AnnouncementPresenter;
@@ -70,6 +72,7 @@ import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.context.LiveRoom;
 import com.baijiahulian.livecore.models.imodels.ILoginConflictModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
+import com.baijiahulian.livecore.utils.CrashHandler;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 
 import java.util.concurrent.TimeUnit;
@@ -77,6 +80,7 @@ import java.util.concurrent.TimeUnit;
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 
 import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 
@@ -161,6 +165,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         };
         dlChat.openDrawer(Gravity.START);
         checkScreenOrientationInit();
+        CrashHandler.getInstance().init(LiveRoomActivity.this);
     }
 
     private void initViews() {
