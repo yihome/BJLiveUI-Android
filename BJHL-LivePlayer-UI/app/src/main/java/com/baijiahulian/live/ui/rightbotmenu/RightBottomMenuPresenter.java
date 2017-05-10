@@ -57,6 +57,25 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
 
     @Override
     public void getSysRotationSetting() {
+        /*避免引入sdk代码，这里直接用了数字*/
+        if (liveRoomRouterListener.getSysRotationSetting() == 1) {
+            //可自由转屏
+            view.hideZoom();
+        } else if (liveRoomRouterListener.getSysRotationSetting() == 0) {
+            //不可自由转屏
+            view.showZoom();
+            //横屏
+            if (liveRoomRouterListener.getCurrentScreenOrientation() == 2) {
+                view.showZoomOut();
+            } else if (liveRoomRouterListener.getCurrentScreenOrientation() == 1) {
+                //竖屏
+                view.showZoomIn();
+            }
+        }
+    }
+
+    @Override
+    public void setSysRotationSetting() {
         if (liveRoomRouterListener.getSysRotationSetting() == 1) {
             //可自由转屏
             view.hideZoom();
@@ -65,15 +84,15 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
             //不可自由转屏
             view.showZoom();
             liveRoomRouterListener.forbidScreenRotateItself();
+            //横屏
+            if (liveRoomRouterListener.getCurrentScreenOrientation() == 2) {
+                view.showZoomOut();
+            } else if (liveRoomRouterListener.getCurrentScreenOrientation() == 1) {
+                //竖屏
+                view.showZoomIn();
+            }
         }
 
-        //横屏
-        if (liveRoomRouterListener.getCurrentScreenOrientation() == 2) {
-            view.showZoomOut();
-        } else if (liveRoomRouterListener.getCurrentScreenOrientation() == 1) {
-            //竖屏
-            view.showZoomIn();
-        }
     }
 
     @Override

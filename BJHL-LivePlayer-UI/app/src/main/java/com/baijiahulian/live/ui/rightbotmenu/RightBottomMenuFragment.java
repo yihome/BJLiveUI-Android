@@ -115,7 +115,7 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
     public void unClearScreen() {
         $.id(R.id.fragment_right_bottom_video).visible();
         $.id(R.id.fragment_right_bottom_audio).visible();
-        $.id(R.id.fragment_right_bottom_zoom).visible();
+        presenter.getSysRotationSetting();
     }
 
     @Override
@@ -187,6 +187,6 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
     @Override
     public void onRotationSettingChanged() {
         //TODO:主动获取自动旋转设置
-        presenter.getSysRotationSetting();
+        presenter.setSysRotationSetting();
     }
 }
