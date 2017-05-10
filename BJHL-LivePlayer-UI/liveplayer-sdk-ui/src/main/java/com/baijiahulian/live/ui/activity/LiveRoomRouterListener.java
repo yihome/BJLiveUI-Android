@@ -103,4 +103,8 @@ public interface LiveRoomRouterListener {
     void showBigChatPic(String url);
 
     void sendImageMessage(String path);
+
+    void doReconnectServer();
+
+    void showReconnectSuccess();
 }

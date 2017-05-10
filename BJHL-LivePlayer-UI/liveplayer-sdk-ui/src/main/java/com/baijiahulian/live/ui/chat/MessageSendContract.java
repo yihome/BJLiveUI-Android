@@ -24,5 +24,7 @@ interface MessageSendContract {
         void sendPicture(String path);
 
         void chooseEmoji();
+
+        boolean isTeacherOrAssistant();
     }
 }

@@ -81,5 +81,7 @@ interface SettingContract {
 
         void switchForbidStatus();
 
+        boolean isTeacherOrAssistant();
+
     }
 }

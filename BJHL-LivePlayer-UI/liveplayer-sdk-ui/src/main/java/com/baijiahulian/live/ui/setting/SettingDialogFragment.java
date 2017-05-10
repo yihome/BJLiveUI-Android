@@ -6,11 +6,8 @@ import android.view.View;
 import android.widget.Button;
 
 import com.baijiahulian.live.ui.R;
-import com.baijiahulian.live.ui.activity.LiveRoomActivity;
 import com.baijiahulian.live.ui.base.BaseDialogFragment;
 import com.baijiahulian.live.ui.utils.QueryPlus;
-
-import rx.functions.Action1;
 
 /**
  * Created by Shubo on 2017/3/2.
@@ -123,6 +120,11 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
             }
         });
 
+        if (presenter.isTeacherOrAssistant()) {
+            $.id(R.id.dialog_setting_forbid_all_speak_container).visible();
+        } else {
+            $.id(R.id.dialog_setting_forbid_all_speak_container).gone();
+        }
 
     }
 

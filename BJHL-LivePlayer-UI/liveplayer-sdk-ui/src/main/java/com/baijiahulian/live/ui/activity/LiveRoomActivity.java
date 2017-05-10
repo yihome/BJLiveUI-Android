@@ -28,6 +28,7 @@ import com.baijiahulian.live.ui.chat.ChatPictureViewFragment;
 import com.baijiahulian.live.ui.chat.ChatPresenter;
 import com.baijiahulian.live.ui.chat.MessageSendPresenter;
 import com.baijiahulian.live.ui.chat.MessageSentFragment;
+import com.baijiahulian.live.ui.error.ErrorFragment;
 import com.baijiahulian.live.ui.leftmenu.LeftMenuFragment;
 import com.baijiahulian.live.ui.leftmenu.LeftMenuPresenter;
 import com.baijiahulian.live.ui.loading.LoadingFragment;
@@ -60,14 +61,15 @@ import com.baijiahulian.live.ui.topbar.TopBarFragment;
 import com.baijiahulian.live.ui.topbar.TopBarPresenter;
 import com.baijiahulian.live.ui.users.OnlineUserDialogFragment;
 import com.baijiahulian.live.ui.users.OnlineUserPresenter;
-import com.baijiahulian.live.ui.utils.QueryPlus;
 import com.baijiahulian.live.ui.utils.RxUtils;
 import com.baijiahulian.live.ui.videoplayer.VideoPlayerFragment;
 import com.baijiahulian.live.ui.videoplayer.VideoPlayerPresenter;
 import com.baijiahulian.live.ui.videorecorder.VideoRecorderFragment;
 import com.baijiahulian.live.ui.videorecorder.VideoRecorderPresenter;
 import com.baijiahulian.livecore.context.LPConstants;
+import com.baijiahulian.livecore.context.LPError;
 import com.baijiahulian.livecore.context.LiveRoom;
+import com.baijiahulian.livecore.context.OnLiveRoomListener;
 import com.baijiahulian.livecore.models.imodels.ILoginConflictModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
@@ -113,6 +115,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private RightMenuPresenter rightMenuPresenter;
     private PPTManageFragment pptManageFragment;
     private PPTManagePresenter pptManagePresenter;
+    private ErrorFragment errorFragment;
 
     private OrientationEventListener orientationEventListener; //处理屏幕旋转时本地录制视频的方向
     private int oldRotation;
@@ -120,8 +123,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private Subscription subscriptionOfLoginConflict;
     private IMediaModel currentRemoteMediaUser;
     private boolean isClearScreen;//是否已经清屏，作用于视频采集和远程视频ui的调整
-
-    private QueryPlus $;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -139,9 +140,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         String name = getIntent().getStringExtra("name");
 
         loadingFragment = new LoadingFragment();
-        LoadingPresenter loadingPresenter = new LoadingPresenter(loadingFragment, code, name);
-        loadingPresenter.setRouter(this);
-        loadingFragment.setPresenter(loadingPresenter);
+        LoadingPresenter loadingPresenter = new LoadingPresenter(loadingFragment, code, name, false);
+        bindVP(loadingFragment, loadingPresenter);
         addFragment(R.id.activity_live_room_loading, loadingFragment);
 
         windowManager = (WindowManager) this
@@ -274,6 +274,36 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public void setLiveRoom(LiveRoom liveRoom) {
         this.liveRoom = liveRoom;
+        liveRoom.setOnLiveRoomListener(new OnLiveRoomListener() {
+            @Override
+            public void onError(LPError error) {
+                switch ((int) error.getCode()) {
+                    case LPError.CODE_ERROR_ROOMSERVER_LOSE_CONNECTION:
+                    case LPError.CODE_ERROR_NETWORK_FAILURE:
+                        showNetError(error);
+                        break;
+                }
+            }
+        });
+    }
+
+    private void showNetError(LPError error) {
+        if (errorFragment != null) return;
+        errorFragment = ErrorFragment.newInstance("好像断网了", error.getMessage());
+        errorFragment.setRouterListener(this);
+        flLoading.setVisibility(View.VISIBLE);
+        addFragment(R.id.activity_live_room_loading, errorFragment);
+    }
+
+    @Override
+    public void doReconnectServer() {
+        removeFragment(errorFragment);
+        errorFragment = null;
+
+        loadingFragment = new LoadingFragment();
+        LoadingPresenter loadingPresenter = new LoadingPresenter(loadingFragment, "", "", true);
+        bindVP(loadingFragment, loadingPresenter);
+        addFragment(R.id.activity_live_room_loading, loadingFragment);
     }
 
     @Override
@@ -314,6 +344,20 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         bindVP(chatFragment, chatPresenter);
         addFragment(R.id.activity_live_room_chat, chatFragment);
 
+        subscriptionOfLoginConflict = getLiveRoom().getObservableOfLoginConflict().observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<ILoginConflictModel>() {
+                    @Override
+                    public void call(ILoginConflictModel iLoginConflictModel) {
+                        // todo 登录冲突
+                        Toast.makeText(LiveRoomActivity.this, "登录冲突", Toast.LENGTH_SHORT).show();
+                        LiveRoomActivity.super.finish();
+                    }
+                });
+
+        if (getLiveRoom().getCurrentUser().getType() == LPConstants.LPUserType.Teacher) {
+            liveRoom.requestClassStart();
+        }
+
         // might delay 500ms to process
         Observable.timer(500, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new LPErrorPrintSubscriber<Long>() {
@@ -323,20 +367,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                         flLoading.setVisibility(View.GONE);
                     }
                 });
-
-        subscriptionOfLoginConflict = getLiveRoom().getObservableOfLoginConflict().observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<ILoginConflictModel>() {
-                    @Override
-                    public void call(ILoginConflictModel iLoginConflictModel) {
-                        // todo 登录冲突
-                        Toast.makeText(LiveRoomActivity.this, "登录冲突", Toast.LENGTH_SHORT).show();
-                        finish();
-                    }
-                });
-
-        if (getLiveRoom().getCurrentUser().getType() == LPConstants.LPUserType.Teacher) {
-            liveRoom.requestClassStart();
-        }
     }
 
     @Override
@@ -752,6 +782,19 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public void sendImageMessage(String path) {
         chatPresenter.sendImageMessage(path);
+    }
+
+    @Override
+    public void showReconnectSuccess() {
+        // might delay 500ms to process
+        Observable.timer(500, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<Long>() {
+                    @Override
+                    public void call(Long aLong) {
+                        removeFragment(loadingFragment);
+                        flLoading.setVisibility(View.GONE);
+                    }
+                });
     }
 
     private void switchView(View view1, View view2) {

@@ -36,6 +36,11 @@ public class MessageSendPresenter implements MessageSendContract.Presenter {
     }
 
     @Override
+    public boolean isTeacherOrAssistant() {
+        return routerListener.isTeacherOrAssistant();
+    }
+
+    @Override
     public void setRouter(LiveRoomRouterListener liveRoomRouterListener) {
         this.routerListener = liveRoomRouterListener;
     }

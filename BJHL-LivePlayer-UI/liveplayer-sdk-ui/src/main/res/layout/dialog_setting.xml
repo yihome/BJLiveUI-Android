@@ -82,6 +82,7 @@
 
             <!--全体禁言-->
             <LinearLayout
+                android:id="@+id/dialog_setting_forbid_all_speak_container"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"

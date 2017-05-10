@@ -258,4 +258,9 @@ public class SettingPresenter implements SettingContract.Presenter {
             view.showForbidden();
         }
     }
+
+    @Override
+    public boolean isTeacherOrAssistant() {
+        return routerListener.isTeacherOrAssistant();
+    }
 }

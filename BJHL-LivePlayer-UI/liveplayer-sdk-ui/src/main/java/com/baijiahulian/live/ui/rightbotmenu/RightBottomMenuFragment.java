@@ -106,16 +106,22 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
 
     @Override
     public void clearScreen() {
-        $.id(R.id.fragment_right_bottom_video).invisible();
-        $.id(R.id.fragment_right_bottom_audio).invisible();
-        $.id(R.id.fragment_right_bottom_zoom).invisible();
+        if ($.id(R.id.fragment_right_bottom_video).view().getVisibility() == View.VISIBLE)
+            $.id(R.id.fragment_right_bottom_video).invisible();
+        if ($.id(R.id.fragment_right_bottom_audio).view().getVisibility() == View.VISIBLE)
+            $.id(R.id.fragment_right_bottom_audio).invisible();
+        if ($.id(R.id.fragment_right_bottom_zoom).view().getVisibility() == View.VISIBLE)
+            $.id(R.id.fragment_right_bottom_zoom).invisible();
     }
 
     @Override
     public void unClearScreen() {
-        $.id(R.id.fragment_right_bottom_video).visible();
-        $.id(R.id.fragment_right_bottom_audio).visible();
-        $.id(R.id.fragment_right_bottom_zoom).visible();
+        if ($.id(R.id.fragment_right_bottom_video).view().getVisibility() == View.INVISIBLE)
+            $.id(R.id.fragment_right_bottom_video).visible();
+        if ($.id(R.id.fragment_right_bottom_audio).view().getVisibility() == View.INVISIBLE)
+            $.id(R.id.fragment_right_bottom_audio).visible();
+        if ($.id(R.id.fragment_right_bottom_zoom).view().getVisibility() == View.INVISIBLE)
+            $.id(R.id.fragment_right_bottom_zoom).visible();
     }
 
     @Override

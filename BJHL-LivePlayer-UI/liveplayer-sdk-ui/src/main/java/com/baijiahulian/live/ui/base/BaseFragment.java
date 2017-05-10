@@ -75,20 +75,24 @@ public abstract class BaseFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        basePresenter.subscribe();
+        if (basePresenter != null)
+            basePresenter.subscribe();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        basePresenter.unSubscribe();
+        if (basePresenter != null)
+            basePresenter.unSubscribe();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        basePresenter.destroy();
-        basePresenter = null;
+        if (basePresenter != null) {
+            basePresenter.destroy();
+            basePresenter = null;
+        }
         $ = null;
     }
 }

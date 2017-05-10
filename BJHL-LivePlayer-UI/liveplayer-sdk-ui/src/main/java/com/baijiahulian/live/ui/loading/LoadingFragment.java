@@ -37,8 +37,10 @@ public class LoadingFragment extends BaseFragment implements LoadingContract.Vie
     public void init(Bundle savedInstanceState) {
         checkNotNull(presenter);
         progressBar = (ProgressBar) $.id(R.id.fragment_loading_pb).view();
-        LiveRoom room = LiveSDK.enterRoom(getActivity(), presenter.getCode(), presenter.getName(), presenter.getLaunchListener());
-        presenter.setLiveRoom(room);
+        if (!presenter.isReconnect()) {
+            LiveRoom room = LiveSDK.enterRoom(getActivity(), presenter.getCode(), presenter.getName(), presenter.getLaunchListener());
+            presenter.setLiveRoom(room);
+        }
     }
 
     private ObjectAnimator animator;

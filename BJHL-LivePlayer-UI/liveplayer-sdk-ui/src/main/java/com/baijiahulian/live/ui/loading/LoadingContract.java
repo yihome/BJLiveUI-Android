@@ -25,5 +25,7 @@ interface LoadingContract {
         String getName();
 
         void setLiveRoom(LiveRoom liveRoom);
+
+        boolean isReconnect();
     }
 }

@@ -30,5 +30,8 @@ dependencies {
     compile 'com.android.support:appcompat-v7:25.3.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.0-beta4'
     testCompile 'junit:junit:4.12'
+
+    compile 'com.baijia.common:common-tools:1.0.1' // crash handler
+
     compile project(':liveplayer-sdk-ui')
 }
