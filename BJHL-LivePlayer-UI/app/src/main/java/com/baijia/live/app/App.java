@@ -1,4 +1,4 @@
-package com.baijiahulian.live.ui;
+package com.baijia.live.app;
 
 import android.app.Application;
 

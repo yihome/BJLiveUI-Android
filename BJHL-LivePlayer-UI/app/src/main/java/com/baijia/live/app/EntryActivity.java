@@ -1,4 +1,4 @@
-package com.baijiahulian.live.ui.activity;
+package com.baijia.live.app;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -9,7 +9,6 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.baijiahulian.live.ui.LiveSDKWithUI;
-import com.baijiahulian.live.ui.R;
 
 /**
  * Created by Shubo on 2017/3/20.

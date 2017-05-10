@@ -12,6 +12,7 @@
             <option value="$PROJECT_DIR$/../../liveplayer-android-sdk-core/BJHL-LivePlayer/liveplayer-sdk-core-ppt" />
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/liveplayer-sdk-ui" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />
