@@ -9,6 +9,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="@dimen/activity_live_room_dialog_margin"
         android:background="@android:color/transparent"
         android:orientation="vertical">
 
@@ -25,8 +26,8 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/shape_video_window_bg"
                 android:gravity="center"
-                android:paddingBottom="@dimen/activity_live_room_margin"
-                android:paddingTop="@dimen/activity_live_room_margin"
+                android:paddingBottom="@dimen/activity_live_room_margin_big"
+                android:paddingTop="@dimen/activity_live_room_margin_big"
                 android:text="@string/live_recorder_title"
                 android:textColor="@color/live_text_color_mid_light"
                 android:textSize="13sp" />
@@ -38,10 +39,10 @@
                 android:id="@+id/dialog_recorder_fullscreen"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/shape_video_window_bg"
+                android:background="@drawable/selector_dialog_radius_0dp"
                 android:gravity="center"
-                android:paddingBottom="@dimen/activity_live_room_margin"
-                android:paddingTop="@dimen/activity_live_room_margin"
+                android:paddingBottom="@dimen/activity_live_room_margin_big"
+                android:paddingTop="@dimen/activity_live_room_margin_big"
                 android:text="@string/live_full_screen"
                 android:textColor="@color/live_blue" />
 
@@ -52,10 +53,10 @@
                 android:id="@+id/dialog_recorder_switch_camera"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/shape_video_window_bg"
+                android:background="@drawable/selector_dialog_radius_0dp"
                 android:gravity="center"
-                android:paddingBottom="@dimen/activity_live_room_margin"
-                android:paddingTop="@dimen/activity_live_room_margin"
+                android:paddingBottom="@dimen/activity_live_room_margin_big"
+                android:paddingTop="@dimen/activity_live_room_margin_big"
                 android:text="@string/live_recorder_switch_camera"
                 android:textColor="@color/live_blue" />
 
@@ -66,10 +67,10 @@
                 android:id="@+id/dialog_recorder_pretty_filter_switch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/shape_video_window_bg"
+                android:background="@drawable/selector_dialog_radius_0dp"
                 android:gravity="center"
-                android:paddingBottom="@dimen/activity_live_room_margin"
-                android:paddingTop="@dimen/activity_live_room_margin"
+                android:paddingBottom="@dimen/activity_live_room_margin_big"
+                android:paddingTop="@dimen/activity_live_room_margin_big"
                 android:text="@string/live_recorder_pretty_filter_on"
                 android:textColor="@color/live_blue" />
 
@@ -80,10 +81,10 @@
                 android:id="@+id/dialog_recorder_turnoff_camera"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/shape_video_window_bg"
+                android:background="@drawable/selector_dialog_radius_bottom_6dp"
                 android:gravity="center"
-                android:paddingBottom="@dimen/activity_live_room_margin"
-                android:paddingTop="@dimen/activity_live_room_margin"
+                android:paddingBottom="@dimen/activity_live_room_margin_big"
+                android:paddingTop="@dimen/activity_live_room_margin_big"
                 android:text="@string/live_recorder_camera_switch_off"
                 android:textColor="@color/live_red" />
 
@@ -94,10 +95,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/activity_live_room_margin"
-            android:background="@drawable/shape_video_window_bg"
+            android:background="@drawable/selector_dialog_radius_6dp"
             android:gravity="center"
-            android:paddingBottom="@dimen/activity_live_room_margin"
-            android:paddingTop="@dimen/activity_live_room_margin"
+            android:paddingBottom="@dimen/activity_live_room_margin_big"
+            android:paddingTop="@dimen/activity_live_room_margin_big"
             android:text="@string/live_cancel"
             android:textColor="@color/live_blue" />
 

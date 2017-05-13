@@ -106,4 +106,7 @@ public interface LiveRoomRouterListener {
     void showMessage(String message);
 
     void saveTeacherMediaStatus(IMediaModel model);
+    void showSavePicDialog(byte[] bmpArray);
+
+    void realSaveBmpToFile(byte[] bmpArray);
 }

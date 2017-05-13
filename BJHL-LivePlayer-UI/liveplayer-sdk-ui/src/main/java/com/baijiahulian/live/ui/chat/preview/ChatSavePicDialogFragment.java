@@ -1,4 +1,4 @@
-package com.baijiahulian.live.ui.pptdialog;
+package com.baijiahulian.live.ui.chat.preview;
 
 import android.os.Bundle;
 import android.view.Gravity;
@@ -11,16 +11,16 @@ import com.baijiahulian.live.ui.utils.DisplayUtils;
 import com.baijiahulian.live.ui.utils.QueryPlus;
 
 /**
- * Created by wangkangfei on 17/4/27.
+ * Created by wangkangfei on 17/5/13.
  */
 
-public class PPTDialogFragment extends BaseDialogFragment implements PPTDialogContract.View {
+public class ChatSavePicDialogFragment extends BaseDialogFragment implements ChatSavePicDialogContract.View {
     private QueryPlus $;
-    private PPTDialogContract.Presenter presenter;
+    private ChatSavePicDialogContract.Presenter presenter;
 
     @Override
     protected int getLayoutId() {
-        return R.layout.dialog_ppt;
+        return R.layout.dialog_chat_save_pic;
     }
 
     @Override
@@ -33,26 +33,25 @@ public class PPTDialogFragment extends BaseDialogFragment implements PPTDialogCo
     protected void init(Bundle savedInstanceState, Bundle arguments) {
         hideTitleBar();
         $ = QueryPlus.with(contentView);
-        $.id(R.id.dialog_ppt_fullscreen).clicked(new View.OnClickListener() {
+        $.id(R.id.dialog_save_pic).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                presenter.switchFullscreen();
-                dismiss();
+                presenter.realSavePic();
+                dismissAllowingStateLoss();
             }
         });
-        $.id(R.id.dialog_ppt_manage).clicked(new View.OnClickListener() {
+        $.id(R.id.dialog_save_pic_cancel).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                presenter.managePPT();
-                dismiss();
+                dismissAllowingStateLoss();
             }
         });
-        $.id(R.id.dialog_ppt_cancel).clicked(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dismiss();
-            }
-        });
+    }
+
+    @Override
+    public void setPresenter(ChatSavePicDialogContract.Presenter presenter) {
+        super.setBasePresenter(presenter);
+        this.presenter = presenter;
     }
 
     @Override
@@ -66,27 +65,6 @@ public class PPTDialogFragment extends BaseDialogFragment implements PPTDialogCo
         windowParams.y = 0;
 
         windowParams.windowAnimations = R.style.LiveBaseSendMsgDialogAnim;
-    }
-
-    @Override
-    public void setPresenter(PPTDialogContract.Presenter presenter) {
-        super.setBasePresenter(presenter);
-        this.presenter = presenter;
-    }
-
-    @Override
-    public void showFullScreen() {
-
-    }
-
-    @Override
-    public void showManagePPT() {
-        $.id(R.id.dialog_ppt_manage).visible();
-    }
-
-    @Override
-    public void hideManagePPT() {
-        $.id(R.id.dialog_ppt_manage).gone();
     }
 
     @Override

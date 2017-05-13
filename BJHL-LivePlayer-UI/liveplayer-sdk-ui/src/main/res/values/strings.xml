@@ -76,5 +76,6 @@
     <string name="live_image_loading_fail">图片加载失败</string>
     <string name="live_retry">刷新重试</string>
     <string name="live_retry_suggestion">可拨打客服电话 xxx-xxxx-xxxx\n或者添加技术支持QQ xxx-xxxx-xxxx 获得帮助</string>
+    <string name="live_image_save">保存图片</string>
 
 </resources>

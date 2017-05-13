@@ -18,7 +18,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_centerInParent="true"
-        android:scaleType="fitCenter" />
+        android:scaleType="centerInside" />
 
     <Button
         android:id="@+id/lp_dialog_big_picture_save"
