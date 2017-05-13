@@ -1,8 +1,9 @@
-package com.baijiahulian.live.ui.chat;
+package com.baijiahulian.live.ui.chat.preview;
 
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -19,6 +20,7 @@ import com.baijiahulian.live.ui.utils.AliCloudImageUtil;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -30,11 +32,12 @@ import static android.R.attr.path;
  * Created by Shubo on 2017/3/23.
  */
 
-public class ChatPictureViewFragment extends BaseDialogFragment {
+public class ChatPictureViewFragment extends BaseDialogFragment implements ChatPictureViewContract.View {
 
     private ImageView imageView;
     private TextView tvLoading;
-//    private Button btnSave;
+    //    private Button btnSave;
+    private ChatPictureViewContract.Presenter presenter;
 
     public static ChatPictureViewFragment newInstance(String url) {
 
@@ -80,13 +83,13 @@ public class ChatPictureViewFragment extends BaseDialogFragment {
 //                }
             }
         });
-//        imageView.setOnLongClickListener(new View.OnLongClickListener() {
-//            @Override
-//            public boolean onLongClick(View v) {
-//                btnSave.setVisibility(View.VISIBLE);
-//                return true;
-//            }
-//        });
+        imageView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                presenter.showSaveDialog(convertBmpToByteArray());
+                return true;
+            }
+        });
 //        btnSave.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View v) {
@@ -111,33 +114,20 @@ public class ChatPictureViewFragment extends BaseDialogFragment {
         windowParams.windowAnimations = R.style.ViewBigPicAnim;
     }
 
-    public static void saveImageToGallery(Context context, Bitmap bmp) {
-        // 首先保存图片
-        File appDir = new File(Environment.getExternalStorageDirectory(), "bjhl_image");
-        if (!appDir.exists()) {
-            appDir.mkdir();
-        }
-        String fileName = System.currentTimeMillis() + ".jpg";
-        File file = new File(appDir, fileName);
-        try {
-            FileOutputStream fos = new FileOutputStream(file);
-            bmp.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-            fos.flush();
-            fos.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    /**
+     * 将bitmap转为字节数组,避免presenter使用Android api
+     */
+    private byte[] convertBmpToByteArray() {
+        Bitmap bmp = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        bmp.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+        return outputStream.toByteArray();
+    }
 
-        // 其次把文件插入到系统图库
-        try {
-            MediaStore.Images.Media.insertImage(context.getContentResolver(),
-                    file.getAbsolutePath(), fileName, null);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        // 最后通知图库更新
-        context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + path)));
+
+    @Override
+    public void setPresenter(ChatPictureViewContract.Presenter presenter) {
+        super.setBasePresenter(presenter);
+        this.presenter = presenter;
     }
 }

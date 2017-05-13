@@ -103,4 +103,8 @@ public interface LiveRoomRouterListener {
     void showBigChatPic(String url);
 
     void sendImageMessage(String path);
+
+    void showSavePicDialog(byte[] bmpArray);
+
+    void realSaveBmpToFile(byte[] bmpArray);
 }

@@ -1,12 +1,17 @@
 package com.baijiahulian.live.ui.activity;
 
-import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.SensorManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Gravity;
@@ -19,17 +24,19 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.baijiahulian.common.permission.AppPermissions;
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.announcement.AnnouncementFragment;
 import com.baijiahulian.live.ui.announcement.AnnouncementPresenter;
 import com.baijiahulian.live.ui.base.BasePresenter;
 import com.baijiahulian.live.ui.base.BaseView;
 import com.baijiahulian.live.ui.chat.ChatFragment;
-import com.baijiahulian.live.ui.chat.ChatPictureViewFragment;
+import com.baijiahulian.live.ui.chat.preview.ChatPictureViewFragment;
 import com.baijiahulian.live.ui.chat.ChatPresenter;
 import com.baijiahulian.live.ui.chat.MessageSendPresenter;
 import com.baijiahulian.live.ui.chat.MessageSentFragment;
+import com.baijiahulian.live.ui.chat.preview.ChatPictureViewPresenter;
+import com.baijiahulian.live.ui.chat.preview.ChatSavePicDialogFragment;
+import com.baijiahulian.live.ui.chat.preview.ChatSavePicDialogPresenter;
 import com.baijiahulian.live.ui.leftmenu.LeftMenuFragment;
 import com.baijiahulian.live.ui.leftmenu.LeftMenuPresenter;
 import com.baijiahulian.live.ui.loading.LoadingFragment;
@@ -75,13 +82,17 @@ import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.utils.CrashHandler;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
 
+import static android.R.attr.path;
 import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 
 public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRouterListener {
@@ -751,12 +762,27 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public void showBigChatPic(String url) {
         ChatPictureViewFragment fragment = ChatPictureViewFragment.newInstance(url);
+        ChatPictureViewPresenter presenter = new ChatPictureViewPresenter();
+        bindVP(fragment, presenter);
         showDialogFragment(fragment);
     }
 
     @Override
     public void sendImageMessage(String path) {
         chatPresenter.sendImageMessage(path);
+    }
+
+    @Override
+    public void showSavePicDialog(byte[] bmpArray) {
+        ChatSavePicDialogFragment fragment = new ChatSavePicDialogFragment();
+        ChatSavePicDialogPresenter presenter = new ChatSavePicDialogPresenter(bmpArray);
+        bindVP(fragment, presenter);
+        showDialogFragment(fragment);
+    }
+
+    @Override
+    public void realSaveBmpToFile(byte[] bmpArray) {
+        saveImageToGallery(bmpArray);
     }
 
     private void switchView(View view1, View view2) {
@@ -796,4 +822,51 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
             dlChat.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN);
         }
     }
+
+    /**
+     * 保存图片
+     */
+    private void saveImageToGallery(final byte[] bmpArray) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // 首先保存图片
+                File appDir = new File(Environment.getExternalStorageDirectory(), "bjhl_lp_image");
+                if (!appDir.exists()) {
+                    appDir.mkdir();
+                }
+                String fileName = System.currentTimeMillis() + ".jpg";
+                File file = new File(appDir, fileName);
+                final String picPath = file.getAbsolutePath();
+                try {
+                    Bitmap bmp = BitmapFactory.decodeByteArray(bmpArray, 0, bmpArray.length);
+                    FileOutputStream fos = new FileOutputStream(file);
+                    bmp.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                    fos.flush();
+                    fos.close();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                // 其次把文件插入到系统图库
+                try {
+                    MediaStore.Images.Media.insertImage(getContentResolver(),
+                            file.getAbsolutePath(), fileName, null);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                // 最后通知图库更新
+                sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + path)));
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(LiveRoomActivity.this, "图片保存在" + picPath, Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        }).start();
+    }
+
 }
