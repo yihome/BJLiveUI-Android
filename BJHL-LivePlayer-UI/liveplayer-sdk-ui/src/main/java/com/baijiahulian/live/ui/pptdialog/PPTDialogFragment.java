@@ -47,6 +47,12 @@ public class PPTDialogFragment extends BaseDialogFragment implements PPTDialogCo
                 dismiss();
             }
         });
+        $.id(R.id.dialog_ppt_cancel).clicked(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dismiss();
+            }
+        });
     }
 
     @Override
