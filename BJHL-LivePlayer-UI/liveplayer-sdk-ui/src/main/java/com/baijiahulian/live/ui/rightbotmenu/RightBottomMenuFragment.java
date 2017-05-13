@@ -122,6 +122,7 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
             $.id(R.id.fragment_right_bottom_audio).visible();
         if ($.id(R.id.fragment_right_bottom_zoom).view().getVisibility() == View.INVISIBLE)
             $.id(R.id.fragment_right_bottom_zoom).visible();
+        presenter.getSysRotationSetting();
     }
 
     @Override
@@ -193,6 +194,6 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
     @Override
     public void onRotationSettingChanged() {
         //TODO:主动获取自动旋转设置
-        presenter.getSysRotationSetting();
+        presenter.setSysRotationSetting();
     }
 }

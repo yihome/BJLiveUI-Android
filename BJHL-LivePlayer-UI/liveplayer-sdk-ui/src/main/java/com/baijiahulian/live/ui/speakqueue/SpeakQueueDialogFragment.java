@@ -14,6 +14,7 @@ import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseDialogFragment;
 import com.baijiahulian.live.ui.utils.AliCloudImageUtil;
 import com.baijiahulian.live.ui.utils.QueryPlus;
+import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
 import com.squareup.picasso.Picasso;
@@ -90,7 +91,7 @@ public class SpeakQueueDialogFragment extends BaseDialogFragment implements Spea
     private static class SpeakViewHolder extends RecyclerView.ViewHolder {
 
         ImageView avatar, cameraLabel;
-        TextView name, videoLabel, openVideo, closeSpeak;
+        TextView name, videoLabel, openVideo, closeSpeak, teacherTag;
 
         SpeakViewHolder(View itemView) {
             super(itemView);
@@ -100,6 +101,7 @@ public class SpeakQueueDialogFragment extends BaseDialogFragment implements Spea
             videoLabel = (TextView) itemView.findViewById(R.id.item_speaker_speaking_video_label);
             openVideo = (TextView) itemView.findViewById(R.id.item_speaker_speaking_open_video);
             closeSpeak = (TextView) itemView.findViewById(R.id.item_speaker_speaking_close_speak);
+            teacherTag = (TextView) itemView.findViewById(R.id.item_speaker_speaking_video_teacher_tag);
         }
     }
 
@@ -173,6 +175,11 @@ public class SpeakQueueDialogFragment extends BaseDialogFragment implements Spea
                         }
                     }
                 });
+                if(mediaModel.getUser().getType() == LPConstants.LPUserType.Teacher) {
+                    viewHolder.teacherTag.setVisibility(View.VISIBLE);
+                }else{
+                    viewHolder.teacherTag.setVisibility(View.GONE);
+                }
             }
         }
 

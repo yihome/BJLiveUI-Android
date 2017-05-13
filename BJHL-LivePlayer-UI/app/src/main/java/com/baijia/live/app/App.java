@@ -19,7 +19,6 @@ public class App extends Application{
 //        CrashHandler crashHandler = CrashHandler.getInstance();
 //        crashHandler.init(this);
 //        Thread.setDefaultUncaughtExceptionHandler(crashHandler);
-
         LiveSDK.init(LPConstants.LPDeployType.Test);
     }
 }

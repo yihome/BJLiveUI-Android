@@ -62,4 +62,9 @@
         <item name="android:windowExitAnimation">@anim/live_dialog_scale_out</item>
     </style>
 
+    <style name="ShareDialogAnim">
+        <item name="android:windowEnterAnimation">@anim/live_dialog_down_in_x90</item>
+        <item name="android:windowExitAnimation">@anim/live_dialog_down_out_x90</item>
+    </style>
+
 </resources>

@@ -8,6 +8,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.widget.DrawerLayout;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.OrientationEventListener;
 import android.view.View;
@@ -18,6 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.baijiahulian.live.ui.LiveSDKWithUI;
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.announcement.AnnouncementFragment;
 import com.baijiahulian.live.ui.announcement.AnnouncementPresenter;
@@ -55,6 +57,7 @@ import com.baijiahulian.live.ui.righttopmenu.RightTopMenuFragment;
 import com.baijiahulian.live.ui.righttopmenu.RightTopMenuPresenter;
 import com.baijiahulian.live.ui.setting.SettingDialogFragment;
 import com.baijiahulian.live.ui.setting.SettingPresenter;
+import com.baijiahulian.live.ui.share.LPShareDialog;
 import com.baijiahulian.live.ui.speakqueue.SpeakQueueDialogFragment;
 import com.baijiahulian.live.ui.speakqueue.SpeakQueuePresenter;
 import com.baijiahulian.live.ui.topbar.TopBarFragment;
@@ -72,13 +75,16 @@ import com.baijiahulian.livecore.context.LiveRoom;
 import com.baijiahulian.livecore.context.OnLiveRoomListener;
 import com.baijiahulian.livecore.models.imodels.ILoginConflictModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
+import com.baijiahulian.livecore.utils.CrashHandler;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
+import com.baijiahulian.livecore.wrapper.exception.NotInitializedException;
 
 import java.util.concurrent.TimeUnit;
 
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 
 import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 
@@ -116,6 +122,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private PPTManageFragment pptManageFragment;
     private PPTManagePresenter pptManagePresenter;
     private ErrorFragment errorFragment;
+    private GlobalPresenter globalPresenter;
 
     private OrientationEventListener orientationEventListener; //处理屏幕旋转时本地录制视频的方向
     private int oldRotation;
@@ -154,13 +161,18 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                 int newRotation = windowManager.getDefaultDisplay().getRotation();
                 if (newRotation != oldRotation) {
                     oldRotation = newRotation;
-                    if (liveRoom.getRecorder().isVideoAttached())
-                        liveRoom.getRecorder().invalidVideo();
+                    try {
+                        if (liveRoom.getRecorder().isVideoAttached())
+                            liveRoom.getRecorder().invalidVideo();
+                    } catch (NotInitializedException ignored) {
+                    }
+
                 }
             }
         };
         dlChat.openDrawer(Gravity.START);
         checkScreenOrientationInit();
+        CrashHandler.getInstance().init(LiveRoomActivity.this);
     }
 
     private void initViews() {
@@ -202,7 +214,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         onBackgroundContainerConfigurationChanged(newConfig);
         onForegroundContainerConfigurationChanged(newConfig);
         onPPTLeftMenuConfigurationChanged(newConfig);
-
     }
 
     private void onForegroundContainerConfigurationChanged(Configuration newConfig) {
@@ -282,9 +293,33 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                     case LPError.CODE_ERROR_NETWORK_FAILURE:
                         showNetError(error);
                         break;
+                    case LPError.CODE_ERROR_LOGIN_CONFLICT:
+                        showMessage("登录冲突");
+                        break;
+                    default:
+                        if (!TextUtils.isEmpty(error.getMessage()))
+                            showMessage(error.getMessage());
+                        break;
                 }
             }
         });
+    }
+
+    @Override
+    public void showMessage(final String message) {
+        Observable.empty().observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Object>() {
+            @Override
+            public void call(Object obj) {
+                Toast toast = Toast.makeText(LiveRoomActivity.this, message, Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.CENTER, 0, 0);
+                toast.show();
+            }
+        });
+    }
+
+    @Override
+    public void saveTeacherMediaStatus(IMediaModel model) {
+        globalPresenter.setTeacherMedia(model);
     }
 
     private void showNetError(LPError error) {
@@ -308,6 +343,10 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void navigateToMain() {
+
+        globalPresenter = new GlobalPresenter();
+        globalPresenter.setRouter(this);
+        globalPresenter.subscribe();
 
         lppptFragment = new MyPPTFragment();
         lppptFragment.setLiveRoom(getLiveRoom());
@@ -348,14 +387,16 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                 .subscribe(new LPErrorPrintSubscriber<ILoginConflictModel>() {
                     @Override
                     public void call(ILoginConflictModel iLoginConflictModel) {
-                        // todo 登录冲突
-                        Toast.makeText(LiveRoomActivity.this, "登录冲突", Toast.LENGTH_SHORT).show();
                         LiveRoomActivity.super.finish();
                     }
                 });
 
         if (getLiveRoom().getCurrentUser().getType() == LPConstants.LPUserType.Teacher) {
             liveRoom.requestClassStart();
+        }
+
+        if (shareListener != null) {
+            shareListener.getShareData(this, liveRoom.getRoomId());
         }
 
         // might delay 500ms to process
@@ -385,7 +426,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     public void unClearScreen() {
         chatFragment.unClearScreen();
         isClearScreen = false;
-//        dlChat.setVisibility(View.VISIBLE);
         rightBottomMenuFragment.unClearScreen();
         showFragment(topBarFragment);
         showFragment(rightMenuFragment);
@@ -454,8 +494,12 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public void navigateToPPTWareHouse() {
         pptManageFragment = PPTManageFragment.newInstance();
-        pptManagePresenter = new PPTManagePresenter(pptManageFragment);
-        bindVP(pptManageFragment, pptManagePresenter);
+        if (pptManagePresenter == null) {
+            pptManagePresenter = new PPTManagePresenter();
+            pptManagePresenter.setRouter(this);
+            pptManagePresenter.subscribe();
+        }
+        pptManageFragment.setPresenter(pptManagePresenter);
         showDialogFragment(pptManageFragment);
     }
 
@@ -531,7 +575,14 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void navigateToShare() {
-
+        LPShareDialog shareDialog = LPShareDialog.newInstance(shareListener.setShareList());
+        shareDialog.setListener(new LPShareDialog.LPShareClickListener() {
+            @Override
+            public void onShareClick(int type) {
+                shareListener.onShareClicked(LiveRoomActivity.this, type);
+            }
+        });
+        showDialogFragment(shareDialog);
     }
 
     @Override
@@ -557,11 +608,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     }
 
     @Override
-    public boolean getCloudRecordStatus() {
-        return false;
-    }
-
-    @Override
     public void navigateToHelp() {
 
     }
@@ -582,8 +628,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public String getCurrentVideoPlayingUserId() {
-        if (playerPresenter == null) return null;
-        else return playerPresenter.getCurrentPlayingUserId();
+        if (currentRemoteMediaUser == null || currentRemoteMediaUser.getUser() == null) return null;
+        return currentRemoteMediaUser.getUser().getUserId();
     }
 
     @Override
@@ -814,11 +860,19 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
+        if (pptManagePresenter != null) {
+            pptManagePresenter.destroy();
+            pptManagePresenter = null;
+        }
+        if (globalPresenter != null)
+            globalPresenter.destroy();
         RxUtils.unSubscribe(subscriptionOfLoginConflict);
 
         orientationEventListener = null;
         if (getLiveRoom().getCurrentUser().getType() == LPConstants.LPUserType.Teacher) {
+            if (getLiveRoom().getCloudRecordStatus()) {
+                liveRoom.requestCloudRecord(false);
+            }
             liveRoom.requestClassEnd();
         }
         getLiveRoom().quitRoom();
@@ -833,5 +887,11 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         } else {
             dlChat.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN);
         }
+    }
+
+    private static LiveSDKWithUI.LPShareListener shareListener;
+
+    public static void setShareListener(LiveSDKWithUI.LPShareListener listener) {
+        shareListener = listener;
     }
 }

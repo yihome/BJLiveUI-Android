@@ -45,7 +45,6 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
                 presenter.speakApply();
             }
         });
-
     }
 
     @Override
@@ -157,6 +156,11 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
     @Override
     public void showPPTDrawBtn() {
         $.id(R.id.fragment_right_pen).visible();
+    }
+
+    @Override
+    public void showHandUpError() {
+        showToast(getString(R.string.live_hand_up_error));
     }
 
     @Override

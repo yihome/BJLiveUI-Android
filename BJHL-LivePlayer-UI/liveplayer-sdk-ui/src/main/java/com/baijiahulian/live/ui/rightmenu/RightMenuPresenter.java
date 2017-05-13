@@ -5,7 +5,6 @@ import android.text.TextUtils;
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 import com.baijiahulian.live.ui.utils.RxUtils;
 import com.baijiahulian.livecore.context.LPConstants;
-import com.baijiahulian.livecore.context.LiveRoom;
 import com.baijiahulian.livecore.models.imodels.IMediaControlModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
@@ -21,6 +20,7 @@ import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.observables.ConnectableObservable;
+import rx.schedulers.Schedulers;
 
 import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 
@@ -35,10 +35,10 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
     private LPConstants.LPUserType currentUserType;
     private Subscription subscriptionOfMediaControl, subscriptionOfActiveUser, subscriptionOfMedia,
             subscriptionOfSpeakApply, subscriptionOfAvatarSwitcher, subscriptionOfSpeakApplyCounter,
-            subscriptionOfSpeakApplyResponse, subscriptionOfMediaClose, subscriptionOfMediaChanged;
+            subscriptionOfSpeakApplyResponse, subscriptionOfMediaClose, subscriptionOfMediaChanged,
+            subscriptionOfClassEnd;
     private int speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_NONE;
     private boolean isDrawing = false;
-    private LiveRoom liveRoom;
 
     public RightMenuPresenter(RightMenuContract.View view) {
         this.view = view;
@@ -67,7 +67,13 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
     @Override
     public void speakApply() {
         checkNotNull(liveRoomRouterListener);
-        if (liveRoomRouterListener.isTeacherOrAssistant()) return;
+
+        if (!liveRoomRouterListener.getLiveRoom().isClassStarted() ||
+                liveRoomRouterListener.getLiveRoom().getTeacherUser() == null) {
+            view.showHandUpError();
+            return;
+        }
+
         if (speakApplyStatus == RightMenuContract.STUDENT_SPEAK_APPLY_NONE) {
             liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().requestSpeakApply();
             speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_APPLYING;
@@ -113,6 +119,10 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
             liveRoomRouterListener.getLiveRoom().getSpeakQueueVM()
                     .closeOtherSpeak(liveRoomRouterListener.getLiveRoom().getCurrentUser().getUserId());
             view.showSpeakApplyCanceled();
+            if (isDrawing) {
+                // 如果画笔打开 关闭画笔模式
+                changeDrawing();
+            }
         }
     }
 
@@ -133,7 +143,6 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
     @Override
     public void setRouter(LiveRoomRouterListener liveRoomRouterListener) {
         this.liveRoomRouterListener = liveRoomRouterListener;
-        this.liveRoom = liveRoomRouterListener.getLiveRoom();
     }
 
     @Override
@@ -154,7 +163,19 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
             }
         };
         final ConnectableObservable<List<IMediaModel>> observable = liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getObservableOfActiveUsers();
-        subscriptionOfActiveUser = observable.observeOn(AndroidSchedulers.mainThread()).subscribe(activeUserSubscriber);
+        subscriptionOfActiveUser = observable
+                .subscribeOn(Schedulers.newThread())
+                .doOnNext(new Action1<List<IMediaModel>>() {
+                    @Override
+                    public void call(List<IMediaModel> iMediaModels) {
+                        for (IMediaModel model : iMediaModels) {
+                            if (model.getUser().getType() == LPConstants.LPUserType.Teacher) {
+                                liveRoomRouterListener.saveTeacherMediaStatus(model);
+                                break;
+                            }
+                        }
+                    }
+                }).observeOn(AndroidSchedulers.mainThread()).subscribe(activeUserSubscriber);
         observable.connect();
 
         subscriptionOfMedia = liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getObservableOfMediaNew()
@@ -175,7 +196,7 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                     public void call(IMediaModel iMediaModel) {
                         if (TextUtils.isEmpty(liveRoomRouterListener.getCurrentVideoPlayingUserId()))
                             return;
-                        if (liveRoomRouterListener.getCurrentVideoPlayingUserId().equals(iMediaModel.getUser().getUserId()))
+                        if (liveRoomRouterListener.getCurrentVideoUser().getUser().getUserId().equals(iMediaModel.getUser().getUserId()))
                             liveRoomRouterListener.playVideoClose(liveRoomRouterListener.getCurrentVideoPlayingUserId());
                     }
                 });
@@ -193,7 +214,6 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                         }
                     }
                 });
-
 
         if (liveRoomRouterListener.isTeacherOrAssistant()) {
             // 老师
@@ -215,6 +235,7 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                         @Override
                         public void call(IMediaControlModel iMediaControlModel) {
                             refreshSpeakQueueBtnStatus();
+                            view.showSpeakQueueCount(liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getApplyList().size());
                         }
                     });
         } else {
@@ -274,29 +295,50 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                     });
         }
 
-        liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().requestActiveUsers();
-        liveRoom.getObservableOfForbidAllChatStatus()
-                .subscribe(new Action1<Boolean>() {
+        subscriptionOfClassEnd = liveRoomRouterListener.getLiveRoom().getObservableOfClassEnd()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<Void>() {
                     @Override
-                    public void call(Boolean aBoolean) {
-                        if (aBoolean) {
-                            view.showForbiddenHand();
-                            if (speakApplyStatus == RightMenuContract.STUDENT_SPEAK_APPLY_APPLYING) {
-                                //正在请求发言
-                                speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_NONE;
-                                RxUtils.unSubscribe(subscriptionOfSpeakApplyCounter);
-                                liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().cancelSpeakApply();
+                    public void call(Void aVoid) {
+                        if (speakApplyStatus == RightMenuContract.STUDENT_SPEAK_APPLY_APPLYING) {
+                            // 取消发言请求
+                            speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_NONE;
+                            RxUtils.unSubscribe(subscriptionOfSpeakApplyCounter);
+                            liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().cancelSpeakApply();
+                            view.showSpeakApplyCanceled();
+                        } else if (speakApplyStatus == RightMenuContract.STUDENT_SPEAK_APPLY_SPEAKING) {
+                            // 取消发言
+                            speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_NONE;
+                            liveRoomRouterListener.disableSpeakerMode();
+                            liveRoomRouterListener.getLiveRoom().getSpeakQueueVM()
+                                    .closeOtherSpeak(liveRoomRouterListener.getLiveRoom().getCurrentUser().getUserId());
+                            view.showSpeakApplyCanceled();
+                            if (isDrawing) {
+                                // 如果画笔打开 关闭画笔模式
+                                changeDrawing();
                             }
-                        } else {
-                            view.showNotForbiddenHand();
                         }
                     }
                 });
-//        if (liveRoom.getForbidStatus()) {
-//            view.showForbiddenHand();
-//        } else {
-//            view.showNotForbiddenHand();
-//        }
+
+        liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().requestActiveUsers();
+//        liveRoom.getObservableOfForbidAllChatStatus()
+//                .subscribe(new Action1<Boolean>() {
+//                    @Override
+//                    public void call(Boolean aBoolean) {
+//                        if (aBoolean) {
+//                            view.showForbiddenHand();
+//                            if (speakApplyStatus == RightMenuContract.STUDENT_SPEAK_APPLY_APPLYING) {
+//                                //正在请求发言
+//                                speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_NONE;
+//                                RxUtils.unSubscribe(subscriptionOfSpeakApplyCounter);
+//                                liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().cancelSpeakApply();
+//                            }
+//                        } else {
+//                            view.showNotForbiddenHand();
+//                        }
+//                    }
+//                });
     }
 
     private void refreshSpeakQueueBtnStatus() {
@@ -312,6 +354,7 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                             @Override
                             public void call(Long aLong) {
                                 List<IMediaModel> mediaModels = liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getSpeakQueueList();
+                                if(mediaModels.size() == 0) return;
                                 view.showSpeakQueueImage(mediaModels.get(aLong.intValue() % mediaModels.size()).getUser().getAvatar());
                             }
                         });
@@ -331,6 +374,8 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
         RxUtils.unSubscribe(subscriptionOfSpeakApplyCounter);
         RxUtils.unSubscribe(subscriptionOfMediaChanged);
         RxUtils.unSubscribe(subscriptionOfMediaClose);
+        RxUtils.unSubscribe(subscriptionOfSpeakApplyResponse);
+        RxUtils.unSubscribe(subscriptionOfClassEnd);
     }
 
     @Override

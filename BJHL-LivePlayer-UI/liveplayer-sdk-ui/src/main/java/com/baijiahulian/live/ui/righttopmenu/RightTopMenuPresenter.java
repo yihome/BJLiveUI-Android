@@ -2,7 +2,6 @@ package com.baijiahulian.live.ui.righttopmenu;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 import com.baijiahulian.live.ui.utils.RxUtils;
-import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 
 import rx.Subscription;
@@ -15,7 +14,6 @@ import rx.android.schedulers.AndroidSchedulers;
 public class RightTopMenuPresenter implements RightTopMenuContract.Presenter {
     private LiveRoomRouterListener liveRoomRouterListener;
     private Subscription subscriptionOfCloudRecord;
-    private LPConstants.LPUserType currentUserType;
 
     @Override
     public void setRouter(LiveRoomRouterListener liveRoomRouterListener) {
@@ -24,14 +22,13 @@ public class RightTopMenuPresenter implements RightTopMenuContract.Presenter {
 
     @Override
     public void subscribe() {
-        currentUserType = liveRoomRouterListener.getLiveRoom().getCurrentUser().getType();
         subscriptionOfCloudRecord = liveRoomRouterListener.getLiveRoom().getObservableOfCloudRecordStatus()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new LPErrorPrintSubscriber<Boolean>() {
                     @Override
                     public void call(Boolean aBoolean) {
                         if (aBoolean) {
-                            if (currentUserType == LPConstants.LPUserType.Teacher || currentUserType == LPConstants.LPUserType.Assistant) {
+                            if (liveRoomRouterListener.isTeacherOrAssistant()) {
                                 liveRoomRouterListener.navigateToCloudRecord(true);
                             } else {
                                 liveRoomRouterListener.navigateToCloudRecord(false);

@@ -81,30 +81,31 @@ public class MessageSentFragment extends BaseDialogFragment implements MessageSe
                 dismissAllowingStateLoss();
             }
         });
-        if (presenter.isTeacherOrAssistant()) {
-            $.id(R.id.dialog_message_send_pic).visible().clicked(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    ThemeConfig.Builder builder = new ThemeConfig.Builder();
-                    builder.setMainElementsColor(ContextCompat.getColor(getContext(), R.color.live_blue));
-                    BJCommonImageCropHelper.openImageSingleAblum(getActivity(), BJCommonImageCropHelper.PhotoCropType.Free, builder.build(), new BJCommonImageCropHelper.OnHandlerResultCallback() {
-                        @Override
-                        public void onHandlerSuccess(List<PhotoInfo> list) {
-                            if (list.size() == 1) {
-                                presenter.sendPicture(list.get(0).getPhotoPath());
-                            }
+        $.id(R.id.dialog_message_send_pic).clicked(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ThemeConfig.Builder builder = new ThemeConfig.Builder();
+                builder.setMainElementsColor(ContextCompat.getColor(getContext(), R.color.live_blue));
+                BJCommonImageCropHelper.openImageSingleAblum(getActivity(), BJCommonImageCropHelper.PhotoCropType.Free, builder.build(), new BJCommonImageCropHelper.OnHandlerResultCallback() {
+                    @Override
+                    public void onHandlerSuccess(List<PhotoInfo> list) {
+                        if (list.size() == 1) {
+                            presenter.sendPicture(list.get(0).getPhotoPath());
                         }
+                    }
 
-                        @Override
-                        public void onHandlerFailure(String s) {
-                            showToast(s);
-                        }
-                    });
-                }
-            });
-        } else {
-            $.id(R.id.dialog_message_send_pic).gone();
-        }
+                    @Override
+                    public void onHandlerFailure(String s) {
+                        showToast(s);
+                    }
+                });
+            }
+        });
+//        if (presenter.isTeacherOrAssistant()) {
+//
+//        } else {
+//            $.id(R.id.dialog_message_send_pic).gone();
+//        }
 
         $.id(R.id.dialog_message_emoji).clicked(new View.OnClickListener() {
             @Override

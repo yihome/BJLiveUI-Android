@@ -43,6 +43,8 @@ interface RightMenuContract {
         void hidePPTDrawBtn();
 
         void showPPTDrawBtn();
+
+        void showHandUpError();
     }
 
     interface Presenter extends BasePresenter {

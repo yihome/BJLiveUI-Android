@@ -7,6 +7,7 @@ import android.content.res.Configuration;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -50,6 +51,8 @@ public abstract class BaseDialogFragment extends DialogFragment {
         $ = Query.with(baseView);
         ((FrameLayout) $.id(R.id.dialog_base_content).view()).addView(contentView);
         init(savedInstanceState, getArguments());
+        if (basePresenter != null)
+            basePresenter.subscribe();
         return baseView;
     }
 
@@ -150,13 +153,10 @@ public abstract class BaseDialogFragment extends DialogFragment {
             @Override
             public void onClick(View v) {
                 if (isEditing) {
-                    $.id(R.id.dialog_base_edit).text(getString(R.string.live_edit));
                     disableEdit();
                 } else {
-                    $.id(R.id.dialog_base_edit).text(getString(R.string.live_cancel));
                     enableEdit();
                 }
-                isEditing = !isEditing;
             }
         });
         return this;
@@ -190,12 +190,16 @@ public abstract class BaseDialogFragment extends DialogFragment {
         return super.onCreateAnimation(transit, enter, nextAnim);
     }
 
+    @CallSuper
     protected void disableEdit() {
-
+        isEditing = false;
+        $.id(R.id.dialog_base_edit).text(getString(R.string.live_edit));
     }
 
+    @CallSuper
     protected void enableEdit() {
-
+        isEditing = true;
+        $.id(R.id.dialog_base_edit).text(getString(R.string.live_cancel));
     }
 
     protected void showToast(String msg) {
@@ -205,21 +209,18 @@ public abstract class BaseDialogFragment extends DialogFragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (basePresenter != null)
-            basePresenter.subscribe();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if (basePresenter != null)
-            basePresenter.unSubscribe();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         if (basePresenter != null) {
+            basePresenter.unSubscribe();
             basePresenter.destroy();
             basePresenter = null;
         }

@@ -46,5 +46,8 @@ interface PPTManageContract {
 
         boolean isDocumentAdded(int position);
 
+        void attachView(View view);
+
+        void detachView();
     }
 }

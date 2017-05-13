@@ -11,6 +11,7 @@
     <string name="live_open_video">打开视频</string>
     <string name="live_close_video">关闭视频</string>
     <string name="live_agree">同意</string>
+    <string name="live_teacher">老师</string>
     <string name="live_disagree">拒绝</string>
     <string name="live_publish">发布</string>
     <string name="live_edit">编辑</string>
@@ -55,7 +56,8 @@
     <string name="live_saved">已保存</string>
     <string name="live_upload_new_file">上传新文件</string>
     <string name="live_announcement_hint">输入公告内容</string>
-    <string name="live_announcement_url_hint">为公告添加跳转网址</string>
+    <string name="live_announcement_none">暂无公告</string>
+    <string name="live_announcement_url_hint">为公告添加网址</string>
     <string name="live_announcement_view_url_hint">点击公告可以跳转</string>
     <string name="live_recorder_title">采集视频</string>
     <string name="live_recorder_switch_camera">切换摄像头</string>
@@ -63,8 +65,10 @@
     <string name="live_recorder_pretty_filter_off">关闭美颜</string>
     <string name="live_recorder_camera_switch_off">关闭摄像头</string>
     <string name="live_ppt_manage">管理课件</string>
+    <string name="live_hand_up_error">课程未开始，举手发言失败</string>
     <string name="live_ppt_title">PPT</string>
     <string name="live_forbid_raise_hand">禁止举手</string>
+    <string name="live_forbid_send_message">老师已禁止了发言</string>
     <string name="live_ppt_clear_all">清除</string>
     <string name="live_remove">移除</string>
     <string name="live_image_loading">图片加载中…</string>

@@ -3,6 +3,7 @@ package com.baijiahulian.live.ui.base;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +36,8 @@ public abstract class BaseFragment extends Fragment {
         checkNotNull(view);
         $ = QueryPlus.with(view);
         init(savedInstanceState);
+        if (basePresenter != null)
+            basePresenter.subscribe();
         return view;
     }
 
@@ -58,7 +61,9 @@ public abstract class BaseFragment extends Fragment {
     }
 
     protected void showToast(String msg) {
-        Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
+        Toast toast = Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.show();
     }
 
     @Override
@@ -73,23 +78,10 @@ public abstract class BaseFragment extends Fragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        if (basePresenter != null)
-            basePresenter.subscribe();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (basePresenter != null)
-            basePresenter.unSubscribe();
-    }
-
-    @Override
     public void onDestroy() {
         super.onDestroy();
         if (basePresenter != null) {
+            basePresenter.unSubscribe();
             basePresenter.destroy();
             basePresenter = null;
         }

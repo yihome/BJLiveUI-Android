@@ -65,7 +65,7 @@ public class PPTManageFragment extends BaseDialogFragment implements PPTManageCo
                 } else {
                     ThemeConfig.Builder builder = new ThemeConfig.Builder();
                     builder.setMainElementsColor(ContextCompat.getColor(getContext(), R.color.live_blue));
-                    BJCommonImageCropHelper.openImageMulti(getActivity(), 9, builder.build(), new BJCommonImageCropHelper.OnHandlerResultCallback() {
+                    BJCommonImageCropHelper.openImageMulti(getActivity(), 20, builder.build(), new BJCommonImageCropHelper.OnHandlerResultCallback() {
                         @Override
                         public void onHandlerSuccess(List<PhotoInfo> list) {
                             List<String> pics = new ArrayList<>();
@@ -83,10 +83,12 @@ public class PPTManageFragment extends BaseDialogFragment implements PPTManageCo
                 }
             }
         });
+        presenter.attachView(this);
     }
 
     @Override
     protected void enableEdit() {
+        super.enableEdit();
         $.id(R.id.dialog_ppt_manage_btn)
                 .background(ContextCompat.getColor(getContext(), R.color.live_fail_dark))
                 .text(getString(R.string.live_remove))
@@ -96,6 +98,7 @@ public class PPTManageFragment extends BaseDialogFragment implements PPTManageCo
 
     @Override
     protected void disableEdit() {
+        super.disableEdit();
         $.id(R.id.dialog_ppt_manage_btn)
                 .background(ContextCompat.getColor(getContext(), R.color.live_blue))
                 .text(getString(R.string.live_upload_new_file))
@@ -105,7 +108,7 @@ public class PPTManageFragment extends BaseDialogFragment implements PPTManageCo
 
     @Override
     public void setPresenter(PPTManageContract.Presenter presenter) {
-        super.setBasePresenter(presenter);
+        super.setBasePresenter(null);
         this.presenter = presenter;
     }
 
@@ -113,6 +116,7 @@ public class PPTManageFragment extends BaseDialogFragment implements PPTManageCo
     public void showPPTEmpty() {
         $.id(R.id.dialog_ppt_manage_empty_container).visible();
         $.id(R.id.dialog_ppt_manage_rv).gone();
+        disableEdit();
     }
 
     @Override
@@ -165,6 +169,7 @@ public class PPTManageFragment extends BaseDialogFragment implements PPTManageCo
     @Override
     public void onDestroy() {
         super.onDestroy();
+        presenter.detachView();
         presenter = null;
         $ = null;
     }
@@ -241,20 +246,29 @@ public class PPTManageFragment extends BaseDialogFragment implements PPTManageCo
                     }
                 });
                 docViewHolder.checkBox.setChecked(presenter.isItemSelected(position));
-                String url = AliCloudImageUtil.getRectScaledUrl(getContext(), ((DocumentModel)presenter.getItem(position)).pageInfoModel.url, 24);
-//                int res = getDrawableResByFileExt(presenter.getItem(position).getFileExt());
-                Picasso.with(getContext()).load(url).into(docViewHolder.ivIcon);
+                int res = getDrawableResByFileExt(presenter.getItem(position).getFileExt());
+                if (res == 0) { // pic
+                    String url = AliCloudImageUtil.getRectScaledUrl(getContext(), ((DocumentModel) presenter.getItem(position)).pageInfoModel.url, 24);
+                    Picasso.with(getContext()).load(url).into(docViewHolder.ivIcon);
+                } else {
+                    Picasso.with(getContext()).load(res).into(docViewHolder.ivIcon);
+                }
             } else if (holder instanceof UploadingViewHolder) {
                 UploadingViewHolder viewHolder = (UploadingViewHolder) holder;
                 viewHolder.tvTitle.setText(presenter.getItem(position).getFileName());
-                Picasso.with(getContext()).load(getDrawableResByFileExt(presenter.getItem(position).getFileExt())).into(viewHolder.ivIcon);
+                int res = getDrawableResByFileExt(presenter.getItem(position).getFileExt());
+                if (res == 0) {
+                    Picasso.with(getContext()).load(R.drawable.live_ic_file_jpg).into(viewHolder.ivIcon);
+                } else {
+                    Picasso.with(getContext()).load(res).into(viewHolder.ivIcon);
+                }
                 if (presenter.getItem(position).getStatus() == DocumentUploadingModel.UPLOADING) {
                     viewHolder.tvStatus.setText(getString(R.string.live_uploading));
                 } else if (presenter.getItem(position).getStatus() == DocumentUploadingModel.UPLOADED) {
                     viewHolder.tvStatus.setText(getString(R.string.live_queueing));
-                } else if (presenter.getItem(position).getStatus() == DocumentUploadingModel.UPLOAD_FAIL){
+                } else if (presenter.getItem(position).getStatus() == DocumentUploadingModel.UPLOAD_FAIL) {
                     viewHolder.tvStatus.setText(getString(R.string.live_upload_fail));
-                }else{
+                } else {
                     viewHolder.tvStatus.setText("");
                 }
 //                viewHolder.tvStatus.setText(String.valueOf(presenter.getItem(position).getUploadPercent()));
@@ -267,7 +281,7 @@ public class PPTManageFragment extends BaseDialogFragment implements PPTManageCo
         }
 
         private int getDrawableResByFileExt(String ext) {
-            if (ext == null) return R.drawable.live_ic_file_jpg;
+            if (ext == null) return 0;
             switch (ext) {
                 case ".doc":
                 case ".docx":
@@ -278,7 +292,7 @@ public class PPTManageFragment extends BaseDialogFragment implements PPTManageCo
                 case ".pdf":
                     return R.drawable.live_ic_file_pdf;
                 default:
-                    return R.drawable.live_ic_file_jpg;
+                    return 0;
             }
         }
     }

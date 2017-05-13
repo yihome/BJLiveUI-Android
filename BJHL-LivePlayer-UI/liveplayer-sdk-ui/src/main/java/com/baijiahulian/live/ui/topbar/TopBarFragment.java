@@ -40,6 +40,7 @@ public class TopBarFragment extends BaseFragment implements TopBarContract.View 
                 presenter.navigateToShare();
             }
         });
+//        $.id(R.id.fragment_top_bar_share).gone();
     }
 
     @Override

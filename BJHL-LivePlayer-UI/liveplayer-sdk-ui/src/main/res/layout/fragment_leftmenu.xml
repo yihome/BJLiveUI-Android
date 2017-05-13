@@ -8,12 +8,12 @@
         android:id="@+id/fragment_left_menu_clear_screen"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/live_ic_clear"/>
+        android:layout_marginRight="@dimen/activity_live_room_margin"
+        android:src="@drawable/live_ic_clear" />
 
     <ImageView
         android:id="@+id/fragment_left_menu_send_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/activity_live_room_margin"
-        android:src="@drawable/live_ic_send_msg"/>
+        android:src="@drawable/live_ic_send_msg" />
 </LinearLayout>

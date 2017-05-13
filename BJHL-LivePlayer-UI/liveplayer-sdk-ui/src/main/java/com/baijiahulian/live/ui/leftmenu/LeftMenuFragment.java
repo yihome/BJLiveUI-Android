@@ -1,5 +1,6 @@
 package com.baijiahulian.live.ui.leftmenu;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.View;
 
@@ -31,14 +32,24 @@ public class LeftMenuFragment extends BaseFragment implements LeftMenuContract.V
         $.id(R.id.fragment_left_menu_send_message).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (presenter.isForbidden()) {
+                    showToast(getString(R.string.live_forbid_send_message));
+                    return;
+                }
                 presenter.showMessageInput();
             }
         });
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            $.id(R.id.fragment_left_menu_clear_screen).gone();
+        } else {
+            $.id(R.id.fragment_left_menu_clear_screen).visible();
+        }
     }
 
     @Override
     public void notifyClearScreenChanged(boolean isCleared) {
-        if (isCleared) $.id(R.id.fragment_left_menu_clear_screen).image(R.drawable.live_ic_clear_on);
+        if (isCleared)
+            $.id(R.id.fragment_left_menu_clear_screen).image(R.drawable.live_ic_clear_on);
         else $.id(R.id.fragment_left_menu_clear_screen).image(R.drawable.live_ic_clear);
     }
 
@@ -46,5 +57,18 @@ public class LeftMenuFragment extends BaseFragment implements LeftMenuContract.V
     public void setPresenter(LeftMenuContract.Presenter presenter) {
         super.setBasePresenter(presenter);
         this.presenter = presenter;
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (presenter.isScreenCleared()) {
+            presenter.clearScreen();
+        }
+        if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            $.id(R.id.fragment_left_menu_clear_screen).gone();
+        } else {
+            $.id(R.id.fragment_left_menu_clear_screen).visible();
+        }
     }
 }

@@ -18,12 +18,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
+import rx.Observable;
+import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func2;
 
 /**
- * 管理PPT文档
+ * 管理PPT文档 生命周期不与fragment绑定
  * <p>
  * Created by Shubo on 2017/4/26.
  */
@@ -40,10 +44,25 @@ public class PPTManagePresenter implements PPTManageContract.Presenter {
 
     private List<String> deleteDocIds;
 
-    public PPTManagePresenter(PPTManageContract.View view) {
-        this.view = view;
+    public PPTManagePresenter() {
         uploadingQueue = new LinkedBlockingQueue<>();
         deleteDocIds = new ArrayList<>();
+    }
+
+    @Override
+    public void attachView(PPTManageContract.View view) {
+        this.view = view;
+        if (addedDocuments.size() > 0 || uploadingQueue.size() > 0) {
+            view.showPPTNotEmpty();
+        } else {
+            view.showPPTEmpty();
+        }
+    }
+
+    @Override
+    public void detachView() {
+        view = null;
+        deleteDocIds.clear();
     }
 
     @Override
@@ -59,12 +78,6 @@ public class PPTManagePresenter implements PPTManageContract.Presenter {
                 addedDocuments.add(new DocumentModel(m));
         }
 
-        if (addedDocuments.size() > 0 || uploadingQueue.size() > 0) {
-            view.showPPTNotEmpty();
-        } else {
-            view.showPPTEmpty();
-        }
-
         subscriptionOfDocAdd = routerListener.getLiveRoom().getDocListVM().getObservableOfDocAdd()
                 .onBackpressureBuffer()
                 .observeOn(AndroidSchedulers.mainThread())
@@ -72,7 +85,8 @@ public class PPTManagePresenter implements PPTManageContract.Presenter {
                     @Override
                     public void call(LPDocumentModel lpDocumentModel) {
                         addedDocuments.add(new DocumentModel(lpDocumentModel));
-                        view.notifyItemChanged(addedDocuments.size() - 1);
+                        if (view != null)
+                            view.notifyItemChanged(addedDocuments.size() - 1);
                         DocumentUploadingModel model = uploadingQueue.peek();
                         // 如果是本地上传，等待DocAdd信令返回后再队列里移除
                         if (model != null && model.status == DocumentUploadingModel.WAIT_SIGNAL
@@ -93,8 +107,10 @@ public class PPTManagePresenter implements PPTManageContract.Presenter {
                         for (int i = 0; i < addedDocuments.size(); i++) {
                             if (addedDocuments.get(i).id.equals(s)) {
                                 addedDocuments.remove(i);
-                                view.notifyItemRemoved(i);
-                                if (addedDocuments.size() == 0) view.showPPTEmpty();
+                                if (view != null) {
+                                    view.notifyItemRemoved(i);
+                                    if (addedDocuments.size() == 0) view.showPPTEmpty();
+                                }
                                 return;
                             }
                         }
@@ -122,8 +138,10 @@ public class PPTManagePresenter implements PPTManageContract.Presenter {
 
     @Override
     public void destroy() {
-        view = null;
-//        routerListener = null;
+        unSubscribe();
+        if (view != null)
+            view = null;
+        routerListener = null;
     }
 
     @Override
@@ -147,6 +165,11 @@ public class PPTManagePresenter implements PPTManageContract.Presenter {
             DocumentUploadingModel model = new DocumentUploadingModel(path);
             uploadingQueue.offer(model);
             view.notifyItemInserted(addedDocuments.size() + uploadingQueue.size() - 1);
+        }
+        if (addedDocuments.size() > 0 || uploadingQueue.size() > 0) {
+            view.showPPTNotEmpty();
+        } else {
+            view.showPPTEmpty();
         }
         startQueue();
     }
@@ -195,13 +218,13 @@ public class PPTManagePresenter implements PPTManageContract.Presenter {
         }
     }
 
-    private void continueQueue() {
+    private synchronized void continueQueue() {
         DocumentUploadingModel model = uploadingQueue.peek();
         if (model == null) return;
         if (model.status == DocumentUploadingModel.UPLOADED) {
+            model.status = DocumentUploadingModel.WAIT_SIGNAL;
             routerListener.getLiveRoom().getDocListVM().addPictureDocument(String.valueOf(model.uploadModel.fileId)
                     , model.uploadModel.fext, model.uploadModel.name, model.uploadModel.width, model.uploadModel.height, model.uploadModel.url);
-            model.status = DocumentUploadingModel.WAIT_SIGNAL;
         }
     }
 
@@ -224,10 +247,29 @@ public class PPTManagePresenter implements PPTManageContract.Presenter {
 
     @Override
     public void removeSelectedItems() {
-        for (String docId : deleteDocIds) {
-            routerListener.getLiveRoom().getDocListVM().deleteDocument(docId);
-        }
-        deleteDocIds.clear();
+        Observable.from(deleteDocIds).zipWith(Observable.interval(50, TimeUnit.MILLISECONDS).onBackpressureDrop(),
+                new Func2<String, Long, String>() {
+                    @Override
+                    public String call(String s, Long aLong) {
+                        return s;
+                    }
+                })
+                .subscribe(new Subscriber<String>() {
+                    @Override
+                    public void onCompleted() {
+                        deleteDocIds.clear();
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onNext(String s) {
+                        routerListener.getLiveRoom().getDocListVM().deleteDocument(s);
+                    }
+                });
         view.showRemoveBtnDisable();
     }
 

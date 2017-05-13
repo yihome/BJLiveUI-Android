@@ -25,5 +25,18 @@
             android:ellipsize="end"
             android:maxLines="1" />
 
+        <TextView
+            android:id="@+id/item_online_user_teacher_tag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="2dp"
+            android:layout_toRightOf="@+id/item_online_user_name"
+            android:background="@drawable/live_teacher_tag"
+            android:padding="2dp"
+            android:text="@string/live_teacher"
+            android:textColor="@color/live_blue"
+            android:textSize="10sp" />
+
     </RelativeLayout>
 </LinearLayout>

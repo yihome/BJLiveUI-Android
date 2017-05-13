@@ -2,6 +2,7 @@ package com.baijiahulian.live.ui.speakqueue;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 import com.baijiahulian.live.ui.utils.RxUtils;
+import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.models.imodels.IMediaControlModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
@@ -44,8 +45,13 @@ public class SpeakQueuePresenter implements SpeakQueueContract.Presenter {
                 .subscribe(new LPErrorPrintSubscriber<IMediaModel>() {
                     @Override
                     public void call(IMediaModel iMediaModel) {
-                        speakList.add(iMediaModel);
-                        view.notifyItemInserted(applyList.size() + speakList.size());
+                        if (iMediaModel.getUser().getType() == LPConstants.LPUserType.Teacher) {
+                            speakList.add(0, iMediaModel);
+                            view.notifyItemInserted(applyList.size());
+                        } else {
+                            speakList.add(iMediaModel);
+                            view.notifyItemInserted(applyList.size() + speakList.size() - 1);
+                        }
                     }
                 });
         subscriptionOfMediaChange = routerListener.getLiveRoom().getSpeakQueueVM().getObservableOfMediaChange()
@@ -76,7 +82,7 @@ public class SpeakQueuePresenter implements SpeakQueueContract.Presenter {
                                 break;
                             }
                         }
-                        view.notifyItemDeleted(counter + applyList.size());
+                        view.notifyItemDeleted(counter - 1 + applyList.size());
                     }
                 });
 
@@ -157,7 +163,6 @@ public class SpeakQueuePresenter implements SpeakQueueContract.Presenter {
             routerListener.playVideoClose(speakList.get(position - applyList.size()).getUser().getUserId());
         }
         routerListener.getLiveRoom().getSpeakQueueVM().closeOtherSpeak(speakList.get(position - applyList.size()).getUser().getUserId());
-//        routerListener.setCurrentVideoUser(null);
     }
 
     @Override

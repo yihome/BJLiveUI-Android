@@ -1,10 +1,15 @@
 package com.baijiahulian.live.ui.setting;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
+import com.baijiahulian.live.ui.utils.RxUtils;
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.context.LiveRoom;
+import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 import com.baijiahulian.livecore.wrapper.LPPlayer;
 import com.baijiahulian.livecore.wrapper.LPRecorder;
+
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
 
 import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 
@@ -19,6 +24,7 @@ public class SettingPresenter implements SettingContract.Presenter {
     private LPRecorder recorder;
     private LPPlayer player;
     private LiveRoom liveRoom;
+    private Subscription subscriptionOfForbidAllChat;
 
     public SettingPresenter(SettingContract.View view) {
         this.view = view;
@@ -90,12 +96,22 @@ public class SettingPresenter implements SettingContract.Presenter {
         } else {
             view.showNotForbidden();
         }
-
+        subscriptionOfForbidAllChat = liveRoom.getObservableOfForbidAllChatStatus().observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<Boolean>() {
+                    @Override
+                    public void call(Boolean aBoolean) {
+                        if (aBoolean) {
+                            view.showForbidden();
+                        } else {
+                            view.showNotForbidden();
+                        }
+                    }
+                });
     }
 
     @Override
     public void unSubscribe() {
-
+        RxUtils.unSubscribe(subscriptionOfForbidAllChat);
     }
 
     @Override
@@ -139,7 +155,6 @@ public class SettingPresenter implements SettingContract.Presenter {
                 view.showVisitorFail();
                 break;
         }
-
     }
 
     @Override
@@ -252,10 +267,8 @@ public class SettingPresenter implements SettingContract.Presenter {
     public void switchForbidStatus() {
         if (liveRoom.getForbidStatus()) {
             liveRoom.requestForbidAllChat(false);
-            view.showNotForbidden();
         } else {
             liveRoom.requestForbidAllChat(true);
-            view.showForbidden();
         }
     }
 

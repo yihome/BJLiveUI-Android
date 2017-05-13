@@ -30,6 +30,16 @@ public class LeftMenuPresenter implements LeftMenuContract.Presenter {
     }
 
     @Override
+    public boolean isScreenCleared() {
+        return isScreenCleared;
+    }
+
+    @Override
+    public boolean isForbidden() {
+        return !routerListener.isTeacherOrAssistant() && routerListener.getLiveRoom().getForbidStatus();
+    }
+
+    @Override
     public void setRouter(LiveRoomRouterListener liveRoomRouterListener) {
         routerListener = liveRoomRouterListener;
     }

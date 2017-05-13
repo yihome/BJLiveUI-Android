@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseDialogFragment;
 import com.baijiahulian.live.ui.utils.AliCloudImageUtil;
+import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
 import com.squareup.picasso.Picasso;
 
@@ -76,13 +77,14 @@ public class OnlineUserDialogFragment extends BaseDialogFragment implements Onli
     }
 
     private static class OnlineUserViewHolder extends RecyclerView.ViewHolder {
-        TextView name;
+        TextView name, teacherTag;
         ImageView avatar;
 
         OnlineUserViewHolder(View itemView) {
             super(itemView);
             name = (TextView) itemView.findViewById(R.id.item_online_user_name);
             avatar = (ImageView) itemView.findViewById(R.id.item_online_user_avatar);
+            teacherTag = (TextView) itemView.findViewById(R.id.item_online_user_teacher_tag);
         }
     }
 
@@ -133,6 +135,11 @@ public class OnlineUserDialogFragment extends BaseDialogFragment implements Onli
                 IUserModel userModel = presenter.getUser(position);
                 OnlineUserViewHolder userViewHolder = (OnlineUserViewHolder) holder;
                 userViewHolder.name.setText(userModel.getName());
+                if (userModel.getType() == LPConstants.LPUserType.Teacher) {
+                    userViewHolder.teacherTag.setVisibility(View.VISIBLE);
+                } else {
+                    userViewHolder.teacherTag.setVisibility(View.GONE);
+                }
                 Picasso.with(getActivity()).load(AliCloudImageUtil.getRoundedAvatarUrl(userModel.getAvatar(), 64))
                         .into(userViewHolder.avatar);
             } else if (holder instanceof LoadingViewHolder) {

@@ -42,5 +42,7 @@ interface RightBottomMenuContract {
         void more(int anchorX, int anchorY);
 
         void getSysRotationSetting();
+
+        void setSysRotationSetting();
     }
 }

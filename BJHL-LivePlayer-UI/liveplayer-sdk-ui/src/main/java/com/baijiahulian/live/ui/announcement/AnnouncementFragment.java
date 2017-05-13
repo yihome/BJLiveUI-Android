@@ -97,7 +97,11 @@ public class AnnouncementFragment extends BaseDialogFragment implements Announce
         if (isTeacherView) {
             $.id(R.id.dialog_announcement_et).text(text);
         } else {
-            $.id(R.id.dialog_announcement_view_tv).text(text);
+            if (TextUtils.isEmpty(text)) {
+                $.id(R.id.dialog_announcement_view_tv).text(getString(R.string.live_announcement_none));
+            } else {
+                $.id(R.id.dialog_announcement_view_tv).text(text);
+            }
         }
     }
 
@@ -107,10 +111,10 @@ public class AnnouncementFragment extends BaseDialogFragment implements Announce
             $.id(R.id.dialog_announcement_url_et).text(url);
         } else {
             if (TextUtils.isEmpty(url)) {
-                $.id(R.id.dialog_announcement_view_tv).clicked(null);
+                $.id(R.id.dialog_announcement_view_container).clicked(null);
                 $.id(R.id.dialog_announcement_view_hint).gone();
             } else {
-                $.id(R.id.dialog_announcement_view_tv).clicked(new View.OnClickListener() {
+                $.id(R.id.dialog_announcement_view_container).clicked(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         Intent intent = new Intent();
@@ -137,7 +141,11 @@ public class AnnouncementFragment extends BaseDialogFragment implements Announce
                             public void onClick(View v) {
                                 EditText editText = (EditText) $.id(R.id.dialog_announcement_et).view();
                                 EditText editUrl = (EditText) $.id(R.id.dialog_announcement_url_et).view();
-                                presenter.saveAnnouncement(editText.getText().toString(), editUrl.getText().toString());
+                                if (TextUtils.isEmpty(editText.getText().toString())) {
+                                    presenter.saveAnnouncement(editUrl.getText().toString(), editUrl.getText().toString());
+                                } else {
+                                    presenter.saveAnnouncement(editText.getText().toString(), editUrl.getText().toString());
+                                }
                             }
                         });
                 break;

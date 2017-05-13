@@ -10,16 +10,36 @@
         android:layout_height="32dp"
         android:layout_centerVertical="true" />
 
-    <TextView
-        android:id="@+id/item_speaker_speaking_name"
+    <LinearLayout
+        android:id="@+id/item_speak_speaking_name_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginLeft="@dimen/activity_live_room_margin"
         android:layout_toRightOf="@+id/item_speaker_speaking_avatar"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:maxWidth="90dp" />
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/item_speaker_speaking_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:maxWidth="90dp" />
+
+        <TextView
+            android:id="@+id/item_speaker_speaking_video_teacher_tag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="2dp"
+            android:background="@drawable/live_teacher_tag"
+            android:padding="2dp"
+            android:text="@string/live_teacher"
+            android:textColor="@color/live_blue"
+            android:textSize="10sp" />
+
+    </LinearLayout>
 
     <ImageView
         android:id="@+id/item_speaker_speaking_video_ic"
@@ -27,7 +47,7 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginLeft="2dp"
-        android:layout_toRightOf="@+id/item_speaker_speaking_name"
+        android:layout_toRightOf="@+id/item_speak_speaking_name_container"
         android:src="@drawable/ic_videoopen" />
 
     <TextView

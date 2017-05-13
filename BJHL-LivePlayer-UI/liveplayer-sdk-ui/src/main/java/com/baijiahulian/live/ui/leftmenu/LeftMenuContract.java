@@ -16,5 +16,9 @@ interface LeftMenuContract {
         void clearScreen();
 
         void showMessageInput();
+
+        boolean isScreenCleared();
+
+        boolean isForbidden();
     }
 }

@@ -82,7 +82,7 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
     @Override
     public void notifyItemInserted(int position) {
         adapter.notifyItemInserted(position);
-        recyclerView.smoothScrollToPosition(position);
+        recyclerView.smoothScrollToPosition(adapter.getItemCount());
     }
 
     @Override
@@ -165,9 +165,9 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
                 EmojiViewHolder emojiViewHolder = (EmojiViewHolder) holder;
                 emojiViewHolder.tvName.setText(spanText);
                 Picasso.with(getContext()).load(message.getUrl())
-                        .placeholder(failedColorDrawable)
-                        .error(failedColorDrawable)
-//                        .resize(emojiSize, emojiSize)
+                        .placeholder(R.drawable.live_ic_emoji_holder)
+                        .error(R.drawable.live_ic_emoji_holder)
+                        .resize(emojiSize, emojiSize)
                         .into(emojiViewHolder.ivEmoji);
             } else if (holder instanceof ImageViewHolder) {
                 ImageViewHolder imageViewHolder = (ImageViewHolder) holder;
