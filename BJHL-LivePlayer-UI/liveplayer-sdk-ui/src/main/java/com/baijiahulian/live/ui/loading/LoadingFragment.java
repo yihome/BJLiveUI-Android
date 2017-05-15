@@ -60,6 +60,6 @@ public class LoadingFragment extends BaseFragment implements LoadingContract.Vie
 
     @Override
     public void showLaunchError(LPError lpError) {
-        showToast(lpError.getMessage());
+//        showToast(lpError.getMessage());
     }
 }

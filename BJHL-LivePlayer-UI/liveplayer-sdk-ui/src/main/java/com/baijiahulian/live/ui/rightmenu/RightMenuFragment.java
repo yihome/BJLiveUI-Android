@@ -8,7 +8,12 @@ import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseFragment;
 import com.baijiahulian.live.ui.utils.AliCloudImageUtil;
 import com.baijiahulian.live.ui.viewsupport.CountdownCircleView;
+import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 import com.squareup.picasso.Picasso;
+
+import java.util.concurrent.TimeUnit;
+
+import rx.android.schedulers.AndroidSchedulers;
 
 /**
  * Created by Shubo on 2017/2/15.
@@ -39,12 +44,14 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
                 presenter.visitSpeakers();
             }
         });
-        $.id(R.id.fragment_right_speak_apply).clicked(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                presenter.speakApply();
-            }
-        });
+        $.id(R.id.fragment_right_speak_apply).clicked().throttleFirst(1, TimeUnit.SECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<Void>() {
+                    @Override
+                    public void call(Void aVoid) {
+                        presenter.speakApply();
+                    }
+                });
     }
 
     @Override

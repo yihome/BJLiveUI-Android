@@ -137,6 +137,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private PPTManagePresenter pptManagePresenter;
     private ErrorFragment errorFragment;
     private GlobalPresenter globalPresenter;
+    private PPTLeftFragment pptLeftFragment;
 
     private OrientationEventListener orientationEventListener; //处理屏幕旋转时本地录制视频的方向
     private int oldRotation;
@@ -144,6 +145,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private Subscription subscriptionOfLoginConflict;
     private IMediaModel currentRemoteMediaUser;
     private boolean isClearScreen;//是否已经清屏，作用于视频采集和远程视频ui的调整
+    private String code, name;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -157,8 +159,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
             onConfigurationChanged(getResources().getConfiguration());
         }
 
-        String code = getIntent().getStringExtra("code");
-        String name = getIntent().getStringExtra("name");
+        code = getIntent().getStringExtra("code");
+        name = getIntent().getStringExtra("name");
 
         loadingFragment = new LoadingFragment();
         LoadingPresenter loadingPresenter = new LoadingPresenter(loadingFragment, code, name, false);
@@ -180,7 +182,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                             liveRoom.getRecorder().invalidVideo();
                     } catch (NotInitializedException ignored) {
                     }
-
                 }
             }
         };
@@ -206,6 +207,35 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     protected void onResume() {
         super.onResume();
         orientationEventListener.enable();
+
+        if (roomLifeCycleListener != null) {
+            roomLifeCycleListener.onResume(this, new LiveSDKWithUI.LPRoomChangeRoomListener() {
+                @Override
+                public void changeRoom(String code, String nickName) {
+                    //重新进入教室
+                    removeFragment(lppptFragment);
+                    removeFragment(topBarFragment);
+                    removeFragment(rightTopMenuFragment);
+                    removeFragment(leftMenuFragment);
+                    removeFragment(pptLeftFragment);
+                    removeFragment(rightMenuFragment);
+                    removeFragment(rightBottomMenuFragment);
+                    removeFragment(chatFragment);
+
+                    if (playerFragment != null && playerFragment.isAdded())
+                        removeFragment(playerFragment);
+                    if (recorderFragment != null && recorderFragment.isAdded())
+                        removeFragment(recorderFragment);
+                    if (errorFragment != null && errorFragment.isAdded())
+                        removeFragment(errorFragment);
+
+                    loadingFragment = new LoadingFragment();
+                    LoadingPresenter loadingPresenter = new LoadingPresenter(loadingFragment, code, nickName, false);
+                    bindVP(loadingFragment, loadingPresenter);
+                    addFragment(R.id.activity_live_room_loading, loadingFragment);
+                }
+            });
+        }
     }
 
     @Override
@@ -308,7 +338,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                         showNetError(error);
                         break;
                     case LPError.CODE_ERROR_LOGIN_CONFLICT:
-                        showMessage("登录冲突");
+                        break;
+                    case LPError.CODE_ERROR_CHATSERVER_LOSE_CONNECTION:
+
                         break;
                     default:
                         if (!TextUtils.isEmpty(error.getMessage()))
@@ -319,13 +351,18 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         });
     }
 
+    private Toast toast;
+
     @Override
     public void showMessage(final String message) {
-        Observable.empty().observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Object>() {
+        Observable.just(1).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Object>() {
             @Override
             public void call(Object obj) {
-                Toast toast = Toast.makeText(LiveRoomActivity.this, message, Toast.LENGTH_SHORT);
+                toast = Toast.makeText(LiveRoomActivity.this, message, Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.CENTER, 0, 0);
+                if(toast.getView().getVisibility() == View.VISIBLE){
+                    toast.cancel();
+                }
                 toast.show();
             }
         });
@@ -336,12 +373,46 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         globalPresenter.setTeacherMedia(model);
     }
 
-    private void showNetError(LPError error) {
-        if (errorFragment != null) return;
-        errorFragment = ErrorFragment.newInstance("好像断网了", error.getMessage());
+    @Override
+    public void showError(LPError error) {
+        if (errorFragment != null && errorFragment.isAdded()) return;
+        errorFragment = ErrorFragment.newInstance("哎呀出错了", error.getMessage(), ErrorFragment.ERROR_HANDLE_REENTER);
         errorFragment.setRouterListener(this);
         flLoading.setVisibility(View.VISIBLE);
         addFragment(R.id.activity_live_room_loading, errorFragment);
+    }
+
+    private void showNetError(LPError error) {
+        if (errorFragment != null) return;
+        errorFragment = ErrorFragment.newInstance("好像断网了", error.getMessage(), ErrorFragment.ERROR_HANDLE_RECONNECT);
+        errorFragment.setRouterListener(this);
+        flLoading.setVisibility(View.VISIBLE);
+        addFragment(R.id.activity_live_room_loading, errorFragment);
+    }
+
+    @Override
+    public void doReEnterRoom() {
+
+        removeFragment(lppptFragment);
+        removeFragment(topBarFragment);
+        removeFragment(rightTopMenuFragment);
+        removeFragment(leftMenuFragment);
+        removeFragment(pptLeftFragment);
+        removeFragment(rightMenuFragment);
+        removeFragment(rightBottomMenuFragment);
+        removeFragment(chatFragment);
+
+        if (playerFragment != null && playerFragment.isAdded())
+            removeFragment(playerFragment);
+        if (recorderFragment != null && recorderFragment.isAdded())
+            removeFragment(recorderFragment);
+        if (errorFragment != null && errorFragment.isAdded())
+            removeFragment(errorFragment);
+
+        loadingFragment = new LoadingFragment();
+        LoadingPresenter loadingPresenter = new LoadingPresenter(loadingFragment, code, name, false);
+        bindVP(loadingFragment, loadingPresenter);
+        addFragment(R.id.activity_live_room_loading, loadingFragment);
     }
 
     @Override
@@ -379,7 +450,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         bindVP(leftMenuFragment, new LeftMenuPresenter(leftMenuFragment));
         addFragment(R.id.activity_live_room_bottom_left, leftMenuFragment);
 
-        PPTLeftFragment pptLeftFragment = new PPTLeftFragment();
+        pptLeftFragment = new PPTLeftFragment();
         bindVP(pptLeftFragment, new PPTLeftPresenter(pptLeftFragment));
         addFragment(R.id.activity_live_room_ppt_left, pptLeftFragment);
 
@@ -401,7 +472,23 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                 .subscribe(new LPErrorPrintSubscriber<ILoginConflictModel>() {
                     @Override
                     public void call(ILoginConflictModel iLoginConflictModel) {
-                        LiveRoomActivity.super.finish();
+                        tryToCloseCloudRecord();
+                        if (enterRoomConflictListener != null) {
+                            enterRoomConflictListener.onConflict(LiveRoomActivity.this, iLoginConflictModel.getConflictEndType()
+                                    , new LiveSDKWithUI.LPRoomExitCallback() {
+                                        @Override
+                                        public void exit() {
+                                            LiveRoomActivity.super.finish();
+                                        }
+
+                                        @Override
+                                        public void cancel() {
+                                            LiveRoomActivity.super.finish();
+                                        }
+                                    });
+                        } else {
+                            LiveRoomActivity.super.finish();
+                        }
                     }
                 });
 
@@ -422,6 +509,11 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                         flLoading.setVisibility(View.GONE);
                     }
                 });
+
+        if(liveRoom.getCurrentUser().getType() == LPConstants.LPUserType.Teacher){
+            attachLocalVideo();
+            liveRoom.getRecorder().attachAudio();
+        }
     }
 
     @Override
@@ -521,7 +613,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     public void disableSpeakerMode() {
         rightBottomMenuFragment.disableSpeakerMode();
         if (recorderFragment != null) {
-            detachVideo();
+            detachLocalVideo();
         }
         if (getLiveRoom().getRecorder().isPublishing())
             getLiveRoom().getRecorder().stopPublishing();
@@ -697,7 +789,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     }
 
     @Override
-    public void attachVideo() {
+    public void attachLocalVideo() {
         if (recorderFragment == null) {
             recorderFragment = new VideoRecorderFragment();
             bindVP(recorderFragment, new VideoRecorderPresenter(recorderFragment));
@@ -715,7 +807,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     }
 
     @Override
-    public void detachVideo() {
+    public void detachLocalVideo() {
         checkNotNull(recorderFragment);
         checkNotNull(recorderFragment.getView());
         checkNotNull(lppptFragment.getView());
@@ -871,6 +963,11 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         saveImageToGallery(bmpArray);
     }
 
+    @Override
+    public void doHandleErrorNothing() {
+        removeFragment(errorFragment);
+    }
+
     private void switchView(View view1, View view2) {
         FrameLayout fl1 = (FrameLayout) view1.getParent();
         FrameLayout fl2 = (FrameLayout) view2.getParent();
@@ -897,13 +994,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         RxUtils.unSubscribe(subscriptionOfLoginConflict);
 
         orientationEventListener = null;
-        if (getLiveRoom().getCurrentUser().getType() == LPConstants.LPUserType.Teacher) {
-            if (getLiveRoom().getCloudRecordStatus()) {
-                liveRoom.requestCloudRecord(false);
-            }
-            liveRoom.requestClassEnd();
-        }
+
         getLiveRoom().quitRoom();
+        clearStaticCallback();
     }
 
     //初始化时检测屏幕方向，以此设置聊天页面是否可隐藏
@@ -915,12 +1008,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         } else {
             dlChat.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN);
         }
-    }
-
-    private static LiveSDKWithUI.LPShareListener shareListener;
-
-    public static void setShareListener(LiveSDKWithUI.LPShareListener listener) {
-        shareListener = listener;
     }
 
     /**
@@ -968,4 +1055,64 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
             }
         }).start();
     }
+
+    @Override
+    public void finish() {
+        if (exitListener != null) {
+            exitListener.onRoomExit(this, new LiveSDKWithUI.LPRoomExitCallback() {
+                @Override
+                public void exit() {
+                    tryToCloseCloudRecord();
+                    LiveRoomActivity.super.finish();
+                }
+
+                @Override
+                public void cancel() {
+                }
+            });
+        } else {
+            tryToCloseCloudRecord();
+            super.finish();
+        }
+    }
+
+    private void tryToCloseCloudRecord() {
+        // TODO: 2017/5/13 core里面quitRoom了
+//        if (getLiveRoom().getCurrentUser().getType() == LPConstants.LPUserType.Teacher) {
+//            if (getLiveRoom().getCloudRecordStatus()) {
+//                liveRoom.requestCloudRecord(false);
+//            }
+//            liveRoom.requestClassEnd();
+//        }
+    }
+
+    /* 房间外部回调 */
+    private static LiveSDKWithUI.LPShareListener shareListener;
+    private static LiveSDKWithUI.LPRoomExitListener exitListener;
+    private static LiveSDKWithUI.RoomEnterConflictListener enterRoomConflictListener;
+    private static LiveSDKWithUI.LPRoomResumeListener roomLifeCycleListener;
+
+    private void clearStaticCallback() {
+        shareListener = null;
+        exitListener = null;
+        enterRoomConflictListener = null;
+        roomLifeCycleListener = null;
+    }
+
+    public static void setRoomLifeCycleListener(LiveSDKWithUI.LPRoomResumeListener roomLifeCycleListener) {
+        LiveRoomActivity.roomLifeCycleListener = roomLifeCycleListener;
+    }
+
+    public static void setShareListener(LiveSDKWithUI.LPShareListener listener) {
+        LiveRoomActivity.shareListener = listener;
+    }
+
+    public static void setRoomExitListener(LiveSDKWithUI.LPRoomExitListener roomExitListener) {
+        LiveRoomActivity.exitListener = roomExitListener;
+    }
+
+    public static void setEnterRoomConflictListener(LiveSDKWithUI.RoomEnterConflictListener enterRoomConflictListener) {
+        LiveRoomActivity.enterRoomConflictListener = enterRoomConflictListener;
+    }
+
 }

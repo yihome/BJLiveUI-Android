@@ -1,6 +1,7 @@
 package com.baijiahulian.live.ui.activity;
 
 import com.baijiahulian.livecore.context.LPConstants;
+import com.baijiahulian.livecore.context.LPError;
 import com.baijiahulian.livecore.context.LiveRoom;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 
@@ -64,9 +65,9 @@ public interface LiveRoomRouterListener {
 
     void playVideoClose(String userId);
 
-    void attachVideo();
+    void attachLocalVideo();
 
-    void detachVideo();
+    void detachLocalVideo();
 
     void showRecorderDialogFragment();
 
@@ -106,7 +107,14 @@ public interface LiveRoomRouterListener {
     void showMessage(String message);
 
     void saveTeacherMediaStatus(IMediaModel model);
+
     void showSavePicDialog(byte[] bmpArray);
 
     void realSaveBmpToFile(byte[] bmpArray);
+
+    void doReEnterRoom();
+
+    void doHandleErrorNothing();
+
+    void showError(LPError error);
 }

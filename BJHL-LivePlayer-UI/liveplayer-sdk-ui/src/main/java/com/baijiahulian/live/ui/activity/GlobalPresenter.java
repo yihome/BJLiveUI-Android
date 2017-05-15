@@ -86,13 +86,13 @@ public class GlobalPresenter implements BasePresenter {
                                 if (teacherAudioOn && teacherVideoOn) {
                                     routerListener.showMessage("老师关闭了音频");
                                 } else if (!teacherVideoOn) {
-                                    routerListener.showMessage("老师打开了音频");
+                                    routerListener.showMessage("老师打开了视频");
                                 }
                             } else if (iMediaModel.isAudioOn()) {
                                 if (teacherAudioOn && teacherVideoOn) {
                                     routerListener.showMessage("老师关闭了视频");
                                 } else if (!teacherAudioOn) {
-                                    routerListener.showMessage("老师打开了视频");
+                                    routerListener.showMessage("老师打开了音频");
                                 }
                             } else {
                                 routerListener.showMessage("老师关闭了音视频");

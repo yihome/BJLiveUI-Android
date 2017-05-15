@@ -59,6 +59,7 @@ public abstract class LiveRoomBaseActivity extends AppCompatActivity {
     }
 
     protected void removeFragment(Fragment fragment) {
+        if(fragment == null) return;
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 //        int inAnim = LPFragmentAnimUtil.getInAnim(fragment);
 //        int outAnim = LPFragmentAnimUtil.getOutAnim(fragment);

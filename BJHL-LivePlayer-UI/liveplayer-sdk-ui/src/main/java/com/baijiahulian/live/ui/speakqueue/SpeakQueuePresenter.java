@@ -7,6 +7,7 @@ import com.baijiahulian.livecore.models.imodels.IMediaControlModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
+import com.baijiahulian.livecore.utils.LPLogger;
 
 import java.util.Iterator;
 import java.util.List;
@@ -24,8 +25,8 @@ public class SpeakQueuePresenter implements SpeakQueueContract.Presenter {
     private LiveRoomRouterListener routerListener;
     private List<IMediaModel> speakList;
     private List<IUserModel> applyList;
-    private Subscription subscriptionOfMediaNew, subscriptionOfMediaChange, subscriptionOfMediaClose;
-    private Subscription subscriptionSpeakApply, subscriptionSpeakResponse;
+    private Subscription subscriptionOfMediaNew, subscriptionOfMediaChange, subscriptionOfMediaClose,
+            subscriptionSpeakApply, subscriptionSpeakResponse;
 
     public SpeakQueuePresenter(SpeakQueueContract.View view) {
         this.view = view;
@@ -107,11 +108,11 @@ public class SpeakQueuePresenter implements SpeakQueueContract.Presenter {
                                 IUserModel model = iterator.next();
                                 if (model.getUserId().equals(iMediaControlModel.getUser().getUserId())) {
                                     iterator.remove();
+                                    view.notifyItemDeleted(counter);
                                     break;
                                 }
                                 counter++;
                             }
-                            view.notifyItemDeleted(counter);
                         }
                     });
         }
@@ -149,16 +150,20 @@ public class SpeakQueuePresenter implements SpeakQueueContract.Presenter {
 
     @Override
     public void agreeSpeakApply(int position) {
+        if(position == -1) return;
         routerListener.getLiveRoom().getSpeakQueueVM().agreeSpeakApply(applyList.get(position).getUserId());
     }
 
     @Override
     public void disagreeSpeakApply(int position) {
+        if(position == -1) return;
         routerListener.getLiveRoom().getSpeakQueueVM().disagreeSpeakApply(applyList.get(position).getUserId());
     }
 
     @Override
     public void closeSpeaking(int position) {
+        if(position == -1) return;
+        LPLogger.e("position:"+position +" speakList:"+speakList.size() + " applyList:" +applyList.size());
         if (speakList.get(position - applyList.size()).getUser().getUserId().equals(routerListener.getCurrentVideoPlayingUserId())) {
             routerListener.playVideoClose(speakList.get(position - applyList.size()).getUser().getUserId());
         }

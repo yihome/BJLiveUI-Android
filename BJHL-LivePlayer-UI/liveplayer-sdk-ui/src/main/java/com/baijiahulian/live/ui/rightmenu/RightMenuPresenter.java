@@ -36,7 +36,7 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
     private Subscription subscriptionOfMediaControl, subscriptionOfActiveUser, subscriptionOfMedia,
             subscriptionOfSpeakApply, subscriptionOfAvatarSwitcher, subscriptionOfSpeakApplyCounter,
             subscriptionOfSpeakApplyResponse, subscriptionOfMediaClose, subscriptionOfMediaChanged,
-            subscriptionOfClassEnd;
+            subscriptionOfClassEnd, subscriptionOfUserOut;
     private int speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_NONE;
     private boolean isDrawing = false;
 
@@ -238,6 +238,18 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                             view.showSpeakQueueCount(liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getApplyList().size());
                         }
                     });
+            // 学生举着手退出教室 回调到拒绝举手
+            subscriptionOfSpeakApplyResponse = liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getObservableOfSpeakResponse()
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new LPErrorPrintSubscriber<IMediaControlModel>() {
+                        @Override
+                        public void call(IMediaControlModel iMediaControlModel) {
+                            if (!iMediaControlModel.isApplyAgreed()) {
+                                refreshSpeakQueueBtnStatus();
+                                view.showSpeakQueueCount(liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getApplyList().size());
+                            }
+                        }
+                    });
         } else {
             // 学生
             subscriptionOfMediaControl = liveRoomRouterListener.getLiveRoom().getSpeakQueueVM()
@@ -354,7 +366,7 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                             @Override
                             public void call(Long aLong) {
                                 List<IMediaModel> mediaModels = liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getSpeakQueueList();
-                                if(mediaModels.size() == 0) return;
+                                if (mediaModels.size() == 0) return;
                                 view.showSpeakQueueImage(mediaModels.get(aLong.intValue() % mediaModels.size()).getUser().getAvatar());
                             }
                         });

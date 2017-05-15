@@ -51,7 +51,7 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
     @Override
     public void changeVideo() {
         if (liveRoomRouterListener.getLiveRoom().getRecorder().isVideoAttached()) {
-            liveRoomRouterListener.detachVideo();
+            liveRoomRouterListener.detachLocalVideo();
             if (!liveRoomRouterListener.getLiveRoom().getRecorder().isAudioAttached()) {
                 liveRoomRouterListener.getLiveRoom().getRecorder().stopPublishing();
             }
@@ -59,7 +59,7 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
             if (!liveRoomRouterListener.getLiveRoom().getRecorder().isPublishing()) {
                 liveRoomRouterListener.getLiveRoom().getRecorder().publish();
             }
-            liveRoomRouterListener.attachVideo();
+            liveRoomRouterListener.attachLocalVideo();
         }
     }
 

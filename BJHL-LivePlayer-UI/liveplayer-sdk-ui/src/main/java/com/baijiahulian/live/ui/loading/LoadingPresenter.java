@@ -33,6 +33,7 @@ public class LoadingPresenter implements LoadingContract.Presenter {
             @Override
             public void onLaunchError(LPError lpError) {
                 LoadingPresenter.this.view.showLaunchError(lpError);
+                routerListener.showError(lpError);
             }
 
             @Override

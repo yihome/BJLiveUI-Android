@@ -166,10 +166,10 @@ public class SettingPresenter implements SettingContract.Presenter {
                     recorder.publish();
                 }
                 if (recorder.isVideoAttached()) {
-                    routerListener.detachVideo();
+                    routerListener.detachLocalVideo();
                     view.showCameraClosed();
                 } else {
-                    routerListener.attachVideo();
+                    routerListener.attachLocalVideo();
                     view.showCameraOpen();
                 }
                 break;
@@ -179,10 +179,10 @@ public class SettingPresenter implements SettingContract.Presenter {
                     return;
                 }
                 if (recorder.isVideoAttached()) {
-                    routerListener.detachVideo();
+                    routerListener.detachLocalVideo();
                     view.showCameraClosed();
                 } else {
-                    routerListener.attachVideo();
+                    routerListener.attachLocalVideo();
                     view.showCameraOpen();
                 }
                 break;
