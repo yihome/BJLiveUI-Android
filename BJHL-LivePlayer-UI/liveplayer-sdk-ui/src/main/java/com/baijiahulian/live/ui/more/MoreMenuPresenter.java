@@ -84,7 +84,7 @@ public class MoreMenuPresenter implements MoreMenuContract.Presenter {
     }
 
     @Override
-    public boolean isTeacherOrAssistant() {
-        return routerListener.isTeacherOrAssistant();
+    public boolean isTeacher() {
+        return routerListener.isCurrentUserTeacher();
     }
 }

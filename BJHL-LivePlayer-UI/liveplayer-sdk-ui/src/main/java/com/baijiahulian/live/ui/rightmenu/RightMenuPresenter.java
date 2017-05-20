@@ -8,7 +8,6 @@ import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.models.imodels.IMediaControlModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
-import com.baijiahulian.livecore.utils.LPRxUtils;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -51,6 +50,10 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
 
     @Override
     public void changeDrawing() {
+        if (!isDrawing && !liveRoomRouterListener.canStudentDraw()) {
+            view.showCantDraw();
+            return;
+        }
         liveRoomRouterListener.navigateToPPTDrawing();
         isDrawing = !isDrawing;
         view.showDrawingStatus(isDrawing);
@@ -64,12 +67,15 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
         }
     }
 
+    public int getSpeakApplyStatus(){
+        return speakApplyStatus;
+    }
+
     @Override
     public void speakApply() {
         checkNotNull(liveRoomRouterListener);
 
-        if (!liveRoomRouterListener.getLiveRoom().isClassStarted() ||
-                liveRoomRouterListener.getLiveRoom().getTeacherUser() == null) {
+        if (!liveRoomRouterListener.getLiveRoom().isClassStarted()) {
             view.showHandUpError();
             return;
         }
@@ -77,6 +83,7 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
         if (speakApplyStatus == RightMenuContract.STUDENT_SPEAK_APPLY_NONE) {
             liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().requestSpeakApply();
             speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_APPLYING;
+            view.showWaitingTeacherAgree();
             subscriptionOfSpeakApplyCounter = Observable.interval(0, 100, TimeUnit.MILLISECONDS)
                     .take(300)
                     .map(new Func1<Long, Long>() {
@@ -171,6 +178,11 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                         for (IMediaModel model : iMediaModels) {
                             if (model.getUser().getType() == LPConstants.LPUserType.Teacher) {
                                 liveRoomRouterListener.saveTeacherMediaStatus(model);
+                                // 自动打开老师视频
+                                if (!liveRoomRouterListener.isCurrentUserTeacher() && !liveRoomRouterListener.isVideoManipulated() && model.isVideoOn()) {
+                                    liveRoomRouterListener.playVideo(model.getUser().getUserId());
+                                    liveRoomRouterListener.setCurrentVideoUser(model);
+                                }
                                 break;
                             }
                         }
@@ -235,7 +247,7 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                         @Override
                         public void call(IMediaControlModel iMediaControlModel) {
                             refreshSpeakQueueBtnStatus();
-                            view.showSpeakQueueCount(liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getApplyList().size());
+//                            view.showSpeakQueueCount(liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getApplyList().size());
                         }
                     });
             // 学生举着手退出教室 回调到拒绝举手
@@ -244,10 +256,9 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                     .subscribe(new LPErrorPrintSubscriber<IMediaControlModel>() {
                         @Override
                         public void call(IMediaControlModel iMediaControlModel) {
-                            if (!iMediaControlModel.isApplyAgreed()) {
-                                refreshSpeakQueueBtnStatus();
-                                view.showSpeakQueueCount(liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getApplyList().size());
-                            }
+//                            int applySize = liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getApplyList().size();
+//                            view.showSpeakQueueCount(applySize);
+                            refreshSpeakQueueBtnStatus();
                         }
                     });
         } else {
@@ -354,24 +365,35 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
     }
 
     private void refreshSpeakQueueBtnStatus() {
+        if (liveRoomRouterListener.isTeacherOrAssistant() &&
+                liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getApplyList().size() > 0) {
+            RxUtils.unSubscribe(subscriptionOfAvatarSwitcher);
+            view.showSpeakQueueCount(liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getApplyList().size());
+            view.showSpeakQueueImage(liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getApplyList()
+                    .get(liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getApplyList().size() - 1).getAvatar());
+            return;
+        }else if(liveRoomRouterListener.isTeacherOrAssistant()){
+            view.showSpeakQueueCount(0);
+            return;
+        }
         if (liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getSpeakQueueList().size() > 0) {
-            if (liveRoomRouterListener.isTeacherOrAssistant() &&
-                    liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getApplyList().size() > 0) {
-                return;
-            }
             if (subscriptionOfAvatarSwitcher == null || subscriptionOfAvatarSwitcher.isUnsubscribed())
                 subscriptionOfAvatarSwitcher = Observable.interval(0, 5, TimeUnit.SECONDS)
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new LPErrorPrintSubscriber<Long>() {
                             @Override
                             public void call(Long aLong) {
+                                if (liveRoomRouterListener.getLiveRoom().getSpeakQueueVM() == null) {
+                                    view.showEmptyQueue();
+                                    return;
+                                }
                                 List<IMediaModel> mediaModels = liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getSpeakQueueList();
                                 if (mediaModels.size() == 0) return;
                                 view.showSpeakQueueImage(mediaModels.get(aLong.intValue() % mediaModels.size()).getUser().getAvatar());
                             }
                         });
         } else {
-            LPRxUtils.unSubscribe(subscriptionOfAvatarSwitcher);
+            RxUtils.unSubscribe(subscriptionOfAvatarSwitcher);
             view.showEmptyQueue();
         }
     }

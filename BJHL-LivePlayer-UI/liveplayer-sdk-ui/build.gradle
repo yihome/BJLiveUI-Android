@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'maven'
 
 android {
     compileSdkVersion 25
@@ -8,7 +9,6 @@ android {
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -19,10 +19,7 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
+
     compile 'com.android.support:appcompat-v7:25.3.0'
     testCompile 'junit:junit:4.12'
 
@@ -32,8 +29,8 @@ dependencies {
 
 //    compile 'com.afollestad.material-dialogs:commons:0.9.4.4'
 
-//    compile 'com.baijia.live:liveplayer-sdk-core:0.0.7'
-//    compile 'com.baijia.live:liveplayer-sdk-core-ppt:0.0.7'
+//    compile 'com.baijia.live:liveplayer-sdk-core:0.3.1-snapshot'
+//    compile 'com.baijia.live:liveplayer-sdk-core-ppt:0.3.1-snapshot'
     compile project(path: ":liveplayer-sdk-core")
     compile project(path: ":liveplayer-sdk-core-ppt")
 
@@ -43,4 +40,6 @@ android {
         abortOnError false
     }
 }
+
+//apply from: 'https://raw.github.com/baijia/gradle-mvn-push/master/gradle-mvn-push.gradle'
 

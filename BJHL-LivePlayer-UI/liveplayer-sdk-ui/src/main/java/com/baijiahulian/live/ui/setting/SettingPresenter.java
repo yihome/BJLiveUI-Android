@@ -1,6 +1,7 @@
 package com.baijiahulian.live.ui.setting;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
+import com.baijiahulian.live.ui.rightmenu.RightMenuContract;
 import com.baijiahulian.live.ui.utils.RxUtils;
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.context.LiveRoom;
@@ -139,7 +140,7 @@ public class SettingPresenter implements SettingContract.Presenter {
                 }
                 break;
             case Student:
-                if (!recorder.isPublishing()) {
+                if (routerListener.getSpeakApplyStatus() == RightMenuContract.STUDENT_SPEAK_APPLY_NONE) {
                     view.showStudentFail();
                     return;
                 }
@@ -174,7 +175,7 @@ public class SettingPresenter implements SettingContract.Presenter {
                 }
                 break;
             case Student:
-                if (!recorder.isPublishing()) {
+                if (routerListener.getSpeakApplyStatus() == RightMenuContract.STUDENT_SPEAK_APPLY_NONE) {
                     view.showStudentFail();
                     return;
                 }

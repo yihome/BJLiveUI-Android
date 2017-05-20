@@ -7,7 +7,7 @@ import com.baijiahulian.live.ui.base.BaseView;
  * Created by Shubo on 2017/2/15.
  */
 
-interface RightMenuContract {
+public interface RightMenuContract {
 
     int STUDENT_SPEAK_APPLY_NONE = 0;
     int STUDENT_SPEAK_APPLY_APPLYING = 1;
@@ -45,6 +45,10 @@ interface RightMenuContract {
         void showPPTDrawBtn();
 
         void showHandUpError();
+
+        void showCantDraw();
+
+        void showWaitingTeacherAgree();
     }
 
     interface Presenter extends BasePresenter {

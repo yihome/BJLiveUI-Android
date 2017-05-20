@@ -4,9 +4,10 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
+import android.view.SurfaceView;
 import android.view.View;
 
-import com.baijiahulian.avsdk.liveplayer.CameraGLTextureView;
+import com.baijiahulian.avsdk.liveplayer.CameraGLSurfaceView;
 import com.baijiahulian.live.ui.base.BaseFragment;
 
 /**
@@ -26,7 +27,8 @@ public class VideoRecorderFragment extends BaseFragment implements VideoRecorder
     @Override
     protected View getContentView() {
         if (view == null) {
-            view = new CameraGLTextureView(getActivity());
+            view = new CameraGLSurfaceView(getActivity());
+            ((SurfaceView)view).setZOrderMediaOverlay(true);
         }
         return view;
     }
@@ -34,7 +36,7 @@ public class VideoRecorderFragment extends BaseFragment implements VideoRecorder
     @Override
     public void init(Bundle savedInstanceState) {
         super.init(savedInstanceState);
-        presenter.getRecorder().setPreview((CameraGLTextureView) view);
+        presenter.getRecorder().setPreview((CameraGLSurfaceView) view);
 
         gestureDetector = new GestureDetector(getContext(), new MyGestureListener());
 
@@ -71,6 +73,18 @@ public class VideoRecorderFragment extends BaseFragment implements VideoRecorder
     public void setPresenter(VideoRecorderContract.Presenter presenter) {
         super.setBasePresenter(presenter);
         this.presenter = presenter;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        presenter.subscribe();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        presenter.unSubscribe();
     }
 
     @Override

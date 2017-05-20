@@ -2,21 +2,22 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/live_top_bar_gradient"
-    android:gravity="center_vertical">
+    android:background="@drawable/live_top_bar_gradient">
 
     <ImageView
         android:id="@+id/fragment_top_bar_back"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
         android:layout_marginLeft="@dimen/activity_live_room_margin"
+        android:padding="10dp"
         android:src="@drawable/live_ic_back" />
-
 
     <TextView
         android:id="@+id/fragment_top_bar_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
         android:layout_marginLeft="@dimen/activity_live_room_margin"
         android:layout_toRightOf="@+id/fragment_top_bar_back"
         android:maxWidth="160dp"
@@ -26,6 +27,7 @@
         android:id="@+id/fragment_top_bar_user_count_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
         android:layout_marginLeft="@dimen/activity_live_room_margin"
         android:layout_toRightOf="@+id/fragment_top_bar_title"
         android:gravity="center"
@@ -50,6 +52,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
         android:layout_marginRight="@dimen/activity_live_room_margin"
         android:src="@drawable/live_ic_nav_sharebold" />
 

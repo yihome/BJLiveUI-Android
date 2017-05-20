@@ -79,7 +79,8 @@ public class AnnouncementPresenter implements AnnouncementContract.Presenter {
     @Override
     public void saveAnnouncement(String text, String url) {
         if (!url.startsWith("http://") && !url.startsWith("https://")) {
-            url = "http://" + url;
+            if (!TextUtils.isEmpty(url))
+                url = "http://" + url;
         }
         routerListener.getLiveRoom().changeRoomAnnouncement(text, url);
     }

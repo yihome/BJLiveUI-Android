@@ -122,4 +122,9 @@
         android:id="@+id/activity_live_room_loading"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+    <FrameLayout
+        android:id="@+id/activity_live_room_error"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 </RelativeLayout>

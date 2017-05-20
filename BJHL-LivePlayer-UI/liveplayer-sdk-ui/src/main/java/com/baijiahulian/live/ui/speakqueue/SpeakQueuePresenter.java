@@ -41,6 +41,7 @@ public class SpeakQueuePresenter implements SpeakQueueContract.Presenter {
     public void subscribe() {
         speakList = routerListener.getLiveRoom().getSpeakQueueVM().getSpeakQueueList();
         applyList = routerListener.getLiveRoom().getSpeakQueueVM().getApplyList();
+        reorderSpeakList();
         subscriptionOfMediaNew = routerListener.getLiveRoom().getSpeakQueueVM().getObservableOfMediaNew()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new LPErrorPrintSubscriber<IMediaModel>() {
@@ -118,6 +119,16 @@ public class SpeakQueuePresenter implements SpeakQueueContract.Presenter {
         }
     }
 
+    private void reorderSpeakList() {
+        for (int i = 0; i < speakList.size(); i++) {
+            if (speakList.get(i).getUser().getType() == LPConstants.LPUserType.Teacher && i != 0) {
+                IMediaModel model = speakList.remove(i);
+                speakList.add(0, model);
+                return;
+            }
+        }
+    }
+
     @Override
     public void unSubscribe() {
         RxUtils.unSubscribe(subscriptionOfMediaNew);
@@ -150,28 +161,31 @@ public class SpeakQueuePresenter implements SpeakQueueContract.Presenter {
 
     @Override
     public void agreeSpeakApply(int position) {
-        if(position == -1) return;
+        if (position == -1) return;
         routerListener.getLiveRoom().getSpeakQueueVM().agreeSpeakApply(applyList.get(position).getUserId());
     }
 
     @Override
     public void disagreeSpeakApply(int position) {
-        if(position == -1) return;
+        if (position == -1) return;
         routerListener.getLiveRoom().getSpeakQueueVM().disagreeSpeakApply(applyList.get(position).getUserId());
     }
 
     @Override
     public void closeSpeaking(int position) {
-        if(position == -1) return;
-        LPLogger.e("position:"+position +" speakList:"+speakList.size() + " applyList:" +applyList.size());
+        if (position == -1) return;
+        LPLogger.e("position:" + position + " speakList:" + speakList.size() + " applyList:" + applyList.size());
         if (speakList.get(position - applyList.size()).getUser().getUserId().equals(routerListener.getCurrentVideoPlayingUserId())) {
             routerListener.playVideoClose(speakList.get(position - applyList.size()).getUser().getUserId());
+            if (!routerListener.isCurrentUserTeacher())
+                routerListener.setVideoManipulated(true);
         }
         routerListener.getLiveRoom().getSpeakQueueVM().closeOtherSpeak(speakList.get(position - applyList.size()).getUser().getUserId());
     }
 
     @Override
     public void openVideo(int position) {
+        if (position == -1) return;
         IMediaModel formerVideoUser = routerListener.getCurrentVideoUser();
         if (formerVideoUser != null) {
             closeVideo(applyList.size() + speakList.indexOf(formerVideoUser));
@@ -180,14 +194,21 @@ public class SpeakQueuePresenter implements SpeakQueueContract.Presenter {
         routerListener.playVideo(mediaModel.getUser().getUserId());
         routerListener.setCurrentVideoUser(mediaModel);
         view.notifyItemChanged(position);
+        // 操作过视频了，不自动打开老师视频
+        if (!routerListener.isCurrentUserTeacher())
+            routerListener.setVideoManipulated(true);
     }
 
     @Override
     public void closeVideo(int position) {
+        if (position == -1) return;
         String userId = speakList.get(position - applyList.size()).getUser().getUserId();
         routerListener.playVideoClose(userId);
         routerListener.getLiveRoom().getPlayer().playAudio(userId);
         view.notifyItemChanged(position);
+        // 操作过视频了，不自动打开老师视频
+        if (!routerListener.isCurrentUserTeacher())
+            routerListener.setVideoManipulated(true);
     }
 
     @Override

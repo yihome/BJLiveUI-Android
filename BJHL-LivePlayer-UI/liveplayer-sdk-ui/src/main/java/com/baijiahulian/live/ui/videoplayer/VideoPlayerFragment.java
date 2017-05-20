@@ -1,16 +1,17 @@
 package com.baijiahulian.live.ui.videoplayer;
 
+import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.MotionEvent;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import com.baijiahulian.avsdk.liveplayer.GLTextureView;
-import com.baijiahulian.avsdk.liveplayer.ViETextureViewRenderer;
+import com.baijiahulian.avsdk.liveplayer.ViESurfaceViewRenderer;
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseFragment;
 
@@ -42,8 +43,9 @@ public class VideoPlayerFragment extends BaseFragment implements VideoPlayerCont
         ViewGroup.LayoutParams flLp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         flContainer.setLayoutParams(flLp);
         //视频
-        View textureView = ViETextureViewRenderer.CreateRenderer(getActivity(), true);
-        flContainer.addView(textureView);
+        View videoView = ViESurfaceViewRenderer.CreateRenderer(getActivity(), true);
+        ((SurfaceView)videoView).setZOrderMediaOverlay(true);
+        flContainer.addView(videoView);
         //名字
         tvName = new TextView(getActivity());
         FrameLayout.LayoutParams tvLp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -62,7 +64,7 @@ public class VideoPlayerFragment extends BaseFragment implements VideoPlayerCont
     @Override
     public void init(Bundle savedInstanceState) {
         super.init(savedInstanceState);
-        presenter.getPlayer().setVideoView((GLTextureView) flContainer.getChildAt(0));
+        presenter.getPlayer().setVideoView((GLSurfaceView) flContainer.getChildAt(0));
         gestureDetector = new GestureDetector(getContext(), new MyGestureListener());
         view.setOnTouchListener(new View.OnTouchListener() {
             @Override

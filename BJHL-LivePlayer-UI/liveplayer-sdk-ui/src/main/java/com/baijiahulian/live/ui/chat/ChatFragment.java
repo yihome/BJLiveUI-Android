@@ -27,11 +27,15 @@ import com.baijiahulian.live.ui.utils.ChatImageUtil;
 import com.baijiahulian.live.ui.utils.DisplayUtils;
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.models.imodels.IMessageModel;
+import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
+
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
 
 /**
  * Created by Shubo on 2017/2/23.
@@ -69,8 +73,14 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
 
     @Override
     public void notifyDataChanged() {
-        adapter.notifyDataSetChanged();
-        recyclerView.smoothScrollToPosition(adapter.getItemCount());
+        Observable.just(1).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<Integer>() {
+                    @Override
+                    public void call(Integer integer) {
+                        adapter.notifyDataSetChanged();
+                        recyclerView.smoothScrollToPosition(adapter.getItemCount());
+                    }
+                });
 //        adapter.notifyItemInserted(adapter.getItemCount());
     }
 

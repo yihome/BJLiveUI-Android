@@ -117,4 +117,15 @@ public interface LiveRoomRouterListener {
     void doHandleErrorNothing();
 
     void showError(LPError error);
+
+    boolean canStudentDraw();
+
+    boolean isCurrentUserTeacher();
+
+    // 学生是否操作过老师视频
+    boolean isVideoManipulated();
+
+    void setVideoManipulated(boolean b);
+
+    int getSpeakApplyStatus();
 }

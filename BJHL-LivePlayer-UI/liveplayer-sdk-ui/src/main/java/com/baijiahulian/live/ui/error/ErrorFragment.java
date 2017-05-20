@@ -1,6 +1,7 @@
 package com.baijiahulian.live.ui.error;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 
 import com.baijiahulian.live.ui.R;
@@ -46,21 +47,31 @@ public class ErrorFragment extends BaseFragment {
         });
         $.id(R.id.fragment_error_title).text(getArguments().getString("title"));
         $.id(R.id.fragment_error_reason).text(getArguments().getString("content"));
-        $.id(R.id.fragment_error_suggestion).text(getString(R.string.live_retry_suggestion, routerListener.getLiveRoom().getTechSupportContactQQ().replace(",", "/")));
+        if (TextUtils.isEmpty(routerListener.getLiveRoom().getTechSupportContactQQ())) {
+            $.id(R.id.fragment_error_suggestion).gone();
+        } else {
+            $.id(R.id.fragment_error_suggestion).visible();
+            $.id(R.id.fragment_error_suggestion).text(getString(R.string.live_retry_suggestion, routerListener.getLiveRoom().getTechSupportContactQQ().replace(",", "/")));
+        }
         $.id(R.id.fragment_error_retry).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (routerListener != null) {
                     int handleWay = getArguments().getInt("handleWay");
                     if (handleWay == ERROR_HANDLE_RECONNECT) {
-                        routerListener.doReconnectServer();
+                        routerListener.doReEnterRoom();
                     } else if (handleWay == ERROR_HANDLE_REENTER) {
-                        routerListener.getLiveRoom().quitRoom();
                         routerListener.doReEnterRoom();
                     } else {
                         routerListener.doHandleErrorNothing();
                     }
                 }
+            }
+        });
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
             }
         });
     }

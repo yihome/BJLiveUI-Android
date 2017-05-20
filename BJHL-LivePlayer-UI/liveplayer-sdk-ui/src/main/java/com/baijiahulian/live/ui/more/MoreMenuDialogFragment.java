@@ -74,7 +74,7 @@ public class MoreMenuDialogFragment extends BaseDialogFragment implements MoreMe
             }
         });
 
-        if (presenter.isTeacherOrAssistant()) {
+        if (presenter.isTeacher()) {
             $.id(R.id.dialog_more_record).visible();
         } else {
             $.id(R.id.dialog_more_record).gone();

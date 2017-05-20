@@ -24,6 +24,6 @@ interface MoreMenuContract {
 
         void navigateToSetting();
 
-        boolean isTeacherOrAssistant();
+        boolean isTeacher();
     }
 }

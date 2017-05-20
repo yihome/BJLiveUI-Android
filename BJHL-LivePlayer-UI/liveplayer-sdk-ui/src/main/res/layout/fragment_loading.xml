@@ -8,7 +8,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/activity_live_room_margin"
-        android:layout_marginTop="@dimen/activity_live_room_margin"
+        android:padding="10dp"
+        android:layout_marginTop="2.5dp"
         android:src="@drawable/live_ic_back" />
 
     <LinearLayout

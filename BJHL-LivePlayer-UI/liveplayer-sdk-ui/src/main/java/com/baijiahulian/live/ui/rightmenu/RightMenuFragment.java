@@ -171,6 +171,16 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
     }
 
     @Override
+    public void showCantDraw() {
+        showToast(getString(R.string.live_cant_draw));
+    }
+
+    @Override
+    public void showWaitingTeacherAgree() {
+        showToast(getString(R.string.live_waiting_speak_apply_agree));
+    }
+
+    @Override
     public void setPresenter(RightMenuContract.Presenter presenter) {
         super.setBasePresenter(presenter);
         this.presenter = presenter;

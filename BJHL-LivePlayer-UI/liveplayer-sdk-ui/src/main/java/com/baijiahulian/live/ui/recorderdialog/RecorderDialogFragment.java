@@ -1,7 +1,6 @@
 package com.baijiahulian.live.ui.recorderdialog;
 
 import android.os.Bundle;
-import android.support.v4.view.GravityCompat;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;

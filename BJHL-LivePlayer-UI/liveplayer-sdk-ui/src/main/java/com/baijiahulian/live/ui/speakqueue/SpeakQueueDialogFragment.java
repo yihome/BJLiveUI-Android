@@ -105,6 +105,18 @@ public class SpeakQueueDialogFragment extends BaseDialogFragment implements Spea
         }
     }
 
+    private static long clickTime = 0;
+
+    private boolean clickable() {
+        if (System.currentTimeMillis() - clickTime > 1000) {
+            clickTime = System.currentTimeMillis();
+            return true;
+        } else {
+            clickTime = System.currentTimeMillis();
+            return false;
+        }
+    }
+
     private class SpeakQueueAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         private static final int VIEW_TYPE_APPLY = 0;
@@ -156,9 +168,15 @@ public class SpeakQueueDialogFragment extends BaseDialogFragment implements Spea
                 viewHolder.videoLabel.setVisibility(presenter.isCurrentVideoPlayingUser(position) ?
                         View.VISIBLE : View.INVISIBLE);
                 viewHolder.closeSpeak.setVisibility(presenter.isTeacherOrAssistant() ? View.VISIBLE : View.GONE);
+                if (mediaModel.getUser().getType() == LPConstants.LPUserType.Teacher) {
+                    viewHolder.closeSpeak.setVisibility(View.GONE);
+                }
                 viewHolder.closeSpeak.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        if(!clickable()) {
+                            return;
+                        }
                         presenter.closeSpeaking(holder.getAdapterPosition());
                     }
                 });
@@ -168,6 +186,9 @@ public class SpeakQueueDialogFragment extends BaseDialogFragment implements Spea
                 viewHolder.openVideo.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        if(!clickable()) {
+                            return;
+                        }
                         if (presenter.isCurrentVideoPlayingUser(holder.getAdapterPosition())) {
                             presenter.closeVideo(viewHolder.getAdapterPosition());
                         } else {
@@ -175,9 +196,9 @@ public class SpeakQueueDialogFragment extends BaseDialogFragment implements Spea
                         }
                     }
                 });
-                if(mediaModel.getUser().getType() == LPConstants.LPUserType.Teacher) {
+                if (mediaModel.getUser().getType() == LPConstants.LPUserType.Teacher) {
                     viewHolder.teacherTag.setVisibility(View.VISIBLE);
-                }else{
+                } else {
                     viewHolder.teacherTag.setVisibility(View.GONE);
                 }
             }

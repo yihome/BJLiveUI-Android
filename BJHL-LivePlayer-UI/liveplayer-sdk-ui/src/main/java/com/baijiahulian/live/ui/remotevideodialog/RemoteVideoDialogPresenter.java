@@ -51,13 +51,13 @@ public class RemoteVideoDialogPresenter implements RemoteVideoDialogContract.Pre
 
     @Override
     public void closeVideo() {
-        //TODO:关闭视频
+        if (!routerListener.isCurrentUserTeacher())
+            routerListener.setVideoManipulated(true);
         routerListener.playVideoClose(routerListener.getCurrentVideoUser().getUser().getUserId());
     }
 
     @Override
     public void closeSpeaking() {
-        //TODO:结束发言
         routerListener.playVideoClose(routerListener.getCurrentVideoUser().getUser().getUserId());
         routerListener.getLiveRoom().getSpeakQueueVM().closeOtherSpeak(routerListener.getCurrentVideoUser().getUser().getUserId());
     }

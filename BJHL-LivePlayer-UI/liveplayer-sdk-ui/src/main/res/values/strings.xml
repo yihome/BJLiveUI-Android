@@ -28,19 +28,19 @@
     <string name="live_setting_definition_low">流畅</string>
     <string name="live_setting_definition_high">高清</string>
     <string name="live_setting_link_type">线路选择：</string>
-    <string name="live_setting_link_type_up1">上传1</string>
-    <string name="live_setting_link_type_up2">上传2</string>
-    <string name="live_setting_link_type_down1">下载1</string>
-    <string name="live_setting_link_type_down2">下载2</string>
+    <string name="live_setting_link_type_up1">发送1</string>
+    <string name="live_setting_link_type_up2">发送2</string>
+    <string name="live_setting_link_type_down1">接收1</string>
+    <string name="live_setting_link_type_down2">接收2</string>
     <string name="live_setting_camera_switch">摄像头切换：</string>
     <string name="live_setting_camera_switch_front">前</string>
     <string name="live_setting_camera_switch_back">后</string>
     <string name="live_setting_camera_forbid_all">全体禁言</string>
     <string name="live_media_visitor_fail">游客不能举手发言</string>
     <string name="live_media_student_fail">请先举手发言，并等待老师同意</string>
-    <string name="live_loading_more">正在加载更多…</string>
-    <string name="live_media_speak_apply_agree">老师同意了您的发言</string>
-    <string name="live_media_speak_apply_disagree">老师拒绝了您的发言</string>
+    <string name="live_loading_more">正在加载…</string>
+    <string name="live_media_speak_apply_agree">老师同意了您的发言请求</string>
+    <string name="live_media_speak_apply_disagree">老师拒绝了您的发言请求</string>
     <string name="live_media_speak_closed_by_teacher">老师结束了您的发言</string>
     <string name="live_announcement">公告</string>
     <string name="live_cloud_record">录课</string>
@@ -50,14 +50,14 @@
     <string name="live_optional_input">选填</string>
     <string name="live_save">保存</string>
     <string name="live_uploading">上传中</string>
-    <string name="live_queueing">队列中</string>
+    <string name="live_queueing">等待添加</string>
     <string name="live_upload_fail">上传失败</string>
     <string name="live_ppt_empty">课件都不给，上课全靠嘴？</string>
     <string name="live_saved">已保存</string>
     <string name="live_upload_new_file">上传新文件</string>
     <string name="live_announcement_hint">输入公告内容</string>
     <string name="live_announcement_none">暂无公告</string>
-    <string name="live_announcement_url_hint">为公告添加网址</string>
+    <string name="live_announcement_url_hint">为公告添加链接</string>
     <string name="live_announcement_view_url_hint">点击公告可以跳转</string>
     <string name="live_recorder_title">采集视频</string>
     <string name="live_recorder_switch_camera">切换摄像头</string>
@@ -65,7 +65,7 @@
     <string name="live_recorder_pretty_filter_off">关闭美颜</string>
     <string name="live_recorder_camera_switch_off">关闭摄像头</string>
     <string name="live_ppt_manage">管理课件</string>
-    <string name="live_hand_up_error">课程未开始，举手发言失败</string>
+    <string name="live_hand_up_error">课程未开始，还不能举手</string>
     <string name="live_ppt_title">PPT</string>
     <string name="live_forbid_raise_hand">禁止举手</string>
     <string name="live_forbid_send_message">老师已禁止了发言</string>
@@ -77,5 +77,10 @@
     <string name="live_retry">刷新重试</string>
     <string name="live_retry_suggestion">可添加技术支持 QQ %1$s 获得帮助</string>
     <string name="live_image_save">保存图片</string>
+    <string name="live_cant_draw">您与老师不在同一页面，不能使用画笔模式</string>
+    <string name="live_not_support_beauty_filter">抱歉，系统版本低于4.3的手机暂不支持美颜功能</string>
+    <string name="live_override_error">哎呀出错了</string>
+    <string name="live_waiting_speak_apply_agree">正在举手发言，请等待老师同意</string>
 
 </resources>
+

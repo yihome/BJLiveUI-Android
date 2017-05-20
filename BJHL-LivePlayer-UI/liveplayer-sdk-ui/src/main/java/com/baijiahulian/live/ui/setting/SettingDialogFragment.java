@@ -1,5 +1,6 @@
 package com.baijiahulian.live.ui.setting;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
@@ -19,8 +20,7 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
     private SettingContract.Presenter presenter;
 
     public static SettingDialogFragment newInstance() {
-        SettingDialogFragment dialog = new SettingDialogFragment();
-        return dialog;
+        return new SettingDialogFragment();
     }
 
     @Override
@@ -47,7 +47,11 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
         $.id(R.id.dialog_setting_beauty_filter).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                presenter.changeBeautyFilter();
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                    showToast(getString(R.string.live_not_support_beauty_filter));
+                } else {
+                    presenter.changeBeautyFilter();
+                }
             }
         });
         $.id(R.id.dialog_setting_radio_ppt_fs).clicked(new View.OnClickListener() {

@@ -1,8 +1,6 @@
 package com.baijiahulian.live.ui.pptdialog;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
-import com.baijiahulian.livecore.context.LPConstants;
-import com.baijiahulian.livecore.context.LiveRoom;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
 
 /**
@@ -26,8 +24,7 @@ public class PPTDialogPresenter implements PPTDialogContract.Presenter {
 
     @Override
     public void subscribe() {
-        if (currentUser.getType() == LPConstants.LPUserType.Teacher
-                || currentUser.getType() == LPConstants.LPUserType.Assistant) {
+        if (routerListener.isTeacherOrAssistant()) {
             view.showManagePPT();
         } else {
             view.hideManagePPT();
@@ -53,6 +50,6 @@ public class PPTDialogPresenter implements PPTDialogContract.Presenter {
 
     @Override
     public void managePPT() {
-        //TODO:待开发
+        routerListener.navigateToPPTWareHouse();
     }
 }
