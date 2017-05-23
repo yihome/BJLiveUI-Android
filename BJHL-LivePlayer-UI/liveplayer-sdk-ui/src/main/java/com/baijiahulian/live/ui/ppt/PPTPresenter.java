@@ -17,7 +17,10 @@ public class PPTPresenter implements PPTContract.Presenter {
 
     @Override
     public void switchWithMaximum() {
-        routerListener.maximisePPTView();
+        if(routerListener.switchable()) {
+            routerListener.maximisePPTView();
+            routerListener.setSwitching();
+        }
     }
 
     @Override

@@ -81,7 +81,6 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
                         recyclerView.smoothScrollToPosition(adapter.getItemCount());
                     }
                 });
-//        adapter.notifyItemInserted(adapter.getItemCount());
     }
 
     @Override

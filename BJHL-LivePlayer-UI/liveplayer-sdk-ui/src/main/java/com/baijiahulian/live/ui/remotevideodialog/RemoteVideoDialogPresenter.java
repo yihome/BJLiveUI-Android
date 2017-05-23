@@ -46,14 +46,22 @@ public class RemoteVideoDialogPresenter implements RemoteVideoDialogContract.Pre
 
     @Override
     public void switchFullscreen() {
-        routerListener.maximisePlayerView();
+        if (routerListener.switchable()) {
+            routerListener.maximisePlayerView();
+            routerListener.setSwitching();
+        }
     }
 
     @Override
     public void closeVideo() {
         if (!routerListener.isCurrentUserTeacher())
             routerListener.setVideoManipulated(true);
-        routerListener.playVideoClose(routerListener.getCurrentVideoUser().getUser().getUserId());
+        boolean isAudioOn = routerListener.getCurrentVideoUser().isAudioOn();
+        String currentVideoUserId = routerListener.getCurrentVideoUser().getUser().getUserId();
+        routerListener.playVideoClose(currentVideoUserId);
+        if (isAudioOn) {
+            routerListener.getLiveRoom().getPlayer().playAudio(currentVideoUserId);
+        }
     }
 
     @Override

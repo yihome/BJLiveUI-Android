@@ -20,6 +20,8 @@
         android:layout_centerVertical="true"
         android:layout_marginLeft="@dimen/activity_live_room_margin"
         android:layout_toRightOf="@+id/fragment_top_bar_back"
+        android:lines="1"
+        android:ellipsize="end"
         android:maxWidth="160dp"
         android:textColor="@color/live_white" />
 

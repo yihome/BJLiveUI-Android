@@ -23,7 +23,7 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
         RotationObserver.OnRotationSettingChangedListener {
 
     private RightBottomMenuContract.Presenter presenter;
-    private Subscription subscriptionOfVideoClick, subscriptionOfAudioClick;
+    private Subscription subscriptionOfVideoClick, subscriptionOfAudioClick, subscriptionOfZoomClick, subscriptionOfMoreClick;
     private RotationObserver rotationObserver;
 
     @Override
@@ -55,22 +55,29 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
                     }
                 });
 
-        $.id(R.id.fragment_right_bottom_more).clicked(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int location[] = new int[2];
-                $.id(R.id.fragment_right_bottom_more).view().getLocationInWindow(location);
-                // TODO: 2017/5/16 status bar
-                presenter.more(location[0], location[1]);
-            }
-        });
+        subscriptionOfMoreClick = $.id(R.id.fragment_right_bottom_more).clicked()
+                .throttleFirst(1, TimeUnit.SECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<Void>() {
+                    @Override
+                    public void call(Void aVoid) {
+                        int location[] = new int[2];
+                        $.id(R.id.fragment_right_bottom_more).view().getLocationInWindow(location);
+                        // TODO: 2017/5/16 status bar
+                        presenter.more(location[0], location[1]);
+                    }
+                });
 
-        $.id(R.id.fragment_right_bottom_zoom).clicked(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                presenter.changeZoom();
-            }
-        });
+        subscriptionOfZoomClick = $.id(R.id.fragment_right_bottom_zoom)
+                .clicked()
+                .throttleFirst(1, TimeUnit.SECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<Void>() {
+                    @Override
+                    public void call(Void aVoid) {
+                        presenter.changeZoom();
+                    }
+                });
 
         rotationObserver = new RotationObserver(new Handler(), getActivity().getContentResolver());
         rotationObserver.startObserver();
@@ -87,10 +94,13 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
 
     @Override
     public void showAudioStatus(boolean isOn) {
-        if (isOn)
+        if (isOn) {
             $.id(R.id.fragment_right_bottom_audio).image(R.drawable.live_ic_stopaudio_1);
-        else
+            showToast(getString(R.string.live_mic_on));
+        } else {
             $.id(R.id.fragment_right_bottom_audio).image(R.drawable.live_ic_stopaudio);
+            showToast(getString(R.string.live_mic_off));
+        }
     }
 
     @Override
@@ -188,6 +198,8 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
         super.onDestroy();
         RxUtils.unSubscribe(subscriptionOfAudioClick);
         RxUtils.unSubscribe(subscriptionOfVideoClick);
+        RxUtils.unSubscribe(subscriptionOfMoreClick);
+        RxUtils.unSubscribe(subscriptionOfZoomClick);
         rotationObserver.stopObserver();
         presenter = null;
     }

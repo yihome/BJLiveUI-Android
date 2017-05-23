@@ -14,6 +14,14 @@ import android.widget.TextView;
 import com.baijiahulian.avsdk.liveplayer.ViESurfaceViewRenderer;
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseFragment;
+import com.baijiahulian.live.ui.utils.RxUtils;
+import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
+
+import java.util.concurrent.TimeUnit;
+
+import rx.Observable;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
 
 /**
  * Created by Shubo on 2017/3/4.
@@ -25,6 +33,7 @@ public class VideoPlayerFragment extends BaseFragment implements VideoPlayerCont
     private GestureDetector gestureDetector;
     private FrameLayout flContainer;
     private TextView tvName;
+    private Subscription subscriptionOfClickable;
 
     @Override
     public void setPresenter(VideoPlayerContract.Presenter presenter) {
@@ -44,7 +53,7 @@ public class VideoPlayerFragment extends BaseFragment implements VideoPlayerCont
         flContainer.setLayoutParams(flLp);
         //视频
         View videoView = ViESurfaceViewRenderer.CreateRenderer(getActivity(), true);
-        ((SurfaceView)videoView).setZOrderMediaOverlay(true);
+        ((SurfaceView) videoView).setZOrderMediaOverlay(true);
         flContainer.addView(videoView);
         //名字
         tvName = new TextView(getActivity());
@@ -90,7 +99,21 @@ public class VideoPlayerFragment extends BaseFragment implements VideoPlayerCont
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
             presenter.popUpRemoteVideoDialog();
+            view.setEnabled(false);
+            subscriptionOfClickable = Observable.timer(1, TimeUnit.SECONDS).observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new LPErrorPrintSubscriber<Long>() {
+                        @Override
+                        public void call(Long aLong) {
+                            view.setEnabled(true);
+                        }
+                    });
             return super.onSingleTapConfirmed(e);
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        RxUtils.unSubscribe(subscriptionOfClickable);
     }
 }

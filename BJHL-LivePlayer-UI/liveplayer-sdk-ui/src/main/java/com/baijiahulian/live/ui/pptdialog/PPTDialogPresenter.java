@@ -45,7 +45,10 @@ public class PPTDialogPresenter implements PPTDialogContract.Presenter {
 
     @Override
     public void switchFullscreen() {
-        routerListener.maximisePPTView();
+        if(routerListener.switchable()) {
+            routerListener.maximisePPTView();
+            routerListener.setSwitching();
+        }
     }
 
     @Override

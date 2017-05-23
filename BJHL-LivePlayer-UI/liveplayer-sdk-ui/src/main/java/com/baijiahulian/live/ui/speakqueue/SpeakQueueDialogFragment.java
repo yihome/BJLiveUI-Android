@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseDialogFragment;
 import com.baijiahulian.live.ui.utils.AliCloudImageUtil;
+import com.baijiahulian.live.ui.utils.CircleAvatarTransformation;
 import com.baijiahulian.live.ui.utils.QueryPlus;
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
@@ -145,7 +146,8 @@ public class SpeakQueueDialogFragment extends BaseDialogFragment implements Spea
                 IUserModel userModel = (IUserModel) presenter.getItem(position);
                 ApplyViewHolder viewHolder = (ApplyViewHolder) holder;
                 viewHolder.name.setText(userModel.getName());
-                Picasso.with(getContext()).load(AliCloudImageUtil.getRoundedAvatarUrl(userModel.getAvatar(), 32)).into(viewHolder.avatar);
+                Picasso.with(getContext()).load(AliCloudImageUtil.getRoundedAvatarUrl(userModel.getAvatar(), 32))
+                        .transform(new CircleAvatarTransformation()).into(viewHolder.avatar);
                 viewHolder.agree.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {

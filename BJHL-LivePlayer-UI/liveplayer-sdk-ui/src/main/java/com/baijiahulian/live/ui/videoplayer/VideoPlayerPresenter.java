@@ -25,7 +25,10 @@ public class VideoPlayerPresenter implements VideoPlayerContract.Presenter {
 
     @Override
     public void switchWithMaximum() {
-        routerListener.maximisePlayerView();
+        if (routerListener.switchable()) {
+            routerListener.maximisePlayerView();
+            routerListener.setSwitching();
+        }
     }
 
     @Override

@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseFragment;
 import com.baijiahulian.live.ui.utils.AliCloudImageUtil;
+import com.baijiahulian.live.ui.utils.CircleAvatarTransformation;
 import com.baijiahulian.live.ui.viewsupport.CountdownCircleView;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 import com.squareup.picasso.Picasso;
@@ -63,7 +64,7 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
     public void showSpeakQueueImage(String imgUrl) {
         $.id(R.id.fragment_right_speakers_img).visible();
         Picasso.with(getActivity()).load(AliCloudImageUtil.getRoundedAvatarUrl(imgUrl, 46))
-                .into((ImageView) $.id(R.id.fragment_right_speakers_img).view());
+                .transform(new CircleAvatarTransformation()).into((ImageView) $.id(R.id.fragment_right_speakers_img).view());
     }
 
     @Override

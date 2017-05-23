@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseDialogFragment;
 import com.baijiahulian.live.ui.utils.AliCloudImageUtil;
+import com.baijiahulian.live.ui.utils.CircleAvatarTransformation;
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
 import com.squareup.picasso.Picasso;
@@ -141,7 +142,7 @@ public class OnlineUserDialogFragment extends BaseDialogFragment implements Onli
                     userViewHolder.teacherTag.setVisibility(View.GONE);
                 }
                 Picasso.with(getActivity()).load(AliCloudImageUtil.getRoundedAvatarUrl(userModel.getAvatar(), 64))
-                        .into(userViewHolder.avatar);
+                        .transform(new CircleAvatarTransformation()).into(userViewHolder.avatar);
             } else if (holder instanceof LoadingViewHolder) {
                 LoadingViewHolder loadingViewHolder = (LoadingViewHolder) holder;
                 loadingViewHolder.progressBar.setIndeterminate(true);

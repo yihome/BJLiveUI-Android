@@ -9,6 +9,14 @@ import android.view.View;
 
 import com.baijiahulian.avsdk.liveplayer.CameraGLSurfaceView;
 import com.baijiahulian.live.ui.base.BaseFragment;
+import com.baijiahulian.live.ui.utils.RxUtils;
+import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
+
+import java.util.concurrent.TimeUnit;
+
+import rx.Observable;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
 
 /**
  * Created by Shubo on 2017/2/18.
@@ -18,6 +26,7 @@ public class VideoRecorderFragment extends BaseFragment implements VideoRecorder
 
     private VideoRecorderContract.Presenter presenter;
     private GestureDetector gestureDetector;
+    private Subscription subscriptionOfClickable;
 
     @Override
     public int getLayoutId() {
@@ -28,7 +37,7 @@ public class VideoRecorderFragment extends BaseFragment implements VideoRecorder
     protected View getContentView() {
         if (view == null) {
             view = new CameraGLSurfaceView(getActivity());
-            ((SurfaceView)view).setZOrderMediaOverlay(true);
+            ((SurfaceView) view).setZOrderMediaOverlay(true);
         }
         return view;
     }
@@ -59,6 +68,14 @@ public class VideoRecorderFragment extends BaseFragment implements VideoRecorder
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
             presenter.popUpRecorderDialog();
+            view.setEnabled(false);
+            subscriptionOfClickable = Observable.timer(1, TimeUnit.SECONDS).observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new LPErrorPrintSubscriber<Long>() {
+                        @Override
+                        public void call(Long aLong) {
+                            view.setEnabled(true);
+                        }
+                    });
             return super.onSingleTapConfirmed(e);
         }
     }
@@ -90,6 +107,7 @@ public class VideoRecorderFragment extends BaseFragment implements VideoRecorder
     @Override
     public void onDestroy() {
         super.onDestroy();
+        RxUtils.unSubscribe(subscriptionOfClickable);
         presenter = null;
     }
 }

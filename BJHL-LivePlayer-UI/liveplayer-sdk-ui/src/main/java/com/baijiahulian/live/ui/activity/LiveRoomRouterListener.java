@@ -128,4 +128,8 @@ public interface LiveRoomRouterListener {
     void setVideoManipulated(boolean b);
 
     int getSpeakApplyStatus();
+
+    boolean switchable();
+
+    void setSwitching();
 }

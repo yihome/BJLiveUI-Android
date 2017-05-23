@@ -143,10 +143,11 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private OrientationEventListener orientationEventListener; //处理屏幕旋转时本地录制视频的方向
     private int oldRotation;
 
-    private Subscription subscriptionOfLoginConflict;
+    private Subscription subscriptionOfLoginConflict, subscriptionOfSwitch;
     private IMediaModel currentRemoteMediaUser;
     private boolean isClearScreen;//是否已经清屏，作用于视频采集和远程视频ui的调整
     private String code, name;
+    private boolean isSwitchable = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -392,7 +393,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     public void showError(LPError error) {
         if (errorFragment != null && errorFragment.isAdded()) return;
         if (flError.getChildCount() >= 2) return;
-
+        if (loadingFragment != null && loadingFragment.isAdded()) {
+            removeFragment(loadingFragment);
+        }
         errorFragment = ErrorFragment.newInstance(getString(R.string.live_override_error), error.getMessage(), ErrorFragment.ERROR_HANDLE_REENTER);
         errorFragment.setRouterListener(this);
         flError.setVisibility(View.VISIBLE);
@@ -427,9 +430,32 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         return rightMenuPresenter.getSpeakApplyStatus();
     }
 
+    @Override
+    public boolean switchable() {
+        if (!isSwitchable) {
+            showMessage(getString(R.string.live_frequent_error));
+        }
+        return isSwitchable;
+    }
+
+    @Override
+    public void setSwitching() {
+        isSwitchable = false;
+        subscriptionOfSwitch = Observable.timer(2, TimeUnit.SECONDS).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<Long>() {
+                    @Override
+                    public void call(Long aLong) {
+                        isSwitchable = true;
+                    }
+                });
+    }
+
     private void showNetError(LPError error) {
         if (errorFragment != null && errorFragment.isAdded()) return;
         if (flError.getChildCount() >= 2) return;
+        if (loadingFragment != null && loadingFragment.isAdded()) {
+            removeFragment(loadingFragment);
+        }
         errorFragment = ErrorFragment.newInstance("好像断网了", error.getMessage(), ErrorFragment.ERROR_HANDLE_RECONNECT);
         errorFragment.setRouterListener(this);
         flError.setVisibility(View.VISIBLE);
@@ -453,10 +479,12 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         removeFragment(rightBottomMenuFragment);
         removeFragment(chatFragment);
 
+        currentRemoteMediaUser = null;
         if (loadingFragment != null && loadingFragment.isAdded())
             removeFragment(loadingFragment);
         if (playerFragment != null && playerFragment.isAdded()) {
             removeFragment(playerFragment);
+            playerFragment = null;
             playerPresenter = null;
         }
         if (recorderFragment != null && recorderFragment.isAdded()) {
@@ -464,13 +492,18 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
             recorderFragment = null;
         }
 
-        flForegroundLeft.setVisibility(View.GONE);
-        flForegroundRight.setVisibility(View.GONE);
+        flBackground.removeAllViews();
+        flForegroundLeft.removeAllViews();
+        flForegroundRight.removeAllViews();
 
         getSupportFragmentManager().executePendingTransactions();
 
+        flForegroundLeft.setVisibility(View.GONE);
+        flForegroundRight.setVisibility(View.GONE);
+
         liveRoom.quitRoom();
 
+        flLoading.setVisibility(View.VISIBLE);
         loadingFragment = new LoadingFragment();
         LoadingPresenter loadingPresenter = new LoadingPresenter(loadingFragment, code, name, false);
         bindVP(loadingFragment, loadingPresenter);
@@ -853,6 +886,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                 addFragment(R.id.activity_live_room_foreground_right_container, recorderFragment);
                 flForegroundRight.setVisibility(View.VISIBLE);
             }
+            showMessage(getString(R.string.live_camera_on));
         }
     }
 
@@ -881,6 +915,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
             maximisePPTView();
         }
         removeFragment(recorderFragment);
+        showMessage(getString(R.string.live_camera_off));
         if (Build.VERSION.SDK_INT < 24) {
             getSupportFragmentManager().executePendingTransactions();
         }
@@ -1066,7 +1101,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
             globalPresenter.destroy();
             globalPresenter = null;
         }
+
         RxUtils.unSubscribe(subscriptionOfLoginConflict);
+        RxUtils.unSubscribe(subscriptionOfSwitch);
 
         orientationEventListener = null;
 

@@ -20,7 +20,10 @@ public class VideoRecorderPresenter implements VideoRecorderContract.Presenter {
 
     @Override
     public void switchWithMaximum() {
-        routerListener.maximiseRecorderView();
+        if(routerListener.switchable()) {
+            routerListener.maximiseRecorderView();
+            routerListener.setSwitching();
+        }
     }
 
     @Override

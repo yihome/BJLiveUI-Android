@@ -47,11 +47,11 @@ public class ErrorFragment extends BaseFragment {
         });
         $.id(R.id.fragment_error_title).text(getArguments().getString("title"));
         $.id(R.id.fragment_error_reason).text(getArguments().getString("content"));
-        if (TextUtils.isEmpty(routerListener.getLiveRoom().getTechSupportContactQQ())) {
+        if (TextUtils.isEmpty(routerListener.getLiveRoom().getCustomerSupportDefaultExceptionMessage())) {
             $.id(R.id.fragment_error_suggestion).gone();
         } else {
             $.id(R.id.fragment_error_suggestion).visible();
-            $.id(R.id.fragment_error_suggestion).text(getString(R.string.live_retry_suggestion, routerListener.getLiveRoom().getTechSupportContactQQ().replace(",", "/")));
+            $.id(R.id.fragment_error_suggestion).text(routerListener.getLiveRoom().getCustomerSupportDefaultExceptionMessage());
         }
         $.id(R.id.fragment_error_retry).clicked(new View.OnClickListener() {
             @Override

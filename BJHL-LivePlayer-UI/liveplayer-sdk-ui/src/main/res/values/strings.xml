@@ -74,13 +74,18 @@
     <string name="live_image_loading">图片加载中…</string>
     <string name="live_image_uploading">上传中…</string>
     <string name="live_image_loading_fail">图片加载失败</string>
+    <string name="live_frequent_error">请勿频繁切换</string>
     <string name="live_retry">刷新重试</string>
     <string name="live_retry_suggestion">可添加技术支持 QQ %1$s 获得帮助</string>
     <string name="live_image_save">保存图片</string>
     <string name="live_cant_draw">您与老师不在同一页面，不能使用画笔模式</string>
     <string name="live_not_support_beauty_filter">抱歉，系统版本低于4.3的手机暂不支持美颜功能</string>
-    <string name="live_override_error">哎呀出错了</string>
     <string name="live_waiting_speak_apply_agree">正在举手发言，请等待老师同意</string>
+    <string name="live_camera_on">摄像头已打开</string>
+    <string name="live_camera_off">摄像头已关闭</string>
+    <string name="live_mic_on">麦克风已打开</string>
+    <string name="live_mic_off">麦克风已关闭</string>
+    <string name="live_override_error">哎呀出错了</string>
 
 </resources>
 

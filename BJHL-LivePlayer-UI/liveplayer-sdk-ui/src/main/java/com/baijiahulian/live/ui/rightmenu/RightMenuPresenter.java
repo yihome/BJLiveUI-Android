@@ -222,7 +222,13 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                         if (TextUtils.isEmpty(liveRoomRouterListener.getCurrentVideoPlayingUserId()))
                             return;
                         if (!iMediaModel.isVideoOn() && liveRoomRouterListener.getCurrentVideoPlayingUserId().equals(iMediaModel.getUser().getUserId())) {
-                            liveRoomRouterListener.playVideoClose(liveRoomRouterListener.getCurrentVideoUser().getUser().getUserId());
+//                            liveRoomRouterListener.playVideoClose(liveRoomRouterListener.getCurrentVideoUser().getUser().getUserId());
+                            boolean isAudioOn = liveRoomRouterListener.getCurrentVideoUser().isAudioOn();
+                            String currentVideoUserId = liveRoomRouterListener.getCurrentVideoUser().getUser().getUserId();
+                            liveRoomRouterListener.playVideoClose(currentVideoUserId);
+                            if (isAudioOn) {
+                                liveRoomRouterListener.getLiveRoom().getPlayer().playAudio(currentVideoUserId);
+                            }
                         }
                     }
                 });
@@ -374,7 +380,6 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
             return;
         }else if(liveRoomRouterListener.isTeacherOrAssistant()){
             view.showSpeakQueueCount(0);
-            return;
         }
         if (liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getSpeakQueueList().size() > 0) {
             if (subscriptionOfAvatarSwitcher == null || subscriptionOfAvatarSwitcher.isUnsubscribed())

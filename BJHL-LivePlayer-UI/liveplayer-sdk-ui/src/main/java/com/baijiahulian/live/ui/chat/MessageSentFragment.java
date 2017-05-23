@@ -101,11 +101,11 @@ public class MessageSentFragment extends BaseDialogFragment implements MessageSe
                 });
             }
         });
-//        if (presenter.isTeacherOrAssistant()) {
-//
-//        } else {
-//            $.id(R.id.dialog_message_send_pic).gone();
-//        }
+        if (presenter.isTeacherOrAssistant()) {
+            $.id(R.id.dialog_message_send_pic).visible();
+        } else {
+            $.id(R.id.dialog_message_send_pic).gone();
+        }
 
         $.id(R.id.dialog_message_emoji).clicked(new View.OnClickListener() {
             @Override

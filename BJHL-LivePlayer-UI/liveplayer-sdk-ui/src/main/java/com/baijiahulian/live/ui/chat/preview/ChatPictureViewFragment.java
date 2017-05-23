@@ -1,13 +1,8 @@
 package com.baijiahulian.live.ui.chat.preview;
 
-import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.view.WindowManager;
@@ -21,12 +16,9 @@ import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 
-import static android.R.attr.path;
+import static com.squareup.picasso.MemoryPolicy.NO_CACHE;
+import static com.squareup.picasso.MemoryPolicy.NO_STORE;
 
 /**
  * Created by Shubo on 2017/3/23.
@@ -62,6 +54,7 @@ public class ChatPictureViewFragment extends BaseDialogFragment implements ChatP
 //        btnSave = (Button) view.findViewById(R.id.lp_dialog_big_picture_save);
         Picasso.with(getContext())
                 .load(AliCloudImageUtil.getScreenScaledUrl(getContext(), url))
+                .memoryPolicy(NO_CACHE, NO_STORE)
                 .into(imageView, new Callback() {
                     @Override
                     public void onSuccess() {
