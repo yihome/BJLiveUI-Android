@@ -47,7 +47,53 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private class ShareModel extends LPShareModel {
+
+        @Override
+        public String getShareIconText() {
+            return null;
+        }
+
+        @Override
+        public int getShareIconRes() {
+            return 0;
+        }
+
+        @Override
+        public boolean hasCorner() {
+            return false;
+        }
+
+        @Override
+        public String getCornerText() {
+            return null;
+        }
+
+        @Override
+        public int getShareType() {
+            return 0;
+        }
+
+        public String getTitle() {
+            return null;
+        }
+
+        public String getContent() {
+            return null;
+        }
+
+        public String getUrl() {
+            return null;
+        }
+
+        public String getImageUrl() {
+            return null;
+        }
+    }
+
     private static void setupRoomListeners(Context context, LPConstants.LPUserType type) {
+        ArrayList<ShareModel> shareModels;
+
         LiveSDKWithUI.setShareListener(new LiveSDKWithUI.LPShareListener() {
 
             @Override
