@@ -2,7 +2,6 @@ package com.baijiahulian.live.ui.pptmanage;
 
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +17,7 @@ import com.baijiahulian.common.cropperv2.model.PhotoInfo;
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseDialogFragment;
 import com.baijiahulian.live.ui.utils.AliCloudImageUtil;
+import com.baijiahulian.live.ui.utils.LinearLayoutWrapManager;
 import com.baijiahulian.live.ui.utils.QueryPlus;
 import com.squareup.picasso.Picasso;
 
@@ -53,7 +53,7 @@ public class PPTManageFragment extends BaseDialogFragment implements PPTManageCo
         super.title(getString(R.string.live_ppt)).editable(true);
         $ = QueryPlus.with(contentView);
         RecyclerView recyclerView = (RecyclerView) $.id(R.id.dialog_ppt_manage_rv).view();
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setLayoutManager(new LinearLayoutWrapManager(getContext()));
         adapter = new DocumentAdapter();
         recyclerView.setAdapter(adapter);
 

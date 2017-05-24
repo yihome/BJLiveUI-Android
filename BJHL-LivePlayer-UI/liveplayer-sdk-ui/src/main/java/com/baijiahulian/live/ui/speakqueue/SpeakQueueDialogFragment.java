@@ -1,7 +1,6 @@
 package com.baijiahulian.live.ui.speakqueue;
 
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +13,7 @@ import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseDialogFragment;
 import com.baijiahulian.live.ui.utils.AliCloudImageUtil;
 import com.baijiahulian.live.ui.utils.CircleAvatarTransformation;
+import com.baijiahulian.live.ui.utils.LinearLayoutWrapManager;
 import com.baijiahulian.live.ui.utils.QueryPlus;
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
@@ -48,7 +48,7 @@ public class SpeakQueueDialogFragment extends BaseDialogFragment implements Spea
         RecyclerView recyclerView = (RecyclerView) $.id(R.id.dialog_speaker_rv).view();
         super.title(getString(R.string.live_speaker_dialog)).editable(false);
         adapter = new SpeakQueueAdapter();
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setLayoutManager(new LinearLayoutWrapManager(getContext()));
         recyclerView.setAdapter(adapter);
     }
 

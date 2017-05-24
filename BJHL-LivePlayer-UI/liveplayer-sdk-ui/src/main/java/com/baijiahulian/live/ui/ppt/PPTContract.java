@@ -17,5 +17,7 @@ interface PPTContract {
         void switchWithMaximum();
 
         void popUpPPTDialog();
+
+        void clearScreen();
     }
 }

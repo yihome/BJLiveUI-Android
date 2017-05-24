@@ -374,6 +374,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void showMessage(final String message) {
+        if(TextUtils.isEmpty(message)) return;
         Observable.just(1).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Object>() {
             @Override
             public void call(Object obj) {

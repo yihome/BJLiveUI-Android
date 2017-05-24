@@ -182,6 +182,11 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
     }
 
     @Override
+    public void showTeacherNotIn() {
+        showToast(getString(R.string.live_teacher_not_in));
+    }
+
+    @Override
     public void setPresenter(RightMenuContract.Presenter presenter) {
         super.setBasePresenter(presenter);
         this.presenter = presenter;

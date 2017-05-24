@@ -38,6 +38,7 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
             subscriptionOfClassEnd, subscriptionOfUserOut;
     private int speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_NONE;
     private boolean isDrawing = false;
+    private boolean isTeacherIn = false;
 
     public RightMenuPresenter(RightMenuContract.View view) {
         this.view = view;
@@ -67,7 +68,7 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
         }
     }
 
-    public int getSpeakApplyStatus(){
+    public int getSpeakApplyStatus() {
         return speakApplyStatus;
     }
 
@@ -167,6 +168,8 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
             @Override
             public void call(List<IMediaModel> iMediaModels) {
                 refreshSpeakQueueBtnStatus();
+                if (!isTeacherIn && !liveRoomRouterListener.isCurrentUserTeacher())
+                    view.showTeacherNotIn();
             }
         };
         final ConnectableObservable<List<IMediaModel>> observable = liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getObservableOfActiveUsers();
@@ -183,6 +186,7 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                                     liveRoomRouterListener.playVideo(model.getUser().getUserId());
                                     liveRoomRouterListener.setCurrentVideoUser(model);
                                 }
+                                isTeacherIn = true;
                                 break;
                             }
                         }
@@ -378,7 +382,7 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
             view.showSpeakQueueImage(liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getApplyList()
                     .get(liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getApplyList().size() - 1).getAvatar());
             return;
-        }else if(liveRoomRouterListener.isTeacherOrAssistant()){
+        } else if (liveRoomRouterListener.isTeacherOrAssistant()) {
             view.showSpeakQueueCount(0);
         }
         if (liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getSpeakQueueList().size() > 0) {

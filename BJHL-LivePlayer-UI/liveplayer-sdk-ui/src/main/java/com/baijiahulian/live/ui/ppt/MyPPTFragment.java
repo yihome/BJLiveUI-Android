@@ -25,6 +25,10 @@ public class MyPPTFragment extends LPPPTFragment implements PPTContract.View {
             @Override
             public void onSingleTap(LPWhiteBoardView whiteBoardView) {
                 presenter.popUpPPTDialog();
+//                if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+//                    presenter.clearScreen();
+//                }
+
             }
         });
         super.setOnDoubleTapListener(new LPWhiteBoardView.OnDoubleTapListener() {

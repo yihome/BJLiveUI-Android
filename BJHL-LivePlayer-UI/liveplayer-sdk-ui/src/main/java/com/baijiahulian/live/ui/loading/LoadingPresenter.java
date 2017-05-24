@@ -27,13 +27,15 @@ public class LoadingPresenter implements LoadingContract.Presenter {
         launchListener = new LPLaunchListener() {
             @Override
             public void onLaunchSteps(int i, int i1) {
-                LoadingPresenter.this.view.showLoadingSteps(i, i1);
+                if (LoadingPresenter.this.view != null)
+                    LoadingPresenter.this.view.showLoadingSteps(i, i1);
             }
 
             @Override
             public void onLaunchError(LPError lpError) {
-                LoadingPresenter.this.view.showLaunchError(lpError);
-                routerListener.showError(lpError);
+                // 如果出错显示ErrorFragment，LoadingFragment被移除了 routerListener为空了
+                if (routerListener != null)
+                    routerListener.showError(lpError);
             }
 
             @Override
@@ -80,8 +82,8 @@ public class LoadingPresenter implements LoadingContract.Presenter {
 
     @Override
     public void subscribe() {
-        if(isReconnecting){
-            LPSDKTaskQueue queue =routerListener.getLiveRoom().createReconnectTaskQueue(launchListener);
+        if (isReconnecting) {
+            LPSDKTaskQueue queue = routerListener.getLiveRoom().createReconnectTaskQueue(launchListener);
             queue.start();
         }
     }

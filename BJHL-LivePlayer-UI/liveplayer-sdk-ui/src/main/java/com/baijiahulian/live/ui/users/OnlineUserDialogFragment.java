@@ -14,6 +14,7 @@ import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseDialogFragment;
 import com.baijiahulian.live.ui.utils.AliCloudImageUtil;
 import com.baijiahulian.live.ui.utils.CircleAvatarTransformation;
+import com.baijiahulian.live.ui.utils.LinearLayoutWrapManager;
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
 import com.squareup.picasso.Picasso;
@@ -63,7 +64,7 @@ public class OnlineUserDialogFragment extends BaseDialogFragment implements Onli
     protected void init(Bundle savedInstanceState, Bundle arguments) {
         super.editable(false);
         recyclerView = (RecyclerView) contentView.findViewById(R.id.dialog_online_user_recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView.setLayoutManager(new LinearLayoutWrapManager(getActivity()));
         adapter = new OnlineUserAdapter();
         recyclerView.setAdapter(adapter);
     }

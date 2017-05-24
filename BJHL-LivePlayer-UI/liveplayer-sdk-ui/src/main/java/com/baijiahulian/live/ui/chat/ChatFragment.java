@@ -25,6 +25,7 @@ import com.baijiahulian.live.ui.base.BaseFragment;
 import com.baijiahulian.live.ui.utils.AliCloudImageUtil;
 import com.baijiahulian.live.ui.utils.ChatImageUtil;
 import com.baijiahulian.live.ui.utils.DisplayUtils;
+import com.baijiahulian.live.ui.utils.LinearLayoutWrapManager;
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.models.imodels.IMessageModel;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
@@ -62,7 +63,7 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
         emojiSize = (int) (DisplayUtils.getScreenDensity(getContext()) * 32);
 
         adapter = new MessageAdapter();
-        mLayoutManager = new LinearLayoutManager(getContext());
+        mLayoutManager = new LinearLayoutWrapManager(getContext());
         mLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
 //        mLayoutManager.setStackFromEnd(true);
 

@@ -25,7 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baijiahulian.live.ui.R;
-import com.baijiahulian.live.ui.utils.Query;
+import com.baijiahulian.live.ui.utils.QueryPlus;
 import com.baijiahulian.livecore.utils.DisplayUtils;
 
 import static com.baijiahulian.live.ui.R.id.dialog_base_title_container;
@@ -40,7 +40,7 @@ public abstract class BaseDialogFragment extends DialogFragment {
     private BasePresenter basePresenter;
     protected View contentView;
     private boolean isEditing;
-    private Query $;
+    private QueryPlus $;
     private int contentBackgroundColor = -1;
 
     @Nullable
@@ -48,7 +48,7 @@ public abstract class BaseDialogFragment extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View baseView = inflater.inflate(R.layout.dialog_base, container);
         contentView = inflater.inflate(getLayoutId(), null);
-        $ = Query.with(baseView);
+        $ = QueryPlus.with(baseView);
         ((FrameLayout) $.id(R.id.dialog_base_content).view()).addView(contentView);
         init(savedInstanceState, getArguments());
         if (basePresenter != null)
@@ -59,8 +59,9 @@ public abstract class BaseDialogFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        Dialog dialog = new Dialog(getActivity(), getTheme());
+        Dialog dialog = new Dialog(getActivity(), R.style.LiveBaseDialogFragment);
         checkNotNull(dialog.getWindow());
+        dialog.setCanceledOnTouchOutside(true);
         dialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         dialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {

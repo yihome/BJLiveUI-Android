@@ -10,6 +10,7 @@ public class PPTPresenter implements PPTContract.Presenter {
 
     private PPTContract.View view;
     private LiveRoomRouterListener routerListener;
+    private boolean isScreenCleared = false;
 
     public PPTPresenter(PPTContract.View view) {
         this.view = view;
@@ -26,6 +27,13 @@ public class PPTPresenter implements PPTContract.Presenter {
     @Override
     public void popUpPPTDialog() {
         routerListener.showPPTDialogFragment();
+    }
+
+    @Override
+    public void clearScreen() {
+        isScreenCleared = !isScreenCleared;
+        if (isScreenCleared) routerListener.clearScreen();
+        else routerListener.unClearScreen();
     }
 
     @Override

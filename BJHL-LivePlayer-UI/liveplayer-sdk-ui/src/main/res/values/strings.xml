@@ -86,6 +86,7 @@
     <string name="live_mic_on">麦克风已打开</string>
     <string name="live_mic_off">麦克风已关闭</string>
     <string name="live_override_error">哎呀出错了</string>
+    <string name="live_teacher_not_in">老师未在教室</string>
 
 </resources>
 

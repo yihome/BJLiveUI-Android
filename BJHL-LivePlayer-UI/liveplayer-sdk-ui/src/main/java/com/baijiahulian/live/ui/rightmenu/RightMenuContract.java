@@ -49,6 +49,8 @@ public interface RightMenuContract {
         void showCantDraw();
 
         void showWaitingTeacherAgree();
+
+        void showTeacherNotIn();
     }
 
     interface Presenter extends BasePresenter {
