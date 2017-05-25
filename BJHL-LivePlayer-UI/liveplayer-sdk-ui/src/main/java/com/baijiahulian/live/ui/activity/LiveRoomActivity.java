@@ -459,6 +459,65 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                 });
     }
 
+    @Override
+    public void showMessageClassEnd() {
+        showMessage(getString(R.string.live_message_le, getString(R.string.lp_override_class_end)));
+    }
+
+    @Override
+    public void showMessageClassStart() {
+        showMessage(getString(R.string.live_message_le, getString(R.string.lp_override_class_start)));
+    }
+
+    @Override
+    public void showMessageForbidAllChat(boolean isOn) {
+        if (isTeacherOrAssistant()) {
+            showMessage((isOn ? "打开" : "关闭") + "全体禁言成功");
+        } else {
+            showMessage(getString(R.string.lp_override_class_start) + (isOn ? "打开了" : "关闭了") + "全体禁言");
+        }
+    }
+
+    @Override
+    public void showMessageTeacherOpenAudio() {
+        showMessage(getString(R.string.lp_override_role_teacher) + "打开了音频");
+    }
+
+    @Override
+    public void showMessageTeacherOpenVideo() {
+        showMessage(getString(R.string.lp_override_role_teacher) + "打开了视频");
+    }
+
+    @Override
+    public void showMessageTeacherOpenAV() {
+        showMessage(getString(R.string.lp_override_role_teacher) + "打开了音视频");
+    }
+
+    @Override
+    public void showMessageTeacherCloseAV() {
+        showMessage(getString(R.string.lp_override_role_teacher) + "关闭了音视频");
+    }
+
+    @Override
+    public void showMessageTeacherCloseAudio() {
+        showMessage(getString(R.string.lp_override_role_teacher) + "关闭了音频");
+    }
+
+    @Override
+    public void showMessageTeacherCloseVideo() {
+        showMessage(getString(R.string.lp_override_role_teacher) + "关闭了视频");
+    }
+
+    @Override
+    public void showMessageTeacherEnterRoom() {
+        showMessage(getString(R.string.lp_override_role_teacher) + "进入了" + getString(R.string.lp_override_classroom));
+    }
+
+    @Override
+    public void showMessageTeacherExitRoom() {
+        showMessage(getString(R.string.lp_override_role_teacher) + "离开了" + getString(R.string.lp_override_classroom));
+    }
+
     private void showNetError(LPError error) {
         if (errorFragment != null && errorFragment.isAdded()) return;
         if (flError.getChildCount() >= 2) return;
@@ -959,7 +1018,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         showDialogFragment(pptFragment);
     }
 
-    public boolean isPPTMax(){
+    public boolean isPPTMax() {
         return flBackground.getChildAt(0) == lppptFragment.getView();
     }
 

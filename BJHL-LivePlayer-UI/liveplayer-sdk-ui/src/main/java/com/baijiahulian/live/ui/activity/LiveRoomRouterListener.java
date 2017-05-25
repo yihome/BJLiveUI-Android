@@ -134,4 +134,28 @@ public interface LiveRoomRouterListener {
     boolean switchable();
 
     void setSwitching();
+
+    void showMessageClassEnd();
+
+    void showMessageClassStart();
+
+    void showMessageForbidAllChat(boolean isOn);
+
+    void showMessageTeacherOpenAudio();
+
+    void showMessageTeacherOpenVideo();
+
+    void showMessageTeacherOpenAV();
+
+    void showMessageTeacherCloseAV();
+
+    void showMessageTeacherCloseAudio();
+
+    void showMessageTeacherCloseVideo();
+
+    void showMessageTeacherEnterRoom();
+
+    void showMessageTeacherExitRoom();
+
+
 }

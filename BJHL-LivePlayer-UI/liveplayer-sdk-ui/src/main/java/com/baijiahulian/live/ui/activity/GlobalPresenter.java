@@ -44,7 +44,7 @@ public class GlobalPresenter implements BasePresenter {
                 .subscribe(new LPErrorPrintSubscriber<Void>() {
                     @Override
                     public void call(Void aVoid) {
-                        routerListener.showMessage("上课了");
+                        routerListener.showMessageClassStart();
                     }
                 });
         subscriptionOfClassEnd = routerListener.getLiveRoom().getObservableOfClassEnd()
@@ -52,7 +52,7 @@ public class GlobalPresenter implements BasePresenter {
                 .subscribe(new LPErrorPrintSubscriber<Void>() {
                     @Override
                     public void call(Void aVoid) {
-                        routerListener.showMessage("下课了");
+                        routerListener.showMessageClassEnd();
                         teacherVideoOn = false;
                         teacherAudioOn = false;
                     }
@@ -70,11 +70,7 @@ public class GlobalPresenter implements BasePresenter {
                         }
                         if(isForbidChatChanged == aBoolean) return;
                         isForbidChatChanged = aBoolean;
-                        if (routerListener.isTeacherOrAssistant()) {
-                            routerListener.showMessage((aBoolean ? "打开" : "关闭") + "全体禁言成功");
-                        } else {
-                            routerListener.showMessage("老师" + (aBoolean ? "打开了" : "关闭了") + "全体禁言");
-                        }
+                        routerListener.showMessageForbidAllChat(aBoolean);
                     }
                 });
 
@@ -99,7 +95,7 @@ public class GlobalPresenter implements BasePresenter {
                             }
                             if (iMediaModel.isVideoOn() && iMediaModel.isAudioOn()) {
                                 if (!teacherVideoOn || !teacherAudioOn) {
-                                    routerListener.showMessage("老师打开了音视频");
+                                    routerListener.showMessageTeacherOpenAV();
                                     if (!isVideoManipulated && routerListener.getCurrentVideoUser() == null) {
                                         routerListener.playVideo(iMediaModel.getUser().getUserId());
                                         routerListener.setCurrentVideoUser(iMediaModel);
@@ -107,9 +103,9 @@ public class GlobalPresenter implements BasePresenter {
                                 }
                             } else if (iMediaModel.isVideoOn()) {
                                 if (teacherAudioOn && teacherVideoOn) {
-                                    routerListener.showMessage("老师关闭了音频");
+                                    routerListener.showMessageTeacherCloseAudio();
                                 } else if (!teacherVideoOn) {
-                                    routerListener.showMessage("老师打开了视频");
+                                    routerListener.showMessageTeacherOpenVideo();
                                     if (!isVideoManipulated && routerListener.getCurrentVideoUser() == null) {
                                         routerListener.playVideo(iMediaModel.getUser().getUserId());
                                         routerListener.setCurrentVideoUser(iMediaModel);
@@ -117,12 +113,12 @@ public class GlobalPresenter implements BasePresenter {
                                 }
                             } else if (iMediaModel.isAudioOn()) {
                                 if (teacherAudioOn && teacherVideoOn) {
-                                    routerListener.showMessage("老师关闭了视频");
+                                    routerListener.showMessageTeacherCloseVideo();
                                 } else if (!teacherAudioOn) {
-                                    routerListener.showMessage("老师打开了音频");
+                                    routerListener.showMessageTeacherOpenAudio();
                                 }
                             } else {
-                                routerListener.showMessage("老师关闭了音视频");
+                                routerListener.showMessageTeacherCloseAV();
                             }
                             setTeacherMedia(iMediaModel);
                         }
@@ -133,7 +129,7 @@ public class GlobalPresenter implements BasePresenter {
                         @Override
                         public void call(IUserInModel iUserInModel) {
                             if (iUserInModel.getUser().getType() == LPConstants.LPUserType.Teacher) {
-                                routerListener.showMessage("老师进入了教室");
+                                routerListener.showMessageTeacherEnterRoom();
                             }
                         }
                     });
@@ -145,7 +141,7 @@ public class GlobalPresenter implements BasePresenter {
                             if(TextUtils.isEmpty(s)) return;
                             if(routerListener.getLiveRoom().getTeacherUser() == null) return;
                             if (s.equals(routerListener.getLiveRoom().getTeacherUser().getUserId())) {
-                                routerListener.showMessage("老师离开了教室");
+                                routerListener.showMessageTeacherExitRoom();
                             }
                         }
                     });
