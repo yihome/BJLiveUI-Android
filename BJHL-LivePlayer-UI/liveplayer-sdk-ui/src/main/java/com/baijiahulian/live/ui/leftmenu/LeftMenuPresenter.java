@@ -18,10 +18,10 @@ public class LeftMenuPresenter implements LeftMenuContract.Presenter {
 
     @Override
     public void clearScreen() {
-        isScreenCleared = !isScreenCleared;
-        view.notifyClearScreenChanged(isScreenCleared);
-        if (isScreenCleared) routerListener.clearScreen();
-        else routerListener.unClearScreen();
+//        isScreenCleared = !isScreenCleared;
+//        view.notifyClearScreenChanged(isScreenCleared);
+//        if (isScreenCleared) routerListener.clearScreen();
+//        else routerListener.unClearScreen();
     }
 
     @Override

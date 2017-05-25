@@ -13,6 +13,8 @@ interface MoreMenuContract {
         void showCloudRecordOn();
 
         void showCloudRecordOff();
+
+        void showCloudRecordNotAllowed(String reason);
     }
 
     interface Presenter extends BasePresenter {

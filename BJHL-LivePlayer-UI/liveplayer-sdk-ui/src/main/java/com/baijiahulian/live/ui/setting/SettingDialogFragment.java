@@ -9,6 +9,15 @@ import android.widget.Button;
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseDialogFragment;
 import com.baijiahulian.live.ui.utils.QueryPlus;
+import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import rx.Observable;
+import rx.Subscription;
 
 /**
  * Created by Shubo on 2017/3/2.
@@ -69,51 +78,59 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
         $.id(R.id.dialog_setting_radio_definition_low).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                presenter.setDefinitionLow();
+                if (checkClickable(getString(R.string.live_frequent_error_resolution)))
+                    presenter.setDefinitionLow();
             }
         });
         $.id(R.id.dialog_setting_radio_definition_high).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                presenter.setDefinitionHigh();
+                if (checkClickable(getString(R.string.live_frequent_error_resolution)))
+                    presenter.setDefinitionHigh();
             }
         });
         $.id(R.id.dialog_setting_radio_link_up_1).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                presenter.setUpLinkTCP();
+                if (checkClickable(getString(R.string.live_frequent_error_line)))
+                    presenter.setUpLinkTCP();
             }
         });
         $.id(R.id.dialog_setting_radio_link_up_2).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                presenter.setUpLinkUDP();
+                if (checkClickable(getString(R.string.live_frequent_error_line)))
+                    presenter.setUpLinkUDP();
             }
         });
         $.id(R.id.dialog_setting_radio_link_down_1).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                presenter.setDownLinkTCP();
+                if (checkClickable(getString(R.string.live_frequent_error_line)))
+                    presenter.setDownLinkTCP();
             }
         });
         $.id(R.id.dialog_setting_radio_link_down_2).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                presenter.setDownLinkUDP();
+                if (checkClickable(getString(R.string.live_frequent_error_line)))
+                    presenter.setDownLinkUDP();
             }
         });
 
         $.id(R.id.dialog_setting_radio_camera_front).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                presenter.switchCamera();
+                if (checkClickable(getString(R.string.live_frequent_error_camera)))
+                    presenter.switchCamera();
             }
         });
 
         $.id(R.id.dialog_setting_radio_camera_back).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                presenter.switchCamera();
+                if (checkClickable(getString(R.string.live_frequent_error_camera)))
+                    presenter.switchCamera();
             }
         });
 
@@ -275,6 +292,28 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
     public void setPresenter(SettingContract.Presenter presenter) {
         super.setBasePresenter(presenter);
         this.presenter = presenter;
+    }
+
+    private Map<String, AtomicBoolean> clickableWithKey = new ConcurrentHashMap<>();
+
+    private boolean checkClickable(String error) {
+        if (!clickableWithKey.containsKey(error)) {
+            clickableWithKey.put(error, new AtomicBoolean(true));
+        }
+        final AtomicBoolean clickable = clickableWithKey.get(error);
+        if (clickable.get()) {
+            clickable.set(false);
+            Observable.timer(2, TimeUnit.SECONDS).subscribe(new LPErrorPrintSubscriber<Long>() {
+                @Override
+                public void call(Long aLong) {
+                    clickable.set(true);
+                }
+            });
+            return true;
+        } else {
+            showToast(error);
+            return false;
+        }
     }
 
     @Override

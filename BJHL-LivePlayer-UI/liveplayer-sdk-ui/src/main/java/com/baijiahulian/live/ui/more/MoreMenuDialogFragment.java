@@ -124,6 +124,11 @@ public class MoreMenuDialogFragment extends BaseDialogFragment implements MoreMe
     }
 
     @Override
+    public void showCloudRecordNotAllowed(String reason) {
+        showToast(reason);
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         presenter = null;

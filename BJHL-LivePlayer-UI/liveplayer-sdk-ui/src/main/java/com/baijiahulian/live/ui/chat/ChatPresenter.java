@@ -144,7 +144,8 @@ public class ChatPresenter implements ChatContract.Presenter {
                 try {
                     shortResult = LPJsonUtils.parseString(bjResponse.getResponse().body().string(), LPShortResult.class);
                     LPUploadDocModel uploadModel = LPJsonUtils.parseJsonObject((JsonObject) shortResult.data, LPUploadDocModel.class);
-                    routerListener.getLiveRoom().getChatVM().sendMessage(LPChatMessageParser.toImageMessage(uploadModel.url));
+                    String imageContent = LPChatMessageParser.toImageMessage(uploadModel.url);
+                    routerListener.getLiveRoom().getChatVM().sendImageMessage(imageContent, uploadModel.width, uploadModel.height);
                     imageMessageUploadingQueue.poll();
 //                    view.notifyItemChange(getCount() - imageMessageUploadingQueue.size());
 //                    view.notifyDataChanged();

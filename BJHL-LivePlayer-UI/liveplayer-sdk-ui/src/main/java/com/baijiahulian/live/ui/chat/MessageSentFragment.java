@@ -159,7 +159,7 @@ public class MessageSentFragment extends BaseDialogFragment implements MessageSe
                     emojiFragment.setCallBack(new EmojiSelectCallBack() {
                         @Override
                         public void onEmojiSelected(IExpressionModel emoji) {
-                            presenter.sendMessage("[" + emoji.getKey() + "]");
+                            presenter.sendEmoji("[" + emoji.getKey() + "]");
                         }
                     });
                     FragmentTransaction transaction = getChildFragmentManager().beginTransaction();

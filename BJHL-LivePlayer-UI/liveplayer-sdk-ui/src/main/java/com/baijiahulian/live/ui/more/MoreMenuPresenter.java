@@ -2,6 +2,7 @@ package com.baijiahulian.live.ui.more;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 import com.baijiahulian.live.ui.utils.RxUtils;
+import com.baijiahulian.livecore.models.LPCheckRecordStatusModel;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 
 import rx.Subscription;
@@ -15,7 +16,7 @@ public class MoreMenuPresenter implements MoreMenuContract.Presenter {
 
     private MoreMenuContract.View view;
     private LiveRoomRouterListener routerListener;
-    private Subscription subscriptionOfCloudRecord;
+    private Subscription subscriptionOfCloudRecord, subscriptionOfIsCloudRecordAllowed;
     private boolean recordStatus;
 
     public MoreMenuPresenter(MoreMenuContract.View view) {
@@ -46,7 +47,6 @@ public class MoreMenuPresenter implements MoreMenuContract.Presenter {
             view.showCloudRecordOn();
         else
             view.showCloudRecordOff();
-
     }
 
     @Override
@@ -67,10 +67,27 @@ public class MoreMenuPresenter implements MoreMenuContract.Presenter {
 
     @Override
     public void switchCloudRecord() {
-        //ui
-        routerListener.navigateToCloudRecord(!recordStatus);
-        //logic
-        routerListener.getLiveRoom().requestCloudRecord(!recordStatus);
+        if (!recordStatus) {
+            subscriptionOfIsCloudRecordAllowed = routerListener.getLiveRoom().requestIsCloudRecordAllowed()
+                    .subscribe(new LPErrorPrintSubscriber<LPCheckRecordStatusModel>() {
+                        @Override
+                        public void call(LPCheckRecordStatusModel lpCheckRecordStatusModel) {
+                            if (lpCheckRecordStatusModel.recordStatus == 1) {
+                                routerListener.navigateToCloudRecord(true);
+                                routerListener.getLiveRoom().requestCloudRecord(true);
+                            } else {
+                                if (view != null)
+                                    view.showCloudRecordNotAllowed(lpCheckRecordStatusModel.reason);
+                            }
+                        }
+                    });
+        } else {
+            //ui
+            routerListener.navigateToCloudRecord(false);
+            //logic
+            routerListener.getLiveRoom().requestCloudRecord(false);
+
+        }
     }
 
     @Override

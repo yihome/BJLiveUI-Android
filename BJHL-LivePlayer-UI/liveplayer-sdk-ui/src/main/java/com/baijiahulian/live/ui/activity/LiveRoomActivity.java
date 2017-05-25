@@ -115,6 +115,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private LinearLayout llVideoContainer;
     private FrameLayout flTopRight;
     private FrameLayout flPPTLeft;
+    private FrameLayout flRightBottom;
+    private FrameLayout flRight;
 
     private LiveRoom liveRoom;
 
@@ -204,6 +206,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         flTopRight = (FrameLayout) findViewById(R.id.activity_live_room_top_right);
         flPPTLeft = (FrameLayout) findViewById(R.id.activity_live_room_ppt_left);
         flError = (FrameLayout) findViewById(R.id.activity_live_room_error);
+        flRightBottom = (FrameLayout) findViewById(R.id.activity_live_room_bottom_right);
+        flRight = (FrameLayout) findViewById(R.id.activity_live_room_right);
     }
 
     @Override
@@ -255,6 +259,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                     WindowManager.LayoutParams.FLAG_FULLSCREEN);
             dlChat.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
         } else {
+            if (isClearScreen)
+                unClearScreen();
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
             dlChat.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN);
         }
@@ -292,10 +298,12 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
             if (lppptFragment != null && lppptFragment.isEditable()) {
                 flLeft.setVisibility(View.GONE);
                 dlChat.setVisibility(View.GONE);
+                flRightBottom.setVisibility(View.INVISIBLE);
             }
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
             flLeft.setVisibility(View.VISIBLE);
             dlChat.setVisibility(View.VISIBLE);
+            flRightBottom.setVisibility(View.VISIBLE);
         }
     }
 
@@ -374,7 +382,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void showMessage(final String message) {
-        if(TextUtils.isEmpty(message)) return;
+        if (TextUtils.isEmpty(message)) return;
         Observable.just(1).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Object>() {
             @Override
             public void call(Object obj) {
@@ -622,6 +630,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         rightBottomMenuFragment.clearScreen();
         hideFragment(topBarFragment);
         hideFragment(rightMenuFragment);
+        flLeft.setVisibility(View.INVISIBLE);
+        flRight.setVisibility(View.INVISIBLE);
+        flRightBottom.setVisibility(View.INVISIBLE);
         onRecordFullScreenConfigurationChanged(true);
         onVideoFullScreenConfigurationChanged(true);
     }
@@ -633,6 +644,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         rightBottomMenuFragment.unClearScreen();
         showFragment(topBarFragment);
         showFragment(rightMenuFragment);
+        flLeft.setVisibility(View.VISIBLE);
+        flRight.setVisibility(View.VISIBLE);
+        flRightBottom.setVisibility(View.VISIBLE);
         onRecordFullScreenConfigurationChanged(false);
         onVideoFullScreenConfigurationChanged(false);
         dlChat.openDrawer(Gravity.START);
@@ -658,12 +672,14 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                 checkNotNull(leftMenuFragment);
                 flLeft.setVisibility(View.GONE);
                 dlChat.setVisibility(View.GONE);
+                flRightBottom.setVisibility(View.INVISIBLE);
             }
             flPPTLeft.setVisibility(View.VISIBLE);
         } else {
             flTop.setVisibility(View.VISIBLE);
             flLeft.setVisibility(View.VISIBLE);
             dlChat.setVisibility(View.VISIBLE);
+            flRightBottom.setVisibility(View.VISIBLE);
             dlChat.openDrawer(Gravity.START);
             flPPTLeft.setVisibility(View.GONE);
         }
@@ -941,6 +957,10 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         PPTDialogPresenter pptPresenter = new PPTDialogPresenter(pptFragment);
         bindVP(pptFragment, pptPresenter);
         showDialogFragment(pptFragment);
+    }
+
+    public boolean isPPTMax(){
+        return flBackground.getChildAt(0) == lppptFragment.getView();
     }
 
     @Override

@@ -75,6 +75,9 @@
     <string name="live_image_uploading">上传中…</string>
     <string name="live_image_loading_fail">图片加载失败</string>
     <string name="live_frequent_error">请勿频繁切换</string>
+    <string name="live_frequent_error_line">请勿频繁切换线路</string>
+    <string name="live_frequent_error_camera">请勿频繁切换前后摄像头</string>
+    <string name="live_frequent_error_resolution">请勿频繁切换清晰度</string>
     <string name="live_retry">刷新重试</string>
     <string name="live_retry_suggestion">可添加技术支持 QQ %1$s 获得帮助</string>
     <string name="live_image_save">保存图片</string>

@@ -18,7 +18,7 @@ public class PPTPresenter implements PPTContract.Presenter {
 
     @Override
     public void switchWithMaximum() {
-        if(routerListener.switchable()) {
+        if (routerListener.switchable()) {
             routerListener.maximisePPTView();
             routerListener.setSwitching();
         }
@@ -31,6 +31,7 @@ public class PPTPresenter implements PPTContract.Presenter {
 
     @Override
     public void clearScreen() {
+        if (!routerListener.isPPTMax()) return;
         isScreenCleared = !isScreenCleared;
         if (isScreenCleared) routerListener.clearScreen();
         else routerListener.unClearScreen();

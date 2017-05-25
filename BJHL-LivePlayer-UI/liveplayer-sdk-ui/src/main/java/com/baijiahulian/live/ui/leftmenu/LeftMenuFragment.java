@@ -39,11 +39,11 @@ public class LeftMenuFragment extends BaseFragment implements LeftMenuContract.V
                 presenter.showMessageInput();
             }
         });
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            $.id(R.id.fragment_left_menu_clear_screen).gone();
-        } else {
-            $.id(R.id.fragment_left_menu_clear_screen).visible();
-        }
+//        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+//            $.id(R.id.fragment_left_menu_clear_screen).gone();
+//        } else {
+//            $.id(R.id.fragment_left_menu_clear_screen).visible();
+//        }
     }
 
     @Override
@@ -62,13 +62,13 @@ public class LeftMenuFragment extends BaseFragment implements LeftMenuContract.V
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        if (presenter.isScreenCleared()) {
-            presenter.clearScreen();
-        }
-        if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            $.id(R.id.fragment_left_menu_clear_screen).gone();
-        } else {
-            $.id(R.id.fragment_left_menu_clear_screen).visible();
-        }
+//        if (presenter.isScreenCleared()) {
+//            presenter.clearScreen();
+//        }
+//        if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+//            $.id(R.id.fragment_left_menu_clear_screen).gone();
+//        } else {
+//            $.id(R.id.fragment_left_menu_clear_screen).visible();
+//        }
     }
 }

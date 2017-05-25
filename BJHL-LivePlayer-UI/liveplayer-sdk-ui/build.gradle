@@ -29,7 +29,7 @@ dependencies {
 
 //    compile 'com.afollestad.material-dialogs:commons:0.9.4.4'
 
-//    compile 'com.baijia.live:liveplayer-sdk-core:0.3.6'
+//    compile 'com.baijia.live:liveplayer-sdk-core:0.3.7'
 //    compile 'com.baijia.live:liveplayer-sdk-core-ppt:0.3.5'
     compile project(path: ":liveplayer-sdk-core")
     compile project(path: ":liveplayer-sdk-core-ppt")

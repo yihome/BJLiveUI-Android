@@ -71,6 +71,16 @@ class UploadingImageModel extends LPDataModel implements IMessageModel {
     }
 
     @Override
+    public int getImageWidth() {
+        return 0;
+    }
+
+    @Override
+    public int getImageHeight() {
+        return 0;
+    }
+
+    @Override
     public Date getTimestamp() {
         return null;
     }

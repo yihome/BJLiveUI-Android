@@ -1,5 +1,6 @@
 package com.baijiahulian.live.ui.ppt;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
 
 import com.baijiahulian.livecore.ppt.LPPPTFragment;
@@ -25,9 +26,9 @@ public class MyPPTFragment extends LPPPTFragment implements PPTContract.View {
             @Override
             public void onSingleTap(LPWhiteBoardView whiteBoardView) {
                 presenter.popUpPPTDialog();
-//                if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-//                    presenter.clearScreen();
-//                }
+                if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    presenter.clearScreen();
+                }
 
             }
         });

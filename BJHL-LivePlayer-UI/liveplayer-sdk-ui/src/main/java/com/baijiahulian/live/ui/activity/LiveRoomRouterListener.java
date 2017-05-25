@@ -75,6 +75,8 @@ public interface LiveRoomRouterListener {
 
     void showRemoteVideoPlayer();
 
+    boolean isPPTMax();
+
     /**
      * 当前正在互动的用户多媒体对象
      */

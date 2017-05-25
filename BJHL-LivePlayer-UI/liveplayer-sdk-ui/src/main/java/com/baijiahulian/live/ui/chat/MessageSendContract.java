@@ -21,6 +21,8 @@ interface MessageSendContract {
     interface Presenter extends BasePresenter {
         void sendMessage(String message);
 
+        void sendEmoji(String emoji);
+
         void sendPicture(String path);
 
         void chooseEmoji();

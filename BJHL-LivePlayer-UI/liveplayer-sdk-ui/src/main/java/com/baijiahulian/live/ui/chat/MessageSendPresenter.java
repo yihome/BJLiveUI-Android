@@ -25,6 +25,13 @@ public class MessageSendPresenter implements MessageSendContract.Presenter {
     }
 
     @Override
+    public void sendEmoji(String emoji) {
+        checkNotNull(routerListener);
+        routerListener.getLiveRoom().getChatVM().sendEmojiMessage(emoji);
+        view.showMessageSuccess();
+    }
+
+    @Override
     public void sendPicture(String path) {
         routerListener.sendImageMessage(path);
         view.onPictureSend();
