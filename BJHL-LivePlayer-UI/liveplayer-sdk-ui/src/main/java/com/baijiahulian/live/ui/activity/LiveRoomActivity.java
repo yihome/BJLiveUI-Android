@@ -474,7 +474,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         if (isTeacherOrAssistant()) {
             showMessage((isOn ? "打开" : "关闭") + "全体禁言成功");
         } else {
-            showMessage(getString(R.string.lp_override_class_start) + (isOn ? "打开了" : "关闭了") + "全体禁言");
+            showMessage(getString(R.string.lp_override_role_teacher) + (isOn ? "打开了" : "关闭了") + "全体禁言");
         }
     }
 
