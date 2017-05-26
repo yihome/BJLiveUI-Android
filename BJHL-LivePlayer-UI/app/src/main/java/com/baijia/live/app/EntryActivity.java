@@ -38,6 +38,9 @@ public class EntryActivity extends AppCompatActivity {
                 editor.apply();
 
                 LiveSDKWithUI.enterRoom(EntryActivity.this, code, name, null);
+
+//                LiveSDKWithUI.LiveRoomUserModel enterUser = new LiveSDKWithUI.LiveRoomUserModel("userName", "userAvatar", "userNumber", LPConstants.LPUserType.Student);
+//                LiveSDKWithUI.enterRoom(EntryActivity.this, 213213211L, "sign", enterUser, null);
             }
         });
     }

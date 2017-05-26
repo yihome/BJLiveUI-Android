@@ -4,6 +4,7 @@ import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 import com.baijiahulian.livecore.context.LPError;
 import com.baijiahulian.livecore.context.LiveRoom;
 import com.baijiahulian.livecore.launch.LPLaunchListener;
+import com.baijiahulian.livecore.models.imodels.IUserModel;
 import com.baijiahulian.livecore.utils.LPSDKTaskQueue;
 
 /**
@@ -15,15 +16,32 @@ public class LoadingPresenter implements LoadingContract.Presenter {
     private LPLaunchListener launchListener;
     private LiveRoomRouterListener routerListener;
     private LoadingContract.View view;
-    private String code, name;
+    private String code, name, sign;
+    private long roomId;
     private boolean isReconnecting;
+    private IUserModel userModel;
+    private boolean isJoinCode;
 
     public LoadingPresenter(LoadingContract.View view, String code, String name, final boolean isReconnecting) {
         this.view = view;
         this.code = code;
         this.name = name;
         this.isReconnecting = isReconnecting;
+        isJoinCode = true;
+        initListener();
+    }
 
+    public LoadingPresenter(LoadingContract.View view, long roomId, String sign, IUserModel model, final boolean isReconnecting) {
+        this.view = view;
+        this.isReconnecting = isReconnecting;
+        this.roomId = roomId;
+        this.sign = sign;
+        this.userModel = model;
+        isJoinCode = false;
+        initListener();
+    }
+
+    private void initListener() {
         launchListener = new LPLaunchListener() {
             @Override
             public void onLaunchSteps(int i, int i1) {
@@ -71,6 +89,21 @@ public class LoadingPresenter implements LoadingContract.Presenter {
     }
 
     @Override
+    public String getSign() {
+        return sign;
+    }
+
+    @Override
+    public IUserModel getUser() {
+        return userModel;
+    }
+
+    @Override
+    public long getRoomId() {
+        return roomId;
+    }
+
+    @Override
     public void setLiveRoom(LiveRoom liveRoom) {
         routerListener.setLiveRoom(liveRoom);
     }
@@ -78,6 +111,11 @@ public class LoadingPresenter implements LoadingContract.Presenter {
     @Override
     public boolean isReconnect() {
         return isReconnecting;
+    }
+
+    @Override
+    public boolean isJoinCode() {
+        return isJoinCode;
     }
 
     @Override
