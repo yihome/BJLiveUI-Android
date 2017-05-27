@@ -42,6 +42,7 @@ public class TopBarPresenter implements TopBarContract.Presenter {
                 });
         view.showOnlineUserCount(routerListener.getLiveRoom().getOnlineUserVM().getUserCount());
         view.showRoomTitle(routerListener.getLiveRoom().getRoomTitle());
+        view.showHideShare(routerListener.getVisibilityOfShareBtn());
     }
 
     @Override

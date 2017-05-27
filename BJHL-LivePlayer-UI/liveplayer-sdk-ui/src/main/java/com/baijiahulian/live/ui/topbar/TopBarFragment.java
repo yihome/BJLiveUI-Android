@@ -40,7 +40,6 @@ public class TopBarFragment extends BaseFragment implements TopBarContract.View 
                 presenter.navigateToShare();
             }
         });
-//        $.id(R.id.fragment_top_bar_share).gone();
     }
 
     @Override
@@ -57,6 +56,12 @@ public class TopBarFragment extends BaseFragment implements TopBarContract.View 
     @Override
     public void showRoomTitle(String roomTitle) {
         $.id(R.id.fragment_top_bar_title).text(roomTitle);
+    }
+
+    @Override
+    public void showHideShare(boolean show) {
+        if (show) $.id(R.id.fragment_top_bar_share).visible();
+        else $.id(R.id.fragment_top_bar_share).gone();
     }
 
     @Override

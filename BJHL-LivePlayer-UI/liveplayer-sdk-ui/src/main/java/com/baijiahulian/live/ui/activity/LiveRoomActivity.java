@@ -531,6 +531,11 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         showMessage(getString(R.string.lp_override_role_teacher) + "离开了" + getString(R.string.lp_override_classroom));
     }
 
+    @Override
+    public boolean getVisibilityOfShareBtn() {
+        return shareListener != null;
+    }
+
     private void showNetError(LPError error) {
         if (errorFragment != null && errorFragment.isAdded()) return;
         if (flError.getChildCount() >= 2) return;
