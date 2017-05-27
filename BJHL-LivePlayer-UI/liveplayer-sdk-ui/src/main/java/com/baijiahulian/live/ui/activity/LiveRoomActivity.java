@@ -85,6 +85,7 @@ import com.baijiahulian.livecore.context.LiveRoom;
 import com.baijiahulian.livecore.context.OnLiveRoomListener;
 import com.baijiahulian.livecore.models.imodels.ILoginConflictModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
+import com.baijiahulian.livecore.models.imodels.IUserModel;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 import com.baijiahulian.livecore.wrapper.exception.NotInitializedException;
 
@@ -151,6 +152,10 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private String code, name;
     private boolean isSwitchable = true;
 
+    private long roomId;
+    private String sign;
+    private IUserModel enterUser;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -165,9 +170,17 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
         code = getIntent().getStringExtra("code");
         name = getIntent().getStringExtra("name");
+        roomId = getIntent().getLongExtra("roomId", -1);
+        sign = getIntent().getStringExtra("sign");
+        enterUser = (IUserModel) getIntent().getSerializableExtra("user");
 
         loadingFragment = new LoadingFragment();
-        LoadingPresenter loadingPresenter = new LoadingPresenter(loadingFragment, code, name, false);
+        LoadingPresenter loadingPresenter;
+        if (roomId == -1) {
+            loadingPresenter = new LoadingPresenter(loadingFragment, code, name, false);
+        } else {
+            loadingPresenter = new LoadingPresenter(loadingFragment, roomId, sign, enterUser, false);
+        }
         bindVP(loadingFragment, loadingPresenter);
         addFragment(R.id.activity_live_room_loading, loadingFragment);
 
@@ -573,7 +586,12 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
         flLoading.setVisibility(View.VISIBLE);
         loadingFragment = new LoadingFragment();
-        LoadingPresenter loadingPresenter = new LoadingPresenter(loadingFragment, code, name, false);
+        LoadingPresenter loadingPresenter;
+        if (roomId == -1) {
+            loadingPresenter = new LoadingPresenter(loadingFragment, code, name, false);
+        } else {
+            loadingPresenter = new LoadingPresenter(loadingFragment, roomId, sign, enterUser, false);
+        }
         bindVP(loadingFragment, loadingPresenter);
         addFragment(R.id.activity_live_room_loading, loadingFragment);
     }
@@ -1223,8 +1241,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                     bmp.compress(Bitmap.CompressFormat.JPEG, 100, fos);
                     fos.flush();
                     fos.close();
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

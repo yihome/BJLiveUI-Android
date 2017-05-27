@@ -3,11 +3,13 @@ package com.baijiahulian.live.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.baijiahulian.live.ui.activity.LiveRoomActivity;
 import com.baijiahulian.live.ui.utils.LPShareModel;
 import com.baijiahulian.livecore.context.LPConstants;
+import com.baijiahulian.livecore.models.imodels.IUserModel;
 
 import java.util.ArrayList;
 
@@ -18,7 +20,8 @@ import java.util.ArrayList;
 
 public class LiveSDKWithUI {
 
-    public static void enterRoom(@NonNull Context context, @NonNull String code, @NonNull String name, @NonNull LiveSDKEnterRoomListener listener) {
+    public static void enterRoom(@NonNull Context context, @NonNull String code, @NonNull String name,
+                                 @NonNull LiveSDKEnterRoomListener listener) {
         if (TextUtils.isEmpty(name)) {
             listener.onError("name is empty");
             return;
@@ -31,6 +34,24 @@ public class LiveSDKWithUI {
         Intent intent = new Intent(context, LiveRoomActivity.class);
         intent.putExtra("name", name);
         intent.putExtra("code", code);
+        context.startActivity(intent);
+    }
+
+    public static void enterRoom(@NonNull Context context, long roomId,
+                                 @NonNull String sign, @NonNull LiveRoomUserModel model, @NonNull LiveSDKEnterRoomListener listener) {
+        if (roomId <= 0) {
+            listener.onError("room id =" + roomId);
+            return;
+        }
+        if (TextUtils.isEmpty(sign)) {
+            listener.onError("sign =" + sign);
+            return;
+        }
+
+        Intent intent = new Intent(context, LiveRoomActivity.class);
+        intent.putExtra("roomId", roomId);
+        intent.putExtra("sign", sign);
+        intent.putExtra("user", model);
         context.startActivity(intent);
     }
 
@@ -82,5 +103,50 @@ public class LiveSDKWithUI {
         ArrayList<? extends LPShareModel> setShareList();
 
         void getShareData(Context context, long roomId);
+    }
+
+    public static class LiveRoomUserModel implements IUserModel {
+
+        String userName;
+        String userAvatar;
+        String userNumber;
+        LPConstants.LPUserType userType;
+
+        public LiveRoomUserModel(@NonNull String userName, @Nullable String userAvatar, @Nullable String userNumber, @NonNull LPConstants.LPUserType userType) {
+            this.userName = userName;
+            this.userAvatar = userAvatar;
+            this.userNumber = userNumber;
+            this.userType = userType;
+        }
+
+        @Override
+        public String getUserId() {
+            return null;
+        }
+
+        @Override
+        public String getNumber() {
+            return userNumber;
+        }
+
+        @Override
+        public LPConstants.LPUserType getType() {
+            return userType;
+        }
+
+        @Override
+        public String getName() {
+            return userName;
+        }
+
+        @Override
+        public String getAvatar() {
+            return userAvatar;
+        }
+
+        @Override
+        public LPConstants.LPEndType getEndType() {
+            return LPConstants.LPEndType.Android;
+        }
     }
 }
