@@ -157,5 +157,5 @@ public interface LiveRoomRouterListener {
 
     void showMessageTeacherExitRoom();
 
-
+    boolean getVisibilityOfShareBtn();
 }
