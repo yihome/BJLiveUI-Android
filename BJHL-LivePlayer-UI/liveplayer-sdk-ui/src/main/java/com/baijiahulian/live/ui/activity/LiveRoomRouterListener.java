@@ -3,6 +3,7 @@ package com.baijiahulian.live.ui.activity;
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.context.LPError;
 import com.baijiahulian.livecore.context.LiveRoom;
+import com.baijiahulian.livecore.listener.OnRollCallListener;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 
 /**
@@ -158,4 +159,8 @@ public interface LiveRoomRouterListener {
     void showMessageTeacherExitRoom();
 
     boolean getVisibilityOfShareBtn();
+
+    void showRollCallDlg(int time, OnRollCallListener.RollCall rollCallListener);
+
+    void dismissRollCallDlg();
 }

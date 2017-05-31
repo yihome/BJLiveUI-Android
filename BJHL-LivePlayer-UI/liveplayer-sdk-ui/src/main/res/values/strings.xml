@@ -91,5 +91,7 @@
     <string name="live_override_error">哎呀出错了</string>
     <string name="live_teacher_not_in">老师未在教室</string>
     <string name="live_message_le">%1$s了</string>
+    <string name="live_roll_call_count_down">老师要求您在%1$s秒内响应点名</string>
+    <string name="live_roll_call_answer">答到</string>
 </resources>
 

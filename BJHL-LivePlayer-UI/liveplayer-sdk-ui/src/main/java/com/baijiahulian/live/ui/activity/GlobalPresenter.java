@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import com.baijiahulian.live.ui.base.BasePresenter;
 import com.baijiahulian.live.ui.utils.RxUtils;
 import com.baijiahulian.livecore.context.LPConstants;
+import com.baijiahulian.livecore.listener.OnRollCallListener;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.models.imodels.IUserInModel;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
@@ -24,7 +25,7 @@ public class GlobalPresenter implements BasePresenter {
     private boolean teacherVideoOn, teacherAudioOn;
 
     private Subscription subscriptionOfClassStart, subscriptionOfClassEnd, subscriptionOfForbidAllStatus,
-            subscriptionOfTeacherMedia, subscriptionOfUserIn, subscriptionOfUserOut;
+            subscriptionOfTeacherMedia, subscriptionOfUserIn, subscriptionOfUserOut, subscriptionOfRollCall;
 
     private boolean isVideoManipulated = false;
 
@@ -63,12 +64,12 @@ public class GlobalPresenter implements BasePresenter {
                 .subscribe(new LPErrorPrintSubscriber<Boolean>() {
                     @Override
                     public void call(Boolean aBoolean) {
-                        if(counter == 0){
+                        if (counter == 0) {
                             isForbidChatChanged = aBoolean;
-                            counter ++;
+                            counter++;
                             return;
                         }
-                        if(isForbidChatChanged == aBoolean) return;
+                        if (isForbidChatChanged == aBoolean) return;
                         isForbidChatChanged = aBoolean;
                         routerListener.showMessageForbidAllChat(aBoolean);
                     }
@@ -138,13 +139,25 @@ public class GlobalPresenter implements BasePresenter {
                     .subscribe(new LPErrorPrintSubscriber<String>() {
                         @Override
                         public void call(String s) {
-                            if(TextUtils.isEmpty(s)) return;
-                            if(routerListener.getLiveRoom().getTeacherUser() == null) return;
+                            if (TextUtils.isEmpty(s)) return;
+                            if (routerListener.getLiveRoom().getTeacherUser() == null) return;
                             if (s.equals(routerListener.getLiveRoom().getTeacherUser().getUserId())) {
                                 routerListener.showMessageTeacherExitRoom();
                             }
                         }
                     });
+            //点名
+            routerListener.getLiveRoom().setOnRollCallListener(new OnRollCallListener() {
+                @Override
+                public void onRollCall(int time, RollCall rollCallListener) {
+                    routerListener.showRollCallDlg(time, rollCallListener);
+                }
+
+                @Override
+                public void onRollCallTimeOut() {
+                    routerListener.dismissRollCallDlg();
+                }
+            });
         }
     }
 

@@ -65,6 +65,8 @@ import com.baijiahulian.live.ui.rightmenu.RightMenuFragment;
 import com.baijiahulian.live.ui.rightmenu.RightMenuPresenter;
 import com.baijiahulian.live.ui.righttopmenu.RightTopMenuFragment;
 import com.baijiahulian.live.ui.righttopmenu.RightTopMenuPresenter;
+import com.baijiahulian.live.ui.rollcall.RollCallDialogFragment;
+import com.baijiahulian.live.ui.rollcall.RollCallDialogPresenter;
 import com.baijiahulian.live.ui.setting.SettingDialogFragment;
 import com.baijiahulian.live.ui.setting.SettingPresenter;
 import com.baijiahulian.live.ui.share.LPShareDialog;
@@ -83,6 +85,7 @@ import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.context.LPError;
 import com.baijiahulian.livecore.context.LiveRoom;
 import com.baijiahulian.livecore.context.OnLiveRoomListener;
+import com.baijiahulian.livecore.listener.OnRollCallListener;
 import com.baijiahulian.livecore.models.imodels.ILoginConflictModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
@@ -142,6 +145,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private ErrorFragment errorFragment;
     private GlobalPresenter globalPresenter;
     private PPTLeftFragment pptLeftFragment;
+    private RollCallDialogPresenter rollCallDialogPresenter;
 
     private OrientationEventListener orientationEventListener; //处理屏幕旋转时本地录制视频的方向
     private int oldRotation;
@@ -534,6 +538,23 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public boolean getVisibilityOfShareBtn() {
         return shareListener != null;
+    }
+
+    @Override
+    public void showRollCallDlg(int time, OnRollCallListener.RollCall rollCallListener) {
+        RollCallDialogFragment rollCallDialogFragment = new RollCallDialogFragment();
+        rollCallDialogFragment.setCancelable(false);
+        rollCallDialogPresenter = new RollCallDialogPresenter(rollCallDialogFragment);
+        rollCallDialogPresenter.setRollCallInfo(time, rollCallListener);
+        bindVP(rollCallDialogFragment, rollCallDialogPresenter);
+        showDialogFragment(rollCallDialogFragment);
+    }
+
+    @Override
+    public void dismissRollCallDlg() {
+        if (rollCallDialogPresenter != null) {
+            rollCallDialogPresenter.timeOut();
+        }
     }
 
     private void showNetError(LPError error) {
