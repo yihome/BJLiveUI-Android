@@ -29,10 +29,10 @@ dependencies {
 
 //    compile 'com.afollestad.material-dialogs:commons:0.9.4.4'
 
-//    compile 'com.baijia.live:liveplayer-sdk-core:0.3.8'
-//    compile 'com.baijia.live:liveplayer-sdk-core-ppt:0.3.5'
-    compile project(path: ":liveplayer-sdk-core")
-    compile project(path: ":liveplayer-sdk-core-ppt")
+    compile 'com.baijia.live:liveplayer-sdk-core:0.3.8'
+    compile 'com.baijia.live:liveplayer-sdk-core-ppt:0.3.5'
+//    compile project(path: ":liveplayer-sdk-core")
+//    compile project(path: ":liveplayer-sdk-core-ppt")
 }
 android {
     lintOptions {
@@ -40,4 +40,4 @@ android {
     }
 }
 
-//apply from: 'https://raw.github.com/baijia/gradle-mvn-push/master/gradle-mvn-push.gradle'
+apply from: 'https://raw.github.com/baijia/gradle-mvn-push/master/gradle-mvn-push.gradle'
