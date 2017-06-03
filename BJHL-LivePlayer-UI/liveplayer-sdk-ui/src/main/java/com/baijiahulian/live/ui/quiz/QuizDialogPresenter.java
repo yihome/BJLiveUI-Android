@@ -19,16 +19,6 @@ public class QuizDialogPresenter implements QuizDialogContract.Presenter {
     }
 
     @Override
-    public void onStartArrived(LPJsonModel jsonModel) {
-        view.onStartArrived(jsonModel);
-    }
-
-    @Override
-    public void onQuizResArrived(LPJsonModel jsonModel) {
-
-    }
-
-    @Override
     public void setRouter(LiveRoomRouterListener liveRoomRouterListener) {
         this.routerListener = liveRoomRouterListener;
     }

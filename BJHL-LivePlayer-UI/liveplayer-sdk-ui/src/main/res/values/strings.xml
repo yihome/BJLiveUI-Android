@@ -95,5 +95,8 @@
     <string name="live_roll_call_answer">答到</string>
     <string name="live_quiz_title">小测</string>
     <string name="live_quiz_close">关闭</string>
+    <string name="live_quiz_dialog_tip">确认关闭测验？</string>
+    <string name="live_quiz_dialog_cancel">再等等</string>
+    <string name="live_quiz_dialog_confirm">确认</string>
 </resources>
 

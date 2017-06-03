@@ -1,8 +1,10 @@
 package com.baijiahulian.live.ui.quiz;
 
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
@@ -42,6 +44,7 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
     private String roomToken;
     private List<LPJsonModel> signalList;
     private boolean shouldShowClose;
+    private boolean isUrlLoaded;
     private static final String[] baseUrl = {
             "http://test-api.baijiacloud.com/m/quiz/student",
             "http://beta-api.baijiacloud.com/m/quiz/student",
@@ -78,12 +81,32 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
             editClick(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    presenter.dismissDlg();
+                    showCloseDlg();
                 }
             });
         } else {
             editable(false);
         }
+    }
+
+    private void showCloseDlg() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog dialog = builder.setMessage(R.string.live_quiz_dialog_tip)
+                .setPositiveButton(R.string.live_quiz_dialog_confirm, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        presenter.dismissDlg();
+                    }
+                }).setNegativeButton(R.string.live_quiz_dialog_cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).create();
+        dialog.show();
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.live_blue));
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.live_blue));
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -113,6 +136,7 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
+                isUrlLoaded = true;
                 $.id(R.id.pb_web_view_quiz).gone();
                 setCloseBtnStatus(shouldShowClose);
                 callJsInQueue();
@@ -174,8 +198,15 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
 
     @Override
     public void onEndArrived(LPJsonModel jsonModel) {
+        String key = jsonModel.data.get("message_type").getAsString();
+        if (!"quiz_end".equals(key)) {
+            return;
+        }
         signalList.add(jsonModel);
-        callJs(jsonModel.data.toString());
+        /*只有load完之后才去转发h5，否则加入队列，load完成后依次转发*/
+        if (isUrlLoaded) {
+            callJs(jsonModel.data.toString());
+        }
     }
 
     @Override

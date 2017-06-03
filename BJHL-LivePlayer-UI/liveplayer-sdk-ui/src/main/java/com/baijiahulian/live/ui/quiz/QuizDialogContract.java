@@ -35,9 +35,5 @@ public interface QuizDialogContract {
         String getRoomToken();
 
         void dismissDlg();
-
-        void onStartArrived(LPJsonModel jsonModel);
-
-        void onQuizResArrived(LPJsonModel jsonModel);
     }
 }
