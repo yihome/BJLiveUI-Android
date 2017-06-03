@@ -55,6 +55,8 @@ import com.baijiahulian.live.ui.pptleftmenu.PPTLeftFragment;
 import com.baijiahulian.live.ui.pptleftmenu.PPTLeftPresenter;
 import com.baijiahulian.live.ui.pptmanage.PPTManageFragment;
 import com.baijiahulian.live.ui.pptmanage.PPTManagePresenter;
+import com.baijiahulian.live.ui.quiz.QuizDialogFragment;
+import com.baijiahulian.live.ui.quiz.QuizDialogPresenter;
 import com.baijiahulian.live.ui.recorderdialog.RecorderDialogFragment;
 import com.baijiahulian.live.ui.recorderdialog.RecorderDialogPresenter;
 import com.baijiahulian.live.ui.remotevideodialog.RemoteVideoDialogFragment;
@@ -76,6 +78,7 @@ import com.baijiahulian.live.ui.topbar.TopBarFragment;
 import com.baijiahulian.live.ui.topbar.TopBarPresenter;
 import com.baijiahulian.live.ui.users.OnlineUserDialogFragment;
 import com.baijiahulian.live.ui.users.OnlineUserPresenter;
+import com.baijiahulian.live.ui.utils.JsonObjectUtil;
 import com.baijiahulian.live.ui.utils.RxUtils;
 import com.baijiahulian.live.ui.videoplayer.VideoPlayerFragment;
 import com.baijiahulian.live.ui.videoplayer.VideoPlayerPresenter;
@@ -86,11 +89,14 @@ import com.baijiahulian.livecore.context.LPError;
 import com.baijiahulian.livecore.context.LiveRoom;
 import com.baijiahulian.livecore.context.OnLiveRoomListener;
 import com.baijiahulian.livecore.listener.OnRollCallListener;
+import com.baijiahulian.livecore.models.LPJsonModel;
 import com.baijiahulian.livecore.models.imodels.ILoginConflictModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 import com.baijiahulian.livecore.wrapper.exception.NotInitializedException;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -146,11 +152,14 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private GlobalPresenter globalPresenter;
     private PPTLeftFragment pptLeftFragment;
     private RollCallDialogPresenter rollCallDialogPresenter;
+    private QuizDialogFragment quizFragment;
+    private QuizDialogPresenter quizPresenter;
 
     private OrientationEventListener orientationEventListener; //处理屏幕旋转时本地录制视频的方向
     private int oldRotation;
 
-    private Subscription subscriptionOfLoginConflict, subscriptionOfSwitch;
+    private Subscription subscriptionOfLoginConflict, subscriptionOfSwitch, subscriptionOfSolutionArrived,
+            subscriptionOfQuizStart;
     private IMediaModel currentRemoteMediaUser;
     private boolean isClearScreen;//是否已经清屏，作用于视频采集和远程视频ui的调整
     private String code, name;
@@ -554,6 +563,94 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     public void dismissRollCallDlg() {
         if (rollCallDialogPresenter != null) {
             rollCallDialogPresenter.timeOut();
+        }
+    }
+
+    @Override
+    public void onQuizStartArrived(final LPJsonModel jsonModel) {
+        dismissQuizDlg();
+        subscriptionOfQuizStart = Observable.timer(1000, TimeUnit.MILLISECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<Long>() {
+                    @Override
+                    public void call(Long aLong) {
+                        quizFragment = new QuizDialogFragment();
+                        Bundle args = new Bundle();
+                        args.putBoolean(QuizDialogFragment.KEY_BTN_STATUS, JsonObjectUtil.getAsInt(jsonModel.data, "force_join") != 1);
+                        quizFragment.setArguments(args);
+                        quizFragment.setCancelable(false);
+                        quizPresenter = new QuizDialogPresenter(quizFragment);
+                        quizFragment.onStartArrived(jsonModel);
+                        bindVP(quizFragment, quizPresenter);
+                        showDialogFragment(quizFragment);
+                    }
+                });
+    }
+
+    @Override
+    public void onQuizEndArrived(LPJsonModel jsonModel) {
+        if (quizFragment == null) {
+            return;
+        }
+        quizFragment.onEndArrived(jsonModel);
+    }
+
+    @Override
+    public void onQuizSolutionArrived(final LPJsonModel jsonModel) {
+        dismissQuizDlg();
+        subscriptionOfSolutionArrived = Observable.timer(1000, TimeUnit.MILLISECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<Long>() {
+                    @Override
+                    public void call(Long aLong) {
+                        quizFragment = new QuizDialogFragment();
+                        Bundle args = new Bundle();
+                        args.putBoolean(QuizDialogFragment.KEY_BTN_STATUS, true);
+                        quizFragment.setArguments(args);
+                        quizPresenter = new QuizDialogPresenter(quizFragment);
+                        quizFragment.onSolutionArrived(jsonModel);
+                        bindVP(quizFragment, quizPresenter);
+                        showDialogFragment(quizFragment);
+                    }
+                });
+    }
+
+    @Override
+    public void dismissQuizDlg() {
+        if (quizFragment != null && quizFragment.isAdded() && quizFragment.isVisible()) {
+            quizFragment.dismissAllowingStateLoss();
+        }
+    }
+
+    @Override
+    public void onQuizRes(LPJsonModel jsonModel) {
+        dismissQuizDlg();
+        if (jsonModel != null && jsonModel.data != null) {
+            String quizId = JsonObjectUtil.getAsString(jsonModel.data, "quiz_id");
+            boolean solutionStatus = false;
+            if (!jsonModel.data.has("solution")) {
+                //没有solution
+                solutionStatus = true;
+            } else if (jsonModel.data.getAsJsonObject("solution").entrySet().isEmpty()) {
+                //"solution":{}
+                solutionStatus = true;
+            } else if (jsonModel.data.getAsJsonObject("solution").isJsonNull()) {
+                //"solution":"null"
+                solutionStatus = true;
+            }
+            boolean endFlag = jsonModel.data.get("end_flag").getAsInt() == 1;
+            //quizid非空、solution是空、没有结束答题 才弹窗
+            if (!TextUtils.isEmpty(quizId) && solutionStatus && !endFlag) {
+                quizFragment = new QuizDialogFragment();
+                Bundle args = new Bundle();
+                args.putBoolean(QuizDialogFragment.KEY_BTN_STATUS, JsonObjectUtil.getAsInt(jsonModel.data, "force_join") != 1);
+                quizFragment.setArguments(args);
+                quizFragment.setCancelable(false);
+                quizPresenter = new QuizDialogPresenter(quizFragment);
+                quizFragment.onQuizResArrived(jsonModel);
+                bindVP(quizFragment, quizPresenter);
+                showDialogFragment(quizFragment);
+            }
         }
     }
 
@@ -1228,6 +1325,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
         RxUtils.unSubscribe(subscriptionOfLoginConflict);
         RxUtils.unSubscribe(subscriptionOfSwitch);
+        RxUtils.unSubscribe(subscriptionOfSolutionArrived);
+        RxUtils.unSubscribe(subscriptionOfQuizStart);
 
         orientationEventListener = null;
 

@@ -66,7 +66,7 @@ public class RemoteVideoDialogPresenter implements RemoteVideoDialogContract.Pre
 
     @Override
     public void closeSpeaking() {
-        routerListener.playVideoClose(routerListener.getCurrentVideoUser().getUser().getUserId());
+//        routerListener.playVideoClose(routerListener.getCurrentVideoUser().getUser().getUserId());
         routerListener.getLiveRoom().getSpeakQueueVM().closeOtherSpeak(routerListener.getCurrentVideoUser().getUser().getUserId());
     }
 }

@@ -93,5 +93,7 @@
     <string name="live_message_le">%1$s了</string>
     <string name="live_roll_call_count_down">老师要求您在%1$s秒内响应点名</string>
     <string name="live_roll_call_answer">答到</string>
+    <string name="live_quiz_title">小测</string>
+    <string name="live_quiz_close">关闭</string>
 </resources>
 

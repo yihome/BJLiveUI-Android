@@ -6,6 +6,7 @@ import com.baijiahulian.live.ui.base.BasePresenter;
 import com.baijiahulian.live.ui.utils.RxUtils;
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.listener.OnRollCallListener;
+import com.baijiahulian.livecore.models.LPJsonModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.models.imodels.IUserInModel;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
@@ -25,7 +26,8 @@ public class GlobalPresenter implements BasePresenter {
     private boolean teacherVideoOn, teacherAudioOn;
 
     private Subscription subscriptionOfClassStart, subscriptionOfClassEnd, subscriptionOfForbidAllStatus,
-            subscriptionOfTeacherMedia, subscriptionOfUserIn, subscriptionOfUserOut, subscriptionOfRollCall;
+            subscriptionOfTeacherMedia, subscriptionOfUserIn, subscriptionOfUserOut, subscriptionOfQuizStart,
+            subscriptionOfQuizRes, subscriptionOfQuizEnd, subscriptionOfQuizSolution;
 
     private boolean isVideoManipulated = false;
 
@@ -158,6 +160,53 @@ public class GlobalPresenter implements BasePresenter {
                     routerListener.dismissRollCallDlg();
                 }
             });
+
+            //开始小测
+            subscriptionOfQuizStart = routerListener.getLiveRoom().getQuizVM().getObservableOfQuizStart()
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new LPErrorPrintSubscriber<LPJsonModel>() {
+                        @Override
+                        public void call(LPJsonModel jsonModel) {
+                            if (!routerListener.isTeacherOrAssistant()) {
+                                routerListener.onQuizStartArrived(jsonModel);
+                            }
+                        }
+                    });
+            //中途打开
+            subscriptionOfQuizRes = routerListener.getLiveRoom().getQuizVM().getObservableOfQuizRes()
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new LPErrorPrintSubscriber<LPJsonModel>() {
+                        @Override
+                        public void call(LPJsonModel jsonModel) {
+                            if (!routerListener.isTeacherOrAssistant()) {
+                                routerListener.onQuizRes(jsonModel);
+                            }
+                        }
+                    });
+            //结束，只转发h5
+            subscriptionOfQuizEnd = routerListener.getLiveRoom().getQuizVM().getObservableOfQuizEnd()
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new LPErrorPrintSubscriber<LPJsonModel>() {
+                        @Override
+                        public void call(LPJsonModel jsonModel) {
+                            if (!routerListener.isTeacherOrAssistant()) {
+                                routerListener.onQuizEndArrived(jsonModel);
+                            }
+                        }
+                    });
+
+            //发答案啦
+            subscriptionOfQuizSolution = routerListener.getLiveRoom().getQuizVM().getObservableOfQuizSolution()
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new LPErrorPrintSubscriber<LPJsonModel>() {
+                        @Override
+                        public void call(LPJsonModel jsonModel) {
+                            if (!routerListener.isTeacherOrAssistant()) {
+                                routerListener.onQuizSolutionArrived(jsonModel);
+                            }
+                        }
+                    });
+
         }
     }
 
