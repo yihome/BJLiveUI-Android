@@ -3,12 +3,16 @@ package com.baijiahulian.live.ui.quiz;
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AlertDialog;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
+import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -18,10 +22,13 @@ import android.widget.ProgressBar;
 
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseDialogFragment;
+import com.baijiahulian.live.ui.utils.JsonObjectUtil;
 import com.baijiahulian.live.ui.utils.QueryPlus;
 import com.baijiahulian.livecore.LiveSDK;
 import com.baijiahulian.livecore.models.LPJsonModel;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
+import com.baijiahulian.livecore.utils.LPLogger;
+import com.google.gson.JsonObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -51,6 +58,13 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
             "http://api.baijiacloud.com/m/quiz/student"
     };
 
+    private static final String str = "(function() {\n" +
+            "    var bjlapp = this.bjlapp = this.bjlapp || {};\n" +
+            "    bjlapp.sendMessage = function(json) {\n" +
+            "        bjlapp.sendMessageString(JSON.stringify(json));\n" +
+            "    };\n" +
+            "})();";
+
     public QuizDialogFragment() {
         if (signalList == null) {
             signalList = new ArrayList<>();
@@ -77,6 +91,7 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
     //是否显示关闭按钮
     public void setCloseBtnStatus(boolean shouldShowClose) {
         if (shouldShowClose) {
+            editable(true);
             editText(getString(R.string.live_quiz_close));
             editClick(new View.OnClickListener() {
                 @Override
@@ -123,6 +138,9 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
                 super.onProgressChanged(view, newProgress);
             }
         });
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            WebView.setWebContentsDebuggingEnabled(true);
+        }
 
         //webView client
         ((WebView) $.id(R.id.wv_quiz_main).view()).setWebViewClient(new WebViewClient() {
@@ -130,15 +148,22 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 super.onPageStarted(view, url, favicon);
                 $.id(R.id.pb_web_view_quiz).visible();
-                setCloseBtnStatus(true);
+                setCloseBtnStatus(shouldShowClose);
             }
 
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
                 isUrlLoaded = true;
                 $.id(R.id.pb_web_view_quiz).gone();
                 setCloseBtnStatus(shouldShowClose);
+                view.evaluateJavascript(str, new ValueCallback<String>() {
+                    @Override
+                    public void onReceiveValue(String value) {
+
+                    }
+                });
                 callJsInQueue();
             }
 
@@ -161,7 +186,7 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
         String params = "?userNumber=" + currentUserInfo.getNumber() + "&userName=" + currentUserInfo.getName() + "&quizId=" + quizId
                 + "&roomId=" + roomId + "&token=" + roomToken;
         String url = baseUrl[LiveSDK.getDeployType().getType()] + params;
-        System.out.println("hola url --> " + url);
+        LPLogger.e(getClass().getSimpleName() + " : " + url);
         ((WebView) $.id(R.id.wv_quiz_main).view()).loadUrl(url);
     }
 
@@ -222,7 +247,6 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
 
     @Override
     public void onQuizResArrived(LPJsonModel jsonModel) {
-        //TODO:半截加入
         String key = jsonModel.data.get("message_type").getAsString();
         if (!"quiz_res".equals(key)) {
             return;
@@ -270,14 +294,16 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
     }
 
     @JavascriptInterface
-    public void sendMessage(String json) {
-        presenter.sendCommonRequest(json);
+    public void sendMessageString(String json) {
+        if (!TextUtils.isEmpty(json)) {
+            presenter.sendCommonRequest(json);
+        }
     }
 
     /*************
      * android call js
      ************/
     private void callJs(String json) {
-        ((WebView) $.id(R.id.wv_quiz_main).view()).loadUrl("javascript:receivedMessage('" + json + "')");
+        ((WebView) $.id(R.id.wv_quiz_main).view()).loadUrl("javascript:bjlapp.receivedMessage(" + json + ")");
     }
 }

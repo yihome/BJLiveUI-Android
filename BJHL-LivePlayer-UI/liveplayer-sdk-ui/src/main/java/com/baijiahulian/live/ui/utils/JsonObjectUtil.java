@@ -1,6 +1,9 @@
 package com.baijiahulian.live.ui.utils;
 
+import com.baijiahulian.common.utils.StringUtils;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 
 /**
  * Created by wangkangfei on 17/6/2.
@@ -48,5 +51,20 @@ public class JsonObjectUtil {
             return jsonObject.get(key).isJsonArray();
         }
         return false;
+    }
+
+    /**
+     * 是否是json格式
+     */
+    public static boolean isGoodJson(String json) {
+        if (StringUtils.isBlank(json)) {
+            return false;
+        }
+        try {
+            new JsonParser().parse(json);
+            return true;
+        } catch (JsonParseException e) {
+            return false;
+        }
     }
 }

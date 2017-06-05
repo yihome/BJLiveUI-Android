@@ -159,7 +159,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private int oldRotation;
 
     private Subscription subscriptionOfLoginConflict, subscriptionOfSwitch, subscriptionOfSolutionArrived,
-            subscriptionOfQuizStart;
+            subscriptionOfQuizStart, subscriptionOfQuizRes;
     private IMediaModel currentRemoteMediaUser;
     private boolean isClearScreen;//是否已经清屏，作用于视频采集和远程视频ui的调整
     private String code, name;
@@ -576,7 +576,13 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                     public void call(Long aLong) {
                         quizFragment = new QuizDialogFragment();
                         Bundle args = new Bundle();
-                        args.putBoolean(QuizDialogFragment.KEY_BTN_STATUS, JsonObjectUtil.getAsInt(jsonModel.data, "force_join") != 1);
+                        int forceJoin = 0;
+                        if (JsonObjectUtil.isJsonNull(jsonModel.data, "force_join")) {
+                            forceJoin = 0;
+                        } else {
+                            forceJoin = 1;
+                        }
+                        args.putBoolean(QuizDialogFragment.KEY_BTN_STATUS, forceJoin != 1);
                         quizFragment.setArguments(args);
                         quizFragment.setCancelable(false);
                         quizPresenter = new QuizDialogPresenter(quizFragment);
@@ -616,43 +622,39 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     }
 
     @Override
+    public void onQuizRes(final LPJsonModel jsonModel) {
+        dismissQuizDlg();
+        subscriptionOfQuizRes = Observable.timer(1000, TimeUnit.MILLISECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<Long>() {
+                    @Override
+                    public void call(Long aLong) {
+                        quizFragment = new QuizDialogFragment();
+                        Bundle args = new Bundle();
+                        int forceJoin = 0;
+                        if (JsonObjectUtil.isJsonNull(jsonModel.data, "force_join")) {
+                            forceJoin = 0;
+                        } else {
+                            forceJoin = 1;
+                        }
+                        args.putBoolean(QuizDialogFragment.KEY_BTN_STATUS, forceJoin != 1);
+                        quizFragment.setArguments(args);
+                        quizFragment.setCancelable(false);
+                        quizPresenter = new QuizDialogPresenter(quizFragment);
+                        quizFragment.onQuizResArrived(jsonModel);
+                        bindVP(quizFragment, quizPresenter);
+                        showDialogFragment(quizFragment);
+                    }
+                });
+    }
+
+    @Override
     public void dismissQuizDlg() {
         if (quizFragment != null && quizFragment.isAdded() && quizFragment.isVisible()) {
             quizFragment.dismissAllowingStateLoss();
         }
     }
 
-    @Override
-    public void onQuizRes(LPJsonModel jsonModel) {
-        dismissQuizDlg();
-        if (jsonModel != null && jsonModel.data != null) {
-            String quizId = JsonObjectUtil.getAsString(jsonModel.data, "quiz_id");
-            boolean solutionStatus = false;
-            if (!jsonModel.data.has("solution")) {
-                //没有solution
-                solutionStatus = true;
-            } else if (jsonModel.data.getAsJsonObject("solution").entrySet().isEmpty()) {
-                //"solution":{}
-                solutionStatus = true;
-            } else if (jsonModel.data.getAsJsonObject("solution").isJsonNull()) {
-                //"solution":"null"
-                solutionStatus = true;
-            }
-            boolean endFlag = jsonModel.data.get("end_flag").getAsInt() == 1;
-            //quizid非空、solution是空、没有结束答题 才弹窗
-            if (!TextUtils.isEmpty(quizId) && solutionStatus && !endFlag) {
-                quizFragment = new QuizDialogFragment();
-                Bundle args = new Bundle();
-                args.putBoolean(QuizDialogFragment.KEY_BTN_STATUS, JsonObjectUtil.getAsInt(jsonModel.data, "force_join") != 1);
-                quizFragment.setArguments(args);
-                quizFragment.setCancelable(false);
-                quizPresenter = new QuizDialogPresenter(quizFragment);
-                quizFragment.onQuizResArrived(jsonModel);
-                bindVP(quizFragment, quizPresenter);
-                showDialogFragment(quizFragment);
-            }
-        }
-    }
 
     private void showNetError(LPError error) {
         if (errorFragment != null && errorFragment.isAdded()) return;
@@ -1327,6 +1329,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         RxUtils.unSubscribe(subscriptionOfSwitch);
         RxUtils.unSubscribe(subscriptionOfSolutionArrived);
         RxUtils.unSubscribe(subscriptionOfQuizStart);
+        RxUtils.unSubscribe(subscriptionOfQuizRes);
 
         orientationEventListener = null;
 

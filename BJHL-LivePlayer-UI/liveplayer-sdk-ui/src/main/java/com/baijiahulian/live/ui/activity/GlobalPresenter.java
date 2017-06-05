@@ -1,8 +1,12 @@
 package com.baijiahulian.live.ui.activity;
 
+import android.os.Bundle;
 import android.text.TextUtils;
 
 import com.baijiahulian.live.ui.base.BasePresenter;
+import com.baijiahulian.live.ui.quiz.QuizDialogFragment;
+import com.baijiahulian.live.ui.quiz.QuizDialogPresenter;
+import com.baijiahulian.live.ui.utils.JsonObjectUtil;
 import com.baijiahulian.live.ui.utils.RxUtils;
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.listener.OnRollCallListener;
@@ -11,6 +15,9 @@ import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.models.imodels.IUserInModel;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 
+import java.util.concurrent.TimeUnit;
+
+import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
@@ -179,7 +186,26 @@ public class GlobalPresenter implements BasePresenter {
                         @Override
                         public void call(LPJsonModel jsonModel) {
                             if (!routerListener.isTeacherOrAssistant()) {
-                                routerListener.onQuizRes(jsonModel);
+                                if (jsonModel != null && jsonModel.data != null) {
+                                    String quizId = JsonObjectUtil.getAsString(jsonModel.data, "quiz_id");
+                                    boolean solutionStatus = false;
+                                    if (!jsonModel.data.has("solution")) {
+                                        //没有solution
+                                        solutionStatus = true;
+                                    } else if (jsonModel.data.getAsJsonObject("solution").entrySet().isEmpty()) {
+                                        //"solution":{}
+                                        solutionStatus = true;
+                                    } else if (jsonModel.data.getAsJsonObject("solution").isJsonNull()) {
+                                        //"solution":"null"
+                                        solutionStatus = true;
+                                    }
+                                    boolean endFlag = jsonModel.data.get("end_flag").getAsInt() == 1;
+                                    //quizid非空、solution是空、没有结束答题 才弹窗
+                                    if (!TextUtils.isEmpty(quizId) && solutionStatus && !endFlag) {
+                                        routerListener.onQuizRes(jsonModel);
+                                    }
+                                }
+
                             }
                         }
                     });
