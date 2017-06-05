@@ -32,7 +32,7 @@ public class LeftMenuFragment extends BaseFragment implements LeftMenuContract.V
         $.id(R.id.fragment_left_menu_send_message).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (presenter.isForbidden()) {
+                if (presenter.isAllForbidden()) {
                     showToast(getString(R.string.live_forbid_send_message));
                     return;
                 }
