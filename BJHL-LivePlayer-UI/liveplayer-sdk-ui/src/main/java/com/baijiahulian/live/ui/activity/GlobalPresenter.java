@@ -9,10 +9,12 @@ import com.baijiahulian.live.ui.quiz.QuizDialogPresenter;
 import com.baijiahulian.live.ui.utils.JsonObjectUtil;
 import com.baijiahulian.live.ui.utils.RxUtils;
 import com.baijiahulian.livecore.context.LPConstants;
+import com.baijiahulian.livecore.context.LPError;
 import com.baijiahulian.livecore.listener.OnRollCallListener;
 import com.baijiahulian.livecore.models.LPJsonModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.models.imodels.IUserInModel;
+import com.baijiahulian.livecore.models.responsedebug.LPResRoomDebugModel;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 
 import java.util.concurrent.TimeUnit;
@@ -34,7 +36,7 @@ public class GlobalPresenter implements BasePresenter {
 
     private Subscription subscriptionOfClassStart, subscriptionOfClassEnd, subscriptionOfForbidAllStatus,
             subscriptionOfTeacherMedia, subscriptionOfUserIn, subscriptionOfUserOut, subscriptionOfQuizStart,
-            subscriptionOfQuizRes, subscriptionOfQuizEnd, subscriptionOfQuizSolution;
+            subscriptionOfQuizRes, subscriptionOfQuizEnd, subscriptionOfQuizSolution, subscriptionOfDebug;
 
     private boolean isVideoManipulated = false;
 
@@ -232,7 +234,24 @@ public class GlobalPresenter implements BasePresenter {
                             }
                         }
                     });
-
+            //debug信息
+            subscriptionOfDebug = routerListener.getLiveRoom().getObservableOfDebug()
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new LPErrorPrintSubscriber<LPResRoomDebugModel>() {
+                        @Override
+                        public void call(LPResRoomDebugModel lpResRoomDebugModel) {
+                            if (lpResRoomDebugModel != null && lpResRoomDebugModel.data != null) {
+                                String commandType = "";
+                                if (JsonObjectUtil.isJsonNull(lpResRoomDebugModel.data, "command_type")) {
+                                    return;
+                                }
+                                commandType = lpResRoomDebugModel.data.get("command_type").getAsString();
+                                if ("logout".equals(commandType)) {
+                                    routerListener.showError(LPError.getNewError(LPError.CODE_ERROR_LOGIN_KICK_OUT, "您已被踢出房间"));
+                                }
+                            }
+                        }
+                    });
         }
     }
 

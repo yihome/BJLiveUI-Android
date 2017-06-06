@@ -1,6 +1,7 @@
 package com.baijiahulian.live.ui.activity;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -14,6 +15,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.OrientationEventListener;
@@ -426,18 +428,38 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void showError(LPError error) {
-        if (errorFragment != null && errorFragment.isAdded()) return;
-        if (flError.getChildCount() >= 2) return;
-        if (loadingFragment != null && loadingFragment.isAdded()) {
-            removeFragment(loadingFragment);
+        if (error.getCode() == LPError.CODE_ERROR_LOGIN_KICK_OUT) {
+            //被踢出房间后的登录
+            showKickOutDlg(error);
+        } else {
+            if (errorFragment != null && errorFragment.isAdded()) return;
+            if (flError.getChildCount() >= 2) return;
+            if (loadingFragment != null && loadingFragment.isAdded()) {
+                removeFragment(loadingFragment);
+            }
+            errorFragment = ErrorFragment.newInstance(getString(R.string.live_override_error), error.getMessage(), ErrorFragment.ERROR_HANDLE_REENTER);
+            errorFragment.setRouterListener(this);
+            flError.setVisibility(View.VISIBLE);
+            addFragment(R.id.activity_live_room_error, errorFragment);
+            if (Build.VERSION.SDK_INT < 24) {
+                getSupportFragmentManager().executePendingTransactions();
+            }
         }
-        errorFragment = ErrorFragment.newInstance(getString(R.string.live_override_error), error.getMessage(), ErrorFragment.ERROR_HANDLE_REENTER);
-        errorFragment.setRouterListener(this);
-        flError.setVisibility(View.VISIBLE);
-        addFragment(R.id.activity_live_room_error, errorFragment);
-        if (Build.VERSION.SDK_INT < 24) {
-            getSupportFragmentManager().executePendingTransactions();
-        }
+    }
+
+    private void showKickOutDlg(LPError error) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog dialog = builder.setMessage(error.getMessage())
+                .setPositiveButton(R.string.live_quiz_dialog_confirm, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        LiveRoomActivity.this.finish();
+                    }
+                }).create();
+        dialog.setCancelable(false);
+        dialog.show();
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.live_blue));
     }
 
     @Override
