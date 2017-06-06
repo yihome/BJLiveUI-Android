@@ -19,6 +19,14 @@ interface LeftMenuContract {
 
         boolean isScreenCleared();
 
-        boolean isForbidden();
+        /**
+         * 全体禁言状态
+         */
+        boolean isAllForbidden();
+
+        /**
+         * 自己是否被禁言（student）
+         */
+        boolean isForbiddenByTeacher();
     }
 }

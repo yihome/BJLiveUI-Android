@@ -1,14 +1,25 @@
 package com.baijiahulian.live.ui.activity;
 
+import android.os.Bundle;
 import android.text.TextUtils;
 
 import com.baijiahulian.live.ui.base.BasePresenter;
+import com.baijiahulian.live.ui.quiz.QuizDialogFragment;
+import com.baijiahulian.live.ui.quiz.QuizDialogPresenter;
+import com.baijiahulian.live.ui.utils.JsonObjectUtil;
 import com.baijiahulian.live.ui.utils.RxUtils;
 import com.baijiahulian.livecore.context.LPConstants;
+import com.baijiahulian.livecore.context.LPError;
+import com.baijiahulian.livecore.listener.OnRollCallListener;
+import com.baijiahulian.livecore.models.LPJsonModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.models.imodels.IUserInModel;
+import com.baijiahulian.livecore.models.responsedebug.LPResRoomDebugModel;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 
+import java.util.concurrent.TimeUnit;
+
+import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
@@ -24,7 +35,8 @@ public class GlobalPresenter implements BasePresenter {
     private boolean teacherVideoOn, teacherAudioOn;
 
     private Subscription subscriptionOfClassStart, subscriptionOfClassEnd, subscriptionOfForbidAllStatus,
-            subscriptionOfTeacherMedia, subscriptionOfUserIn, subscriptionOfUserOut;
+            subscriptionOfTeacherMedia, subscriptionOfUserIn, subscriptionOfUserOut, subscriptionOfQuizStart,
+            subscriptionOfQuizRes, subscriptionOfQuizEnd, subscriptionOfQuizSolution, subscriptionOfDebug;
 
     private boolean isVideoManipulated = false;
 
@@ -63,12 +75,12 @@ public class GlobalPresenter implements BasePresenter {
                 .subscribe(new LPErrorPrintSubscriber<Boolean>() {
                     @Override
                     public void call(Boolean aBoolean) {
-                        if(counter == 0){
+                        if (counter == 0) {
                             isForbidChatChanged = aBoolean;
-                            counter ++;
+                            counter++;
                             return;
                         }
-                        if(isForbidChatChanged == aBoolean) return;
+                        if (isForbidChatChanged == aBoolean) return;
                         isForbidChatChanged = aBoolean;
                         routerListener.showMessageForbidAllChat(aBoolean);
                     }
@@ -138,10 +150,105 @@ public class GlobalPresenter implements BasePresenter {
                     .subscribe(new LPErrorPrintSubscriber<String>() {
                         @Override
                         public void call(String s) {
-                            if(TextUtils.isEmpty(s)) return;
-                            if(routerListener.getLiveRoom().getTeacherUser() == null) return;
+                            if (TextUtils.isEmpty(s)) return;
+                            if (routerListener.getLiveRoom().getTeacherUser() == null) return;
                             if (s.equals(routerListener.getLiveRoom().getTeacherUser().getUserId())) {
                                 routerListener.showMessageTeacherExitRoom();
+                            }
+                        }
+                    });
+            //点名
+            routerListener.getLiveRoom().setOnRollCallListener(new OnRollCallListener() {
+                @Override
+                public void onRollCall(int time, RollCall rollCallListener) {
+                    routerListener.showRollCallDlg(time, rollCallListener);
+                }
+
+                @Override
+                public void onRollCallTimeOut() {
+                    routerListener.dismissRollCallDlg();
+                }
+            });
+
+            //开始小测
+            subscriptionOfQuizStart = routerListener.getLiveRoom().getQuizVM().getObservableOfQuizStart()
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new LPErrorPrintSubscriber<LPJsonModel>() {
+                        @Override
+                        public void call(LPJsonModel jsonModel) {
+                            if (!routerListener.isTeacherOrAssistant()) {
+                                routerListener.onQuizStartArrived(jsonModel);
+                            }
+                        }
+                    });
+            //中途打开
+            subscriptionOfQuizRes = routerListener.getLiveRoom().getQuizVM().getObservableOfQuizRes()
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new LPErrorPrintSubscriber<LPJsonModel>() {
+                        @Override
+                        public void call(LPJsonModel jsonModel) {
+                            if (!routerListener.isTeacherOrAssistant()) {
+                                if (jsonModel != null && jsonModel.data != null) {
+                                    String quizId = JsonObjectUtil.getAsString(jsonModel.data, "quiz_id");
+                                    boolean solutionStatus = false;
+                                    if (!jsonModel.data.has("solution")) {
+                                        //没有solution
+                                        solutionStatus = true;
+                                    } else if (jsonModel.data.getAsJsonObject("solution").entrySet().isEmpty()) {
+                                        //"solution":{}
+                                        solutionStatus = true;
+                                    } else if (jsonModel.data.getAsJsonObject("solution").isJsonNull()) {
+                                        //"solution":"null"
+                                        solutionStatus = true;
+                                    }
+                                    boolean endFlag = jsonModel.data.get("end_flag").getAsInt() == 1;
+                                    //quizid非空、solution是空、没有结束答题 才弹窗
+                                    if (!TextUtils.isEmpty(quizId) && solutionStatus && !endFlag) {
+                                        routerListener.onQuizRes(jsonModel);
+                                    }
+                                }
+
+                            }
+                        }
+                    });
+            //结束，只转发h5
+            subscriptionOfQuizEnd = routerListener.getLiveRoom().getQuizVM().getObservableOfQuizEnd()
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new LPErrorPrintSubscriber<LPJsonModel>() {
+                        @Override
+                        public void call(LPJsonModel jsonModel) {
+                            if (!routerListener.isTeacherOrAssistant()) {
+                                routerListener.onQuizEndArrived(jsonModel);
+                            }
+                        }
+                    });
+
+            //发答案啦
+            subscriptionOfQuizSolution = routerListener.getLiveRoom().getQuizVM().getObservableOfQuizSolution()
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new LPErrorPrintSubscriber<LPJsonModel>() {
+                        @Override
+                        public void call(LPJsonModel jsonModel) {
+                            if (!routerListener.isTeacherOrAssistant()) {
+                                routerListener.onQuizSolutionArrived(jsonModel);
+                            }
+                        }
+                    });
+            //debug信息
+            subscriptionOfDebug = routerListener.getLiveRoom().getObservableOfDebug()
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new LPErrorPrintSubscriber<LPResRoomDebugModel>() {
+                        @Override
+                        public void call(LPResRoomDebugModel lpResRoomDebugModel) {
+                            if (lpResRoomDebugModel != null && lpResRoomDebugModel.data != null) {
+                                String commandType = "";
+                                if (JsonObjectUtil.isJsonNull(lpResRoomDebugModel.data, "command_type")) {
+                                    return;
+                                }
+                                commandType = lpResRoomDebugModel.data.get("command_type").getAsString();
+                                if ("logout".equals(commandType)) {
+                                    routerListener.showError(LPError.getNewError(LPError.CODE_ERROR_LOGIN_KICK_OUT, "您已被踢出房间"));
+                                }
                             }
                         }
                     });
