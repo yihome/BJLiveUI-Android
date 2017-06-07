@@ -97,8 +97,6 @@ import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 import com.baijiahulian.livecore.wrapper.exception.NotInitializedException;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -602,9 +600,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                         if (JsonObjectUtil.isJsonNull(jsonModel.data, "force_join")) {
                             forceJoin = 0;
                         } else {
-                            forceJoin = 1;
+                            forceJoin = JsonObjectUtil.getAsInt(jsonModel.data, "force_join");
                         }
-                        args.putBoolean(QuizDialogFragment.KEY_BTN_STATUS, forceJoin != 1);
+                        args.putBoolean(QuizDialogFragment.KEY_FORCE_JOIN, forceJoin == 1);
                         quizFragment.setArguments(args);
                         quizFragment.setCancelable(false);
                         quizPresenter = new QuizDialogPresenter(quizFragment);
@@ -633,7 +631,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                     public void call(Long aLong) {
                         quizFragment = new QuizDialogFragment();
                         Bundle args = new Bundle();
-                        args.putBoolean(QuizDialogFragment.KEY_BTN_STATUS, true);
+                        args.putBoolean(QuizDialogFragment.KEY_FORCE_JOIN, false);
                         quizFragment.setArguments(args);
                         quizPresenter = new QuizDialogPresenter(quizFragment);
                         quizFragment.onSolutionArrived(jsonModel);
@@ -657,9 +655,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                         if (JsonObjectUtil.isJsonNull(jsonModel.data, "force_join")) {
                             forceJoin = 0;
                         } else {
-                            forceJoin = 1;
+                            forceJoin = JsonObjectUtil.getAsInt(jsonModel.data, "force_join");
                         }
-                        args.putBoolean(QuizDialogFragment.KEY_BTN_STATUS, forceJoin != 1);
+                        args.putBoolean(QuizDialogFragment.KEY_FORCE_JOIN, forceJoin != 1);
                         quizFragment.setArguments(args);
                         quizFragment.setCancelable(false);
                         quizPresenter = new QuizDialogPresenter(quizFragment);

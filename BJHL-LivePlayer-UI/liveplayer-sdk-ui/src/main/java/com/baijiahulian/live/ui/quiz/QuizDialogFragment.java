@@ -1,6 +1,7 @@
 package com.baijiahulian.live.ui.quiz;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -16,6 +17,7 @@ import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
@@ -28,7 +30,6 @@ import com.baijiahulian.livecore.LiveSDK;
 import com.baijiahulian.livecore.models.LPJsonModel;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
 import com.baijiahulian.livecore.utils.LPLogger;
-import com.google.gson.JsonObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -40,7 +41,7 @@ import java.util.List;
  */
 
 public class QuizDialogFragment extends BaseDialogFragment implements QuizDialogContract.View {
-    public static final String KEY_BTN_STATUS = "top_right_btn_status";
+    public static final String KEY_FORCE_JOIN = "key_force_join";
 
     private QueryPlus $;
     private static final String windowName = "bjlapp";
@@ -50,8 +51,9 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
     private String roomId;
     private String roomToken;
     private List<LPJsonModel> signalList;
-    private boolean shouldShowClose;
+    private boolean forceJoin;
     private boolean isUrlLoaded;
+    private boolean isLoadFailed = false; //url load失败了也会调到onPageFinished
     private static final String[] baseUrl = {
             "http://test-api.baijiacloud.com/m/quiz/student",
             "http://beta-api.baijiacloud.com/m/quiz/student",
@@ -64,6 +66,9 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
             "        bjlapp.sendMessageString(JSON.stringify(json));\n" +
             "    };\n" +
             "})();";
+
+    private static final String str01 = "localStorage.getItem('injected')";
+    private static final String str02 = "localStorage.setItem('injected', JSON.stringify({\\\"a\\\": 1, \\\"b\\\": 2}))";
 
     public QuizDialogFragment() {
         if (signalList == null) {
@@ -83,14 +88,14 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
         $ = QueryPlus.with(contentView);
         title(getString(R.string.live_quiz_title));
         Bundle args = getArguments();
-        shouldShowClose = args.getBoolean(KEY_BTN_STATUS);
+        forceJoin = args.getBoolean(KEY_FORCE_JOIN);
         initWebClient();
         loadUrl();
     }
 
     //是否显示关闭按钮
-    public void setCloseBtnStatus(boolean shouldShowClose) {
-        if (shouldShowClose) {
+    public void setCloseBtnStatus(boolean forceJoin) {
+        if (!forceJoin) {
             editable(true);
             editText(getString(R.string.live_quiz_close));
             editClick(new View.OnClickListener() {
@@ -126,12 +131,26 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
 
     @SuppressLint("SetJavaScriptEnabled")
     private void initWebClient() {
-        ((WebView) $.id(R.id.wv_quiz_main).view()).getSettings().setJavaScriptEnabled(true);
-        ((WebView) $.id(R.id.wv_quiz_main).view()).addJavascriptInterface(this, windowName);
-        ((WebView) $.id(R.id.wv_quiz_main).view()).setVerticalScrollBarEnabled(false);
+        WebView mWebView = ((WebView) $.id(R.id.wv_quiz_main).view());
+        mWebView.getSettings().setJavaScriptEnabled(true);
+        mWebView.addJavascriptInterface(this, windowName);
+        mWebView.setVerticalScrollBarEnabled(false);
+
+//
+//        mWebView.getSettings().setDatabaseEnabled(true);
+//        mWebView.getSettings().setDomStorageEnabled(true);
+//        mWebView.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
+//        mWebView.getSettings().setAppCacheEnabled(true);
+
+        mWebView.getSettings().setDomStorageEnabled(true);
+        mWebView.getSettings().setAppCacheMaxSize(1024 * 1024 * 8);
+        String appCachePath = getActivity().getApplicationContext().getCacheDir().getAbsolutePath();
+        mWebView.getSettings().setAppCachePath(appCachePath);
+        mWebView.getSettings().setAllowFileAccess(true);
+        mWebView.getSettings().setAppCacheEnabled(true);
 
         //chrome client
-        ((WebView) $.id(R.id.wv_quiz_main).view()).setWebChromeClient(new WebChromeClient() {
+        mWebView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onProgressChanged(WebView view, int newProgress) {
                 ((ProgressBar) $.id(R.id.pb_web_view_quiz).view()).setProgress(newProgress);
@@ -143,12 +162,12 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
         }
 
         //webView client
-        ((WebView) $.id(R.id.wv_quiz_main).view()).setWebViewClient(new WebViewClient() {
+        mWebView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 super.onPageStarted(view, url, favicon);
                 $.id(R.id.pb_web_view_quiz).visible();
-                setCloseBtnStatus(shouldShowClose);
+                setCloseBtnStatus(forceJoin);
             }
 
             @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -157,13 +176,36 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
                 super.onPageFinished(view, url);
                 isUrlLoaded = true;
                 $.id(R.id.pb_web_view_quiz).gone();
-                setCloseBtnStatus(shouldShowClose);
+                if (!isLoadFailed) {
+                    setCloseBtnStatus(forceJoin);
+                }
+                isLoadFailed = false;
                 view.evaluateJavascript(str, new ValueCallback<String>() {
                     @Override
                     public void onReceiveValue(String value) {
 
                     }
                 });
+                view.evaluateJavascript(str01, new ValueCallback<String>() {
+                    @Override
+                    public void onReceiveValue(String value) {
+                        System.out.println("hola " + value);
+                    }
+                });
+                view.evaluateJavascript(str02, new ValueCallback<String>() {
+                    @Override
+                    public void onReceiveValue(String value) {
+                        System.out.println("hola " + value);
+                    }
+                });
+                view.evaluateJavascript(str01, new ValueCallback<String>() {
+                    @Override
+                    public void onReceiveValue(String value) {
+                        System.out.println("hola " + value);
+                    }
+                });
+
+
                 callJsInQueue();
             }
 
@@ -171,7 +213,8 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
                 super.onReceivedError(view, request, error);
                 $.id(R.id.pb_web_view_quiz).gone();
-                setCloseBtnStatus(true);
+                setCloseBtnStatus(false);
+                isLoadFailed = true;
             }
         });
 
@@ -216,8 +259,16 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
         if (!"quiz_start".equals(key)) {
             return;
         }
-        quizId = jsonModel.data.get("quiz_id").getAsString();
-        roomId = jsonModel.data.get("class_id").getAsString();
+        if (JsonObjectUtil.isJsonNull(jsonModel.data, "quiz_id")) {
+            quizId = "";
+        } else {
+            quizId = jsonModel.data.get("quiz_id").getAsString();
+        }
+        if (JsonObjectUtil.isJsonNull(jsonModel.data, "class_id")) {
+            roomId = "";
+        } else {
+            roomId = jsonModel.data.get("class_id").getAsString();
+        }
         signalList.add(jsonModel);
     }
 
@@ -240,8 +291,16 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
         if (!"quiz_solution".equals(key)) {
             return;
         }
-        quizId = jsonModel.data.get("quiz_id").getAsString();
-        roomId = jsonModel.data.get("class_id").getAsString();
+        if (JsonObjectUtil.isJsonNull(jsonModel.data, "quiz_id")) {
+            quizId = "";
+        } else {
+            quizId = jsonModel.data.get("quiz_id").getAsString();
+        }
+        if (JsonObjectUtil.isJsonNull(jsonModel.data, "class_id")) {
+            roomId = "";
+        } else {
+            roomId = jsonModel.data.get("class_id").getAsString();
+        }
         signalList.add(jsonModel);
     }
 
@@ -251,8 +310,16 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
         if (!"quiz_res".equals(key)) {
             return;
         }
-        quizId = jsonModel.data.get("quiz_id").getAsString();
-        roomId = jsonModel.data.get("class_id").getAsString();
+        if (JsonObjectUtil.isJsonNull(jsonModel.data, "quiz_id")) {
+            quizId = "";
+        } else {
+            quizId = jsonModel.data.get("quiz_id").getAsString();
+        }
+        if (JsonObjectUtil.isJsonNull(jsonModel.data, "class_id")) {
+            roomId = "";
+        } else {
+            roomId = jsonModel.data.get("class_id").getAsString();
+        }
         signalList.add(jsonModel);
     }
 
