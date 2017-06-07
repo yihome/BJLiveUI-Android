@@ -10,17 +10,13 @@ import com.baijiahulian.live.ui.base.BaseView;
 interface TopBarContract {
 
     interface View extends BaseView<Presenter> {
-        void showOnlineUserCount(int count);
-
-        void showRoomTitle(String roomTitle);
 
         void showHideShare(boolean show);
     }
 
     interface Presenter extends BasePresenter {
-        void navigateToShare();
 
-        void navigateToUserList();
+        void navigateToShare();
     }
 
 }

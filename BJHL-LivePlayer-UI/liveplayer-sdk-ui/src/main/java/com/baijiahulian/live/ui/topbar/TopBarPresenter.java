@@ -1,11 +1,6 @@
 package com.baijiahulian.live.ui.topbar;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
-import com.baijiahulian.live.ui.utils.RxUtils;
-import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
-
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
 
 import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 
@@ -19,8 +14,6 @@ public class TopBarPresenter implements TopBarContract.Presenter {
 
     private TopBarContract.View view;
 
-    private Subscription subscriptionOfUserCountChange;
-
     public TopBarPresenter(TopBarContract.View view) {
         this.view = view;
     }
@@ -33,21 +26,11 @@ public class TopBarPresenter implements TopBarContract.Presenter {
     @Override
     public void subscribe() {
         checkNotNull(routerListener);
-        subscriptionOfUserCountChange = routerListener.getLiveRoom().getObservableOfUserNumberChange().observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<Integer>() {
-                    @Override
-                    public void call(Integer integer) {
-                        view.showOnlineUserCount(integer);
-                    }
-                });
-        view.showOnlineUserCount(routerListener.getLiveRoom().getOnlineUserVM().getUserCount());
-        view.showRoomTitle(routerListener.getLiveRoom().getRoomTitle());
         view.showHideShare(routerListener.getVisibilityOfShareBtn());
     }
 
     @Override
     public void unSubscribe() {
-        RxUtils.unSubscribe(subscriptionOfUserCountChange);
     }
 
     @Override
@@ -59,10 +42,5 @@ public class TopBarPresenter implements TopBarContract.Presenter {
     @Override
     public void navigateToShare() {
         routerListener.navigateToShare();
-    }
-
-    @Override
-    public void navigateToUserList() {
-        routerListener.navigateToUserList();
     }
 }

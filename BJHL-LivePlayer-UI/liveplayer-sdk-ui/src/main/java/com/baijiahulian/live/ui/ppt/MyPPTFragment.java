@@ -12,6 +12,12 @@ import com.baijiahulian.livecore.ppt.whiteboard.LPWhiteBoardView;
 
 public class MyPPTFragment extends LPPPTFragment implements PPTContract.View {
 
+    @Override
+    public void init(Bundle savedInstanceState) {
+        super.init(savedInstanceState);
+        showPPTPageView();
+    }
+
     private PPTContract.Presenter presenter;
 
     @Override
@@ -40,11 +46,6 @@ public class MyPPTFragment extends LPPPTFragment implements PPTContract.View {
         });
     }
 
-    @Override
-    public void init(Bundle savedInstanceState) {
-        super.init(savedInstanceState);
-        showPPTPageView();
-    }
 
     @Override
     public void onDestroy() {

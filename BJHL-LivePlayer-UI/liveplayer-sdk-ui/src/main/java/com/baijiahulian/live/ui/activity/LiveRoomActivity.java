@@ -204,7 +204,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         };
         dlChat.openDrawer(Gravity.START);
         checkScreenOrientationInit();
-//        CrashHandler.getInstance().init(LiveRoomActivity.this);
     }
 
     private void initViews() {
@@ -216,7 +215,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         flLoading = (FrameLayout) findViewById(R.id.activity_live_room_loading);
         dlChat = (DrawerLayout) findViewById(R.id.activity_live_room_chat_drawer);
         llVideoContainer = (LinearLayout) findViewById(R.id.activity_live_room_video_recorder_container);
-        flTopRight = (FrameLayout) findViewById(R.id.activity_live_room_top_right);
+        flTopRight = (FrameLayout) findViewById(R.id.activity_live_room_top_right_recording);
         flPPTLeft = (FrameLayout) findViewById(R.id.activity_live_room_ppt_left);
         flError = (FrameLayout) findViewById(R.id.activity_live_room_error);
         flRightBottom = (FrameLayout) findViewById(R.id.activity_live_room_bottom_right);

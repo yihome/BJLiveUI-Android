@@ -43,7 +43,8 @@ public class VideoPlayerPresenter implements VideoPlayerContract.Presenter {
     }
 
     public String getCurrentPlayingUserId() {
-        return player.getCurrentVideoUserId();
+//        return player.getCurrentVideoUserId();
+        return null;
     }
 
     @Override
@@ -65,7 +66,7 @@ public class VideoPlayerPresenter implements VideoPlayerContract.Presenter {
 
     @Override
     public void unSubscribe() {
-        player.playAVClose(player.getCurrentVideoUserId());
+//        player.playAVClose(player.getCurrentVideoUserId());
     }
 
     @Override

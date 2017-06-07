@@ -22,12 +22,6 @@ public class TopBarFragment extends BaseFragment implements TopBarContract.View 
     @Override
     public void init(Bundle savedInstanceState) {
 
-        $.id(R.id.fragment_top_bar_user_count_container).clicked(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                presenter.navigateToUserList();
-            }
-        });
         $.id(R.id.fragment_top_bar_back).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -46,16 +40,6 @@ public class TopBarFragment extends BaseFragment implements TopBarContract.View 
     public void setPresenter(TopBarContract.Presenter presenter) {
         super.setBasePresenter(presenter);
         this.presenter = presenter;
-    }
-
-    @Override
-    public void showOnlineUserCount(int count) {
-        $.id(R.id.fragment_top_bar_user_count).text(getString(R.string.live_on_line_user_count, count));
-    }
-
-    @Override
-    public void showRoomTitle(String roomTitle) {
-        $.id(R.id.fragment_top_bar_title).text(roomTitle);
     }
 
     @Override
