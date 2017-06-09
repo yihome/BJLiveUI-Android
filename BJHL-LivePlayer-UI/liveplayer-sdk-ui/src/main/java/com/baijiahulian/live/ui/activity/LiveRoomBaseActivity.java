@@ -59,7 +59,7 @@ public abstract class LiveRoomBaseActivity extends AppCompatActivity {
     }
 
     protected void removeFragment(Fragment fragment) {
-        if(fragment == null) return;
+        if (fragment == null) return;
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 //        int inAnim = LPFragmentAnimUtil.getInAnim(fragment);
 //        int outAnim = LPFragmentAnimUtil.getOutAnim(fragment);
@@ -133,14 +133,14 @@ public abstract class LiveRoomBaseActivity extends AppCompatActivity {
 
     protected void showDialogFragment(final BaseDialogFragment dialogFragment) {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        dialogFragment.show(ft, dialogFragment.getClass().getSimpleName());
+        dialogFragment.show(ft, dialogFragment.getClass().getSimpleName() + dialogFragment.hashCode());
         getSupportFragmentManager().executePendingTransactions();
         dialogFragment.getDialog().setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {
                 if (isFinishing()) return;
                 FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                Fragment prev = getSupportFragmentManager().findFragmentByTag(dialogFragment.getClass().getSimpleName());
+                Fragment prev = getSupportFragmentManager().findFragmentByTag(dialogFragment.getClass().getSimpleName() + dialogFragment.hashCode());
                 if (prev != null)
                     ft.remove(prev);
                 ft.commitAllowingStateLoss();

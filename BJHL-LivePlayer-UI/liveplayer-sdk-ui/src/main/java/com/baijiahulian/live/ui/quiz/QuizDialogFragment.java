@@ -148,6 +148,7 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
         mWebView.getSettings().setAppCachePath(appCachePath);
         mWebView.getSettings().setAllowFileAccess(true);
         mWebView.getSettings().setAppCacheEnabled(true);
+        mWebView.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
 
         //chrome client
         mWebView.setWebChromeClient(new WebChromeClient() {

@@ -589,28 +589,21 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public void onQuizStartArrived(final LPJsonModel jsonModel) {
         dismissQuizDlg();
-        subscriptionOfQuizStart = Observable.timer(1000, TimeUnit.MILLISECONDS)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<Long>() {
-                    @Override
-                    public void call(Long aLong) {
-                        quizFragment = new QuizDialogFragment();
-                        Bundle args = new Bundle();
-                        int forceJoin = 0;
-                        if (JsonObjectUtil.isJsonNull(jsonModel.data, "force_join")) {
-                            forceJoin = 0;
-                        } else {
-                            forceJoin = JsonObjectUtil.getAsInt(jsonModel.data, "force_join");
-                        }
-                        args.putBoolean(QuizDialogFragment.KEY_FORCE_JOIN, forceJoin == 1);
-                        quizFragment.setArguments(args);
-                        quizFragment.setCancelable(false);
-                        quizPresenter = new QuizDialogPresenter(quizFragment);
-                        quizFragment.onStartArrived(jsonModel);
-                        bindVP(quizFragment, quizPresenter);
-                        showDialogFragment(quizFragment);
-                    }
-                });
+        quizFragment = new QuizDialogFragment();
+        Bundle args = new Bundle();
+        int forceJoin = 0;
+        if (JsonObjectUtil.isJsonNull(jsonModel.data, "force_join")) {
+            forceJoin = 0;
+        } else {
+            forceJoin = JsonObjectUtil.getAsInt(jsonModel.data, "force_join");
+        }
+        args.putBoolean(QuizDialogFragment.KEY_FORCE_JOIN, forceJoin == 1);
+        quizFragment.setArguments(args);
+        quizFragment.setCancelable(false);
+        quizPresenter = new QuizDialogPresenter(quizFragment);
+        quizFragment.onStartArrived(jsonModel);
+        bindVP(quizFragment, quizPresenter);
+        showDialogFragment(quizFragment);
     }
 
     @Override
@@ -624,48 +617,34 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public void onQuizSolutionArrived(final LPJsonModel jsonModel) {
         dismissQuizDlg();
-        subscriptionOfSolutionArrived = Observable.timer(1000, TimeUnit.MILLISECONDS)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<Long>() {
-                    @Override
-                    public void call(Long aLong) {
-                        quizFragment = new QuizDialogFragment();
-                        Bundle args = new Bundle();
-                        args.putBoolean(QuizDialogFragment.KEY_FORCE_JOIN, false);
-                        quizFragment.setArguments(args);
-                        quizPresenter = new QuizDialogPresenter(quizFragment);
-                        quizFragment.onSolutionArrived(jsonModel);
-                        bindVP(quizFragment, quizPresenter);
-                        showDialogFragment(quizFragment);
-                    }
-                });
+        quizFragment = new QuizDialogFragment();
+        Bundle args = new Bundle();
+        args.putBoolean(QuizDialogFragment.KEY_FORCE_JOIN, false);
+        quizFragment.setArguments(args);
+        quizPresenter = new QuizDialogPresenter(quizFragment);
+        quizFragment.onSolutionArrived(jsonModel);
+        bindVP(quizFragment, quizPresenter);
+        showDialogFragment(quizFragment);
     }
 
     @Override
     public void onQuizRes(final LPJsonModel jsonModel) {
         dismissQuizDlg();
-        subscriptionOfQuizRes = Observable.timer(1000, TimeUnit.MILLISECONDS)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<Long>() {
-                    @Override
-                    public void call(Long aLong) {
-                        quizFragment = new QuizDialogFragment();
-                        Bundle args = new Bundle();
-                        int forceJoin = 0;
-                        if (JsonObjectUtil.isJsonNull(jsonModel.data, "force_join")) {
-                            forceJoin = 0;
-                        } else {
-                            forceJoin = JsonObjectUtil.getAsInt(jsonModel.data, "force_join");
-                        }
-                        args.putBoolean(QuizDialogFragment.KEY_FORCE_JOIN, forceJoin != 1);
-                        quizFragment.setArguments(args);
-                        quizFragment.setCancelable(false);
-                        quizPresenter = new QuizDialogPresenter(quizFragment);
-                        quizFragment.onQuizResArrived(jsonModel);
-                        bindVP(quizFragment, quizPresenter);
-                        showDialogFragment(quizFragment);
-                    }
-                });
+        quizFragment = new QuizDialogFragment();
+        Bundle args = new Bundle();
+        int forceJoin = 0;
+        if (JsonObjectUtil.isJsonNull(jsonModel.data, "force_join")) {
+            forceJoin = 0;
+        } else {
+            forceJoin = JsonObjectUtil.getAsInt(jsonModel.data, "force_join");
+        }
+        args.putBoolean(QuizDialogFragment.KEY_FORCE_JOIN, forceJoin == 1);
+        quizFragment.setArguments(args);
+        quizFragment.setCancelable(false);
+        quizPresenter = new QuizDialogPresenter(quizFragment);
+        quizFragment.onQuizResArrived(jsonModel);
+        bindVP(quizFragment, quizPresenter);
+        showDialogFragment(quizFragment);
     }
 
     @Override
