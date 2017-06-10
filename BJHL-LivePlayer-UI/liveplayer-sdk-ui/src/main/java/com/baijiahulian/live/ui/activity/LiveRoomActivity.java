@@ -188,6 +188,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         enterUser = (IUserModel) getIntent().getSerializableExtra("user");
 
         loadingFragment = new LoadingFragment();
+        Bundle args = new Bundle();
+        args.putBoolean("show_tech_support", shouldShowTechSupport);
+        loadingFragment.setArguments(args);
         LoadingPresenter loadingPresenter;
         if (roomId == -1) {
             loadingPresenter = new LoadingPresenter(loadingFragment, code, name, false);
@@ -263,6 +266,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                         removeFragment(errorFragment);
 
                     loadingFragment = new LoadingFragment();
+                    Bundle args = new Bundle();
+                    args.putBoolean("show_tech_support", shouldShowTechSupport);
+                    loadingFragment.setArguments(args);
                     LoadingPresenter loadingPresenter = new LoadingPresenter(loadingFragment, code, nickName, false);
                     bindVP(loadingFragment, loadingPresenter);
                     addFragment(R.id.activity_live_room_loading, loadingFragment);
@@ -710,6 +716,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
         flLoading.setVisibility(View.VISIBLE);
         loadingFragment = new LoadingFragment();
+        Bundle args = new Bundle();
+        args.putBoolean("show_tech_support", shouldShowTechSupport);
+        loadingFragment.setArguments(args);
         LoadingPresenter loadingPresenter;
         if (roomId == -1) {
             loadingPresenter = new LoadingPresenter(loadingFragment, code, name, false);
@@ -1315,6 +1324,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        shouldShowTechSupport = true;
         if (pptManagePresenter != null) {
             pptManagePresenter.destroy();
             pptManagePresenter = null;
@@ -1429,6 +1439,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private static LiveSDKWithUI.RoomEnterConflictListener enterRoomConflictListener;
     private static LiveSDKWithUI.LPRoomResumeListener roomLifeCycleListener;
 
+    private static boolean shouldShowTechSupport = true;
+
     private void clearStaticCallback() {
         shareListener = null;
         exitListener = null;
@@ -1450,6 +1462,10 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     public static void setEnterRoomConflictListener(LiveSDKWithUI.RoomEnterConflictListener enterRoomConflictListener) {
         LiveRoomActivity.enterRoomConflictListener = enterRoomConflictListener;
+    }
+
+    public static void setShouldShowTechSupport(boolean shouldShow) {
+        shouldShowTechSupport = shouldShow;
     }
 
 }

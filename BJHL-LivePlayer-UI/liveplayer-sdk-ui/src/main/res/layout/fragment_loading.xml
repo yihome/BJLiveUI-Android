@@ -8,8 +8,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/activity_live_room_margin"
-        android:padding="10dp"
         android:layout_marginTop="2.5dp"
+        android:padding="10dp"
         android:src="@drawable/live_ic_back" />
 
     <LinearLayout
@@ -39,4 +39,18 @@
             android:textColor="@color/live_text_color_mid_light" />
 
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_fragment_loading_tech_support"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/activity_live_room_dialog_margin_big"
+        android:drawableLeft="@drawable/ic_baijiayun_logo"
+        android:drawablePadding="5dp"
+        android:drawableStart="@drawable/ic_baijiayun_logo"
+        android:text="@string/live_loading_support"
+        android:textColor="@color/live_grey_tech_support"
+        android:textSize="12sp" />
 </RelativeLayout>

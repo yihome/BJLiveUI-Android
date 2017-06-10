@@ -364,7 +364,7 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
     @JavascriptInterface
     public void sendMessageString(String json) {
         if (!TextUtils.isEmpty(json)) {
-            presenter.sendCommonRequest(json);
+            presenter.submitAnswer(json);
         }
     }
 
