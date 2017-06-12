@@ -98,6 +98,6 @@
     <string name="live_quiz_dialog_tip">确认关闭测验？</string>
     <string name="live_quiz_dialog_cancel">再等等</string>
     <string name="live_quiz_dialog_confirm">确认</string>
-    <string name="live_loading_support">百家云提供技术支持</string>
+    <string name="live_loading_support">百家云提供直播服务</string>
 </resources>
 
