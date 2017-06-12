@@ -7,7 +7,7 @@ import com.baijiahulian.live.ui.base.BaseView;
  * Created by Shubo on 2017/4/11.
  */
 
-public interface SpeakQueueContract {
+interface SpeakQueueContract {
 
     interface View extends BaseView<Presenter> {
         void notifyItemChanged(int position);

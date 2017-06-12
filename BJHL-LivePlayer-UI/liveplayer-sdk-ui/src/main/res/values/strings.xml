@@ -37,6 +37,7 @@
     <string name="live_setting_camera_switch_back">后</string>
     <string name="live_setting_camera_forbid_all">全体禁言</string>
     <string name="live_media_visitor_fail">游客不能举手发言</string>
+    <string name="live_media_speak_applying">举手中</string>
     <string name="live_media_student_fail">请先举手发言，并等待老师同意</string>
     <string name="live_loading_more">正在加载…</string>
     <string name="live_media_speak_apply_agree">老师同意了您的发言请求</string>

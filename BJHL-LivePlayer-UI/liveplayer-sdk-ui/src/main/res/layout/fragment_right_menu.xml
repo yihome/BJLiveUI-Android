@@ -5,29 +5,13 @@
     android:gravity="bottom|left"
     android:orientation="vertical">
 
-    <RelativeLayout
-        android:id="@+id/fragment_right_speakers_container"
-        android:layout_width="51dp"
-        android:layout_height="wrap_content">
-
-        <ImageView
-            android:id="@+id/fragment_right_speakers_img"
-            android:layout_width="46dp"
-            android:layout_height="46dp"
-            android:layout_marginBottom="@dimen/activity_live_room_margin"
-            android:layout_marginTop="5dp"
-            android:visibility="gone" />
-
-        <TextView
-            android:id="@+id/fragment_right_speakers_num"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_alignParentRight="true"
-            android:background="@drawable/live_right_menu_dot"
-            android:gravity="center"
-            android:textColor="@color/live_white"
-            android:visibility="gone" />
-    </RelativeLayout>
+    <ImageView
+        android:id="@+id/fragment_right_online_user"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/activity_live_room_margin"
+        android:layout_marginTop="5dp"
+        android:src="@drawable/live_ic_useronline" />
 
     <ImageView
         android:id="@+id/fragment_right_pen"

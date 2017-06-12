@@ -14,11 +14,13 @@ public interface RightMenuContract {
     int STUDENT_SPEAK_APPLY_SPEAKING = 2;
 
     interface View extends BaseView<Presenter> {
+        /*
         void showSpeakQueueImage(String imgUrl);
 
         void showSpeakQueueCount(int count);
 
         void showEmptyQueue();
+        */
 
         void showSpeakClosedByTeacher();
 
@@ -54,7 +56,7 @@ public interface RightMenuContract {
     }
 
     interface Presenter extends BasePresenter {
-        void visitSpeakers();
+        void visitOnlineUser();
 
         void changeDrawing();
 

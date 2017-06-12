@@ -27,7 +27,7 @@ dependencies {
 
     compile 'com.baijia.common:common-image-crop:1.1.8' // image crop
 
-//    compile 'com.afollestad.material-dialogs:commons:0.9.4.4'
+    compile 'com.afollestad.material-dialogs:commons:0.9.4.5'
 
 //    compile 'com.baijia.live:liveplayer-sdk-core:0.3.8'
 //    compile 'com.baijia.live:liveplayer-sdk-core-ppt:0.3.5'

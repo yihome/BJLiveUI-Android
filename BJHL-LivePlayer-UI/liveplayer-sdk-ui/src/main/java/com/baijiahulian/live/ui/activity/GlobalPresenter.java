@@ -96,20 +96,20 @@ public class GlobalPresenter implements BasePresenter {
                             if (iMediaModel.isVideoOn() && iMediaModel.isAudioOn()) {
                                 if (!teacherVideoOn || !teacherAudioOn) {
                                     routerListener.showMessageTeacherOpenAV();
-                                    if (!isVideoManipulated && routerListener.getCurrentVideoUser() == null) {
-                                        routerListener.playVideo(iMediaModel.getUser().getUserId());
-                                        routerListener.setCurrentVideoUser(iMediaModel);
-                                    }
+//                                    if (!isVideoManipulated && routerListener.getCurrentVideoUser() == null) {
+//                                        routerListener.playVideo(iMediaModel.getUser().getUserId());
+//                                        routerListener.setCurrentVideoUser(iMediaModel);
+//                                    }
                                 }
                             } else if (iMediaModel.isVideoOn()) {
                                 if (teacherAudioOn && teacherVideoOn) {
                                     routerListener.showMessageTeacherCloseAudio();
                                 } else if (!teacherVideoOn) {
                                     routerListener.showMessageTeacherOpenVideo();
-                                    if (!isVideoManipulated && routerListener.getCurrentVideoUser() == null) {
-                                        routerListener.playVideo(iMediaModel.getUser().getUserId());
-                                        routerListener.setCurrentVideoUser(iMediaModel);
-                                    }
+//                                    if (!isVideoManipulated && routerListener.getCurrentVideoUser() == null) {
+//                                        routerListener.playVideo(iMediaModel.getUser().getUserId());
+//                                        routerListener.setCurrentVideoUser(iMediaModel);
+//                                    }
                                 }
                             } else if (iMediaModel.isAudioOn()) {
                                 if (teacherAudioOn && teacherVideoOn) {

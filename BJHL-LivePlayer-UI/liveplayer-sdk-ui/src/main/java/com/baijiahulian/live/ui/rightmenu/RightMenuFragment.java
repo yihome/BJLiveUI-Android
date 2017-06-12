@@ -2,15 +2,11 @@ package com.baijiahulian.live.ui.rightmenu;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ImageView;
 
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseFragment;
-import com.baijiahulian.live.ui.utils.AliCloudImageUtil;
-import com.baijiahulian.live.ui.utils.CircleAvatarTransformation;
 import com.baijiahulian.live.ui.viewsupport.CountdownCircleView;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
-import com.squareup.picasso.Picasso;
 
 import java.util.concurrent.TimeUnit;
 
@@ -39,10 +35,10 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
                 presenter.managePPT();
             }
         });
-        $.id(R.id.fragment_right_speakers_container).clicked(new View.OnClickListener() {
+        $.id(R.id.fragment_right_online_user).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                presenter.visitSpeakers();
+                presenter.visitOnlineUser();
             }
         });
         $.id(R.id.fragment_right_speak_apply).clicked().throttleFirst(1, TimeUnit.SECONDS)
@@ -59,7 +55,7 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
     public int getLayoutId() {
         return R.layout.fragment_right_menu;
     }
-
+/*
     @Override
     public void showSpeakQueueImage(String imgUrl) {
         $.id(R.id.fragment_right_speakers_img).visible();
@@ -82,6 +78,7 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
         $.id(R.id.fragment_right_speakers_num).gone();
         $.id(R.id.fragment_right_speakers_img).gone();
     }
+    */
 
     @Override
     public void showDrawingStatus(boolean isEnable) {
