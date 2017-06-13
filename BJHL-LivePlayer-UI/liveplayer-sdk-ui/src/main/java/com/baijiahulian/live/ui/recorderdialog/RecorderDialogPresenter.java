@@ -46,7 +46,7 @@ public class RecorderDialogPresenter implements RecorderDialogContract.Presenter
     @Override
     public void switchFullscreen() {
         if(routerListener.switchable()) {
-            routerListener.maximiseRecorderView();
+//            routerListener.maximiseRecorderView();
             routerListener.setSwitching();
         }
     }

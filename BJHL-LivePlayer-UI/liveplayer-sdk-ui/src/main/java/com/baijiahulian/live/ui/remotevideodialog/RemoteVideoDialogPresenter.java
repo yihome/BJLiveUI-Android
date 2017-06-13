@@ -30,7 +30,7 @@ public class RemoteVideoDialogPresenter implements RemoteVideoDialogContract.Pre
         } else {
             view.hideCloseSpeaking();
         }
-        view.showCurrentRemoteUserName(routerListener.getCurrentVideoUser().getUser().getName());
+//        view.showCurrentRemoteUserName(routerListener.getCurrentVideoUser().getUser().getName());
     }
 
     @Override
@@ -47,26 +47,26 @@ public class RemoteVideoDialogPresenter implements RemoteVideoDialogContract.Pre
     @Override
     public void switchFullscreen() {
         if (routerListener.switchable()) {
-            routerListener.maximisePlayerView();
+//            routerListener.maximisePlayerView();
             routerListener.setSwitching();
         }
     }
 
     @Override
     public void closeVideo() {
-        if (!routerListener.isCurrentUserTeacher())
-            routerListener.setVideoManipulated(true);
-        boolean isAudioOn = routerListener.getCurrentVideoUser().isAudioOn();
-        String currentVideoUserId = routerListener.getCurrentVideoUser().getUser().getUserId();
-        routerListener.playVideoClose(currentVideoUserId);
-        if (isAudioOn) {
-            routerListener.getLiveRoom().getPlayer().playAudio(currentVideoUserId);
-        }
+//        if (!routerListener.isCurrentUserTeacher())
+//            routerListener.setVideoManipulated(true);
+//        boolean isAudioOn = routerListener.getCurrentVideoUser().isAudioOn();
+//        String currentVideoUserId = routerListener.getCurrentVideoUser().getUser().getUserId();
+//        routerListener.playVideoClose(currentVideoUserId);
+//        if (isAudioOn) {
+//            routerListener.getLiveRoom().getPlayer().playAudio(currentVideoUserId);
+//        }
     }
 
     @Override
     public void closeSpeaking() {
-        routerListener.playVideoClose(routerListener.getCurrentVideoUser().getUser().getUserId());
-        routerListener.getLiveRoom().getSpeakQueueVM().closeOtherSpeak(routerListener.getCurrentVideoUser().getUser().getUserId());
+//        routerListener.playVideoClose(routerListener.getCurrentVideoUser().getUser().getUserId());
+//        routerListener.getLiveRoom().getSpeakQueueVM().closeOtherSpeak(routerListener.getCurrentVideoUser().getUser().getUserId());
     }
 }

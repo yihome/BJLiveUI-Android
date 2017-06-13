@@ -237,6 +237,12 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                 break;
             case VIEW_TYPE_RECORD:
                 options.add(getString(R.string.live_full_screen));
+                options.add(getString(R.string.live_recorder_switch_camera));
+                if (presenter.getRecorder().isBeautyFilterOn()) {
+                    options.add(getString(R.string.live_recorder_pretty_filter_off));
+                } else {
+                    options.add(getString(R.string.live_recorder_pretty_filter_on));
+                }
                 options.add(getString(R.string.live_close_video));
                 break;
             case VIEW_TYPE_VIDEO_PLAY:
@@ -267,6 +273,11 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                             presenter.playVideo(tag);
                         } else if (getString(R.string.live_full_screen).equals(charSequence.toString())) {
                             presenter.setFullScreenTag(tag);
+                        } else if (getString(R.string.live_recorder_switch_camera).equals(charSequence.toString())) {
+                            presenter.switchCamera();
+                        } else if (getString(R.string.live_recorder_pretty_filter_off).equals(charSequence.toString())
+                                || getString(R.string.live_recorder_pretty_filter_on).equals(charSequence.toString())) {
+                            presenter.switchPrettyFilter();
                         }
                         materialDialog.dismiss();
                     }

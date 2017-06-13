@@ -40,12 +40,6 @@ public interface LiveRoomRouterListener {
 
     void enableSpeakerMode();
 
-    void maximiseRecorderView();
-
-    void maximisePlayerView();
-
-    void maximisePPTView();
-
     void showMorePanel(int anchorX, int anchorY);
 
     void navigateToShare();
@@ -60,30 +54,11 @@ public interface LiveRoomRouterListener {
 
     boolean isTeacherOrAssistant();
 
-    String getCurrentVideoPlayingUserId();
-
-    void playVideo(String userId);
-
-    void playVideoClose(String userId);
-
     void attachLocalVideo();
 
     void detachLocalVideo();
 
-    void showRecorderDialogFragment();
-
-    void showPPTDialogFragment();
-
-    void showRemoteVideoPlayer();
-
     boolean isPPTMax();
-
-    /**
-     * 当前正在互动的用户多媒体对象
-     */
-    void setCurrentVideoUser(IMediaModel mediaModel);
-
-    IMediaModel getCurrentVideoUser();
 
     void clearPPTAllShapes();
 
@@ -102,8 +77,6 @@ public interface LiveRoomRouterListener {
     void showBigChatPic(String url);
 
     void sendImageMessage(String path);
-
-    void doReconnectServer();
 
     void showReconnectSuccess();
 

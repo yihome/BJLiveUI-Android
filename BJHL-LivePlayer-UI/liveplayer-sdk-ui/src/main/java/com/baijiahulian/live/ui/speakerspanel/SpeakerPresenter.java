@@ -41,14 +41,12 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
 
     private LiveRoomRouterListener routerListener;
     private SpeakersContract.View view;
-//    private String currentFullScreenTag = PPT_TAG;
 //    private List<String> videoPlayingUserIdList;
 
     private LPSubscribeObjectWithLastValue<String> fullScreenKVO;
 
     private List<String> displayList;
 
-    private int _displayPPTSection = -1;
     private int _displayRecordSection = -1;
     private int _displayVideoSection = -1;
     private int _displaySpeakerSection = -1;
@@ -65,12 +63,10 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
     @Override
     public void setRouter(LiveRoomRouterListener liveRoomRouterListener) {
         routerListener = liveRoomRouterListener;
-//        videoPlayingUserIdList = new ArrayList<>();
     }
 
     private void initView() {
         displayList = new ArrayList<>();
-        _displayPPTSection = displayList.size();
         if (!fullScreenKVO.getParameter().equals(PPT_TAG)) {
             displayList.add(PPT_TAG);
         }
@@ -125,11 +121,19 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                     public void call(IMediaModel iMediaModel) {
                         if (fullScreenKVO.getParameter().equals(iMediaModel.getUser().getUserId())) {
                             // full screen user
-                            if (!iMediaModel.isVideoOn())
+                            if (!iMediaModel.isVideoOn()) {
                                 fullScreenKVO.setParameter(null);
+                                routerListener.getLiveRoom().getPlayer().playAVClose(iMediaModel.getUser().getUserId());
+                                routerListener.getLiveRoom().getPlayer().playAudio(iMediaModel.getUser().getUserId());
+                                _displayApplySection++;
+                                displayList.add(_displayApplySection - 1, iMediaModel.getUser().getUserId());
+                                view.notifyItemInserted(_displayApplySection - 1);
+                            }
                             return;
                         }
                         int position = displayList.indexOf(iMediaModel.getUser().getUserId());
+                        if(position == -1)
+                            return;
                         if (position < _displayVideoSection) {
                             throw new RuntimeException("position < _displayVideoSection");
                         } else if (position < _displaySpeakerSection) { // 视频打开用户
@@ -161,6 +165,8 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                             return;
                         }
                         int position = displayList.indexOf(iMediaModel.getUser().getUserId());
+                        if(position == -1)
+                            return;
                         if (position < _displayVideoSection) {
                             throw new RuntimeException("position < _displayVideoSection");
                         } else if (position < _displaySpeakerSection) { // 视频打开用户
@@ -213,7 +219,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                 .filter(new Func1<String, Boolean>() {
                     @Override
                     public Boolean call(String s) {
-                        return !s.equals(fullScreenKVO.getLastParameter());
+                        return s == null || !s.equals(fullScreenKVO.getLastParameter());
                     }
                 })
                 .observeOn(AndroidSchedulers.mainThread())
@@ -364,18 +370,27 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
     }
 
     @Override
-    public void closeVideo(String userId) {
-        int position = displayList.indexOf(userId);
+    public void closeVideo(String tag) {
+        if (tag.equals(RECORD_TAG)) {
+            if (routerListener.getLiveRoom().getRecorder().isVideoAttached()) {
+                routerListener.detachLocalVideo();
+                if (!routerListener.getLiveRoom().getRecorder().isAudioAttached()) {
+                    routerListener.getLiveRoom().getRecorder().stopPublishing();
+                }
+            }
+            return;
+        }
+        int position = displayList.indexOf(tag);
 
         // 在dialog操作过程中 数据发生了变化
         if (position == -1) return;
         if (getSpeakModel(position) == null) return;
 
-        routerListener.getLiveRoom().getPlayer().playAVClose(userId);
-        routerListener.getLiveRoom().getPlayer().playAudio(userId);
+        routerListener.getLiveRoom().getPlayer().playAVClose(tag);
+        routerListener.getLiveRoom().getPlayer().playAudio(tag);
         view.notifyItemDeleted(position);
         displayList.remove(position);
-        displayList.add(_displayApplySection - 1, userId);
+        displayList.add(_displayApplySection - 1, tag);
         _displaySpeakerSection--;
         view.notifyItemInserted(_displayApplySection - 1);
     }
@@ -416,6 +431,20 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
     public boolean isFullScreen(String tag) {
         checkNotNull(tag);
         return tag.equals(fullScreenKVO.getParameter());
+    }
+
+    @Override
+    public void switchCamera() {
+        routerListener.getLiveRoom().getRecorder().switchCamera();
+    }
+
+    @Override
+    public void switchPrettyFilter() {
+        if (getRecorder().isBeautyFilterOn()) {
+            getRecorder().closeBeautyFilter();
+        } else {
+            getRecorder().openBeautyFilter();
+        }
     }
 
     @Override
@@ -463,6 +492,10 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
     }
 
     public void detachVideo() {
+        if (RECORD_TAG.equals(fullScreenKVO.getParameter())) {
+            fullScreenKVO.setParameter(null);
+            return;
+        }
         if (_displayRecordSection == _displayVideoSection - 1) {
             view.notifyItemDeleted(_displayRecordSection);
             displayList.remove(_displayRecordSection);

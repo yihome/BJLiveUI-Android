@@ -7,7 +7,6 @@ import com.baijiahulian.livecore.models.imodels.IMediaControlModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
-import com.baijiahulian.livecore.utils.LPLogger;
 
 import java.util.Iterator;
 import java.util.List;
@@ -173,47 +172,48 @@ public class SpeakQueuePresenter implements SpeakQueueContract.Presenter {
 
     @Override
     public void closeSpeaking(int position) {
-        if (position == -1) return;
-        LPLogger.e("position:" + position + " speakList:" + speakList.size() + " applyList:" + applyList.size());
-        if (speakList.get(position - applyList.size()).getUser().getUserId().equals(routerListener.getCurrentVideoPlayingUserId())) {
-            routerListener.playVideoClose(speakList.get(position - applyList.size()).getUser().getUserId());
-            if (!routerListener.isCurrentUserTeacher())
-                routerListener.setVideoManipulated(true);
-        }
-        routerListener.getLiveRoom().getSpeakQueueVM().closeOtherSpeak(speakList.get(position - applyList.size()).getUser().getUserId());
+//        if (position == -1) return;
+//        LPLogger.e("position:" + position + " speakList:" + speakList.size() + " applyList:" + applyList.size());
+//        if (speakList.get(position - applyList.size()).getUser().getUserId().equals(routerListener.getCurrentVideoPlayingUserId())) {
+//            routerListener.playVideoClose(speakList.get(position - applyList.size()).getUser().getUserId());
+//            if (!routerListener.isCurrentUserTeacher())
+//                routerListener.setVideoManipulated(true);
+//        }
+//        routerListener.getLiveRoom().getSpeakQueueVM().closeOtherSpeak(speakList.get(position - applyList.size()).getUser().getUserId());
     }
 
     @Override
     public void openVideo(int position) {
-        if (position == -1) return;
-        IMediaModel formerVideoUser = routerListener.getCurrentVideoUser();
-        if (formerVideoUser != null) {
-            closeVideo(applyList.size() + speakList.indexOf(formerVideoUser));
-        }
-        IMediaModel mediaModel = speakList.get(position - applyList.size());
-        routerListener.playVideo(mediaModel.getUser().getUserId());
-        routerListener.setCurrentVideoUser(mediaModel);
-        view.notifyItemChanged(position);
-        // 操作过视频了，不自动打开老师视频
-        if (!routerListener.isCurrentUserTeacher())
-            routerListener.setVideoManipulated(true);
+//        if (position == -1) return;
+//        IMediaModel formerVideoUser = routerListener.getCurrentVideoUser();
+//        if (formerVideoUser != null) {
+//            closeVideo(applyList.size() + speakList.indexOf(formerVideoUser));
+//        }
+//        IMediaModel mediaModel = speakList.get(position - applyList.size());
+//        routerListener.playVideo(mediaModel.getUser().getUserId());
+//        routerListener.setCurrentVideoUser(mediaModel);
+//        view.notifyItemChanged(position);
+//        // 操作过视频了，不自动打开老师视频
+//        if (!routerListener.isCurrentUserTeacher())
+//            routerListener.setVideoManipulated(true);
     }
 
     @Override
     public void closeVideo(int position) {
-        if (position == -1) return;
-        String userId = speakList.get(position - applyList.size()).getUser().getUserId();
-        routerListener.playVideoClose(userId);
-        routerListener.getLiveRoom().getPlayer().playAudio(userId);
-        view.notifyItemChanged(position);
-        // 操作过视频了，不自动打开老师视频
-        if (!routerListener.isCurrentUserTeacher())
-            routerListener.setVideoManipulated(true);
+//        if (position == -1) return;
+//        String userId = speakList.get(position - applyList.size()).getUser().getUserId();
+//        routerListener.playVideoClose(userId);
+//        routerListener.getLiveRoom().getPlayer().playAudio(userId);
+//        view.notifyItemChanged(position);
+//        // 操作过视频了，不自动打开老师视频
+//        if (!routerListener.isCurrentUserTeacher())
+//            routerListener.setVideoManipulated(true);
     }
 
     @Override
     public boolean isCurrentVideoPlayingUser(int position) {
-        return routerListener.getCurrentVideoUser() != null && speakList.get(position - applyList.size()).getUser().getUserId().equals(routerListener.getCurrentVideoUser().getUser().getUserId());
+//        return routerListener.getCurrentVideoUser() != null && speakList.get(position - applyList.size()).getUser().getUserId().equals(routerListener.getCurrentVideoUser().getUser().getUserId());
+        return false;
     }
 
     @Override

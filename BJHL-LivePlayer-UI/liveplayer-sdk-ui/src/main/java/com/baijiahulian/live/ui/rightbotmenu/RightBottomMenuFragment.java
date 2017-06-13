@@ -63,7 +63,6 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
                     public void call(Void aVoid) {
                         int location[] = new int[2];
                         $.id(R.id.fragment_right_bottom_more).view().getLocationInWindow(location);
-                        // TODO: 2017/5/16 status bar
                         presenter.more(location[0], location[1]);
                     }
                 });

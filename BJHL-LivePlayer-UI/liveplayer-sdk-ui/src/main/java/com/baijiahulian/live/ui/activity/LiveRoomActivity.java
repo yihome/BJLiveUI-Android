@@ -48,8 +48,6 @@ import com.baijiahulian.live.ui.more.MoreMenuDialogFragment;
 import com.baijiahulian.live.ui.more.MoreMenuPresenter;
 import com.baijiahulian.live.ui.ppt.MyPPTFragment;
 import com.baijiahulian.live.ui.ppt.PPTPresenter;
-import com.baijiahulian.live.ui.pptdialog.PPTDialogFragment;
-import com.baijiahulian.live.ui.pptdialog.PPTDialogPresenter;
 import com.baijiahulian.live.ui.pptleftmenu.PPTLeftFragment;
 import com.baijiahulian.live.ui.pptleftmenu.PPTLeftPresenter;
 import com.baijiahulian.live.ui.pptmanage.PPTManageFragment;
@@ -136,7 +134,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private int oldRotation;
 
     private Subscription subscriptionOfLoginConflict, subscriptionOfSwitch;
-    private IMediaModel currentRemoteMediaUser;
     private boolean isClearScreen;//是否已经清屏，作用于视频采集和远程视频ui的调整
     private String code, name;
     private boolean isSwitchable = true;
@@ -145,7 +142,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private long roomId;
     private String sign;
     private IUserModel enterUser;
-    private ViewGroup.LayoutParams lpBackgroud;
+    private ViewGroup.LayoutParams lpBackground;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -198,7 +195,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     }
 
     private void initViews() {
-        lpBackgroud = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        lpBackground = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         flBackground = (FrameLayout) findViewById(R.id.activity_live_room_background_container);
         flTop = (FrameLayout) findViewById(R.id.activity_live_room_top);
         flLeft = (FrameLayout) findViewById(R.id.activity_live_room_bottom_left);
@@ -231,12 +228,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                     removeFragment(rightBottomMenuFragment);
                     removeFragment(chatFragment);
                     removeFragment(speakersFragment);
-/*
-                    if (playerFragment != null && playerFragment.isAdded())
-                        removeFragment(playerFragment);
-                    if (recorderFragment != null && recorderFragment.isAdded())
-                        removeFragment(recorderFragment);
-*/
                     if (errorFragment != null && errorFragment.isAdded())
                         removeFragment(errorFragment);
 
@@ -357,9 +348,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                             showMessage(error.getMessage());
                         detachLocalVideo();
                         break;
-//                    case LPError.CODE_ERROR_CHATSERVER_LOSE_CONNECTION:
-//
-//                        break;
                     default:
                         if (!TextUtils.isEmpty(error.getMessage()))
                             showMessage(error.getMessage());
@@ -548,7 +536,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public void setFullScreenView(View view) {
         setZOrderMediaOverlayFalse(view);
-        flBackground.addView(view, lpBackgroud);
+        flBackground.addView(view, lpBackground);
         if(view == lppptFragment.getView()){
             lppptFragment.onResume();
         }else if(view instanceof RecorderView){
@@ -592,20 +580,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         removeFragment(chatFragment);
         removeFragment(speakersFragment);
 
-        currentRemoteMediaUser = null;
         if (loadingFragment != null && loadingFragment.isAdded())
             removeFragment(loadingFragment);
-        /*
-        if (playerFragment != null && playerFragment.isAdded()) {
-            removeFragment(playerFragment);
-            playerFragment = null;
-            playerPresenter = null;
-        }
-        if (recorderFragment != null && recorderFragment.isAdded()) {
-            removeFragment(recorderFragment);
-            recorderFragment = null;
-        }
-        */
+
         flBackground.removeAllViews();
         getSupportFragmentManager().executePendingTransactions();
 
@@ -621,17 +598,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         }
         bindVP(loadingFragment, loadingPresenter);
         addFragment(R.id.activity_live_room_loading, loadingFragment);
-    }
-
-    @Override
-    public void doReconnectServer() {
-//        if (errorFragment != null && errorFragment.isAdded())
-//            removeFragment(errorFragment);
-//
-//        loadingFragment = new LoadingFragment();
-//        LoadingPresenter loadingPresenter = new LoadingPresenter(loadingFragment, "", "", true);
-//        bindVP(loadingFragment, loadingPresenter);
-//        addFragment(R.id.activity_live_room_loading, loadingFragment);
     }
 
     @Override
@@ -842,29 +808,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     }
 
     @Override
-    public void maximiseRecorderView() {
-    }
-
-    @Override
-    public void maximisePlayerView() {
-        liveRoom.getRecorder().invalidVideo();
-
-        if (lppptFragment != null && lppptFragment.isEditable()) {
-            rightMenuPresenter.changeDrawing();
-        }
-        rightMenuPresenter.changePPTDrawBtnStatus(false);
-    }
-
-    @Override
-    public void maximisePPTView() {
-        View max = flBackground.getChildAt(0);
-        if (lppptFragment.getView() == max) return;
-        switchView(lppptFragment.getView(), max);
-        liveRoom.getRecorder().invalidVideo();
-        rightMenuPresenter.changePPTDrawBtnStatus(true);
-    }
-
-    @Override
     public void showMorePanel(int anchorX, int anchorY) {
         MoreMenuDialogFragment fragment = MoreMenuDialogFragment.newInstance(anchorX, anchorY);
         MoreMenuPresenter presenter = new MoreMenuPresenter(fragment);
@@ -926,69 +869,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     }
 
     @Override
-    public String getCurrentVideoPlayingUserId() {
-        if (currentRemoteMediaUser == null || currentRemoteMediaUser.getUser() == null) return null;
-        return currentRemoteMediaUser.getUser().getUserId();
-    }
-
-    @Override
-    public void playVideo(String userId) {
-        if (speakerPresenter != null) {
-            speakerPresenter.playVideo(userId);
-        }
-        /*
-        if (playerPresenter == null) {
-            playerFragment = new VideoPlayerFragment();
-            playerPresenter = new VideoPlayerPresenter(playerFragment);
-            bindVP(playerFragment, playerPresenter);
-            if (flForegroundLeft.getVisibility() == View.GONE) {
-                //左侧闲置
-                addFragment(R.id.activity_live_room_foreground_left_container, playerFragment);
-                flForegroundLeft.setVisibility(View.VISIBLE);
-            } else if (flForegroundRight.getVisibility() == View.GONE) {
-                //右侧闲置
-                addFragment(R.id.activity_live_room_foreground_right_container, playerFragment);
-                flForegroundRight.setVisibility(View.VISIBLE);
-            }
-        }
-        playerPresenter.playVideo(userId);
-        */
-    }
-
-    @Override
-    public void playVideoClose(String userId) {
-        /*
-        checkNotNull(playerPresenter);
-        checkNotNull(playerFragment.getView());
-        checkNotNull(lppptFragment.getView());
-        int playerParentId = ((ViewGroup) playerFragment.getView().getParent()).getId();
-        int pptParentId = ((ViewGroup) lppptFragment.getView().getParent()).getId();
-        if (playerParentId == R.id.activity_live_room_foreground_left_container) {
-            //视频在左边
-            flForegroundLeft.setVisibility(View.GONE);
-        } else if (playerParentId == R.id.activity_live_room_foreground_right_container) {
-            //视频在右边
-            flForegroundRight.setVisibility(View.GONE);
-        } else if (playerParentId == R.id.activity_live_room_background_container) {
-            //视频已经最大化
-            if (pptParentId == R.id.activity_live_room_foreground_left_container) {
-                //ppt在左边
-                flForegroundLeft.setVisibility(View.GONE);
-            } else if (pptParentId == R.id.activity_live_room_foreground_right_container) {
-                //ppt在右边
-                flForegroundRight.setVisibility(View.GONE);
-            }
-            maximisePPTView();
-        }
-        setCurrentVideoUser(null);
-        playerPresenter.playAVClose(userId);
-        removeFragment(playerFragment);
-        playerFragment = null;
-        playerPresenter = null;
-        */
-    }
-
-    @Override
     public void attachLocalVideo() {
         speakerPresenter.attachVideo();
     }
@@ -998,41 +878,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         speakerPresenter.detachVideo();
     }
 
-    @Override
-    public void showRecorderDialogFragment() {
-    }
-
-    @Override
-    public void showPPTDialogFragment() {
-        View max = flBackground.getChildAt(0);
-        if (max == lppptFragment.getView()) return;
-        PPTDialogFragment pptFragment = new PPTDialogFragment();
-        PPTDialogPresenter pptPresenter = new PPTDialogPresenter(pptFragment);
-        bindVP(pptFragment, pptPresenter);
-        showDialogFragment(pptFragment);
-    }
-
     public boolean isPPTMax() {
         return flBackground.getChildAt(0) == lppptFragment.getView();
-    }
-
-    @Override
-    public void showRemoteVideoPlayer() {
-    }
-
-    /**
-     * 当前正在互动的用户多媒体对象
-     *
-     * @param mediaModel
-     */
-    @Override
-    public void setCurrentVideoUser(IMediaModel mediaModel) {
-        this.currentRemoteMediaUser = mediaModel;
-    }
-
-    @Override
-    public IMediaModel getCurrentVideoUser() {
-        return currentRemoteMediaUser;
     }
 
     @Override
@@ -1112,25 +959,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public void doHandleErrorNothing() {
         removeFragment(errorFragment);
-    }
-
-    private void switchView(View view1, View view2) {
-        FrameLayout fl1 = (FrameLayout) view1.getParent();
-        FrameLayout fl2 = (FrameLayout) view2.getParent();
-        if (view1 == lppptFragment.getView() || view2 == lppptFragment.getView()) {
-            lppptFragment.onPause();
-        }
-        fl1.removeView(view1);
-        fl2.removeView(view2);
-
-        fl1.addView(view2);
-        fl2.addView(view1);
-
-        if (view1 == lppptFragment.getView() || view2 == lppptFragment.getView()) {
-            lppptFragment.onResume();
-        }
-        setZOrderMediaOverlayTrue(view2);
-        setZOrderMediaOverlayFalse(view1);
     }
 
     private void setZOrderMediaOverlayTrue(View view) {

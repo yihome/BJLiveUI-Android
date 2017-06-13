@@ -58,7 +58,7 @@ interface SpeakersContract {
 
         void playVideo(String userId);
 
-        void closeVideo(String userId);
+        void closeVideo(String tag);
 
         void closeSpeaking(String userId);
 
@@ -71,5 +71,9 @@ interface SpeakersContract {
         MyPPTFragment getPPTFragment();
 
         boolean isFullScreen(String tag);
+
+        void switchCamera();
+
+        void switchPrettyFilter();
     }
 }

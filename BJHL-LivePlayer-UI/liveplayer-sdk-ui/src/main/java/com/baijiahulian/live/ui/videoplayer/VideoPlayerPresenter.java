@@ -1,7 +1,6 @@
 package com.baijiahulian.live.ui.videoplayer;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
-import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.wrapper.LPPlayer;
 
 /**
@@ -26,14 +25,14 @@ public class VideoPlayerPresenter implements VideoPlayerContract.Presenter {
     @Override
     public void switchWithMaximum() {
         if (routerListener.switchable()) {
-            routerListener.maximisePlayerView();
+//            routerListener.maximisePlayerView();
             routerListener.setSwitching();
         }
     }
 
     @Override
     public void popUpRemoteVideoDialog() {
-        routerListener.showRemoteVideoPlayer();
+//        routerListener.showRemoteVideoPlayer();
     }
 
     @Override
@@ -49,10 +48,10 @@ public class VideoPlayerPresenter implements VideoPlayerContract.Presenter {
 
     @Override
     public void subscribe() {
-        IMediaModel mediaModel = routerListener.getCurrentVideoUser();
-        if (mediaModel != null && mediaModel.getUser() != null) {
-            view.showCurrentVideoUserName(mediaModel.getUser().getName());
-        }
+//        IMediaModel mediaModel = routerListener.getCurrentVideoUser();
+//        if (mediaModel != null && mediaModel.getUser() != null) {
+//            view.showCurrentVideoUserName(mediaModel.getUser().getName());
+//        }
     }
 
 

@@ -14,10 +14,6 @@ interface PPTContract {
     }
 
     interface Presenter extends BasePresenter {
-        void switchWithMaximum();
-
-        void popUpPPTDialog();
-
         void clearScreen();
     }
 }
