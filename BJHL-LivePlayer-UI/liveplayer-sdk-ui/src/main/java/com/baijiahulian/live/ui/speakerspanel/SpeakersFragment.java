@@ -252,9 +252,13 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                     options.add(getString(R.string.live_close_speaking));
                 break;
             case VIEW_TYPE_SPEAKER:
-                options.add(getString(R.string.live_open_video));
-                if (presenter.isTeacherOrAssistant())
-                    options.add(getString(R.string.live_close_speaking));
+                IMediaModel model = presenter.getSpeakModel(tag);
+                if (model != null) {
+                    if (model.isVideoOn())
+                        options.add(getString(R.string.live_open_video));
+                    if (presenter.isTeacherOrAssistant())
+                        options.add(getString(R.string.live_close_speaking));
+                }
                 break;
             default:
                 break;

@@ -41,8 +41,6 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
 
     private LiveRoomRouterListener routerListener;
     private SpeakersContract.View view;
-//    private List<String> videoPlayingUserIdList;
-
     private LPSubscribeObjectWithLastValue<String> fullScreenKVO;
 
     private List<String> displayList;
@@ -323,6 +321,16 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
     }
 
     @Override
+    public IMediaModel getSpeakModel(String userId) {
+        for(IMediaModel model : routerListener.getLiveRoom().getSpeakQueueVM().getSpeakQueueList()){
+            if(model.getUser().getUserId().equals(userId)){
+                return model;
+            }
+        }
+        return null;
+    }
+
+    @Override
     public LPRecorder getRecorder() {
         return routerListener.getLiveRoom().getRecorder();
     }
@@ -457,7 +465,6 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
 
     @Override
     public int getCount() {
-        // ppt + record video + speaking list(contains playing video) + speak apply list - full screen item
         return displayList.size();
     }
 

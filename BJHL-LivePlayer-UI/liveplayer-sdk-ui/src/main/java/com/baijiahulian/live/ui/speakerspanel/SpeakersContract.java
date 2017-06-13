@@ -48,6 +48,8 @@ interface SpeakersContract {
 
         int getItemViewType(String userId);
 
+        IMediaModel getSpeakModel(String userId);
+
         LPRecorder getRecorder();
 
         LPPlayer getPlayer();
