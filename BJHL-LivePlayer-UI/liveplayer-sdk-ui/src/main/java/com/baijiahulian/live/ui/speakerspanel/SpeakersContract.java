@@ -2,6 +2,7 @@ package com.baijiahulian.live.ui.speakerspanel;
 
 import com.baijiahulian.live.ui.base.BasePresenter;
 import com.baijiahulian.live.ui.base.BaseView;
+import com.baijiahulian.live.ui.ppt.MyPPTFragment;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
 import com.baijiahulian.livecore.wrapper.LPPlayer;
@@ -28,6 +29,10 @@ interface SpeakersContract {
         void notifyItemInserted(int position);
 
         void notifyItemDeleted(int position);
+
+        android.view.View removeViewAt(int position);
+
+        void notifyViewAdded(android.view.View view, int position);
     }
 
     interface Presenter extends BasePresenter {
@@ -38,8 +43,6 @@ interface SpeakersContract {
         void agreeSpeakApply(String userId);
 
         void disagreeSpeakApply(String userId);
-
-        android.view.View getPPTView();
 
         int getItemViewType(int position);
 
@@ -60,5 +63,13 @@ interface SpeakersContract {
         void closeSpeaking(String userId);
 
         boolean isTeacherOrAssistant();
+
+        void changeBackgroundContainerSize(boolean isShrink);
+
+        void setFullScreenTag(String tag);
+
+        MyPPTFragment getPPTFragment();
+
+        boolean isFullScreen(String tag);
     }
 }

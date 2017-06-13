@@ -1,5 +1,6 @@
 package com.baijiahulian.live.ui.activity;
 
+import com.baijiahulian.live.ui.ppt.MyPPTFragment;
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.context.LPError;
 import com.baijiahulian.livecore.context.LiveRoom;
@@ -158,4 +159,12 @@ public interface LiveRoomRouterListener {
     void showMessageTeacherExitRoom();
 
     boolean getVisibilityOfShareBtn();
+
+    void changeBackgroundContainerSize(boolean isShrink);
+
+    android.view.View removeFullScreenView();
+
+    void setFullScreenView(android.view.View view);
+
+    MyPPTFragment getPPTFragment();
 }

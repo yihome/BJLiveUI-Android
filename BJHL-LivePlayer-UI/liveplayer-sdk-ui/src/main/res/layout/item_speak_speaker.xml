@@ -18,10 +18,13 @@
     <TextView
         android:id="@+id/item_speak_speaker_name"
         android:layout_width="match_parent"
-        android:layout_height="23dp"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:background="@drawable/shape_remote_name_bg"
         android:gravity="center"
         android:lines="1"
+        android:paddingBottom="2dp"
+        android:paddingTop="2dp"
         android:textColor="@color/live_white"
         android:textSize="13sp" />
 

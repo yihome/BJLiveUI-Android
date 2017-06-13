@@ -1,8 +1,11 @@
 package com.baijiahulian.live.ui.speakerspanel;
 
 import android.os.Bundle;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -12,11 +15,14 @@ import com.baijiahulian.live.ui.utils.DisplayUtils;
 import com.baijiahulian.live.ui.utils.QueryPlus;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
+import com.baijiahulian.livecore.ppt.whiteboard.LPWhiteBoardView;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.baijiahulian.live.ui.speakerspanel.SpeakersContract.PPT_TAG;
+import static com.baijiahulian.live.ui.speakerspanel.SpeakersContract.RECORD_TAG;
 import static com.baijiahulian.live.ui.speakerspanel.SpeakersContract.VIEW_TYPE_APPLY;
 import static com.baijiahulian.live.ui.speakerspanel.SpeakersContract.VIEW_TYPE_PPT;
 import static com.baijiahulian.live.ui.speakerspanel.SpeakersContract.VIEW_TYPE_RECORD;
@@ -32,6 +38,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
     private SpeakersContract.Presenter presenter;
     private LinearLayout container;
     private RecorderView recorderView;
+    private ViewGroup.LayoutParams lpItem;
 
     @Override
     public int getLayoutId() {
@@ -48,6 +55,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
     protected void init(Bundle savedInstanceState) {
         super.init(savedInstanceState);
         container = (LinearLayout) $.id(R.id.fragment_speakers_container).view();
+        lpItem = new ViewGroup.LayoutParams(DisplayUtils.dip2px(getActivity(), 100), DisplayUtils.dip2px(getActivity(), 76));
     }
 
     @Override
@@ -62,15 +70,24 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
     public void notifyItemInserted(int position) {
         switch (presenter.getItemViewType(position)) {
             case VIEW_TYPE_PPT:
-                container.addView(presenter.getPPTView(), position);
+//                container.addView(presenter.getPPTView(), position);
                 break;
             case VIEW_TYPE_RECORD:
                 if (recorderView == null) {
                     recorderView = new RecorderView(getActivity());
                     presenter.getRecorder().setPreview(recorderView);
                 }
-                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(DisplayUtils.dip2px(getContext(), 100), DisplayUtils.dip2px(getContext(), 76));
-                container.addView(recorderView, position, lp);
+                container.addView(recorderView, position, lpItem);
+
+                final GestureDetector gestureDetector1 = new GestureDetector(getActivity(), new ClickGestureDetector(RECORD_TAG));
+                recorderView.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        gestureDetector1.onTouchEvent(event);
+                        return true;
+                    }
+                });
+
                 // TODO: 2017/6/11 reconsider the lifecycle
                 if (!presenter.getRecorder().isPublishing())
                     presenter.getRecorder().publish();
@@ -78,16 +95,20 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                     presenter.getRecorder().attachVideo();
                 break;
             case VIEW_TYPE_VIDEO_PLAY:
-                LinearLayout.LayoutParams lp1 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
                 VideoView videoView = new VideoView(getActivity());
-                container.addView(videoView, position, lp1);
-                final IMediaModel model = presenter.getSpeakModel(position);
-                videoView.setOnClickListener(new View.OnClickListener() {
+                IMediaModel model = presenter.getSpeakModel(position);
+                videoView.setNameText(model.getUser().getName());
+                container.addView(videoView, position, lpItem);
+
+                final GestureDetector gestureDetector = new GestureDetector(getActivity(), new ClickGestureDetector(model.getUser().getUserId()));
+                videoView.setOnTouchListener(new View.OnTouchListener() {
                     @Override
-                    public void onClick(View v) {
-                        showCloseVideoDialog(model);
+                    public boolean onTouch(View v, MotionEvent event) {
+                        gestureDetector.onTouchEvent(event);
+                        return true;
                     }
                 });
+
                 presenter.getPlayer().playAVClose(presenter.getItem(position));
                 presenter.getPlayer().playVideo(presenter.getItem(position), videoView.getSurfaceView());
                 break;
@@ -102,13 +123,47 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
             default:
                 break;
         }
+        presenter.changeBackgroundContainerSize(container.getChildCount() > 3);
     }
 
     @Override
     public void notifyItemDeleted(int position) {
         container.removeViewAt(position);
-        if(presenter.getItemViewType(position) == VIEW_TYPE_RECORD){
+        if (presenter.getItemViewType(position) == VIEW_TYPE_RECORD) {
             presenter.getRecorder().detachVideo();
+        }
+        presenter.changeBackgroundContainerSize(container.getChildCount() > 3);
+    }
+
+    @Override
+    public View removeViewAt(int position) {
+        View view = container.getChildAt(position);
+        if (presenter.getPPTFragment().getView() == view) {
+            presenter.getPPTFragment().onPause();
+        }
+        container.removeView(view);
+        return view;
+    }
+
+    @Override
+    public void notifyViewAdded(View view, int position) {
+        container.addView(view, position, lpItem);
+        if (presenter.getPPTFragment().getView() == view) {
+            presenter.getPPTFragment().onResume();
+            presenter.getPPTFragment().setOnSingleTapListener(new LPWhiteBoardView.OnSingleTapListener() {
+                @Override
+                public void onSingleTap(LPWhiteBoardView whiteBoardView) {
+                    showOptionDialog(PPT_TAG);
+                }
+            });
+            presenter.getPPTFragment().setOnDoubleTapListener(new LPWhiteBoardView.OnDoubleTapListener() {
+                @Override
+                public void onDoubleTap(LPWhiteBoardView whiteBoardView) {
+                    presenter.setFullScreenTag(PPT_TAG);
+                }
+            });
+        } else if (view instanceof RecorderView) {
+            presenter.getRecorder().invalidVideo();
         }
     }
 
@@ -141,62 +196,81 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
         q.contentView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showOpenVideoDialog(model);
+                showOptionDialog(model.getUser().getUserId());
             }
         });
         return view;
     }
 
-    private void showOpenVideoDialog(final IMediaModel model) {
-        List<String> options = new ArrayList<>();
-        if (model.isVideoOn()) {
-            options.add(getString(R.string.live_open_video));
-        }
-        if (presenter.isTeacherOrAssistant()) {
-            options.add(getString(R.string.live_close_speaking));
-        }
-        if (options.size() <= 0) return;
+    private class ClickGestureDetector extends GestureDetector.SimpleOnGestureListener {
 
-        new MaterialDialog.Builder(getActivity())
-                .items(options)
-                .itemsCallback(new MaterialDialog.ListCallback() {
-                    @Override
-                    public void onSelection(MaterialDialog materialDialog, View view, int i, CharSequence charSequence) {
-                        if (getString(R.string.live_open_video).equals(charSequence.toString())) {
-                            presenter.playVideo(model.getUser().getUserId());
-                        } else if (getString(R.string.live_close_speaking).equals(charSequence.toString())) {
-                            presenter.closeSpeaking(model.getUser().getUserId());
-                        }
-                        materialDialog.dismiss();
-                    }
-                })
-                .show();
+        private String tag;
+
+        ClickGestureDetector(String tag) {
+            this.tag = tag;
+        }
+
+        @Override
+        public boolean onSingleTapConfirmed(MotionEvent e) {
+            if (!presenter.isFullScreen(tag)) {
+                showOptionDialog(tag);
+            }
+            return super.onSingleTapConfirmed(e);
+        }
+
+        @Override
+        public boolean onDoubleTap(MotionEvent e) {
+            if (!presenter.isFullScreen(tag)) {
+                presenter.setFullScreenTag(tag);
+            }
+            return super.onDoubleTap(e);
+        }
     }
 
-    private void showCloseVideoDialog(final IMediaModel model) {
+    private void showOptionDialog(final String tag) {
+
         List<String> options = new ArrayList<>();
-        if (model.isVideoOn()) {
-            options.add(getString(R.string.live_close_video));
-        }
-        if (presenter.isTeacherOrAssistant()) {
-            options.add(getString(R.string.live_close_speaking));
+
+        switch (presenter.getItemViewType(tag)) {
+            case VIEW_TYPE_PPT:
+                options.add(getString(R.string.live_full_screen));
+                break;
+            case VIEW_TYPE_RECORD:
+                options.add(getString(R.string.live_full_screen));
+                options.add(getString(R.string.live_close_video));
+                break;
+            case VIEW_TYPE_VIDEO_PLAY:
+                options.add(getString(R.string.live_full_screen));
+                options.add(getString(R.string.live_close_video));
+                if (presenter.isTeacherOrAssistant())
+                    options.add(getString(R.string.live_close_speaking));
+                break;
+            case VIEW_TYPE_SPEAKER:
+                options.add(getString(R.string.live_open_video));
+                if (presenter.isTeacherOrAssistant())
+                    options.add(getString(R.string.live_close_speaking));
+                break;
+            default:
+                break;
         }
         if (options.size() <= 0) return;
-
         new MaterialDialog.Builder(getActivity())
                 .items(options)
                 .itemsCallback(new MaterialDialog.ListCallback() {
                     @Override
                     public void onSelection(MaterialDialog materialDialog, View view, int i, CharSequence charSequence) {
                         if (getString(R.string.live_close_video).equals(charSequence.toString())) {
-                            presenter.closeVideo(model.getUser().getUserId());
+                            presenter.closeVideo(tag);
                         } else if (getString(R.string.live_close_speaking).equals(charSequence.toString())) {
-                            presenter.closeSpeaking(model.getUser().getUserId());
+                            presenter.closeSpeaking(tag);
+                        } else if (getString(R.string.live_open_video).equals(charSequence.toString())) {
+                            presenter.playVideo(tag);
+                        } else if (getString(R.string.live_full_screen).equals(charSequence.toString())) {
+                            presenter.setFullScreenTag(tag);
                         }
                         materialDialog.dismiss();
                     }
                 })
                 .show();
     }
-
 }

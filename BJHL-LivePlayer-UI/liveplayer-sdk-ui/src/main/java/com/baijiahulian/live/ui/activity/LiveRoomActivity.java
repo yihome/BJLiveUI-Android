@@ -62,6 +62,7 @@ import com.baijiahulian.live.ui.righttopmenu.RightTopMenuFragment;
 import com.baijiahulian.live.ui.setting.SettingDialogFragment;
 import com.baijiahulian.live.ui.setting.SettingPresenter;
 import com.baijiahulian.live.ui.share.LPShareDialog;
+import com.baijiahulian.live.ui.speakerspanel.RecorderView;
 import com.baijiahulian.live.ui.speakerspanel.SpeakerPresenter;
 import com.baijiahulian.live.ui.speakerspanel.SpeakersFragment;
 import com.baijiahulian.live.ui.speakqueue.SpeakQueueDialogFragment;
@@ -98,14 +99,11 @@ import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRouterListener {
 
     private FrameLayout flBackground;
-    //    private FrameLayout flForegroundLeft;
-//    private FrameLayout flForegroundRight;
     private FrameLayout flTop;
     private FrameLayout flLeft;
     private FrameLayout flLoading;
     private FrameLayout flError;
     private DrawerLayout dlChat;
-    //    private LinearLayout llVideoContainer;
     private FrameLayout flTopRight;
     private FrameLayout flPPTLeft;
     private FrameLayout flRightBottom;
@@ -119,7 +117,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private RightTopMenuFragment rightTopMenuFragment;
 
     private MyPPTFragment lppptFragment;
-    //    private VideoRecorderFragment recorderFragment;
     private ChatFragment chatFragment;
     private ChatPresenter chatPresenter;
     private RightBottomMenuFragment rightBottomMenuFragment;
@@ -129,8 +126,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     private SpeakersFragment speakersFragment;
     private SpeakerPresenter speakerPresenter;
-    //    private VideoPlayerFragment playerFragment;
-//    private VideoPlayerPresenter playerPresenter;
     private RightMenuPresenter rightMenuPresenter;
     private PPTManagePresenter pptManagePresenter;
     private ErrorFragment errorFragment;
@@ -145,10 +140,12 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private boolean isClearScreen;//是否已经清屏，作用于视频采集和远程视频ui的调整
     private String code, name;
     private boolean isSwitchable = true;
+    private boolean isBackgroundContainerShrink = false; //缩小背景框
 
     private long roomId;
     private String sign;
     private IUserModel enterUser;
+    private ViewGroup.LayoutParams lpBackgroud;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -201,6 +198,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     }
 
     private void initViews() {
+        lpBackgroud = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         flBackground = (FrameLayout) findViewById(R.id.activity_live_room_background_container);
         flTop = (FrameLayout) findViewById(R.id.activity_live_room_top);
         flLeft = (FrameLayout) findViewById(R.id.activity_live_room_bottom_left);
@@ -289,8 +287,12 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) flBackground.getLayoutParams();
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             lp.addRule(RelativeLayout.ABOVE, 0); // lp.removeRule()
+            if (isBackgroundContainerShrink)
+                lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_speakers_container);
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
             lp.addRule(RelativeLayout.ABOVE, R.id.activity_live_room_center_anchor);
+            if (isBackgroundContainerShrink)
+                lp.addRule(RelativeLayout.BELOW, 0);
         }
         flBackground.setLayoutParams(lp);
     }
@@ -318,19 +320,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
             lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_top);
         }
         flTopRight.setLayoutParams(lp);
-    }
-
-    //视频采集和远程视频ui清屏调整,仅横屏
-    private void onVideoFullScreenConfigurationChanged(boolean isClear) {
-//        if (getCurrentScreenOrientation() == Configuration.ORIENTATION_LANDSCAPE) {
-//            RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) llVideoContainer.getLayoutParams();
-//            if (isClear) {
-//                lp.addRule(RelativeLayout.BELOW, 0);
-//            } else {
-//                lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_top);
-//            }
-//            llVideoContainer.setLayoutParams(lp);
-//        }
     }
 
     @Override
@@ -525,6 +514,54 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         return shareListener != null;
     }
 
+    @Override
+    public void changeBackgroundContainerSize(boolean isShrink) {
+        // TODO: 2017/6/13 add throttleLast
+        if (isShrink == isBackgroundContainerShrink)
+            return;
+        isBackgroundContainerShrink = isShrink;
+
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            return;
+        }
+
+        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) flBackground.getLayoutParams();
+        if (isBackgroundContainerShrink) {
+            lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_speakers_container);
+        } else {
+            lp.addRule(RelativeLayout.BELOW, 0);
+        }
+        flBackground.setLayoutParams(lp);
+    }
+
+    @Override
+    public View removeFullScreenView() {
+        View view = flBackground.getChildAt(0);
+        if(view == lppptFragment.getView()){
+            lppptFragment.onPause();
+        }
+        flBackground.removeView(view);
+        setZOrderMediaOverlayTrue(view);
+        return view;
+    }
+
+    @Override
+    public void setFullScreenView(View view) {
+        setZOrderMediaOverlayFalse(view);
+        flBackground.addView(view, lpBackgroud);
+        if(view == lppptFragment.getView()){
+            lppptFragment.onResume();
+        }else if(view instanceof RecorderView){
+            liveRoom.getRecorder().invalidVideo();
+        }
+    }
+
+    @Override
+    public MyPPTFragment getPPTFragment() {
+        checkNotNull(lppptFragment);
+        return lppptFragment;
+    }
+
     private void showNetError(LPError error) {
         if (errorFragment != null && errorFragment.isAdded()) return;
         if (flError.getChildCount() >= 2) return;
@@ -570,13 +607,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         }
         */
         flBackground.removeAllViews();
-//        flForegroundLeft.removeAllViews();
-//        flForegroundRight.removeAllViews();
-
         getSupportFragmentManager().executePendingTransactions();
-
-//        flForegroundLeft.setVisibility(View.GONE);
-//        flForegroundRight.setVisibility(View.GONE);
 
         liveRoom.quitRoom();
 
@@ -704,7 +735,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     public void clearScreen() {
         chatFragment.clearScreen();
         isClearScreen = true;
-//        dlChat.setVisibility(View.GONE);
         rightBottomMenuFragment.clearScreen();
         hideFragment(topBarFragment);
         hideFragment(rightMenuFragment);
@@ -712,7 +742,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         flRight.setVisibility(View.INVISIBLE);
         flRightBottom.setVisibility(View.INVISIBLE);
         onRecordFullScreenConfigurationChanged(true);
-        onVideoFullScreenConfigurationChanged(true);
     }
 
     @Override
@@ -726,7 +755,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         flRight.setVisibility(View.VISIBLE);
         flRightBottom.setVisibility(View.VISIBLE);
         onRecordFullScreenConfigurationChanged(false);
-        onVideoFullScreenConfigurationChanged(false);
         dlChat.openDrawer(Gravity.START);
     }
 
