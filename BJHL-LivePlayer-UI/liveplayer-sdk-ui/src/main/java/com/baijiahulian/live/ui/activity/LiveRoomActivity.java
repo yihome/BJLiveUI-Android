@@ -994,6 +994,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void navigateToShare() {
+        if (shareListener.setShareList() == null) {
+            return;
+        }
         LPShareDialog shareDialog = LPShareDialog.newInstance(shareListener.setShareList());
         shareDialog.setListener(new LPShareDialog.LPShareClickListener() {
             @Override

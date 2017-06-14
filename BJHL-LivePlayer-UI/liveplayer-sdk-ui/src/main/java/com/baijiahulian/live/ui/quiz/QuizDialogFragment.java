@@ -42,6 +42,7 @@ import java.util.List;
 
 public class QuizDialogFragment extends BaseDialogFragment implements QuizDialogContract.View {
     public static final String KEY_FORCE_JOIN = "key_force_join";
+    private static final String argsType = "1";
 
     private QueryPlus $;
     private static final String windowName = "bjlapp";
@@ -60,15 +61,12 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
             "http://api.baijiacloud.com/m/quiz/student"
     };
 
-    private static final String str = "(function() {\n" +
-            "    var bjlapp = this.bjlapp = this.bjlapp || {};\n" +
-            "    bjlapp.sendMessage = function(json) {\n" +
-            "        bjlapp.sendMessageString(JSON.stringify(json));\n" +
-            "    };\n" +
-            "})();";
-
-    private static final String str01 = "localStorage.getItem('injected')";
-    private static final String str02 = "localStorage.setItem('injected', JSON.stringify({\\\"a\\\": 1, \\\"b\\\": 2}))";
+//    private static final String str = "(function() {\n" +
+//            "    var bjlapp = this.bjlapp = this.bjlapp || {};\n" +
+//            "    bjlapp.sendMessage = function(json) {\n" +
+//            "        bjlapp.sendMessageString(JSON.stringify(json));\n" +
+//            "    };\n" +
+//            "})();";
 
     public QuizDialogFragment() {
         if (signalList == null) {
@@ -171,7 +169,6 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
                 setCloseBtnStatus(forceJoin);
             }
 
-            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
@@ -181,31 +178,12 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
                     setCloseBtnStatus(forceJoin);
                 }
                 isLoadFailed = false;
-                view.evaluateJavascript(str, new ValueCallback<String>() {
-                    @Override
-                    public void onReceiveValue(String value) {
-
-                    }
-                });
-                view.evaluateJavascript(str01, new ValueCallback<String>() {
-                    @Override
-                    public void onReceiveValue(String value) {
-                        System.out.println("hola " + value);
-                    }
-                });
-                view.evaluateJavascript(str02, new ValueCallback<String>() {
-                    @Override
-                    public void onReceiveValue(String value) {
-                        System.out.println("hola " + value);
-                    }
-                });
-                view.evaluateJavascript(str01, new ValueCallback<String>() {
-                    @Override
-                    public void onReceiveValue(String value) {
-                        System.out.println("hola " + value);
-                    }
-                });
-
+//                view.evaluateJavascript(str, new ValueCallback<String>() {
+//                    @Override
+//                    public void onReceiveValue(String value) {
+//
+//                    }
+//                });
 
                 callJsInQueue();
             }
@@ -228,7 +206,7 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
             e.printStackTrace();
         }
         String params = "?userNumber=" + currentUserInfo.getNumber() + "&userName=" + currentUserInfo.getName() + "&quizId=" + quizId
-                + "&roomId=" + roomId + "&token=" + roomToken;
+                + "&roomId=" + roomId + "&token=" + roomToken + "&argType=" + argsType;
         String url = baseUrl[LiveSDK.getDeployType().getType()] + params;
         LPLogger.e(getClass().getSimpleName() + " : " + url);
         ((WebView) $.id(R.id.wv_quiz_main).view()).loadUrl(url);
@@ -362,7 +340,7 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
     }
 
     @JavascriptInterface
-    public void sendMessageString(String json) {
+    public void sendMessage(String json) {
         if (!TextUtils.isEmpty(json)) {
             presenter.submitAnswer(json);
         }
