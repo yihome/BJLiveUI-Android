@@ -75,6 +75,10 @@ public class LiveSDKWithUI {
         LiveRoomActivity.setRoomLifeCycleListener(listener);
     }
 
+    public static void setShouldShowTechSupport(boolean shouldShowTechSupport) {
+        LiveRoomActivity.setShouldShowTechSupport(shouldShowTechSupport);
+    }
+
     public interface LPRoomResumeListener {
         void onResume(Context context, LPRoomChangeRoomListener listener);
     }

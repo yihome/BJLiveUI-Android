@@ -37,6 +37,12 @@ public class LoadingFragment extends BaseFragment implements LoadingContract.Vie
     public void init(Bundle savedInstanceState) {
         checkNotNull(presenter);
         progressBar = (ProgressBar) $.id(R.id.fragment_loading_pb).view();
+        Bundle args = getArguments();
+        if (args != null) {
+            setTechSupportVisibility(args.getBoolean("show_tech_support", true));
+        } else {
+            setTechSupportVisibility(true);
+        }
         if (!presenter.isReconnect()) {
             LiveRoom room;
             if (presenter.isJoinCode()) {
@@ -68,5 +74,14 @@ public class LoadingFragment extends BaseFragment implements LoadingContract.Vie
     @Override
     public void showLaunchError(LPError lpError) {
 //        showToast(lpError.getMessage());
+    }
+
+    @Override
+    public void setTechSupportVisibility(boolean shouldShow) {
+        if (shouldShow) {
+            $.id(R.id.tv_fragment_loading_tech_support).visible();
+        } else {
+            $.id(R.id.tv_fragment_loading_tech_support).invisible();
+        }
     }
 }

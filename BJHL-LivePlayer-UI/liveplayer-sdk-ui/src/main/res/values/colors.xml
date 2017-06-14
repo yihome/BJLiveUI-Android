@@ -32,5 +32,6 @@
     <color name="live_transparent_opacity_02">#33000000</color>
     <color name="live_transparent_opacity_06">#99000000</color>
     <color name="live_selector_not_pressed">#dedede</color>
+    <color name="live_grey_tech_support">#FFFFFF</color>
 
 </resources>

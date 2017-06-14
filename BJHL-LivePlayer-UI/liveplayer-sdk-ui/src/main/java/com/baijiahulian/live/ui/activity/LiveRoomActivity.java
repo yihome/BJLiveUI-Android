@@ -1,6 +1,7 @@
 package com.baijiahulian.live.ui.activity;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -14,6 +15,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.OrientationEventListener;
@@ -52,11 +54,15 @@ import com.baijiahulian.live.ui.pptleftmenu.PPTLeftFragment;
 import com.baijiahulian.live.ui.pptleftmenu.PPTLeftPresenter;
 import com.baijiahulian.live.ui.pptmanage.PPTManageFragment;
 import com.baijiahulian.live.ui.pptmanage.PPTManagePresenter;
+import com.baijiahulian.live.ui.quiz.QuizDialogFragment;
+import com.baijiahulian.live.ui.quiz.QuizDialogPresenter;
 import com.baijiahulian.live.ui.rightbotmenu.RightBottomMenuFragment;
 import com.baijiahulian.live.ui.rightbotmenu.RightBottomMenuPresenter;
 import com.baijiahulian.live.ui.rightmenu.RightMenuFragment;
 import com.baijiahulian.live.ui.rightmenu.RightMenuPresenter;
 import com.baijiahulian.live.ui.righttopmenu.RightTopMenuFragment;
+import com.baijiahulian.live.ui.rollcall.RollCallDialogFragment;
+import com.baijiahulian.live.ui.rollcall.RollCallDialogPresenter;
 import com.baijiahulian.live.ui.setting.SettingDialogFragment;
 import com.baijiahulian.live.ui.setting.SettingPresenter;
 import com.baijiahulian.live.ui.share.LPShareDialog;
@@ -67,11 +73,14 @@ import com.baijiahulian.live.ui.topbar.TopBarFragment;
 import com.baijiahulian.live.ui.topbar.TopBarPresenter;
 import com.baijiahulian.live.ui.users.OnlineUserDialogFragment;
 import com.baijiahulian.live.ui.users.OnlineUserPresenter;
+import com.baijiahulian.live.ui.utils.JsonObjectUtil;
 import com.baijiahulian.live.ui.utils.RxUtils;
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.context.LPError;
 import com.baijiahulian.livecore.context.LiveRoom;
 import com.baijiahulian.livecore.context.OnLiveRoomListener;
+import com.baijiahulian.livecore.listener.OnRollCallListener;
+import com.baijiahulian.livecore.models.LPJsonModel;
 import com.baijiahulian.livecore.models.imodels.ILoginConflictModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
@@ -127,11 +136,16 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private ErrorFragment errorFragment;
     private GlobalPresenter globalPresenter;
     private PPTLeftFragment pptLeftFragment;
+    private RollCallDialogPresenter rollCallDialogPresenter;
+    private QuizDialogFragment quizFragment;
+    private QuizDialogPresenter quizPresenter;
 
     private OrientationEventListener orientationEventListener; //处理屏幕旋转时本地录制视频的方向
     private int oldRotation;
 
-    private Subscription subscriptionOfLoginConflict, subscriptionOfSwitch;
+    private Subscription subscriptionOfLoginConflict, subscriptionOfSwitch, subscriptionOfSolutionArrived,
+            subscriptionOfQuizStart, subscriptionOfQuizRes;
+
     private boolean isClearScreen;//是否已经清屏，作用于视频采集和远程视频ui的调整
     private String code, name;
     private boolean isSwitchable = true;
@@ -161,6 +175,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         enterUser = (IUserModel) getIntent().getSerializableExtra("user");
 
         loadingFragment = new LoadingFragment();
+        Bundle args = new Bundle();
+        args.putBoolean("show_tech_support", shouldShowTechSupport);
+        loadingFragment.setArguments(args);
         LoadingPresenter loadingPresenter;
         if (roomId == -1) {
             loadingPresenter = new LoadingPresenter(loadingFragment, code, name, false);
@@ -230,6 +247,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                         removeFragment(errorFragment);
 
                     loadingFragment = new LoadingFragment();
+                    Bundle args = new Bundle();
+                    args.putBoolean("show_tech_support", shouldShowTechSupport);
+                    loadingFragment.setArguments(args);
                     LoadingPresenter loadingPresenter = new LoadingPresenter(loadingFragment, code, nickName, false);
                     bindVP(loadingFragment, loadingPresenter);
                     addFragment(R.id.activity_live_room_loading, loadingFragment);
@@ -377,18 +397,38 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void showError(LPError error) {
-        if (errorFragment != null && errorFragment.isAdded()) return;
-        if (flError.getChildCount() >= 2) return;
-        if (loadingFragment != null && loadingFragment.isAdded()) {
-            removeFragment(loadingFragment);
+        if (error.getCode() == LPError.CODE_ERROR_LOGIN_KICK_OUT) {
+            //被踢出房间后的登录
+            showKickOutDlg(error);
+        } else {
+            if (errorFragment != null && errorFragment.isAdded()) return;
+            if (flError.getChildCount() >= 2) return;
+            if (loadingFragment != null && loadingFragment.isAdded()) {
+                removeFragment(loadingFragment);
+            }
+            errorFragment = ErrorFragment.newInstance(getString(R.string.live_override_error), error.getMessage(), ErrorFragment.ERROR_HANDLE_REENTER);
+            errorFragment.setRouterListener(this);
+            flError.setVisibility(View.VISIBLE);
+            addFragment(R.id.activity_live_room_error, errorFragment);
+            if (Build.VERSION.SDK_INT < 24) {
+                getSupportFragmentManager().executePendingTransactions();
+            }
         }
-        errorFragment = ErrorFragment.newInstance(getString(R.string.live_override_error), error.getMessage(), ErrorFragment.ERROR_HANDLE_REENTER);
-        errorFragment.setRouterListener(this);
-        flError.setVisibility(View.VISIBLE);
-        addFragment(R.id.activity_live_room_error, errorFragment);
-        if (Build.VERSION.SDK_INT < 24) {
-            getSupportFragmentManager().executePendingTransactions();
-        }
+    }
+
+    private void showKickOutDlg(LPError error) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog dialog = builder.setMessage(error.getMessage())
+                .setPositiveButton(R.string.live_quiz_dialog_confirm, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        LiveRoomActivity.this.finish();
+                    }
+                }).create();
+        dialog.setCancelable(false);
+        dialog.show();
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.live_blue));
     }
 
     @Override
@@ -451,7 +491,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         if (isTeacherOrAssistant()) {
             showMessage((isOn ? "打开" : "关闭") + "全体禁言成功");
         } else {
-            showMessage(getString(R.string.lp_override_class_start) + (isOn ? "打开了" : "关闭了") + "全体禁言");
+            showMessage(getString(R.string.lp_override_role_teacher) + (isOn ? "打开了" : "关闭了") + "全体禁言");
         }
     }
 
@@ -548,6 +588,90 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         return lppptFragment;
     }
 
+    public void showRollCallDlg(int time, OnRollCallListener.RollCall rollCallListener) {
+        RollCallDialogFragment rollCallDialogFragment = new RollCallDialogFragment();
+        rollCallDialogFragment.setCancelable(false);
+        rollCallDialogPresenter = new RollCallDialogPresenter(rollCallDialogFragment);
+        rollCallDialogPresenter.setRollCallInfo(time, rollCallListener);
+        bindVP(rollCallDialogFragment, rollCallDialogPresenter);
+        showDialogFragment(rollCallDialogFragment);
+    }
+
+    @Override
+    public void dismissRollCallDlg() {
+        if (rollCallDialogPresenter != null) {
+            rollCallDialogPresenter.timeOut();
+        }
+    }
+
+    @Override
+    public void onQuizStartArrived(final LPJsonModel jsonModel) {
+        dismissQuizDlg();
+        quizFragment = new QuizDialogFragment();
+        Bundle args = new Bundle();
+        int forceJoin = 0;
+        if (JsonObjectUtil.isJsonNull(jsonModel.data, "force_join")) {
+            forceJoin = 0;
+        } else {
+            forceJoin = JsonObjectUtil.getAsInt(jsonModel.data, "force_join");
+        }
+        args.putBoolean(QuizDialogFragment.KEY_FORCE_JOIN, forceJoin == 1);
+        quizFragment.setArguments(args);
+        quizFragment.setCancelable(false);
+        quizPresenter = new QuizDialogPresenter(quizFragment);
+        quizFragment.onStartArrived(jsonModel);
+        bindVP(quizFragment, quizPresenter);
+        showDialogFragment(quizFragment);
+    }
+
+    @Override
+    public void onQuizEndArrived(LPJsonModel jsonModel) {
+        if (quizFragment == null) {
+            return;
+        }
+        quizFragment.onEndArrived(jsonModel);
+    }
+
+    @Override
+    public void onQuizSolutionArrived(final LPJsonModel jsonModel) {
+        dismissQuizDlg();
+        quizFragment = new QuizDialogFragment();
+        Bundle args = new Bundle();
+        args.putBoolean(QuizDialogFragment.KEY_FORCE_JOIN, false);
+        quizFragment.setArguments(args);
+        quizPresenter = new QuizDialogPresenter(quizFragment);
+        quizFragment.onSolutionArrived(jsonModel);
+        bindVP(quizFragment, quizPresenter);
+        showDialogFragment(quizFragment);
+    }
+
+    @Override
+    public void onQuizRes(final LPJsonModel jsonModel) {
+        dismissQuizDlg();
+        quizFragment = new QuizDialogFragment();
+        Bundle args = new Bundle();
+        int forceJoin = 0;
+        if (JsonObjectUtil.isJsonNull(jsonModel.data, "force_join")) {
+            forceJoin = 0;
+        } else {
+            forceJoin = JsonObjectUtil.getAsInt(jsonModel.data, "force_join");
+        }
+        args.putBoolean(QuizDialogFragment.KEY_FORCE_JOIN, forceJoin == 1);
+        quizFragment.setArguments(args);
+        quizFragment.setCancelable(false);
+        quizPresenter = new QuizDialogPresenter(quizFragment);
+        quizFragment.onQuizResArrived(jsonModel);
+        bindVP(quizFragment, quizPresenter);
+        showDialogFragment(quizFragment);
+    }
+
+    @Override
+    public void dismissQuizDlg() {
+        if (quizFragment != null && quizFragment.isAdded() && quizFragment.isVisible()) {
+            quizFragment.dismissAllowingStateLoss();
+        }
+    }
+
     private void showNetError(LPError error) {
         if (errorFragment != null && errorFragment.isAdded()) return;
         if (flError.getChildCount() >= 2) return;
@@ -588,6 +712,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
         flLoading.setVisibility(View.VISIBLE);
         loadingFragment = new LoadingFragment();
+        Bundle args = new Bundle();
+        args.putBoolean("show_tech_support", shouldShowTechSupport);
+        loadingFragment.setArguments(args);
         LoadingPresenter loadingPresenter;
         if (roomId == -1) {
             loadingPresenter = new LoadingPresenter(loadingFragment, code, name, false);
@@ -693,6 +820,13 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 //            liveRoom.getRecorder().attachAudio();
 //            attachLocalVideo();
 //        }
+        if (liveRoom.getCurrentUser().getType() == LPConstants.LPUserType.Teacher) {
+            liveRoom.getRecorder().publish();
+            liveRoom.getRecorder().attachAudio();
+            attachLocalVideo();
+        }
+        //成功进入房间后统一不再显示
+        shouldShowTechSupport = false;
     }
 
     @Override
@@ -807,8 +941,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void navigateToShare() {
-        if (shareListener == null || shareListener.setShareList() == null)
+        if (shareListener.setShareList() == null) {
             return;
+        }
         LPShareDialog shareDialog = LPShareDialog.newInstance(shareListener.setShareList());
         shareDialog.setListener(new LPShareDialog.LPShareClickListener() {
             @Override
@@ -981,6 +1116,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        shouldShowTechSupport = true;
         if (pptManagePresenter != null) {
             pptManagePresenter.destroy();
             pptManagePresenter = null;
@@ -992,6 +1128,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
         RxUtils.unSubscribe(subscriptionOfLoginConflict);
         RxUtils.unSubscribe(subscriptionOfSwitch);
+        RxUtils.unSubscribe(subscriptionOfSolutionArrived);
+        RxUtils.unSubscribe(subscriptionOfQuizStart);
+        RxUtils.unSubscribe(subscriptionOfQuizRes);
 
         orientationEventListener = null;
 
@@ -1092,6 +1231,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private static LiveSDKWithUI.RoomEnterConflictListener enterRoomConflictListener;
     private static LiveSDKWithUI.LPRoomResumeListener roomLifeCycleListener;
 
+    private static boolean shouldShowTechSupport = true;
+
     private void clearStaticCallback() {
         shareListener = null;
         exitListener = null;
@@ -1113,6 +1254,10 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     public static void setEnterRoomConflictListener(LiveSDKWithUI.RoomEnterConflictListener enterRoomConflictListener) {
         LiveRoomActivity.enterRoomConflictListener = enterRoomConflictListener;
+    }
+
+    public static void setShouldShowTechSupport(boolean shouldShow) {
+        shouldShowTechSupport = shouldShow;
     }
 
 }

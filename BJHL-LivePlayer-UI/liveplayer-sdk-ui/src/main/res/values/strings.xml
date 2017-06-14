@@ -92,5 +92,13 @@
     <string name="live_override_error">哎呀出错了</string>
     <string name="live_teacher_not_in">老师未在教室</string>
     <string name="live_message_le">%1$s了</string>
+    <string name="live_roll_call_count_down">老师要求您在%1$s秒内响应点名</string>
+    <string name="live_roll_call_answer">答到</string>
+    <string name="live_quiz_title">测验</string>
+    <string name="live_quiz_close">关闭</string>
+    <string name="live_quiz_dialog_tip">确认关闭？</string>
+    <string name="live_quiz_dialog_cancel">再等等</string>
+    <string name="live_quiz_dialog_confirm">确认</string>
+    <string name="live_loading_support">百家云提供直播服务</string>
 </resources>
 

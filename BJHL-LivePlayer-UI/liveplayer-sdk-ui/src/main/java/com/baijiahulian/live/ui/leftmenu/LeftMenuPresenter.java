@@ -1,6 +1,9 @@
 package com.baijiahulian.live.ui.leftmenu;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
+import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
+
+import rx.android.schedulers.AndroidSchedulers;
 
 /**
  * Created by Shubo on 2017/2/15.
@@ -11,6 +14,7 @@ public class LeftMenuPresenter implements LeftMenuContract.Presenter {
     private LiveRoomRouterListener routerListener;
     private LeftMenuContract.View view;
     private boolean isScreenCleared = false;
+    private boolean isSelfForbidden = false;
 
     public LeftMenuPresenter(LeftMenuContract.View view) {
         this.view = view;
@@ -35,8 +39,16 @@ public class LeftMenuPresenter implements LeftMenuContract.Presenter {
     }
 
     @Override
-    public boolean isForbidden() {
+    public boolean isAllForbidden() {
         return !routerListener.isTeacherOrAssistant() && routerListener.getLiveRoom().getForbidStatus();
+    }
+
+    @Override
+    public boolean isForbiddenByTeacher() {
+        if (routerListener.isTeacherOrAssistant()) {
+            return false;
+        }
+        return isSelfForbidden;
     }
 
     @Override
@@ -46,7 +58,14 @@ public class LeftMenuPresenter implements LeftMenuContract.Presenter {
 
     @Override
     public void subscribe() {
-
+        routerListener.getLiveRoom().getObservableOfIsSelfChatForbid()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<Boolean>() {
+                    @Override
+                    public void call(Boolean aBoolean) {
+                        isSelfForbidden = aBoolean;
+                    }
+                });
     }
 
     @Override

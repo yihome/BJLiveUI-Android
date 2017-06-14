@@ -16,6 +16,8 @@ interface LoadingContract {
         void showLoadingSteps(int currentStep, int totalSteps);
 
         void showLaunchError(LPError lpError);
+
+        void setTechSupportVisibility(boolean shouldShow);
     }
 
     interface Presenter extends BasePresenter {
