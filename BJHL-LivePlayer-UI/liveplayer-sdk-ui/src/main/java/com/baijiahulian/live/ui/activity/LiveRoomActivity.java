@@ -63,8 +63,6 @@ import com.baijiahulian.live.ui.share.LPShareDialog;
 import com.baijiahulian.live.ui.speakerspanel.RecorderView;
 import com.baijiahulian.live.ui.speakerspanel.SpeakerPresenter;
 import com.baijiahulian.live.ui.speakerspanel.SpeakersFragment;
-import com.baijiahulian.live.ui.speakqueue.SpeakQueueDialogFragment;
-import com.baijiahulian.live.ui.speakqueue.SpeakQueuePresenter;
 import com.baijiahulian.live.ui.topbar.TopBarFragment;
 import com.baijiahulian.live.ui.topbar.TopBarPresenter;
 import com.baijiahulian.live.ui.users.OnlineUserDialogFragment;
@@ -765,14 +763,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public void setPPTShowType(LPConstants.LPPPTShowWay type) {
         lppptFragment.setPPTShowWay(type);
-    }
-
-    @Override
-    public void navigateToSpeakers() {
-        SpeakQueueDialogFragment fragment = SpeakQueueDialogFragment.newInstance();
-        SpeakQueuePresenter presenter = new SpeakQueuePresenter(fragment);
-        bindVP(fragment, presenter);
-        showDialogFragment(fragment);
     }
 
     @Override

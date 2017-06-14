@@ -30,8 +30,6 @@ public interface LiveRoomRouterListener {
 
     void setPPTShowType(LPConstants.LPPPTShowWay type);
 
-    void navigateToSpeakers();
-
     void navigateToUserList();
 
     void navigateToPPTWareHouse();
