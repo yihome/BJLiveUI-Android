@@ -34,30 +34,6 @@
         android:layout_width="match_parent"
         android:layout_height="76dp"
         android:layout_below="@+id/activity_live_room_center_anchor"/>
-    <!---->
-    <!--<LinearLayout-->
-        <!--android:id="@+id/activity_live_room_video_recorder_container"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_below="@+id/activity_live_room_background_container"-->
-        <!--android:layout_marginLeft="@dimen/activity_live_room_margin"-->
-        <!--android:layout_marginTop="@dimen/activity_live_room_margin"-->
-        <!--android:background="@android:color/transparent"-->
-        <!--android:orientation="horizontal">-->
-
-        <!--<FrameLayout-->
-            <!--android:id="@+id/activity_live_room_foreground_left_container"-->
-            <!--android:layout_width="92dp"-->
-            <!--android:layout_height="69dp"-->
-            <!--android:visibility="gone" />-->
-
-        <!--<FrameLayout-->
-            <!--android:id="@+id/activity_live_room_foreground_right_container"-->
-            <!--android:layout_width="92dp"-->
-            <!--android:layout_height="69dp"-->
-            <!--android:layout_marginLeft="@dimen/activity_live_room_margin"-->
-            <!--android:visibility="gone" />-->
-    <!--</LinearLayout>-->
 
     <com.baijiahulian.live.ui.viewsupport.AutoExitDrawerLayout
         android:id="@+id/activity_live_room_chat_drawer"

@@ -130,7 +130,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                             return;
                         }
                         int position = displayList.indexOf(iMediaModel.getUser().getUserId());
-                        if(position == -1)
+                        if (position == -1)
                             return;
                         if (position < _displayVideoSection) {
                             throw new RuntimeException("position < _displayVideoSection");
@@ -163,7 +163,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                             return;
                         }
                         int position = displayList.indexOf(iMediaModel.getUser().getUserId());
-                        if(position == -1)
+                        if (position == -1)
                             return;
                         if (position < _displayVideoSection) {
                             throw new RuntimeException("position < _displayVideoSection");
@@ -322,8 +322,8 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
 
     @Override
     public IMediaModel getSpeakModel(String userId) {
-        for(IMediaModel model : routerListener.getLiveRoom().getSpeakQueueVM().getSpeakQueueList()){
-            if(model.getUser().getUserId().equals(userId)){
+        for (IMediaModel model : routerListener.getLiveRoom().getSpeakQueueVM().getSpeakQueueList()) {
+            if (model.getUser().getUserId().equals(userId)) {
                 return model;
             }
         }
@@ -453,6 +453,15 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
         } else {
             getRecorder().openBeautyFilter();
         }
+    }
+
+    private boolean isScreenCleared = false;
+
+    @Override
+    public void clearScreen() {
+        isScreenCleared = !isScreenCleared;
+        if (isScreenCleared) routerListener.clearScreen();
+        else routerListener.unClearScreen();
     }
 
     @Override

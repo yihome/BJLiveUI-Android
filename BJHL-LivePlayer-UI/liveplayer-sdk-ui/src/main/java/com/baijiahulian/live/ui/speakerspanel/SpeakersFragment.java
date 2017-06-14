@@ -1,5 +1,6 @@
 package com.baijiahulian.live.ui.speakerspanel;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -214,6 +215,11 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
         public boolean onSingleTapConfirmed(MotionEvent e) {
             if (!presenter.isFullScreen(tag)) {
                 showOptionDialog(tag);
+            } else {
+                // clear screen
+                if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    presenter.clearScreen();
+                }
             }
             return super.onSingleTapConfirmed(e);
         }

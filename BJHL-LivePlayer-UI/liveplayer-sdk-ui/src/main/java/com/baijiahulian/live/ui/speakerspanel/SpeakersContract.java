@@ -77,5 +77,7 @@ interface SpeakersContract {
         void switchCamera();
 
         void switchPrettyFilter();
+
+        void clearScreen();
     }
 }

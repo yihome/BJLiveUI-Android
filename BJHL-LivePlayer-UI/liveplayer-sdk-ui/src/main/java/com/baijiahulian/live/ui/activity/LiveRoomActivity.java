@@ -525,7 +525,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public View removeFullScreenView() {
         View view = flBackground.getChildAt(0);
-        if(view == lppptFragment.getView()){
+        if (view == lppptFragment.getView()) {
             lppptFragment.onPause();
         }
         flBackground.removeView(view);
@@ -537,9 +537,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     public void setFullScreenView(View view) {
         setZOrderMediaOverlayFalse(view);
         flBackground.addView(view, lpBackground);
-        if(view == lppptFragment.getView()){
+        if (view == lppptFragment.getView()) {
             lppptFragment.onResume();
-        }else if(view instanceof RecorderView){
+        } else if (view instanceof RecorderView) {
             liveRoom.getRecorder().invalidVideo();
         }
     }
@@ -817,6 +817,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void navigateToShare() {
+        if (shareListener == null || shareListener.setShareList() == null)
+            return;
         LPShareDialog shareDialog = LPShareDialog.newInstance(shareListener.setShareList());
         shareDialog.setListener(new LPShareDialog.LPShareClickListener() {
             @Override

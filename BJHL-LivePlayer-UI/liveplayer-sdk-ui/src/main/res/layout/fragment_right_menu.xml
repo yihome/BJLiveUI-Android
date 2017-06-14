@@ -9,8 +9,7 @@
         android:id="@+id/fragment_right_online_user"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/activity_live_room_margin"
-        android:layout_marginTop="5dp"
+        android:layout_margin="2dp"
         android:src="@drawable/live_ic_useronline" />
 
     <ImageView
@@ -18,7 +17,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="2dp"
-        android:layout_marginBottom="@dimen/activity_live_room_margin"
         android:src="@drawable/live_ic_lightpen" />
 
     <ImageView
@@ -26,7 +24,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="2dp"
-        android:layout_marginBottom="@dimen/activity_live_room_margin"
         android:src="@drawable/live_ic_ppt" />
 
     <FrameLayout
