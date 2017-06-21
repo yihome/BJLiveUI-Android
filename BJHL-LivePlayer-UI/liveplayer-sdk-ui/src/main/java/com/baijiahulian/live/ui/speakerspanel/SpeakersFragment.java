@@ -2,18 +2,21 @@ package com.baijiahulian.live.ui.speakerspanel;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseFragment;
 import com.baijiahulian.live.ui.utils.DisplayUtils;
 import com.baijiahulian.live.ui.utils.QueryPlus;
+import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
 import com.baijiahulian.livecore.ppt.whiteboard.LPWhiteBoardView;
@@ -99,6 +102,8 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                 VideoView videoView = new VideoView(getActivity());
                 IMediaModel model = presenter.getSpeakModel(position);
                 videoView.setNameText(model.getUser().getName());
+                if (model.getUser().getType() == LPConstants.LPUserType.Teacher)
+                    videoView.setNameColor(ContextCompat.getColor(getContext(), R.color.live_blue));
                 container.addView(videoView, position, lpItem);
 
                 final GestureDetector gestureDetector = new GestureDetector(getActivity(), new ClickGestureDetector(model.getUser().getUserId()));
@@ -200,6 +205,8 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                 showOptionDialog(model.getUser().getUserId());
             }
         });
+        if (model.getUser().getType() == LPConstants.LPUserType.Teacher)
+            ((TextView) q.id(R.id.item_speak_speaker_name).view()).setTextColor(ContextCompat.getColor(getContext(), R.color.live_blue));
         return view;
     }
 

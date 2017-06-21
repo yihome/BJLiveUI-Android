@@ -1,6 +1,7 @@
 package com.baijiahulian.live.ui.speakerspanel;
 
 import android.content.Context;
+import android.support.annotation.ColorInt;
 import android.support.v4.content.ContextCompat;
 import android.view.Gravity;
 import android.view.SurfaceView;
@@ -22,6 +23,8 @@ public class VideoView extends FrameLayout {
     private TextView tvName;
     private SurfaceView surfaceView;
     private String name;
+    @ColorInt
+    int color = -1;
 
     public VideoView(Context context) {
         super(context);
@@ -31,6 +34,7 @@ public class VideoView extends FrameLayout {
     private void init() {
         ViewGroup.LayoutParams flLp = new ViewGroup.LayoutParams(DisplayUtils.dip2px(getContext(), 100), DisplayUtils.dip2px(getContext(), 76));
         this.setLayoutParams(flLp);
+        if (color == -1) color = ContextCompat.getColor(getContext(), R.color.live_white);
         //视频
         surfaceView = ViESurfaceViewRenderer.CreateRenderer(getContext(), true);
         surfaceView.setZOrderMediaOverlay(true);
@@ -40,7 +44,7 @@ public class VideoView extends FrameLayout {
         FrameLayout.LayoutParams tvLp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         tvLp.gravity = Gravity.BOTTOM;
         tvName.setGravity(Gravity.CENTER);
-        tvName.setTextColor(ContextCompat.getColor(getContext(), R.color.live_white));
+        tvName.setTextColor(color);
         tvName.setPadding(0, DisplayUtils.dip2px(getContext(), 2), 0, DisplayUtils.dip2px(getContext(), 2));
         tvName.setLines(1);
         tvName.setText(name);
@@ -56,8 +60,15 @@ public class VideoView extends FrameLayout {
 
     public void setNameText(String text) {
         name = text;
-        if(tvName != null){
+        if (tvName != null) {
             tvName.setText(name);
+        }
+    }
+
+    public void setNameColor(@ColorInt int color) {
+        this.color = color;
+        if (tvName != null) {
+            tvName.setTextColor(color);
         }
     }
 }

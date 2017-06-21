@@ -820,11 +820,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 //            liveRoom.getRecorder().attachAudio();
 //            attachLocalVideo();
 //        }
-        if (liveRoom.getCurrentUser().getType() == LPConstants.LPUserType.Teacher) {
-            liveRoom.getRecorder().publish();
-            liveRoom.getRecorder().attachAudio();
-            attachLocalVideo();
-        }
         //成功进入房间后统一不再显示
         shouldShowTechSupport = false;
     }

@@ -1,8 +1,10 @@
 package com.baijiahulian.live.ui.ppt;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
 
 import com.baijiahulian.livecore.ppt.LPPPTFragment;
+import com.baijiahulian.livecore.ppt.whiteboard.LPWhiteBoardView;
 
 /**
  * Created by Shubo on 2017/2/18.
