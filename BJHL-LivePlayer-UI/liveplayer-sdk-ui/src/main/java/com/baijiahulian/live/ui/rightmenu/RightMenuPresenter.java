@@ -97,7 +97,7 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                     }, new Action1<Throwable>() {
                         @Override
                         public void call(Throwable throwable) {
-
+                            throwable.printStackTrace();
                         }
                     }, new Action0() {
                         @Override

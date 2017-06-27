@@ -45,6 +45,7 @@ public class OnlineUserPresenter implements OnlineUserContract.Presenter {
         subscriptionOfUserDataChange = routerListener.getLiveRoom()
                 .getOnlineUserVM()
                 .getObservableOfOnlineUser()
+                .onBackpressureBuffer()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new LPBackPressureBufferedSubscriber<List<IUserModel>>() {
                     @Override

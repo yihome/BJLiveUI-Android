@@ -917,6 +917,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public void disableSpeakerMode() {
         rightBottomMenuFragment.disableSpeakerMode();
+        detachLocalVideo();
         if (getLiveRoom().getRecorder().isPublishing())
             getLiveRoom().getRecorder().stopPublishing();
     }

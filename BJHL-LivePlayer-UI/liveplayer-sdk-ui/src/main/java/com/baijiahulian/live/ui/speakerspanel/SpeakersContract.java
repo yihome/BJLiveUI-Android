@@ -19,6 +19,7 @@ interface SpeakersContract {
     int VIEW_TYPE_SPEAKER = 2;
     int VIEW_TYPE_VIDEO_PLAY = 3;
     int VIEW_TYPE_PPT = 4;
+    int VIEW_TYPE_PRESENTER = 5;
 
     String PPT_TAG = "PPT";
     String RECORD_TAG = "RECORD";
@@ -79,5 +80,7 @@ interface SpeakersContract {
         void switchPrettyFilter();
 
         void clearScreen();
+
+        boolean isAutoPlay();
     }
 }

@@ -25,7 +25,7 @@ public class SettingPresenter implements SettingContract.Presenter {
     private LPRecorder recorder;
     private LPPlayer player;
     private LiveRoom liveRoom;
-    private Subscription subscriptionOfForbidAllChat;
+    private Subscription subscriptionOfForbidAllChat, subscriptionOfMic, subscriptionOfCamera;
 
     public SettingPresenter(SettingContract.View view) {
         this.view = view;
@@ -101,11 +101,25 @@ public class SettingPresenter implements SettingContract.Presenter {
                 .subscribe(new LPErrorPrintSubscriber<Boolean>() {
                     @Override
                     public void call(Boolean aBoolean) {
-                        if (aBoolean) {
-                            view.showForbidden();
-                        } else {
-                            view.showNotForbidden();
-                        }
+                        if (aBoolean) view.showForbidden();
+                        else view.showNotForbidden();
+
+                    }
+                });
+        subscriptionOfMic = liveRoom.getRecorder().getObservableOfMicOn().observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<Boolean>() {
+                    @Override
+                    public void call(Boolean aBoolean) {
+                        if (aBoolean) view.showMicOpen();
+                        else view.showMicClosed();
+                    }
+                });
+        subscriptionOfCamera = liveRoom.getRecorder().getObservableOfCameraOn().observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<Boolean>() {
+                    @Override
+                    public void call(Boolean aBoolean) {
+                        if (aBoolean) view.showCameraOpen();
+                        else view.showCameraClosed();
                     }
                 });
     }
@@ -113,6 +127,8 @@ public class SettingPresenter implements SettingContract.Presenter {
     @Override
     public void unSubscribe() {
         RxUtils.unSubscribe(subscriptionOfForbidAllChat);
+        RxUtils.unSubscribe(subscriptionOfMic);
+        RxUtils.unSubscribe(subscriptionOfCamera);
     }
 
     @Override
@@ -133,23 +149,19 @@ public class SettingPresenter implements SettingContract.Presenter {
                 }
                 if (recorder.isAudioAttached()) {
                     recorder.detachAudio();
-                    view.showMicClosed();
                 } else {
                     recorder.attachAudio();
-                    view.showMicOpen();
                 }
                 break;
             case Student:
-                if (routerListener.getSpeakApplyStatus() == RightMenuContract.STUDENT_SPEAK_APPLY_NONE) {
+                if (routerListener.getSpeakApplyStatus() != RightMenuContract.STUDENT_SPEAK_APPLY_SPEAKING) {
                     view.showStudentFail();
                     return;
                 }
                 if (recorder.isAudioAttached()) {
                     recorder.detachAudio();
-                    view.showMicClosed();
                 } else {
                     recorder.attachAudio();
-                    view.showMicOpen();
                 }
                 break;
             case Visitor:
@@ -168,23 +180,19 @@ public class SettingPresenter implements SettingContract.Presenter {
                 }
                 if (recorder.isVideoAttached()) {
                     routerListener.detachLocalVideo();
-                    view.showCameraClosed();
                 } else {
                     routerListener.attachLocalVideo();
-                    view.showCameraOpen();
                 }
                 break;
             case Student:
-                if (routerListener.getSpeakApplyStatus() == RightMenuContract.STUDENT_SPEAK_APPLY_NONE) {
+                if (routerListener.getSpeakApplyStatus() != RightMenuContract.STUDENT_SPEAK_APPLY_SPEAKING) {
                     view.showStudentFail();
                     return;
                 }
                 if (recorder.isVideoAttached()) {
                     routerListener.detachLocalVideo();
-                    view.showCameraClosed();
                 } else {
                     routerListener.attachLocalVideo();
-                    view.showCameraOpen();
                 }
                 break;
             case Visitor:

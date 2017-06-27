@@ -6,6 +6,8 @@ import android.view.View;
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 import com.baijiahulian.live.ui.ppt.MyPPTFragment;
 import com.baijiahulian.live.ui.utils.RxUtils;
+import com.baijiahulian.livecore.models.LPMediaModel;
+import com.baijiahulian.livecore.models.LPUserModel;
 import com.baijiahulian.livecore.models.imodels.IMediaControlModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
@@ -27,12 +29,15 @@ import static com.baijiahulian.live.ui.speakerspanel.SpeakersContract.PPT_TAG;
 import static com.baijiahulian.live.ui.speakerspanel.SpeakersContract.RECORD_TAG;
 import static com.baijiahulian.live.ui.speakerspanel.SpeakersContract.VIEW_TYPE_APPLY;
 import static com.baijiahulian.live.ui.speakerspanel.SpeakersContract.VIEW_TYPE_PPT;
+import static com.baijiahulian.live.ui.speakerspanel.SpeakersContract.VIEW_TYPE_PRESENTER;
 import static com.baijiahulian.live.ui.speakerspanel.SpeakersContract.VIEW_TYPE_RECORD;
 import static com.baijiahulian.live.ui.speakerspanel.SpeakersContract.VIEW_TYPE_SPEAKER;
 import static com.baijiahulian.live.ui.speakerspanel.SpeakersContract.VIEW_TYPE_VIDEO_PLAY;
 import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 
 /**
+ * 发言者列表遵从{[PPT]---[主讲人视频|头像]---[自己视频]---[其他人视频]---[其他发言用户音频]---[请求发言用户]}的顺序
+ * 如果全屏或没有对应的项目则不在此列表中
  * currentFullScreenTag 为当前全屏的tag VideoView为UserId
  * Created by Shubo on 2017/6/5.
  */
@@ -42,13 +47,18 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
     private LiveRoomRouterListener routerListener;
     private SpeakersContract.View view;
     private LPSubscribeObjectWithLastValue<String> fullScreenKVO;
+    private int MAX_VIDEO_COUNT = 0;
+    private boolean autoPlayPresenterVideo = true;
 
+    // 显示视频或发言用户的分段列表 item为相应的tag或者userId;
     private List<String> displayList;
 
-    private int _displayRecordSection = -1;
-    private int _displayVideoSection = -1;
-    private int _displaySpeakerSection = -1;
-    private int _displayApplySection = -1;
+    // 分段列表各个段位的下标 维护需谨慎
+    private int _displayPresenterSection = -1; //主讲人分段
+    private int _displayRecordSection = -1;    //自己视频
+    private int _displayVideoSection = -1;     //视频发言分段
+    private int _displaySpeakerSection = -1;   //未开视频发言分段
+    private int _displayApplySection = -1;     //请求发言用户分段
 
     private Subscription subscriptionOfMediaNew, subscriptionOfMediaChange, subscriptionOfMediaClose,
             subscriptionSpeakApply, subscriptionSpeakResponse, subscriptionOfActiveUser, subscriptionOfFullScreen;
@@ -61,12 +71,17 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
     @Override
     public void setRouter(LiveRoomRouterListener liveRoomRouterListener) {
         routerListener = liveRoomRouterListener;
+        MAX_VIDEO_COUNT = routerListener.getLiveRoom().getPlayer().getMaxSupportedVideoSize();
     }
 
     private void initView() {
         displayList = new ArrayList<>();
         if (!fullScreenKVO.getParameter().equals(PPT_TAG)) {
             displayList.add(PPT_TAG);
+        }
+        _displayPresenterSection = displayList.size();
+        if (routerListener.getLiveRoom().getPresenterUser() != null) {
+            displayList.add(routerListener.getLiveRoom().getPresenterUser().getUserId());
         }
         _displayRecordSection = displayList.size();
         if (routerListener.getLiveRoom().getRecorder().isVideoAttached()) {
@@ -75,7 +90,10 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
         _displayVideoSection = displayList.size();
         _displaySpeakerSection = displayList.size();
         for (IMediaModel model : routerListener.getLiveRoom().getSpeakQueueVM().getSpeakQueueList()) {
-            displayList.add(model.getUser().getUserId());
+            if (!model.getUser().getUserId().equals(routerListener.getLiveRoom().getPresenterUser().getUserId())) {
+                // exclude presenter
+                displayList.add(model.getUser().getUserId());
+            }
         }
         _displayApplySection = displayList.size();
         for (IUserModel model : routerListener.getLiveRoom().getSpeakQueueVM().getApplyList()) {
@@ -132,6 +150,10 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                         int position = displayList.indexOf(iMediaModel.getUser().getUserId());
                         if (position == -1)
                             return;
+                        if (position == _displayPresenterSection) {
+                            view.notifyItemChanged(position);
+                            return;
+                        }
                         if (position < _displayVideoSection) {
                             throw new RuntimeException("position < _displayVideoSection");
                         } else if (position < _displaySpeakerSection) { // 视频打开用户
@@ -236,6 +258,13 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
 
                             displayList.remove(tag);
                             if (PPT_TAG.equals(tag)) {
+                                _displayPresenterSection--;
+                                _displayRecordSection--;
+                                _displayVideoSection--;
+                                _displaySpeakerSection--;
+                                _displayApplySection--;
+                            } else if (routerListener.getLiveRoom().getPresenterUser() != null
+                                    && tag.equals(routerListener.getLiveRoom().getPresenterUser().getUserId())) {
                                 _displayRecordSection--;
                                 _displayVideoSection--;
                                 _displaySpeakerSection--;
@@ -254,19 +283,28 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                                 if (PPT_TAG.equals(lastTag)) {
                                     position = 0;
                                     displayList.add(0, PPT_TAG);
+                                    _displayPresenterSection++;
+                                    _displayRecordSection++;
+                                    _displayVideoSection++;
+                                    _displaySpeakerSection++;
+                                    _displayApplySection++;
+                                } else if (routerListener.getLiveRoom().getPresenterUser() != null
+                                        && lastTag.equals(routerListener.getLiveRoom().getPresenterUser().getUserId())) {
+                                    position = _displayPresenterSection;
+                                    displayList.add(position, lastTag);
                                     _displayRecordSection++;
                                     _displayVideoSection++;
                                     _displaySpeakerSection++;
                                     _displayApplySection++;
                                 } else if (RECORD_TAG.equals(lastTag)) {
                                     position = _displayRecordSection;
-                                    displayList.add(_displayRecordSection, RECORD_TAG);
+                                    displayList.add(position, RECORD_TAG);
                                     _displayVideoSection++;
                                     _displaySpeakerSection++;
                                     _displayApplySection++;
                                 } else { // video
                                     position = _displaySpeakerSection;
-                                    displayList.add(_displaySpeakerSection, lastTag);
+                                    displayList.add(position, lastTag);
                                     _displaySpeakerSection++;
                                     _displayApplySection++;
                                 }
@@ -299,10 +337,12 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
 
     @Override
     public int getItemViewType(int position) {
-        if (position < 0) {
+        if (position < 0)
             throw new RuntimeException("position < 0 in getItemViewType");
-        } else if (position < _displayRecordSection)
+        else if (position < _displayPresenterSection)
             return VIEW_TYPE_PPT;
+        else if (position < _displayRecordSection)
+            return VIEW_TYPE_PRESENTER;
         else if (position < _displayVideoSection)
             return VIEW_TYPE_RECORD;
         else if (position < _displaySpeakerSection)
@@ -359,6 +399,13 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                 return model;
             }
         }
+        // presenter mismatching
+        if (routerListener.getLiveRoom().getPresenterUser() != null &&
+                userId.equals(routerListener.getLiveRoom().getPresenterUser().getUserId())) {
+            LPMediaModel model = new LPMediaModel();
+            model.user = (LPUserModel) routerListener.getLiveRoom().getPresenterUser();
+            return model;
+        }
         return null;
     }
 
@@ -366,12 +413,22 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
     public void playVideo(String userId) {
         int position = displayList.indexOf(userId);
 
-        // 在dialog操作过程中 数据发生了变化
         if (position == -1) return;
         if (getSpeakModel(position) == null || !getSpeakModel(position).isVideoOn()) return;
 
+        if (position < _displayRecordSection) {
+            autoPlayPresenterVideo = true;
+            view.notifyItemChanged(position);
+            return;
+        }
+
+        if (_displaySpeakerSection - _displayVideoSection >= MAX_VIDEO_COUNT) {
+            return;
+        }
+
         view.notifyItemDeleted(position);
         displayList.remove(position);
+
         displayList.add(_displaySpeakerSection, userId);
         _displaySpeakerSection++;
         view.notifyItemInserted(_displaySpeakerSection - 1);
@@ -387,12 +444,22 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                 }
             }
             return;
+        } else if (tag.equals(PPT_TAG)) {
+            throw new RuntimeException("close PPT? wtf");
         }
         int position = displayList.indexOf(tag);
 
         // 在dialog操作过程中 数据发生了变化
         if (position == -1) return;
         if (getSpeakModel(position) == null) return;
+
+        if (position < _displayRecordSection) { // presenter
+            autoPlayPresenterVideo = false;
+            routerListener.getLiveRoom().getPlayer().playAVClose(tag);
+            routerListener.getLiveRoom().getPlayer().playAudio(tag);
+            view.notifyItemChanged(position);
+            return;
+        }
 
         routerListener.getLiveRoom().getPlayer().playAVClose(tag);
         routerListener.getLiveRoom().getPlayer().playAudio(tag);
@@ -462,6 +529,11 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
         isScreenCleared = !isScreenCleared;
         if (isScreenCleared) routerListener.clearScreen();
         else routerListener.unClearScreen();
+    }
+
+    @Override
+    public boolean isAutoPlay() {
+        return autoPlayPresenterVideo;
     }
 
     @Override
