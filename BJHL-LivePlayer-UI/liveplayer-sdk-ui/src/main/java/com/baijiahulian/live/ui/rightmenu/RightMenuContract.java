@@ -14,13 +14,6 @@ public interface RightMenuContract {
     int STUDENT_SPEAK_APPLY_SPEAKING = 2;
 
     interface View extends BaseView<Presenter> {
-        /*
-        void showSpeakQueueImage(String imgUrl);
-
-        void showSpeakQueueCount(int count);
-
-        void showEmptyQueue();
-        */
 
         void showSpeakClosedByTeacher();
 
@@ -52,7 +45,7 @@ public interface RightMenuContract {
 
         void showWaitingTeacherAgree();
 
-        void showTeacherNotIn();
+        void showAutoSpeak();
     }
 
     interface Presenter extends BasePresenter {
@@ -65,6 +58,5 @@ public interface RightMenuContract {
         void speakApply();
 
         void changePPTDrawBtnStatus(boolean shouldShow);
-
     }
 }

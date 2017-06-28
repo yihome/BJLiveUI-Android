@@ -14,6 +14,7 @@ import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseFragment;
 import com.baijiahulian.live.ui.utils.DisplayUtils;
 import com.baijiahulian.live.ui.utils.QueryPlus;
+import com.baijiahulian.live.ui.utils.RxUtils;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
 import com.baijiahulian.livecore.ppt.whiteboard.LPWhiteBoardView;
@@ -21,6 +22,10 @@ import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import rx.Observable;
+import rx.Subscription;
 
 import static com.baijiahulian.live.ui.speakerspanel.SpeakersContract.PPT_TAG;
 import static com.baijiahulian.live.ui.speakerspanel.SpeakersContract.RECORD_TAG;
@@ -60,6 +65,28 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
         lpItem = new ViewGroup.LayoutParams(DisplayUtils.dip2px(getActivity(), 100), DisplayUtils.dip2px(getActivity(), 76));
     }
 
+    private boolean attachVideoOnResume = false;
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(attachVideoOnResume){
+            attachVideoOnResume = false;
+            if(!presenter.getRecorder().isPublishing())
+                presenter.getRecorder().publish();
+            presenter.getRecorder().attachVideo();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(presenter.getRecorder().isVideoAttached()){
+            presenter.getRecorder().detachVideo();
+            attachVideoOnResume = true;
+        }
+    }
+
     @Override
     public void notifyItemChanged(int position) {
         if (presenter.getItemViewType(position) == VIEW_TYPE_SPEAKER) {
@@ -68,6 +95,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
         } else if (presenter.getItemViewType(position) == VIEW_TYPE_PRESENTER) {
             IMediaModel model = presenter.getSpeakModel(position);
             container.removeViewAt(position);
+            if(model == null) return;
             if (model.isVideoOn() && presenter.isAutoPlay()) {
                 VideoView videoView = new VideoView(getActivity());
                 videoView.setNameText(model.getUser().getName());
@@ -115,9 +143,6 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                     presenter.getPlayer().playAVClose(presenter.getItem(position));
                     presenter.getPlayer().playVideo(presenter.getItem(position), videoView.getSurfaceView());
                 } else {
-//                    if (presenterSpeakModel.isAudioOn()) {
-//                        presenter.getPlayer().playAudio(presenter.getItem(position));
-//                    }
                     container.addView(generateSpeakView(presenter.getSpeakModel(position)), position);
                 }
                 break;
@@ -217,6 +242,11 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
         }
     }
 
+    @Override
+    public void showMaxVideoExceed() {
+        showToast(getString(R.string.live_speakers_max_video_exceed));
+    }
+
     private View generateApplyView(final IUserModel model) {
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.item_speak_apply, container, false);
         QueryPlus q = QueryPlus.with(view);
@@ -262,6 +292,10 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
 
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
+            if (!clickableCheck()) {
+                showToast(getString(R.string.live_frequent_error));
+                return super.onSingleTapConfirmed(e);
+            }
             if (!presenter.isFullScreen(tag)) {
                 showOptionDialog(tag);
             } else {
@@ -270,11 +304,15 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                     presenter.clearScreen();
                 }
             }
-            return super.onSingleTapConfirmed(e);
+            return true;
         }
 
         @Override
         public boolean onDoubleTap(MotionEvent e) {
+            if (!clickableCheck()) {
+                showToast(getString(R.string.live_frequent_error));
+                return super.onDoubleTap(e);
+            }
             if (!presenter.isFullScreen(tag)) {
                 presenter.setFullScreenTag(tag);
             }
@@ -292,6 +330,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                 break;
             case VIEW_TYPE_PRESENTER:
                 IMediaModel presenterModel = presenter.getSpeakModel(tag);
+                if (presenterModel == null) return; // 主讲人音视频未开启
                 if (presenterModel.isVideoOn() && presenter.isAutoPlay()) {
                     options.add(getString(R.string.live_full_screen));
                     options.add(getString(R.string.live_close_video));
@@ -351,5 +390,20 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                     }
                 })
                 .show();
+    }
+
+    private Subscription subscriptionOfClickable;
+
+    private boolean clickableCheck() {
+        if (subscriptionOfClickable != null && !subscriptionOfClickable.isUnsubscribed()) {
+            return false;
+        }
+        subscriptionOfClickable = Observable.timer(1, TimeUnit.SECONDS).subscribe(new LPErrorPrintSubscriber<Long>() {
+            @Override
+            public void call(Long aLong) {
+                RxUtils.unSubscribe(subscriptionOfClickable);
+            }
+        });
+        return true;
     }
 }

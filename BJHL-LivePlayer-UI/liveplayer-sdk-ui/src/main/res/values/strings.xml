@@ -75,7 +75,7 @@
     <string name="live_image_loading">图片加载中…</string>
     <string name="live_image_uploading">上传中…</string>
     <string name="live_image_loading_fail">图片加载失败</string>
-    <string name="live_frequent_error">请勿频繁切换</string>
+    <string name="live_frequent_error">请勿频繁点击</string>
     <string name="live_frequent_error_line">请勿频繁切换线路</string>
     <string name="live_frequent_error_camera">请勿频繁切换前后摄像头</string>
     <string name="live_frequent_error_resolution">请勿频繁切换清晰度</string>
@@ -100,5 +100,14 @@
     <string name="live_quiz_dialog_cancel">再等等</string>
     <string name="live_quiz_dialog_confirm">确认</string>
     <string name="live_loading_support">百家云提供直播服务</string>
+    <string name="live_speakers_max_video_exceed">视频播放已达上限，请先关闭一个</string>
+    <string name="live_cloud_record_setting">录课设置</string>
+    <string name="live_cloud_record_setting_end">结束录课</string>
+    <string name="live_cloud_record_setting_content">直播正在录制中</string>
+    <string name="live_exit_hint_title">提示</string>
+    <string name="live_exit_hint_confirm">确定退出</string>
+    <string name="live_exit_hint_content">确定要退出直播教室吗？</string>
+    <string name="live_audio_room_error">音频课不能开启摄像头</string>
+
 </resources>
 

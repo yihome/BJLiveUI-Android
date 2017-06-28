@@ -2,6 +2,7 @@ package com.baijiahulian.live.ui.rightbotmenu;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 import com.baijiahulian.live.ui.utils.RxUtils;
+import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 
 import rx.Subscription;
@@ -50,6 +51,10 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
 
     @Override
     public void changeVideo() {
+        if (liveRoomRouterListener.getLiveRoom().getRoomMediaType() == LPConstants.LPMediaType.Audio) {
+            view.showAudioRoomError();
+            return;
+        }
         if (liveRoomRouterListener.getLiveRoom().getRecorder().isVideoAttached()) {
             liveRoomRouterListener.detachLocalVideo();
             if (!liveRoomRouterListener.getLiveRoom().getRecorder().isAudioAttached()) {
@@ -150,6 +155,10 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
         } else if (liveRoomRouterListener.getCurrentScreenOrientation() == 1) {
             //竖屏
             view.showZoomIn();
+        }
+        if (liveRoomRouterListener.getLiveRoom().getCurrentUser().getType() == LPConstants.LPUserType.Student &&
+                liveRoomRouterListener.getLiveRoom().getRoomType() != LPConstants.LPRoomType.Multi) {
+            view.enableSpeakerMode();
         }
     }
 

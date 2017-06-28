@@ -1,4 +1,4 @@
-package com.baijiahulian.live.ui.righttopmenu;
+package com.baijiahulian.live.ui.cloudrecord;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 import com.baijiahulian.live.ui.utils.RxUtils;
@@ -11,7 +11,7 @@ import rx.android.schedulers.AndroidSchedulers;
  * Created by wangkangfei on 17/5/8.
  */
 
-public class RightTopMenuPresenter implements RightTopMenuContract.Presenter {
+public class CloudRecordPresenter implements CloudRecordContract.Presenter {
     private LiveRoomRouterListener liveRoomRouterListener;
     private Subscription subscriptionOfCloudRecord;
 
@@ -38,7 +38,6 @@ public class RightTopMenuPresenter implements RightTopMenuContract.Presenter {
                         }
                     }
                 });
-
     }
 
     @Override
@@ -49,5 +48,10 @@ public class RightTopMenuPresenter implements RightTopMenuContract.Presenter {
     @Override
     public void destroy() {
         liveRoomRouterListener = null;
+    }
+
+    @Override
+    public void cancelCloudRecord() {
+        liveRoomRouterListener.getLiveRoom().requestCloudRecord(false);
     }
 }

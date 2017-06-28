@@ -52,6 +52,7 @@ interface SettingContract {
 
         void showNotForbidden();
 
+        void showAudioRoomError();
     }
 
     interface Presenter extends BasePresenter {

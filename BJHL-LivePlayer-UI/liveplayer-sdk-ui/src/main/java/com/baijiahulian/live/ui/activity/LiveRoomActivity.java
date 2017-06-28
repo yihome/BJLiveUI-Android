@@ -41,6 +41,7 @@ import com.baijiahulian.live.ui.chat.preview.ChatPictureViewFragment;
 import com.baijiahulian.live.ui.chat.preview.ChatPictureViewPresenter;
 import com.baijiahulian.live.ui.chat.preview.ChatSavePicDialogFragment;
 import com.baijiahulian.live.ui.chat.preview.ChatSavePicDialogPresenter;
+import com.baijiahulian.live.ui.cloudrecord.CloudRecordPresenter;
 import com.baijiahulian.live.ui.error.ErrorFragment;
 import com.baijiahulian.live.ui.leftmenu.LeftMenuFragment;
 import com.baijiahulian.live.ui.leftmenu.LeftMenuPresenter;
@@ -60,7 +61,7 @@ import com.baijiahulian.live.ui.rightbotmenu.RightBottomMenuFragment;
 import com.baijiahulian.live.ui.rightbotmenu.RightBottomMenuPresenter;
 import com.baijiahulian.live.ui.rightmenu.RightMenuFragment;
 import com.baijiahulian.live.ui.rightmenu.RightMenuPresenter;
-import com.baijiahulian.live.ui.righttopmenu.RightTopMenuFragment;
+import com.baijiahulian.live.ui.cloudrecord.CloudRecordFragment;
 import com.baijiahulian.live.ui.rollcall.RollCallDialogFragment;
 import com.baijiahulian.live.ui.rollcall.RollCallDialogPresenter;
 import com.baijiahulian.live.ui.setting.SettingDialogFragment;
@@ -109,17 +110,18 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private FrameLayout flLoading;
     private FrameLayout flError;
     private DrawerLayout dlChat;
-    private FrameLayout flTopRight;
+    //    private FrameLayout flTopRight;
     private FrameLayout flPPTLeft;
     private FrameLayout flRightBottom;
     private FrameLayout flRight;
     private FrameLayout flSpeakers;
+    private FrameLayout flCloudRecord;
 
     private LiveRoom liveRoom;
 
     private LoadingFragment loadingFragment;
     private TopBarFragment topBarFragment;
-    private RightTopMenuFragment rightTopMenuFragment;
+    private CloudRecordFragment cloudRecordFragment;
 
     private MyPPTFragment lppptFragment;
     private ChatFragment chatFragment;
@@ -143,12 +145,10 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private OrientationEventListener orientationEventListener; //处理屏幕旋转时本地录制视频的方向
     private int oldRotation;
 
-    private Subscription subscriptionOfLoginConflict, subscriptionOfSwitch, subscriptionOfSolutionArrived,
-            subscriptionOfQuizStart, subscriptionOfQuizRes;
+    private Subscription subscriptionOfLoginConflict;
 
     private boolean isClearScreen;//是否已经清屏，作用于视频采集和远程视频ui的调整
     private String code, name;
-    private boolean isSwitchable = true;
     private boolean isBackgroundContainerShrink = false; //缩小背景框
 
     private long roomId;
@@ -216,12 +216,12 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         flLeft = (FrameLayout) findViewById(R.id.activity_live_room_bottom_left);
         flLoading = (FrameLayout) findViewById(R.id.activity_live_room_loading);
         dlChat = (DrawerLayout) findViewById(R.id.activity_live_room_chat_drawer);
-        flTopRight = (FrameLayout) findViewById(R.id.activity_live_room_top_right_recording);
         flPPTLeft = (FrameLayout) findViewById(R.id.activity_live_room_ppt_left);
         flError = (FrameLayout) findViewById(R.id.activity_live_room_error);
         flRightBottom = (FrameLayout) findViewById(R.id.activity_live_room_bottom_right);
         flRight = (FrameLayout) findViewById(R.id.activity_live_room_right);
         flSpeakers = (FrameLayout) findViewById(R.id.activity_live_room_speakers_container);
+        flCloudRecord = (FrameLayout) findViewById(R.id.activity_live_room_cloud_record);
     }
 
     @Override
@@ -236,7 +236,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                     //重新进入教室
                     removeFragment(lppptFragment);
                     removeFragment(topBarFragment);
-                    removeFragment(rightTopMenuFragment);
+                    removeFragment(cloudRecordFragment);
                     removeFragment(leftMenuFragment);
                     removeFragment(pptLeftFragment);
                     removeFragment(rightMenuFragment);
@@ -280,13 +280,29 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         onBackgroundContainerConfigurationChanged(newConfig);
         onSpeakersContainerConfigurationChanged(newConfig);
         onPPTLeftMenuConfigurationChanged(newConfig);
+        onCloudRecordConfigurationChanged(newConfig);
+    }
+
+    private void onCloudRecordConfigurationChanged(Configuration newConfig) {
+        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) flCloudRecord.getLayoutParams();
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            lp.addRule(RelativeLayout.ABOVE, 0);
+            lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            lp.addRule(RelativeLayout.ABOVE, R.id.activity_live_room_center_anchor);
+            lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, 0);
+        }
+        flCloudRecord.setLayoutParams(lp);
     }
 
     private void onSpeakersContainerConfigurationChanged(Configuration newConfig) {
         RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) flSpeakers.getLayoutParams();
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            flCloudRecord.setVisibility(View.GONE);
             lp.addRule(RelativeLayout.BELOW, 0);
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            if (liveRoom.getCloudRecordStatus())
+                flCloudRecord.setVisibility(View.VISIBLE);
             lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_center_anchor);
         }
         flSpeakers.setLayoutParams(lp);
@@ -322,13 +338,17 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     //录课中ui清屏调整
     private void onRecordFullScreenConfigurationChanged(boolean isClear) {
-        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) flTopRight.getLayoutParams();
-        if (isClear) {
-            lp.addRule(RelativeLayout.BELOW, 0);
-        } else {
-            lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_top);
+        if (!liveRoom.getCloudRecordStatus())
+            return;
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            flCloudRecord.setVisibility(View.GONE);
+            return;
         }
-        flTopRight.setLayoutParams(lp);
+        if (isClear) {
+            flCloudRecord.setVisibility(View.VISIBLE);
+        } else {
+            flCloudRecord.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -454,26 +474,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public int getSpeakApplyStatus() {
         return rightMenuPresenter.getSpeakApplyStatus();
-    }
-
-    @Override
-    public boolean switchable() {
-        if (!isSwitchable) {
-            showMessage(getString(R.string.live_frequent_error));
-        }
-        return isSwitchable;
-    }
-
-    @Override
-    public void setSwitching() {
-        isSwitchable = false;
-        subscriptionOfSwitch = Observable.timer(2, TimeUnit.SECONDS).observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<Long>() {
-                    @Override
-                    public void call(Long aLong) {
-                        isSwitchable = true;
-                    }
-                });
     }
 
     @Override
@@ -694,7 +694,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         }
         removeFragment(lppptFragment);
         removeFragment(topBarFragment);
-        removeFragment(rightTopMenuFragment);
+        removeFragment(cloudRecordFragment);
         removeFragment(leftMenuFragment);
         removeFragment(pptLeftFragment);
         removeFragment(rightMenuFragment);
@@ -741,9 +741,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         bindVP(topBarFragment, new TopBarPresenter(topBarFragment));
         addFragment(R.id.activity_live_room_top, topBarFragment);
 
-//        rightTopMenuFragment = new RightTopMenuFragment();
-//        bindVP(rightTopMenuFragment, new RightTopMenuPresenter());
-//        addFragment(R.id.activity_live_room_top_right, rightTopMenuFragment);
+        cloudRecordFragment = new CloudRecordFragment();
+        bindVP(cloudRecordFragment, new CloudRecordPresenter());
+        addFragment(R.id.activity_live_room_cloud_record, cloudRecordFragment);
 
         speakersFragment = new SpeakersFragment();
         speakerPresenter = new SpeakerPresenter(speakersFragment);
@@ -812,14 +812,18 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                         removeFragment(loadingFragment);
                         flLoading.setVisibility(View.GONE);
                         flError.setVisibility(View.GONE);
+
+                        if (liveRoom.getCurrentUser().getType() == LPConstants.LPUserType.Teacher) {
+                            liveRoom.getRecorder().publish();
+                            liveRoom.getRecorder().attachAudio();
+                            attachLocalVideo();
+                            if (liveRoom.getAutoStartCloudRecordStatus() == 1) {
+                                liveRoom.requestCloudRecord(true);
+                            }
+                        }
                     }
                 });
 
-//        if (liveRoom.getCurrentUser().getType() == LPConstants.LPUserType.Teacher) {
-//            liveRoom.getRecorder().publish();
-//            liveRoom.getRecorder().attachAudio();
-//            attachLocalVideo();
-//        }
         //成功进入房间后统一不再显示
         shouldShowTechSupport = false;
     }
@@ -964,11 +968,11 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public void navigateToCloudRecord(boolean recordStatus) {
         if (recordStatus) {
-            flTopRight.setVisibility(View.VISIBLE);
-            showFragment(rightTopMenuFragment);
+            flCloudRecord.setVisibility(View.VISIBLE);
+            showFragment(cloudRecordFragment);
         } else {
-            flTopRight.setVisibility(View.GONE);
-            hideFragment(rightTopMenuFragment);
+            flCloudRecord.setVisibility(View.GONE);
+            hideFragment(cloudRecordFragment);
         }
     }
 
@@ -1123,10 +1127,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         }
 
         RxUtils.unSubscribe(subscriptionOfLoginConflict);
-        RxUtils.unSubscribe(subscriptionOfSwitch);
-        RxUtils.unSubscribe(subscriptionOfSolutionArrived);
-        RxUtils.unSubscribe(subscriptionOfQuizStart);
-        RxUtils.unSubscribe(subscriptionOfQuizRes);
 
         orientationEventListener = null;
 
@@ -1234,6 +1234,10 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         exitListener = null;
         enterRoomConflictListener = null;
         roomLifeCycleListener = null;
+    }
+
+    public static LiveSDKWithUI.LPRoomExitListener getExitListener() {
+        return exitListener;
     }
 
     public static void setRoomLifeCycleListener(LiveSDKWithUI.LPRoomResumeListener roomLifeCycleListener) {

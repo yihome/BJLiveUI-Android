@@ -105,10 +105,6 @@ public interface LiveRoomRouterListener {
 
     int getSpeakApplyStatus();
 
-    boolean switchable();
-
-    void setSwitching();
-
     void showMessageClassEnd();
 
     void showMessageClassStart();

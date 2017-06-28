@@ -55,30 +55,6 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
     public int getLayoutId() {
         return R.layout.fragment_right_menu;
     }
-/*
-    @Override
-    public void showSpeakQueueImage(String imgUrl) {
-        $.id(R.id.fragment_right_speakers_img).visible();
-        Picasso.with(getActivity()).load(AliCloudImageUtil.getRoundedAvatarUrl(imgUrl, 46))
-                .transform(new CircleAvatarTransformation()).into((ImageView) $.id(R.id.fragment_right_speakers_img).view());
-    }
-
-    @Override
-    public void showSpeakQueueCount(int count) {
-        if (count > 0) {
-            $.id(R.id.fragment_right_speakers_num).visible();
-            $.id(R.id.fragment_right_speakers_num).text(String.valueOf(count));
-        } else {
-            $.id(R.id.fragment_right_speakers_num).gone();
-        }
-    }
-
-    @Override
-    public void showEmptyQueue() {
-        $.id(R.id.fragment_right_speakers_num).gone();
-        $.id(R.id.fragment_right_speakers_img).gone();
-    }
-    */
 
     @Override
     public void showDrawingStatus(boolean isEnable) {
@@ -179,8 +155,9 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
     }
 
     @Override
-    public void showTeacherNotIn() {
-        showToast(getString(R.string.live_teacher_not_in));
+    public void showAutoSpeak() {
+        $.id(R.id.fragment_right_pen).visible();
+        $.id(R.id.fragment_right_speak_apply).gone();
     }
 
     @Override

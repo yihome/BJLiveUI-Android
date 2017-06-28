@@ -13,6 +13,7 @@ import android.support.v7.widget.RecyclerView;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
+import android.text.util.Linkify;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -171,6 +172,13 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
                 TextViewHolder textViewHolder = (TextViewHolder) holder;
                 textViewHolder.textView.setText(spanText);
                 textViewHolder.textView.append(message.getContent());
+                if (message.getFrom().getType() == LPConstants.LPUserType.Teacher ||
+                        message.getFrom().getType() == LPConstants.LPUserType.Assistant) {
+                    Linkify.addLinks(textViewHolder.textView, Linkify.WEB_URLS | Linkify.EMAIL_ADDRESSES);
+//                    textViewHolder.textView.setAutoLinkMask(Linkify.WEB_URLS | Linkify.EMAIL_ADDRESSES);
+                } else {
+                    textViewHolder.textView.setAutoLinkMask(0);
+                }
             } else if (holder instanceof EmojiViewHolder) {
                 EmojiViewHolder emojiViewHolder = (EmojiViewHolder) holder;
                 emojiViewHolder.tvName.setText(spanText);

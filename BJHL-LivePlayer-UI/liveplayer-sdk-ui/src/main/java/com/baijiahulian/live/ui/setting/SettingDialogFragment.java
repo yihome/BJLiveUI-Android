@@ -17,7 +17,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import rx.Observable;
-import rx.Subscription;
 
 /**
  * Created by Shubo on 2017/3/2.
@@ -286,6 +285,11 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
     @Override
     public void showNotForbidden() {
         $.id(R.id.dialog_setting_forbid_all_speak).image(R.drawable.ic_off_switch);
+    }
+
+    @Override
+    public void showAudioRoomError() {
+        showToast(getString(R.string.live_audio_room_error));
     }
 
     @Override

@@ -33,7 +33,7 @@
         android:id="@+id/activity_live_room_speakers_container"
         android:layout_width="match_parent"
         android:layout_height="76dp"
-        android:layout_below="@+id/activity_live_room_center_anchor"/>
+        android:layout_below="@+id/activity_live_room_center_anchor" />
 
     <com.baijiahulian.live.ui.viewsupport.AutoExitDrawerLayout
         android:id="@+id/activity_live_room_chat_drawer"
@@ -62,18 +62,6 @@
         android:layout_marginTop="26dp" />
 
     <FrameLayout
-        android:id="@+id/activity_live_room_top_right_recording"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/activity_live_room_top"
-        android:layout_marginEnd="@dimen/activity_live_room_margin"
-        android:layout_marginRight="@dimen/activity_live_room_margin"
-        android:layout_marginTop="@dimen/activity_live_room_margin"
-        android:visibility="gone" />
-
-    <FrameLayout
         android:id="@+id/activity_live_room_bottom_left"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -96,7 +84,7 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/activity_live_room_bottom_right"
         android:layout_alignParentRight="true"
-        android:layout_marginBottom="50dp"
+        android:layout_marginBottom="30dp"
         android:layout_marginRight="@dimen/activity_live_room_margin" />
 
     <FrameLayout
@@ -108,4 +96,14 @@
         android:id="@+id/activity_live_room_error"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+    <FrameLayout
+        android:id="@+id/activity_live_room_cloud_record"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/activity_live_room_center_anchor"
+        android:layout_alignParentRight="true"
+        android:layout_margin="@dimen/activity_live_room_margin"
+        android:visibility="gone" />
+
 </RelativeLayout>

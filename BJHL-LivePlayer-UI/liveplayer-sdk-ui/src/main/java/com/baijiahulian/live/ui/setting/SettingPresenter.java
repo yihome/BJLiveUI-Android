@@ -172,6 +172,10 @@ public class SettingPresenter implements SettingContract.Presenter {
 
     @Override
     public void changeCamera() {
+        if(routerListener.getLiveRoom().getRoomMediaType() == LPConstants.LPMediaType.Audio){
+            view.showAudioRoomError();
+            return;
+        }
         switch (routerListener.getLiveRoom().getCurrentUser().getType()) {
             case Teacher:
             case Assistant:

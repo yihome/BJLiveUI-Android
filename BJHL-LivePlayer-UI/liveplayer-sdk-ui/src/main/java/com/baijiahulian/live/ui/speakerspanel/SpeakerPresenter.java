@@ -61,7 +61,8 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
     private int _displayApplySection = -1;     //请求发言用户分段
 
     private Subscription subscriptionOfMediaNew, subscriptionOfMediaChange, subscriptionOfMediaClose,
-            subscriptionSpeakApply, subscriptionSpeakResponse, subscriptionOfActiveUser, subscriptionOfFullScreen;
+            subscriptionSpeakApply, subscriptionSpeakResponse, subscriptionOfActiveUser, subscriptionOfFullScreen,
+            subscriptionOfUserOut;
 
     public SpeakerPresenter(SpeakersContract.View view) {
         this.view = view;
@@ -71,7 +72,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
     @Override
     public void setRouter(LiveRoomRouterListener liveRoomRouterListener) {
         routerListener = liveRoomRouterListener;
-        MAX_VIDEO_COUNT = routerListener.getLiveRoom().getPlayer().getMaxSupportedVideoSize();
+        MAX_VIDEO_COUNT = routerListener.getLiveRoom().getPlayer().getMaxSupportedVideoSize() - 1;
     }
 
     private void initView() {
@@ -124,6 +125,21 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                 .subscribe(new LPErrorPrintSubscriber<IMediaModel>() {
                     @Override
                     public void call(IMediaModel iMediaModel) {
+                        if (routerListener.getLiveRoom().getPresenterUser() != null
+                                && iMediaModel.getUser().getUserId().equals(routerListener.getLiveRoom().getPresenterUser().getUserId())) {
+                            if (_displayPresenterSection < displayList.size() &&
+                                    displayList.get(_displayPresenterSection).equals(iMediaModel.getUser().getUserId())) {
+                                view.notifyItemChanged(_displayPresenterSection);
+                            } else {
+                                displayList.add(_displayPresenterSection, iMediaModel.getUser().getUserId());
+                                _displayRecordSection++;
+                                _displayVideoSection++;
+                                _displaySpeakerSection++;
+                                _displayApplySection++;
+                                view.notifyItemInserted(_displayPresenterSection);
+                            }
+                            return;
+                        }
                         displayList.add(_displayApplySection, iMediaModel.getUser().getUserId());
                         _displayApplySection++;
                         view.notifyItemInserted(_displayApplySection - 1);
@@ -139,17 +155,28 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                             // full screen user
                             if (!iMediaModel.isVideoOn()) {
                                 fullScreenKVO.setParameter(null);
-                                routerListener.getLiveRoom().getPlayer().playAVClose(iMediaModel.getUser().getUserId());
-                                routerListener.getLiveRoom().getPlayer().playAudio(iMediaModel.getUser().getUserId());
-                                _displayApplySection++;
-                                displayList.add(_displayApplySection - 1, iMediaModel.getUser().getUserId());
-                                view.notifyItemInserted(_displayApplySection - 1);
+                                if (routerListener.getLiveRoom().getPresenterUser() != null
+                                        && iMediaModel.getUser().getUserId().equals(routerListener.getLiveRoom().getPresenterUser().getUserId())) {
+                                    _displayRecordSection++;
+                                    _displayVideoSection++;
+                                    _displaySpeakerSection++;
+                                    _displayApplySection++;
+                                    displayList.add(_displayPresenterSection, iMediaModel.getUser().getUserId());
+                                    view.notifyItemInserted(_displayPresenterSection);
+                                } else {
+                                    routerListener.getLiveRoom().getPlayer().playAVClose(iMediaModel.getUser().getUserId());
+                                    routerListener.getLiveRoom().getPlayer().playAudio(iMediaModel.getUser().getUserId());
+                                    _displayApplySection++;
+                                    displayList.add(_displayApplySection - 1, iMediaModel.getUser().getUserId());
+                                    view.notifyItemInserted(_displayApplySection - 1);
+                                }
                             }
                             return;
                         }
                         int position = displayList.indexOf(iMediaModel.getUser().getUserId());
-                        if (position == -1)
+                        if (position == -1) { // 未在speaker列表
                             return;
+                        }
                         if (position == _displayPresenterSection) {
                             view.notifyItemChanged(position);
                             return;
@@ -182,13 +209,24 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                         if (fullScreenKVO.getParameter().equals(iMediaModel.getUser().getUserId())) {
                             // full screen user
                             fullScreenKVO.setParameter(null);
+                            if (routerListener.getLiveRoom().getPresenterUser() != null
+                                    && iMediaModel.getUser().getUserId().equals(routerListener.getLiveRoom().getPresenterUser().getUserId())) {
+                                _displayRecordSection++;
+                                _displayVideoSection++;
+                                _displaySpeakerSection++;
+                                _displayApplySection++;
+                                displayList.add(_displayPresenterSection, iMediaModel.getUser().getUserId());
+                                view.notifyItemInserted(_displayPresenterSection);
+                            }
                             return;
                         }
                         int position = displayList.indexOf(iMediaModel.getUser().getUserId());
                         if (position == -1)
                             return;
-                        if (position < _displayVideoSection) {
-                            throw new RuntimeException("position < _displayVideoSection");
+                        if (position < _displayPresenterSection) {
+                            throw new RuntimeException("position < _displayPresenterSection");
+                        } else if (position < _displayVideoSection) {
+                            view.notifyItemChanged(position);
                         } else if (position < _displaySpeakerSection) { // 视频打开用户
                             view.notifyItemDeleted(position);
                             displayList.remove(position);
@@ -199,8 +237,28 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                             displayList.remove(position);
                             _displayApplySection--;
                         } else {
-                            throw new RuntimeException("position > _displayApplySection");
+//                            throw new RuntimeException("position > _displayApplySection");
                         }
+                    }
+                });
+
+        subscriptionOfUserOut = routerListener.getLiveRoom().getObservableOfUserOut().observeOn(AndroidSchedulers.mainThread())
+                .filter(new Func1<String, Boolean>() {
+                    @Override
+                    public Boolean call(String s) {
+                        return routerListener.getLiveRoom().getPresenterUser() != null && s.equals(routerListener.getLiveRoom().getPresenterUser().getUserId());
+                    }
+                })
+                .subscribe(new LPErrorPrintSubscriber<String>() {
+                    @Override
+                    public void call(String s) {
+                        if (displayList.indexOf(s) < 0) return;
+                        view.notifyItemDeleted(_displayPresenterSection);
+                        displayList.remove(_displayPresenterSection);
+                        _displayRecordSection--;
+                        _displayVideoSection--;
+                        _displaySpeakerSection--;
+                        _displayApplySection--;
                     }
                 });
 
@@ -327,6 +385,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
         RxUtils.unSubscribe(subscriptionSpeakResponse);
         RxUtils.unSubscribe(subscriptionOfActiveUser);
         RxUtils.unSubscribe(subscriptionOfFullScreen);
+        RxUtils.unSubscribe(subscriptionOfUserOut);
     }
 
     @Override
@@ -423,6 +482,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
         }
 
         if (_displaySpeakerSection - _displayVideoSection >= MAX_VIDEO_COUNT) {
+            view.showMaxVideoExceed();
             return;
         }
 
@@ -451,12 +511,14 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
 
         // 在dialog操作过程中 数据发生了变化
         if (position == -1) return;
-        if (getSpeakModel(position) == null) return;
+        IMediaModel model = getSpeakModel(position);
+        if (model == null) return;
 
         if (position < _displayRecordSection) { // presenter
             autoPlayPresenterVideo = false;
             routerListener.getLiveRoom().getPlayer().playAVClose(tag);
-            routerListener.getLiveRoom().getPlayer().playAudio(tag);
+            if (model.isAudioOn())
+                routerListener.getLiveRoom().getPlayer().playAudio(tag);
             view.notifyItemChanged(position);
             return;
         }
@@ -581,6 +643,8 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
 
     public void detachVideo() {
         if (RECORD_TAG.equals(fullScreenKVO.getParameter())) {
+            if (getRecorder().isVideoAttached())
+                getRecorder().detachVideo();
             fullScreenKVO.setParameter(null);
             return;
         }

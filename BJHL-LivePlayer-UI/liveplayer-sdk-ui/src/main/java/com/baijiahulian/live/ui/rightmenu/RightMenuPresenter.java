@@ -4,7 +4,6 @@ import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 import com.baijiahulian.live.ui.utils.RxUtils;
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.models.imodels.IMediaControlModel;
-import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 
 import java.util.concurrent.TimeUnit;
@@ -27,13 +26,10 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
     private LiveRoomRouterListener liveRoomRouterListener;
     private RightMenuContract.View view;
     private LPConstants.LPUserType currentUserType;
-    private Subscription subscriptionOfMediaControl, subscriptionOfActiveUser, subscriptionOfMedia,
-            subscriptionOfSpeakApply, subscriptionOfAvatarSwitcher, subscriptionOfSpeakApplyCounter,
-            subscriptionOfSpeakApplyResponse, subscriptionOfMediaClose, subscriptionOfMediaChanged,
-            subscriptionOfClassEnd;
+    private Subscription subscriptionOfMediaControl, subscriptionOfSpeakApplyCounter,
+            subscriptionOfClassEnd, subscriptionOfSpeakApplyResponse;
     private int speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_NONE;
     private boolean isDrawing = false;
-    private boolean isTeacherIn = false;
 
     public RightMenuPresenter(RightMenuContract.View view) {
         this.view = view;
@@ -158,115 +154,8 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
         } else {
             view.showStudentRightMenu();
         }
-/*
-        LPErrorPrintSubscriber<List<IMediaModel>> activeUserSubscriber = new LPErrorPrintSubscriber<List<IMediaModel>>() {
-            @Override
-            public void call(List<IMediaModel> iMediaModels) {
-                refreshSpeakQueueBtnStatus();
-                if (!isTeacherIn && !liveRoomRouterListener.isCurrentUserTeacher())
-                    view.showTeacherNotIn();
-            }
-        };
-        final ConnectableObservable<List<IMediaModel>> observable = liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getObservableOfActiveUsers();
-        subscriptionOfActiveUser = observable
-                .subscribeOn(Schedulers.newThread())
-                .doOnNext(new Action1<List<IMediaModel>>() {
-                    @Override
-                    public void call(List<IMediaModel> iMediaModels) {
-                        for (IMediaModel model : iMediaModels) {
-                            if (model.getUser().getType() == LPConstants.LPUserType.Teacher) {
-                                liveRoomRouterListener.saveTeacherMediaStatus(model);
-                                // 自动打开老师视频
-                                if (!liveRoomRouterListener.isCurrentUserTeacher() && !liveRoomRouterListener.isVideoManipulated() && model.isVideoOn()) {
-                                    liveRoomRouterListener.playVideo(model.getUser().getUserId());
-                                    liveRoomRouterListener.setCurrentVideoUser(model);
-                                }
-                                isTeacherIn = true;
-                                break;
-                            }
-                        }
-                    }
-                }).observeOn(AndroidSchedulers.mainThread()).subscribe(activeUserSubscriber);
-        observable.connect();
 
-        subscriptionOfMedia = liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getObservableOfMediaNew()
-                .mergeWith(liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getObservableOfMediaClose())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<IMediaModel>() {
-                    @Override
-                    public void call(IMediaModel iMediaModel) {
-                        refreshSpeakQueueBtnStatus();
-                    }
-                });
-
-        //音视频都关闭
-        subscriptionOfMediaClose = liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getObservableOfMediaClose()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<IMediaModel>() {
-                    @Override
-                    public void call(IMediaModel iMediaModel) {
-                        if (TextUtils.isEmpty(liveRoomRouterListener.getCurrentVideoPlayingUserId()))
-                            return;
-                        if (liveRoomRouterListener.getCurrentVideoUser().getUser().getUserId().equals(iMediaModel.getUser().getUserId()))
-                            liveRoomRouterListener.playVideoClose(liveRoomRouterListener.getCurrentVideoPlayingUserId());
-                    }
-                });
-        //音频或者视频状态变化
-        subscriptionOfMediaChanged = liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getObservableOfMediaChange()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<IMediaModel>() {
-                    @Override
-                    public void call(IMediaModel iMediaModel) {
-                        //视频已关闭
-                        if (TextUtils.isEmpty(liveRoomRouterListener.getCurrentVideoPlayingUserId()))
-                            return;
-                        if (!iMediaModel.isVideoOn() && liveRoomRouterListener.getCurrentVideoPlayingUserId().equals(iMediaModel.getUser().getUserId())) {
-//                            liveRoomRouterListener.playVideoClose(liveRoomRouterListener.getCurrentVideoUser().getUser().getUserId());
-                            boolean isAudioOn = liveRoomRouterListener.getCurrentVideoUser().isAudioOn();
-                            String currentVideoUserId = liveRoomRouterListener.getCurrentVideoUser().getUser().getUserId();
-                            liveRoomRouterListener.playVideoClose(currentVideoUserId);
-                            if (isAudioOn) {
-                                liveRoomRouterListener.getLiveRoom().getPlayer().playAudio(currentVideoUserId);
-                            }
-                        }
-                    }
-                });
-*/
-        if (liveRoomRouterListener.isTeacherOrAssistant()) {
-            // 老师
-            subscriptionOfSpeakApply = liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getObservableOfSpeakApply()
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new LPErrorPrintSubscriber<IMediaModel>() {
-                        @Override
-                        public void call(IMediaModel iMediaModel) {
-                            RxUtils.unSubscribe(subscriptionOfAvatarSwitcher);
-//                            view.showSpeakQueueImage(iMediaModel.getUser().getAvatar());
-//                            view.showSpeakQueueCount(liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getApplyList().size());
-                        }
-                    });
-
-            subscriptionOfMediaControl = liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getObservableOfMediaControl()
-                    .mergeWith(liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getObservableOfSpeakResponse())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new LPErrorPrintSubscriber<IMediaControlModel>() {
-                        @Override
-                        public void call(IMediaControlModel iMediaControlModel) {
-//                            refreshSpeakQueueBtnStatus();
-//                            view.showSpeakQueueCount(liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getApplyList().size());
-                        }
-                    });
-            // 学生举着手退出教室 回调到拒绝举手
-            subscriptionOfSpeakApplyResponse = liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getObservableOfSpeakResponse()
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new LPErrorPrintSubscriber<IMediaControlModel>() {
-                        @Override
-                        public void call(IMediaControlModel iMediaControlModel) {
-//                            int applySize = liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getApplyList().size();
-//                            view.showSpeakQueueCount(applySize);
-//                            refreshSpeakQueueBtnStatus();
-                        }
-                    });
-        } else {
+        if (!liveRoomRouterListener.isTeacherOrAssistant()) {
             // 学生
             subscriptionOfMediaControl = liveRoomRouterListener.getLiveRoom().getSpeakQueueVM()
                     .getObservableOfMediaControl()
@@ -349,52 +238,18 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                     }
                 });
 
-//        liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().requestActiveUsers();
-    }
 
-//    private void refreshSpeakQueueBtnStatus() {
-//        if (liveRoomRouterListener.isTeacherOrAssistant() &&
-//                liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getApplyList().size() > 0) {
-//            RxUtils.unSubscribe(subscriptionOfAvatarSwitcher);
-//            view.showSpeakQueueCount(liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getApplyList().size());
-//            view.showSpeakQueueImage(liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getApplyList()
-//                    .get(liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getApplyList().size() - 1).getAvatar());
-//            return;
-//        } else if (liveRoomRouterListener.isTeacherOrAssistant()) {
-//            view.showSpeakQueueCount(0);
-//        }
-//        if (liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getSpeakQueueList().size() > 0) {
-//            if (subscriptionOfAvatarSwitcher == null || subscriptionOfAvatarSwitcher.isUnsubscribed())
-//                subscriptionOfAvatarSwitcher = Observable.interval(0, 5, TimeUnit.SECONDS)
-//                        .observeOn(AndroidSchedulers.mainThread())
-//                        .subscribe(new LPErrorPrintSubscriber<Long>() {
-//                            @Override
-//                            public void call(Long aLong) {
-//                                if (liveRoomRouterListener.getLiveRoom().getSpeakQueueVM() == null) {
-//                                    view.showEmptyQueue();
-//                                    return;
-//                                }
-//                                List<IMediaModel> mediaModels = liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getSpeakQueueList();
-//                                if (mediaModels.size() == 0) return;
-//                                view.showSpeakQueueImage(mediaModels.get(aLong.intValue() % mediaModels.size()).getUser().getAvatar());
-//                            }
-//                        });
-//        } else {
-//            RxUtils.unSubscribe(subscriptionOfAvatarSwitcher);
-//            view.showEmptyQueue();
-//        }
-//    }
+        if(liveRoomRouterListener.getLiveRoom().getCurrentUser().getType() == LPConstants.LPUserType.Student &&
+                liveRoomRouterListener.getLiveRoom().getRoomType() != LPConstants.LPRoomType.Multi){
+            view.showAutoSpeak();
+            speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_SPEAKING;
+        }
+    }
 
     @Override
     public void unSubscribe() {
         RxUtils.unSubscribe(subscriptionOfMediaControl);
-        RxUtils.unSubscribe(subscriptionOfActiveUser);
-        RxUtils.unSubscribe(subscriptionOfMedia);
-        RxUtils.unSubscribe(subscriptionOfSpeakApply);
-        RxUtils.unSubscribe(subscriptionOfAvatarSwitcher);
         RxUtils.unSubscribe(subscriptionOfSpeakApplyCounter);
-        RxUtils.unSubscribe(subscriptionOfMediaChanged);
-        RxUtils.unSubscribe(subscriptionOfMediaClose);
         RxUtils.unSubscribe(subscriptionOfSpeakApplyResponse);
         RxUtils.unSubscribe(subscriptionOfClassEnd);
     }

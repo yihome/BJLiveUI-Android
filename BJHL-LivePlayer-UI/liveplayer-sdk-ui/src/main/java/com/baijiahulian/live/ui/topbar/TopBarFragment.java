@@ -1,9 +1,14 @@
 package com.baijiahulian.live.ui.topbar;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.baijiahulian.live.ui.R;
+import com.baijiahulian.live.ui.activity.LiveRoomActivity;
 import com.baijiahulian.live.ui.base.BaseFragment;
 
 /**
@@ -21,11 +26,35 @@ public class TopBarFragment extends BaseFragment implements TopBarContract.View 
 
     @Override
     public void init(Bundle savedInstanceState) {
-
         $.id(R.id.fragment_top_bar_back).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getActivity().finish();
+                if (LiveRoomActivity.getExitListener() != null) {
+                    getActivity().finish();
+                    return;
+                }
+                new MaterialDialog.Builder(getActivity())
+                        .title(getString(R.string.live_exit_hint_title))
+                        .content(getString(R.string.live_exit_hint_content))
+                        .contentColor(ContextCompat.getColor(getContext(), R.color.live_text_color_light))
+                        .positiveColor(ContextCompat.getColor(getContext(), R.color.live_blue))
+                        .positiveText(getString(R.string.live_exit_hint_confirm))
+                        .negativeColor(ContextCompat.getColor(getContext(), R.color.live_text_color))
+                        .negativeText(getString(R.string.live_cancel))
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
+                                getActivity().finish();
+                            }
+                        })
+                        .onNegative(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
+                                materialDialog.dismiss();
+                            }
+                        })
+                        .build()
+                        .show();
             }
         });
         $.id(R.id.fragment_top_bar_share).clicked(new View.OnClickListener() {
@@ -34,6 +63,7 @@ public class TopBarFragment extends BaseFragment implements TopBarContract.View 
                 presenter.navigateToShare();
             }
         });
+
     }
 
     @Override

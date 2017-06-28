@@ -12,6 +12,7 @@ import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 
 import java.util.concurrent.TimeUnit;
 
+import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 
@@ -41,6 +42,10 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
                 .subscribe(new LPErrorPrintSubscriber<Void>() {
                     @Override
                     public void call(Void aVoid) {
+                        if(!clickableCheck()){
+                            showToast(getString(R.string.live_frequent_error));
+                            return;
+                        }
                         presenter.changeVideo();
                     }
                 });
@@ -51,6 +56,10 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
                 .subscribe(new LPErrorPrintSubscriber<Void>() {
                     @Override
                     public void call(Void aVoid) {
+                        if(!clickableCheck()){
+                            showToast(getString(R.string.live_frequent_error));
+                            return;
+                        }
                         presenter.changeAudio();
                     }
                 });
@@ -187,6 +196,11 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
     }
 
     @Override
+    public void showAudioRoomError() {
+        showToast(getString(R.string.live_audio_room_error));
+    }
+
+    @Override
     public void setPresenter(RightBottomMenuContract.Presenter presenter) {
         super.setBasePresenter(presenter);
         this.presenter = presenter;
@@ -207,5 +221,20 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
     public void onRotationSettingChanged() {
         //TODO:主动获取自动旋转设置
         presenter.setSysRotationSetting();
+    }
+
+    private Subscription subscriptionOfClickable;
+
+    private boolean clickableCheck() {
+        if (subscriptionOfClickable != null && !subscriptionOfClickable.isUnsubscribed()) {
+            return false;
+        }
+        subscriptionOfClickable = Observable.timer(1, TimeUnit.SECONDS).subscribe(new LPErrorPrintSubscriber<Long>() {
+            @Override
+            public void call(Long aLong) {
+                RxUtils.unSubscribe(subscriptionOfClickable);
+            }
+        });
+        return true;
     }
 }

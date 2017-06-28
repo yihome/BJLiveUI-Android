@@ -30,6 +30,8 @@ interface RightBottomMenuContract {
         void showZoom();
 
         void hideZoom();
+
+        void showAudioRoomError();
     }
 
     interface Presenter extends BasePresenter {

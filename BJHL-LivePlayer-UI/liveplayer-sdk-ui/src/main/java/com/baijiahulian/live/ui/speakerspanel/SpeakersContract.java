@@ -34,6 +34,8 @@ interface SpeakersContract {
         android.view.View removeViewAt(int position);
 
         void notifyViewAdded(android.view.View view, int position);
+
+        void showMaxVideoExceed();
     }
 
     interface Presenter extends BasePresenter {
