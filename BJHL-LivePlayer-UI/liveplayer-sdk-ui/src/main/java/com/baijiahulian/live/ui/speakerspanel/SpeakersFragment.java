@@ -70,9 +70,9 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
     @Override
     public void onResume() {
         super.onResume();
-        if(attachVideoOnResume){
+        if (attachVideoOnResume) {
             attachVideoOnResume = false;
-            if(!presenter.getRecorder().isPublishing())
+            if (!presenter.getRecorder().isPublishing())
                 presenter.getRecorder().publish();
             presenter.getRecorder().attachVideo();
         }
@@ -81,7 +81,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
     @Override
     public void onPause() {
         super.onPause();
-        if(presenter.getRecorder().isVideoAttached()){
+        if (presenter.getRecorder().isVideoAttached()) {
             presenter.getRecorder().detachVideo();
             attachVideoOnResume = true;
         }
@@ -95,7 +95,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
         } else if (presenter.getItemViewType(position) == VIEW_TYPE_PRESENTER) {
             IMediaModel model = presenter.getSpeakModel(position);
             container.removeViewAt(position);
-            if(model == null) return;
+            if (model == null) return;
             if (model.isVideoOn() && presenter.isAutoPlay()) {
                 VideoView videoView = new VideoView(getActivity());
                 videoView.setNameText(model.getUser().getName());
@@ -162,7 +162,6 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                     }
                 });
 
-                // TODO: 2017/6/11 reconsider the lifecycle
                 if (!presenter.getRecorder().isPublishing())
                     presenter.getRecorder().publish();
                 if (!presenter.getRecorder().isVideoAttached())

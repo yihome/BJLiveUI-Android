@@ -1,7 +1,12 @@
 package com.baijiahulian.live.ui.rightbotmenu;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.v13.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 
 import com.baijiahulian.live.ui.R;
@@ -42,11 +47,17 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
                 .subscribe(new LPErrorPrintSubscriber<Void>() {
                     @Override
                     public void call(Void aVoid) {
-                        if(!clickableCheck()){
+                        if (!clickableCheck()) {
                             showToast(getString(R.string.live_frequent_error));
                             return;
                         }
-                        presenter.changeVideo();
+//                        if (PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA)) {
+                            presenter.changeVideo();
+//                        } else {
+//                            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), Manifest.permission.CAMERA)) {
+//                                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, 1);
+//                            }
+//                        }
                     }
                 });
 
@@ -56,11 +67,14 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
                 .subscribe(new LPErrorPrintSubscriber<Void>() {
                     @Override
                     public void call(Void aVoid) {
-                        if(!clickableCheck()){
+                        if (!clickableCheck()) {
                             showToast(getString(R.string.live_frequent_error));
                             return;
                         }
-                        presenter.changeAudio();
+//                        if (PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.RECORD_AUDIO)) {
+                            presenter.changeAudio();
+//                        } else {
+//                        }
                     }
                 });
 
@@ -121,6 +135,11 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
     public void disableSpeakerMode() {
         $.id(R.id.fragment_right_bottom_video).gone();
         $.id(R.id.fragment_right_bottom_audio).gone();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override

@@ -1,9 +1,11 @@
 package com.baijiahulian.live.ui.activity;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,6 +16,9 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
@@ -27,6 +32,8 @@ import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.baijiahulian.live.ui.LiveSDKWithUI;
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.announcement.AnnouncementFragment;
@@ -41,6 +48,7 @@ import com.baijiahulian.live.ui.chat.preview.ChatPictureViewFragment;
 import com.baijiahulian.live.ui.chat.preview.ChatPictureViewPresenter;
 import com.baijiahulian.live.ui.chat.preview.ChatSavePicDialogFragment;
 import com.baijiahulian.live.ui.chat.preview.ChatSavePicDialogPresenter;
+import com.baijiahulian.live.ui.cloudrecord.CloudRecordFragment;
 import com.baijiahulian.live.ui.cloudrecord.CloudRecordPresenter;
 import com.baijiahulian.live.ui.error.ErrorFragment;
 import com.baijiahulian.live.ui.leftmenu.LeftMenuFragment;
@@ -61,7 +69,6 @@ import com.baijiahulian.live.ui.rightbotmenu.RightBottomMenuFragment;
 import com.baijiahulian.live.ui.rightbotmenu.RightBottomMenuPresenter;
 import com.baijiahulian.live.ui.rightmenu.RightMenuFragment;
 import com.baijiahulian.live.ui.rightmenu.RightMenuPresenter;
-import com.baijiahulian.live.ui.cloudrecord.CloudRecordFragment;
 import com.baijiahulian.live.ui.rollcall.RollCallDialogFragment;
 import com.baijiahulian.live.ui.rollcall.RollCallDialogPresenter;
 import com.baijiahulian.live.ui.setting.SettingDialogFragment;
@@ -80,7 +87,7 @@ import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.context.LPError;
 import com.baijiahulian.livecore.context.LiveRoom;
 import com.baijiahulian.livecore.context.OnLiveRoomListener;
-import com.baijiahulian.livecore.listener.OnRollCallListener;
+import com.baijiahulian.livecore.listener.OnPhoneRollCallListener;
 import com.baijiahulian.livecore.models.LPJsonModel;
 import com.baijiahulian.livecore.models.imodels.ILoginConflictModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
@@ -588,7 +595,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         return lppptFragment;
     }
 
-    public void showRollCallDlg(int time, OnRollCallListener.RollCall rollCallListener) {
+    public void showRollCallDlg(int time, OnPhoneRollCallListener.RollCall rollCallListener) {
         RollCallDialogFragment rollCallDialogFragment = new RollCallDialogFragment();
         rollCallDialogFragment.setCancelable(false);
         rollCallDialogPresenter = new RollCallDialogPresenter(rollCallDialogFragment);
@@ -669,6 +676,81 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     public void dismissQuizDlg() {
         if (quizFragment != null && quizFragment.isAdded() && quizFragment.isVisible()) {
             quizFragment.dismissAllowingStateLoss();
+        }
+    }
+
+    private static final int REQUEST_CODE_PERMISSION_CAMERA = 1;
+    private static final int REQUEST_CODE_PERMISSION_MIC = 2;
+
+    @Override
+    public boolean checkCameraPermission() {
+        if (PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(LiveRoomActivity.this, Manifest.permission.CAMERA)) {
+            return true;
+        } else {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(LiveRoomActivity.this, Manifest.permission.CAMERA)) {
+                showSystemSettingDialog(REQUEST_CODE_PERMISSION_CAMERA);
+            } else {
+                ActivityCompat.requestPermissions(LiveRoomActivity.this, new String[]{Manifest.permission.CAMERA}, REQUEST_CODE_PERMISSION_CAMERA);
+            }
+        }
+        return false;
+    }
+
+    private boolean checkMicPermission() {
+        if (PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(LiveRoomActivity.this, Manifest.permission.RECORD_AUDIO)) {
+            return true;
+        } else {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(LiveRoomActivity.this, Manifest.permission.RECORD_AUDIO)) {
+                showSystemSettingDialog(REQUEST_CODE_PERMISSION_MIC);
+            } else {
+                ActivityCompat.requestPermissions(LiveRoomActivity.this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_CODE_PERMISSION_MIC);
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void attachLocalAudio() {
+        if (checkMicPermission())
+            liveRoom.getRecorder().attachAudio();
+    }
+
+    private void showSystemSettingDialog(int type) {
+        new MaterialDialog.Builder(this)
+                .title(getString(R.string.live_sweet_hint))
+                .content(type == REQUEST_CODE_PERMISSION_CAMERA ? getString(R.string.live_no_camera_permission) : getString(R.string.live_no_mic_permission))
+                .positiveText(getString(R.string.live_quiz_dialog_confirm))
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
+                        materialDialog.dismiss();
+                    }
+                })
+                .canceledOnTouchOutside(true)
+                .build()
+                .show();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case REQUEST_CODE_PERMISSION_CAMERA:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    speakerPresenter.attachVideo();
+                } else {
+                    showSystemSettingDialog(REQUEST_CODE_PERMISSION_CAMERA);
+                }
+                break;
+            case REQUEST_CODE_PERMISSION_MIC:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    liveRoom.getRecorder().attachAudio();
+                } else {
+                    showSystemSettingDialog(REQUEST_CODE_PERMISSION_MIC);
+                }
+                break;
+            default:
+                break;
         }
     }
 
@@ -815,7 +897,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
                         if (liveRoom.getCurrentUser().getType() == LPConstants.LPUserType.Teacher) {
                             liveRoom.getRecorder().publish();
-                            liveRoom.getRecorder().attachAudio();
+                            attachLocalAudio();
                             attachLocalVideo();
                             if (liveRoom.getAutoStartCloudRecordStatus() == 1) {
                                 liveRoom.requestCloudRecord(true);
@@ -826,6 +908,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
         //成功进入房间后统一不再显示
         shouldShowTechSupport = false;
+
+        if (!isTeacherOrAssistant() && liveRoom.getTeacherUser() == null)
+            showMessage("老师不在教室");
     }
 
     @Override
@@ -1067,8 +1152,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void showReconnectSuccess() {
-
-
     }
 
     public void showSavePicDialog(byte[] bmpArray) {

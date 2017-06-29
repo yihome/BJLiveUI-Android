@@ -1,7 +1,7 @@
 package com.baijiahulian.live.ui.rollcall;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
-import com.baijiahulian.livecore.listener.OnRollCallListener;
+import com.baijiahulian.livecore.listener.OnPhoneRollCallListener;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 
 import java.util.concurrent.TimeUnit;
@@ -19,7 +19,7 @@ public class RollCallDialogPresenter implements RollCallDialogContract.Presenter
     private RollCallDialogContract.View view;
     private Subscription countDownSubscription;
     private int maxTime;
-    private OnRollCallListener.RollCall rollCallListener;
+    private OnPhoneRollCallListener.RollCall rollCallListener;
 
     public RollCallDialogPresenter(RollCallDialogContract.View view) {
         this.view = view;
@@ -30,7 +30,7 @@ public class RollCallDialogPresenter implements RollCallDialogContract.Presenter
         this.routerListener = liveRoomRouterListener;
     }
 
-    public void setRollCallInfo(int maxTime, OnRollCallListener.RollCall rollCallConfirmListener) {
+    public void setRollCallInfo(int maxTime, OnPhoneRollCallListener.RollCall rollCallConfirmListener) {
         this.maxTime = maxTime;
         this.rollCallListener = rollCallConfirmListener;
     }

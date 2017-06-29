@@ -6,6 +6,7 @@ import android.view.View;
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 import com.baijiahulian.live.ui.ppt.MyPPTFragment;
 import com.baijiahulian.live.ui.utils.RxUtils;
+import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.models.LPMediaModel;
 import com.baijiahulian.livecore.models.LPUserModel;
 import com.baijiahulian.livecore.models.imodels.IMediaControlModel;
@@ -481,7 +482,10 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
             return;
         }
 
-        if (_displaySpeakerSection - _displayVideoSection >= MAX_VIDEO_COUNT) {
+        IMediaModel model = getSpeakModel(fullScreenKVO.getParameter());
+        boolean isFullScreenStudentVideo = model != null && model.getUser().getType() == LPConstants.LPUserType.Student;
+
+        if (_displaySpeakerSection - _displayVideoSection + (isFullScreenStudentVideo ? 1 : 0) >= MAX_VIDEO_COUNT) {
             view.showMaxVideoExceed();
             return;
         }
@@ -632,12 +636,14 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
     }
 
     public void attachVideo() {
-        if (_displayRecordSection == _displayVideoSection) {
-            displayList.add(_displayRecordSection, RECORD_TAG);
-            _displayVideoSection++;
-            _displaySpeakerSection++;
-            _displayApplySection++;
-            view.notifyItemInserted(_displayRecordSection);
+        if (routerListener.checkCameraPermission()) {
+            if (_displayRecordSection == _displayVideoSection) {
+                displayList.add(_displayRecordSection, RECORD_TAG);
+                _displayVideoSection++;
+                _displaySpeakerSection++;
+                _displayApplySection++;
+                view.notifyItemInserted(_displayRecordSection);
+            }
         }
     }
 

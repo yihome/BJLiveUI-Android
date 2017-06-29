@@ -20,7 +20,7 @@
     <string name="live_camera">摄像头</string>
     <string name="live_beauty_filter">美颜</string>
     <string name="live_setting">设置</string>
-    <string name="live_full_screen">全屏</string>
+    <string name="live_full_screen">全屏(快捷键：双击)</string>
     <string name="live_send_message">发送</string>
     <string name="live_overspread">铺满</string>
     <string name="live_setting_ppt">课件展示：</string>
@@ -108,6 +108,9 @@
     <string name="live_exit_hint_confirm">确定退出</string>
     <string name="live_exit_hint_content">确定要退出直播教室吗？</string>
     <string name="live_audio_room_error">音频课不能开启摄像头</string>
+    <string name="live_sweet_hint">温馨提示</string>
+    <string name="live_no_camera_permission">摄像头权限获取失败，请前往系统设置中允许访问摄像头</string>
+    <string name="live_no_mic_permission">麦克风权限获取失败，请前往系统设置中允许访问麦克风</string>
 
 </resources>
 

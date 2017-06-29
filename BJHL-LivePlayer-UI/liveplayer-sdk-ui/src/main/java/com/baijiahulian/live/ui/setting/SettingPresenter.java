@@ -150,7 +150,7 @@ public class SettingPresenter implements SettingContract.Presenter {
                 if (recorder.isAudioAttached()) {
                     recorder.detachAudio();
                 } else {
-                    recorder.attachAudio();
+                    routerListener.attachLocalAudio();
                 }
                 break;
             case Student:
@@ -161,7 +161,7 @@ public class SettingPresenter implements SettingContract.Presenter {
                 if (recorder.isAudioAttached()) {
                     recorder.detachAudio();
                 } else {
-                    recorder.attachAudio();
+                    routerListener.attachLocalAudio();
                 }
                 break;
             case Visitor:

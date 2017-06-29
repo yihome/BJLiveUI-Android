@@ -1,25 +1,19 @@
 package com.baijiahulian.live.ui.activity;
 
-import android.os.Bundle;
 import android.text.TextUtils;
 
 import com.baijiahulian.live.ui.base.BasePresenter;
-import com.baijiahulian.live.ui.quiz.QuizDialogFragment;
-import com.baijiahulian.live.ui.quiz.QuizDialogPresenter;
 import com.baijiahulian.live.ui.utils.JsonObjectUtil;
 import com.baijiahulian.live.ui.utils.RxUtils;
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.context.LPError;
-import com.baijiahulian.livecore.listener.OnRollCallListener;
+import com.baijiahulian.livecore.listener.OnPhoneRollCallListener;
 import com.baijiahulian.livecore.models.LPJsonModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.models.imodels.IUserInModel;
 import com.baijiahulian.livecore.models.responsedebug.LPResRoomDebugModel;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 
-import java.util.concurrent.TimeUnit;
-
-import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
@@ -158,7 +152,7 @@ public class GlobalPresenter implements BasePresenter {
                         }
                     });
             //点名
-            routerListener.getLiveRoom().setOnRollCallListener(new OnRollCallListener() {
+            routerListener.getLiveRoom().setOnRollCallListener(new OnPhoneRollCallListener() {
                 @Override
                 public void onRollCall(int time, RollCall rollCallListener) {
                     routerListener.showRollCallDlg(time, rollCallListener);

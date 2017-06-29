@@ -4,7 +4,7 @@ import com.baijiahulian.live.ui.ppt.MyPPTFragment;
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.context.LPError;
 import com.baijiahulian.livecore.context.LiveRoom;
-import com.baijiahulian.livecore.listener.OnRollCallListener;
+import com.baijiahulian.livecore.listener.OnPhoneRollCallListener;
 import com.baijiahulian.livecore.models.LPJsonModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 
@@ -137,7 +137,7 @@ public interface LiveRoomRouterListener {
 
     MyPPTFragment getPPTFragment();
 
-    void showRollCallDlg(int time, OnRollCallListener.RollCall rollCallListener);
+    void showRollCallDlg(int time, OnPhoneRollCallListener.RollCall rollCallListener);
 
     void dismissRollCallDlg();
 
@@ -151,4 +151,8 @@ public interface LiveRoomRouterListener {
     void onQuizRes(LPJsonModel jsonModel);
 
     void dismissQuizDlg();
+
+    boolean checkCameraPermission();
+
+    void attachLocalAudio();
 }
