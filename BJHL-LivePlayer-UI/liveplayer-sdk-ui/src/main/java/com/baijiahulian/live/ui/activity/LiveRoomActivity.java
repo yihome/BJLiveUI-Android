@@ -688,9 +688,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
             return true;
         } else {
             if (ActivityCompat.shouldShowRequestPermissionRationale(LiveRoomActivity.this, Manifest.permission.CAMERA)) {
-                showSystemSettingDialog(REQUEST_CODE_PERMISSION_CAMERA);
-            } else {
                 ActivityCompat.requestPermissions(LiveRoomActivity.this, new String[]{Manifest.permission.CAMERA}, REQUEST_CODE_PERMISSION_CAMERA);
+            } else {
+                showSystemSettingDialog(REQUEST_CODE_PERMISSION_CAMERA);
             }
         }
         return false;
@@ -701,9 +701,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
             return true;
         } else {
             if (ActivityCompat.shouldShowRequestPermissionRationale(LiveRoomActivity.this, Manifest.permission.RECORD_AUDIO)) {
-                showSystemSettingDialog(REQUEST_CODE_PERMISSION_MIC);
-            } else {
                 ActivityCompat.requestPermissions(LiveRoomActivity.this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_CODE_PERMISSION_MIC);
+            } else {
+                showSystemSettingDialog(REQUEST_CODE_PERMISSION_MIC);
             }
         }
         return false;
@@ -720,6 +720,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                 .title(getString(R.string.live_sweet_hint))
                 .content(type == REQUEST_CODE_PERMISSION_CAMERA ? getString(R.string.live_no_camera_permission) : getString(R.string.live_no_mic_permission))
                 .positiveText(getString(R.string.live_quiz_dialog_confirm))
+                .positiveColor(ContextCompat.getColor(LiveRoomActivity.this, R.color.live_blue))
                 .onPositive(new MaterialDialog.SingleButtonCallback() {
                     @Override
                     public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
@@ -903,14 +904,16 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                                 liveRoom.requestCloudRecord(true);
                             }
                         }
+
+                        if (!isTeacherOrAssistant() && liveRoom.getTeacherUser() == null)
+                            showMessage("老师不在教室");
                     }
                 });
 
         //成功进入房间后统一不再显示
         shouldShowTechSupport = false;
 
-        if (!isTeacherOrAssistant() && liveRoom.getTeacherUser() == null)
-            showMessage("老师不在教室");
+
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.baijiahulian.live.ui.speakerspanel;
 
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
@@ -139,11 +140,13 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                                 _displayApplySection++;
                                 view.notifyItemInserted(_displayPresenterSection);
                             }
+                            printSections();
                             return;
                         }
                         displayList.add(_displayApplySection, iMediaModel.getUser().getUserId());
                         _displayApplySection++;
                         view.notifyItemInserted(_displayApplySection - 1);
+                        printSections();
                     }
                 });
 
@@ -172,6 +175,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                                     view.notifyItemInserted(_displayApplySection - 1);
                                 }
                             }
+                            printSections();
                             return;
                         }
                         int position = displayList.indexOf(iMediaModel.getUser().getUserId());
@@ -180,6 +184,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                         }
                         if (position == _displayPresenterSection) {
                             view.notifyItemChanged(position);
+                            printSections();
                             return;
                         }
                         if (position < _displayVideoSection) {
@@ -199,6 +204,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                         } else {
                             throw new RuntimeException("position > _displayApplySection");
                         }
+                        printSections();
                     }
                 });
 
@@ -219,6 +225,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                                 displayList.add(_displayPresenterSection, iMediaModel.getUser().getUserId());
                                 view.notifyItemInserted(_displayPresenterSection);
                             }
+                            printSections();
                             return;
                         }
                         int position = displayList.indexOf(iMediaModel.getUser().getUserId());
@@ -227,7 +234,16 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                         if (position < _displayPresenterSection) {
                             throw new RuntimeException("position < _displayPresenterSection");
                         } else if (position < _displayVideoSection) {
-                            view.notifyItemChanged(position);
+                            if (routerListener.getLiveRoom().getPresenterUser() == null) {
+                                view.notifyItemDeleted(position);
+                                displayList.remove(position);
+                                _displayVideoSection--;
+                                _displayRecordSection--;
+                                _displaySpeakerSection--;
+                                _displayApplySection--;
+                            } else {
+                                view.notifyItemChanged(position);
+                            }
                         } else if (position < _displaySpeakerSection) { // 视频打开用户
                             view.notifyItemDeleted(position);
                             displayList.remove(position);
@@ -240,6 +256,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                         } else {
 //                            throw new RuntimeException("position > _displayApplySection");
                         }
+                        printSections();
                     }
                 });
 
@@ -247,12 +264,18 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                 .filter(new Func1<String, Boolean>() {
                     @Override
                     public Boolean call(String s) {
-                        return routerListener.getLiveRoom().getPresenterUser() != null && s.equals(routerListener.getLiveRoom().getPresenterUser().getUserId());
+                        return routerListener.getLiveRoom().getPresenterUser() == null ||
+                                routerListener.getLiveRoom().getPresenterUser() .getUserId().equals(s); // 主讲人退出教室
                     }
                 })
                 .subscribe(new LPErrorPrintSubscriber<String>() {
                     @Override
                     public void call(String s) {
+                        if (s.equals(fullScreenKVO.getParameter())) {
+//                            fullScreenKVO.setParameter(null);
+                            printSections();
+                            return;
+                        }
                         if (displayList.indexOf(s) < 0) return;
                         view.notifyItemDeleted(_displayPresenterSection);
                         displayList.remove(_displayPresenterSection);
@@ -260,6 +283,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                         _displayVideoSection--;
                         _displaySpeakerSection--;
                         _displayApplySection--;
+                        printSections();
                     }
                 });
 
@@ -373,6 +397,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                                 view.notifyViewAdded(view1, position);
                             routerListener.setFullScreenView(view2);
                         }
+                        printSections();
                     }
                 });
     }
@@ -645,6 +670,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                 view.notifyItemInserted(_displayRecordSection);
             }
         }
+        printSections();
     }
 
     public void detachVideo() {
@@ -661,6 +687,12 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
             _displaySpeakerSection--;
             _displayApplySection--;
         }
+        printSections();
+    }
+
+    private void printSections() {
+//        Log.e("section", _displayPresenterSection + " " + _displayRecordSection + " " + _displayVideoSection + " " +
+//                _displaySpeakerSection + " " + _displayApplySection);
     }
 
 }

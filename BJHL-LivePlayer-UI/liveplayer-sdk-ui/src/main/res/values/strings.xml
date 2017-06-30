@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">BJHL-LivePlayer-UI</string>
-
     <string name="live_on_line_user_count">%1$d人在线</string>
     <string name="live_enter_live_room">进入直播教室</string>
     <string name="live_loading">加载中…</string>
@@ -20,7 +19,7 @@
     <string name="live_camera">摄像头</string>
     <string name="live_beauty_filter">美颜</string>
     <string name="live_setting">设置</string>
-    <string name="live_full_screen">全屏(快捷键：双击)</string>
+    <string name="live_full_screen">全屏</string>
     <string name="live_send_message">发送</string>
     <string name="live_overspread">铺满</string>
     <string name="live_setting_ppt">课件展示：</string>
@@ -100,7 +99,7 @@
     <string name="live_quiz_dialog_cancel">再等等</string>
     <string name="live_quiz_dialog_confirm">确认</string>
     <string name="live_loading_support">百家云提供直播服务</string>
-    <string name="live_speakers_max_video_exceed">视频播放已达上限，请先关闭一个</string>
+    <string name="live_speakers_max_video_exceed">请先关闭一路学生视频</string>
     <string name="live_cloud_record_setting">录课设置</string>
     <string name="live_cloud_record_setting_end">结束录课</string>
     <string name="live_cloud_record_setting_content">直播正在录制中</string>
