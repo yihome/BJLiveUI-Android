@@ -1,7 +1,6 @@
 package com.baijiahulian.live.ui.speakerspanel;
 
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
@@ -15,6 +14,7 @@ import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
 import com.baijiahulian.livecore.utils.LPBackPressureBufferedSubscriber;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
+import com.baijiahulian.livecore.utils.LPLogger;
 import com.baijiahulian.livecore.utils.LPSubscribeObjectWithLastValue;
 import com.baijiahulian.livecore.wrapper.LPPlayer;
 import com.baijiahulian.livecore.wrapper.LPRecorder;
@@ -105,6 +105,10 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
         // init view
         for (int i = 0; i < displayList.size(); i++) {
             view.notifyItemInserted(i);
+            if (getItemViewType(i) != VIEW_TYPE_SPEAKER)
+                continue;
+            if (getSpeakModel(i).isVideoOn())
+                playVideo(getSpeakModel(i).getUser().getUserId());
         }
     }
 
@@ -265,7 +269,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                     @Override
                     public Boolean call(String s) {
                         return routerListener.getLiveRoom().getPresenterUser() == null ||
-                                routerListener.getLiveRoom().getPresenterUser() .getUserId().equals(s); // 主讲人退出教室
+                                routerListener.getLiveRoom().getPresenterUser().getUserId().equals(s); // 主讲人退出教室
                     }
                 })
                 .subscribe(new LPErrorPrintSubscriber<String>() {
@@ -691,8 +695,8 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
     }
 
     private void printSections() {
-//        Log.e("section", _displayPresenterSection + " " + _displayRecordSection + " " + _displayVideoSection + " " +
-//                _displaySpeakerSection + " " + _displayApplySection);
+        LPLogger.e("section:" + _displayPresenterSection + " " + _displayRecordSection + " " + _displayVideoSection + " " +
+                _displaySpeakerSection + " " + _displayApplySection);
     }
 
 }

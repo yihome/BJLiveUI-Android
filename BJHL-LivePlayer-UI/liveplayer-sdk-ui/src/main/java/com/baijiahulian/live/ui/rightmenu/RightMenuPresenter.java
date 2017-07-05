@@ -200,6 +200,7 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                                 view.showSpeakApplyAgreed();
                                 liveRoomRouterListener.getLiveRoom().getRecorder().publish();
                                 liveRoomRouterListener.attachLocalAudio();
+                                liveRoomRouterListener.attachLocalVideo();
                             } else {
                                 RxUtils.unSubscribe(subscriptionOfSpeakApplyCounter);
                                 speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_NONE;

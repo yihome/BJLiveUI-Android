@@ -92,6 +92,9 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
         if (presenter.getItemViewType(position) == VIEW_TYPE_SPEAKER) {
             container.removeViewAt(position);
             container.addView(generateSpeakView(presenter.getSpeakModel(position)), position);
+            if (presenter.getSpeakModel(position).isVideoOn()) {
+                presenter.playVideo(presenter.getSpeakModel(position).getUser().getUserId());
+            }
         } else if (presenter.getItemViewType(position) == VIEW_TYPE_PRESENTER) {
             IMediaModel model = presenter.getSpeakModel(position);
             container.removeViewAt(position);
@@ -186,7 +189,8 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                 presenter.getPlayer().playVideo(presenter.getItem(position), videoView.getSurfaceView());
                 break;
             case VIEW_TYPE_SPEAKER:
-                View view = generateSpeakView(presenter.getSpeakModel(position));
+                IMediaModel speakerModel = presenter.getSpeakModel(position);
+                View view = generateSpeakView(speakerModel);
                 container.addView(view, position);
                 break;
             case VIEW_TYPE_APPLY:
