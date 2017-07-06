@@ -140,10 +140,20 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
             }
         });
 
+        $.id(R.id.dialog_setting_forbid_raise_hand).clicked(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                presenter.switchForbidRaiseHand();
+            }
+        });
+
+
         if (presenter.isTeacherOrAssistant()) {
             $.id(R.id.dialog_setting_forbid_all_speak_container).visible();
+            $.id(R.id.dialog_setting_forbid_raise_hand_container).visible();
         } else {
             $.id(R.id.dialog_setting_forbid_all_speak_container).gone();
+            $.id(R.id.dialog_setting_forbid_raise_hand_container).gone();
         }
 
     }
@@ -290,6 +300,16 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
     @Override
     public void showAudioRoomError() {
         showToast(getString(R.string.live_audio_room_error));
+    }
+
+    @Override
+    public void showForbidRaiseHandOn() {
+        $.id(R.id.dialog_setting_forbid_raise_hand).image(R.drawable.ic_on_switch);
+    }
+
+    @Override
+    public void showForbidRaiseHandOff() {
+        $.id(R.id.dialog_setting_forbid_raise_hand).image(R.drawable.ic_off_switch);
     }
 
     @Override

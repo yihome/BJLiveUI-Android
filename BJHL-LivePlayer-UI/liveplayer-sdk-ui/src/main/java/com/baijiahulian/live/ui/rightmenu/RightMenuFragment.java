@@ -145,6 +145,11 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
     }
 
     @Override
+    public void showHandUpForbid() {
+        showToast(getString(R.string.live_hand_up_forbid));
+    }
+
+    @Override
     public void showCantDraw() {
         showToast(getString(R.string.live_cant_draw));
     }

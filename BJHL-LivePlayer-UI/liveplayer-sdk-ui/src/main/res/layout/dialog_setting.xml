@@ -80,6 +80,17 @@
                     android:src="@drawable/ic_on_switch" />
             </LinearLayout>
 
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/activity_live_room_dialog_margin"
+            android:layout_marginLeft="@dimen/activity_live_room_dialog_margin"
+            android:layout_marginRight="@dimen/activity_live_room_dialog_margin"
+            android:layout_marginTop="@dimen/activity_live_room_dialog_margin"
+            android:orientation="horizontal">
+
             <!--全体禁言-->
             <LinearLayout
                 android:id="@+id/dialog_setting_forbid_all_speak_container"
@@ -102,6 +113,35 @@
                     android:src="@drawable/ic_on_switch" />
             </LinearLayout>
 
+            <!--禁止举手-->
+            <LinearLayout
+                android:id="@+id/dialog_setting_forbid_raise_hand_container"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/LiveTextNormal"
+                    android:text="@string/live_setting_camera_forbid_raise_hand" />
+
+                <ImageButton
+                    android:id="@+id/dialog_setting_forbid_raise_hand"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:background="@null"
+                    android:src="@drawable/ic_on_switch" />
+            </LinearLayout>
+
+            <!--全体禁言-->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical" />
 
         </LinearLayout>
 

@@ -25,7 +25,7 @@ public class SettingPresenter implements SettingContract.Presenter {
     private LPRecorder recorder;
     private LPPlayer player;
     private LiveRoom liveRoom;
-    private Subscription subscriptionOfForbidAllChat, subscriptionOfMic, subscriptionOfCamera;
+    private Subscription subscriptionOfForbidAllChat, subscriptionOfMic, subscriptionOfCamera, subscriptionOfForbidRaiseHand;
 
     public SettingPresenter(SettingContract.View view) {
         this.view = view;
@@ -97,6 +97,13 @@ public class SettingPresenter implements SettingContract.Presenter {
         } else {
             view.showNotForbidden();
         }
+
+        if (liveRoom.getForbidRaiseHandStatus()) {
+            view.showForbidRaiseHandOn();
+        } else {
+            view.showForbidRaiseHandOff();
+        }
+
         subscriptionOfForbidAllChat = liveRoom.getObservableOfForbidAllChatStatus().observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new LPErrorPrintSubscriber<Boolean>() {
                     @Override
@@ -120,6 +127,14 @@ public class SettingPresenter implements SettingContract.Presenter {
                     public void call(Boolean aBoolean) {
                         if (aBoolean) view.showCameraOpen();
                         else view.showCameraClosed();
+                    }
+                });
+        subscriptionOfForbidRaiseHand = liveRoom.getObservableOfForbidRaiseHand().observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<Boolean>() {
+                    @Override
+                    public void call(Boolean aBoolean) {
+                        if (aBoolean) view.showForbidRaiseHandOn();
+                        else view.showForbidRaiseHandOff();
                     }
                 });
     }
@@ -172,7 +187,7 @@ public class SettingPresenter implements SettingContract.Presenter {
 
     @Override
     public void changeCamera() {
-        if(routerListener.getLiveRoom().getRoomMediaType() == LPConstants.LPMediaType.Audio){
+        if (routerListener.getLiveRoom().getRoomMediaType() == LPConstants.LPMediaType.Audio) {
             view.showAudioRoomError();
             return;
         }
@@ -288,5 +303,10 @@ public class SettingPresenter implements SettingContract.Presenter {
     @Override
     public boolean isTeacherOrAssistant() {
         return routerListener.isTeacherOrAssistant();
+    }
+
+    @Override
+    public void switchForbidRaiseHand() {
+        liveRoom.requestForbidRaiseHand(!liveRoom.getForbidRaiseHandStatus());
     }
 }

@@ -1,7 +1,6 @@
 package com.baijiahulian.live.ui.speakerspanel;
 
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
@@ -15,6 +14,7 @@ import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
 import com.baijiahulian.livecore.utils.LPBackPressureBufferedSubscriber;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
+import com.baijiahulian.livecore.utils.LPLogger;
 import com.baijiahulian.livecore.utils.LPSubscribeObjectWithLastValue;
 import com.baijiahulian.livecore.wrapper.LPPlayer;
 import com.baijiahulian.livecore.wrapper.LPRecorder;
@@ -25,7 +25,6 @@ import java.util.List;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
-import rx.observables.ConnectableObservable;
 
 import static com.baijiahulian.live.ui.speakerspanel.SpeakersContract.PPT_TAG;
 import static com.baijiahulian.live.ui.speakerspanel.SpeakersContract.RECORD_TAG;
@@ -40,6 +39,7 @@ import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 /**
  * 发言者列表遵从{[PPT]---[主讲人视频|头像]---[自己视频]---[其他人视频]---[其他发言用户音频]---[请求发言用户]}的顺序
  * 如果全屏或没有对应的项目则不在此列表中
+ * 如果老师不是主讲人并切没有被全屏则在其他人视频里
  * currentFullScreenTag 为当前全屏的tag VideoView为UserId
  * Created by Shubo on 2017/6/5.
  */
@@ -64,7 +64,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
 
     private Subscription subscriptionOfMediaNew, subscriptionOfMediaChange, subscriptionOfMediaClose,
             subscriptionSpeakApply, subscriptionSpeakResponse, subscriptionOfActiveUser, subscriptionOfFullScreen,
-            subscriptionOfUserOut;
+            subscriptionOfUserOut, subscriptionOfPresenterChange;
 
     public SpeakerPresenter(SpeakersContract.View view) {
         this.view = view;
@@ -117,9 +117,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                 initView();
             }
         };
-        final ConnectableObservable<List<IMediaModel>> observable = routerListener.getLiveRoom().getSpeakQueueVM().getObservableOfActiveUsers();
-        subscriptionOfActiveUser = observable.observeOn(AndroidSchedulers.mainThread()).subscribe(activeUserSubscriber);
-        observable.connect();
+        subscriptionOfActiveUser = routerListener.getLiveRoom().getSpeakQueueVM().getObservableOfActiveUsers().observeOn(AndroidSchedulers.mainThread()).subscribe(activeUserSubscriber);
         routerListener.getLiveRoom().getSpeakQueueVM().requestActiveUsers();
 
         subscriptionOfMediaNew = routerListener.getLiveRoom().getSpeakQueueVM().getObservableOfMediaNew()
@@ -260,12 +258,23 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                     }
                 });
 
+        subscriptionOfPresenterChange = routerListener.getLiveRoom().getSpeakQueueVM().getObservableOfPresenterChange()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<String>() {
+                    @Override
+                    public void call(String userId) {
+                        if (_displayPresenterSection == -1)
+                            return;
+
+                    }
+                });
+
         subscriptionOfUserOut = routerListener.getLiveRoom().getObservableOfUserOut().observeOn(AndroidSchedulers.mainThread())
                 .filter(new Func1<String, Boolean>() {
                     @Override
                     public Boolean call(String s) {
                         return routerListener.getLiveRoom().getPresenterUser() == null ||
-                                routerListener.getLiveRoom().getPresenterUser() .getUserId().equals(s); // 主讲人退出教室
+                                routerListener.getLiveRoom().getPresenterUser().getUserId().equals(s); // 主讲人退出教室
                     }
                 })
                 .subscribe(new LPErrorPrintSubscriber<String>() {
@@ -412,6 +421,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
         RxUtils.unSubscribe(subscriptionOfActiveUser);
         RxUtils.unSubscribe(subscriptionOfFullScreen);
         RxUtils.unSubscribe(subscriptionOfUserOut);
+        RxUtils.unSubscribe(subscriptionOfPresenterChange);
     }
 
     @Override
@@ -691,8 +701,8 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
     }
 
     private void printSections() {
-//        Log.e("section", _displayPresenterSection + " " + _displayRecordSection + " " + _displayVideoSection + " " +
-//                _displaySpeakerSection + " " + _displayApplySection);
+        LPLogger.e("section: " + _displayPresenterSection + " " + _displayRecordSection + " " + _displayVideoSection + " " +
+                _displaySpeakerSection + " " + _displayApplySection);
     }
 
 }

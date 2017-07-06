@@ -117,7 +117,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private FrameLayout flLoading;
     private FrameLayout flError;
     private DrawerLayout dlChat;
-    //    private FrameLayout flTopRight;
     private FrameLayout flPPTLeft;
     private FrameLayout flRightBottom;
     private FrameLayout flRight;

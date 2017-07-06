@@ -35,6 +35,7 @@
     <string name="live_setting_camera_switch_front">前</string>
     <string name="live_setting_camera_switch_back">后</string>
     <string name="live_setting_camera_forbid_all">全体禁言</string>
+    <string name="live_setting_camera_forbid_raise_hand">禁止举手</string>
     <string name="live_media_visitor_fail">游客不能举手发言</string>
     <string name="live_media_speak_applying">举手中</string>
     <string name="live_media_student_fail">请先举手发言，并等待老师同意</string>
@@ -66,6 +67,7 @@
     <string name="live_recorder_camera_switch_off">关闭摄像头</string>
     <string name="live_ppt_manage">管理课件</string>
     <string name="live_hand_up_error">课程未开始，还不能举手</string>
+    <string name="live_hand_up_forbid">老师禁止了举手</string>
     <string name="live_ppt_title">PPT</string>
     <string name="live_forbid_raise_hand">禁止举手</string>
     <string name="live_forbid_send_message">老师已禁止了发言</string>

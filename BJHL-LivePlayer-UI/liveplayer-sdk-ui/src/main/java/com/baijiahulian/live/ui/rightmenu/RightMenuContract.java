@@ -41,6 +41,8 @@ public interface RightMenuContract {
 
         void showHandUpError();
 
+        void showHandUpForbid();
+
         void showCantDraw();
 
         void showWaitingTeacherAgree();

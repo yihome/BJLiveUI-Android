@@ -72,6 +72,11 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
             return;
         }
 
+        if (liveRoomRouterListener.getLiveRoom().getForbidRaiseHandStatus()) {
+            view.showHandUpForbid();
+            return;
+        }
+
         if (speakApplyStatus == RightMenuContract.STUDENT_SPEAK_APPLY_NONE) {
             liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().requestSpeakApply();
             speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_APPLYING;
@@ -200,6 +205,9 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                                 view.showSpeakApplyAgreed();
                                 liveRoomRouterListener.getLiveRoom().getRecorder().publish();
                                 liveRoomRouterListener.attachLocalAudio();
+                                if (liveRoomRouterListener.getLiveRoom().getAutoOpenCameraStatus()) {
+                                    liveRoomRouterListener.attachLocalVideo();
+                                }
                             } else {
                                 RxUtils.unSubscribe(subscriptionOfSpeakApplyCounter);
                                 speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_NONE;
@@ -239,8 +247,8 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                 });
 
 
-        if(liveRoomRouterListener.getLiveRoom().getCurrentUser().getType() == LPConstants.LPUserType.Student &&
-                liveRoomRouterListener.getLiveRoom().getRoomType() != LPConstants.LPRoomType.Multi){
+        if (liveRoomRouterListener.getLiveRoom().getCurrentUser().getType() == LPConstants.LPUserType.Student &&
+                liveRoomRouterListener.getLiveRoom().getRoomType() != LPConstants.LPRoomType.Multi) {
             view.showAutoSpeak();
             speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_SPEAKING;
         }

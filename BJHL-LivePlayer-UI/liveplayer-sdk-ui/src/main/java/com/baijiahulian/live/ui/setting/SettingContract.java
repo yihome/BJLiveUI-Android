@@ -53,6 +53,10 @@ interface SettingContract {
         void showNotForbidden();
 
         void showAudioRoomError();
+
+        void showForbidRaiseHandOn();
+
+        void showForbidRaiseHandOff();
     }
 
     interface Presenter extends BasePresenter {
@@ -84,5 +88,6 @@ interface SettingContract {
 
         boolean isTeacherOrAssistant();
 
+        void switchForbidRaiseHand();
     }
 }
