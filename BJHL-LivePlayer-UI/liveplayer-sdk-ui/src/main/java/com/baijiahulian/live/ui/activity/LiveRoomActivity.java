@@ -22,6 +22,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.OrientationEventListener;
 import android.view.SurfaceView;
@@ -59,6 +60,8 @@ import com.baijiahulian.live.ui.more.MoreMenuDialogFragment;
 import com.baijiahulian.live.ui.more.MoreMenuPresenter;
 import com.baijiahulian.live.ui.ppt.MyPPTFragment;
 import com.baijiahulian.live.ui.ppt.PPTPresenter;
+import com.baijiahulian.live.ui.ppt.quickswitchppt.QuickSwitchPPTFragment;
+import com.baijiahulian.live.ui.ppt.quickswitchppt.SwitchPPTFragmentPresenter;
 import com.baijiahulian.live.ui.pptleftmenu.PPTLeftFragment;
 import com.baijiahulian.live.ui.pptleftmenu.PPTLeftPresenter;
 import com.baijiahulian.live.ui.pptmanage.PPTManageFragment;
@@ -145,9 +148,11 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private ErrorFragment errorFragment;
     private GlobalPresenter globalPresenter;
     private PPTLeftFragment pptLeftFragment;
+    private QuickSwitchPPTFragment quickSwitchPPTFragment;
     private RollCallDialogPresenter rollCallDialogPresenter;
     private QuizDialogFragment quizFragment;
     private QuizDialogPresenter quizPresenter;
+    private SwitchPPTFragmentPresenter switchPPTFragmentPresenter;
 
     private OrientationEventListener orientationEventListener; //处理屏幕旋转时本地录制视频的方向
     private int oldRotation;
@@ -949,6 +954,33 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         MessageSendPresenter presenter = new MessageSendPresenter(fragment);
         bindVP(fragment, presenter);
         showDialogFragment(fragment);
+    }
+
+    @Override
+    public void navigateToQuickSwitchPPT(int currentIndex) {
+        if(quickSwitchPPTFragment == null){
+            quickSwitchPPTFragment = QuickSwitchPPTFragment.newInstance();
+        }
+        if(switchPPTFragmentPresenter == null){
+            switchPPTFragmentPresenter = new SwitchPPTFragmentPresenter();
+            switchPPTFragmentPresenter.setRouter(this);
+            switchPPTFragmentPresenter.subscribe();
+        }
+        quickSwitchPPTFragment.setPresenter(switchPPTFragmentPresenter);
+        showDialogFragment(quickSwitchPPTFragment);
+        quickSwitchPPTFragment.setCurrentIndex(currentIndex);
+
+
+    }
+
+    @Override
+    public void notifyPageCurrent(int position) {
+        lppptFragment.updatePage(position);
+    }
+
+    @Override
+    public void notifyEditPPT() {
+        switchPPTFragmentPresenter.subscribe();
     }
 
     @Override

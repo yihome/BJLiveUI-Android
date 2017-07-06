@@ -26,6 +26,11 @@ public interface LiveRoomRouterListener {
 
     void navigateToMessageInput();
 
+    void navigateToQuickSwitchPPT(int index);
+
+    void notifyPageCurrent(int position);
+    void notifyEditPPT();
+
     void navigateToPPTDrawing();
 
     LPConstants.LPPPTShowWay getPPTShowType();
