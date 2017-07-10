@@ -25,6 +25,11 @@ public class PPTPresenter implements PPTContract.Presenter {
     }
 
     @Override
+    public void showQuickSwitchPPTView(int currentIndex, int maxIndex) {
+        routerListener.navigateToQuickSwitchPPT(currentIndex, maxIndex);
+    }
+
+    @Override
     public void setRouter(LiveRoomRouterListener liveRoomRouterListener) {
         routerListener = liveRoomRouterListener;
     }

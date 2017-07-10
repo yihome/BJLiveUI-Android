@@ -22,6 +22,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.OrientationEventListener;
 import android.view.SurfaceHolder;
@@ -60,6 +61,8 @@ import com.baijiahulian.live.ui.more.MoreMenuDialogFragment;
 import com.baijiahulian.live.ui.more.MoreMenuPresenter;
 import com.baijiahulian.live.ui.ppt.MyPPTFragment;
 import com.baijiahulian.live.ui.ppt.PPTPresenter;
+import com.baijiahulian.live.ui.ppt.quickswitchppt.QuickSwitchPPTFragment;
+import com.baijiahulian.live.ui.ppt.quickswitchppt.SwitchPPTFragmentPresenter;
 import com.baijiahulian.live.ui.pptleftmenu.PPTLeftFragment;
 import com.baijiahulian.live.ui.pptleftmenu.PPTLeftPresenter;
 import com.baijiahulian.live.ui.pptmanage.PPTManageFragment;
@@ -111,7 +114,6 @@ import static android.R.attr.path;
 import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 
 public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRouterListener {
-
     private FrameLayout flBackground;
     private FrameLayout flTop;
     private FrameLayout flLeft;
@@ -123,13 +125,10 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private FrameLayout flRight;
     private FrameLayout flSpeakers;
     private FrameLayout flCloudRecord;
-
     private LiveRoom liveRoom;
-
     private LoadingFragment loadingFragment;
     private TopBarFragment topBarFragment;
     private CloudRecordFragment cloudRecordFragment;
-
     private MyPPTFragment lppptFragment;
     private ChatFragment chatFragment;
     private ChatPresenter chatPresenter;
@@ -137,7 +136,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private LeftMenuFragment leftMenuFragment;
     private RightMenuFragment rightMenuFragment;
     private WindowManager windowManager;
-
     private SpeakersFragment speakersFragment;
     private SpeakerPresenter speakerPresenter;
     private RightMenuPresenter rightMenuPresenter;
@@ -148,7 +146,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private RollCallDialogPresenter rollCallDialogPresenter;
     private QuizDialogFragment quizFragment;
     private QuizDialogPresenter quizPresenter;
-
     private OrientationEventListener orientationEventListener; //处理屏幕旋转时本地录制视频的方向
     private int oldRotation;
 
@@ -957,6 +954,24 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         bindVP(fragment, presenter);
         showDialogFragment(fragment);
     }
+
+    @Override
+    public void navigateToQuickSwitchPPT(int currentIndex, int maxIndex) {
+        QuickSwitchPPTFragment quickSwitchPPTFragment =  QuickSwitchPPTFragment.newInstance();
+        Bundle args = new Bundle();
+        args.putInt("currentIndex", currentIndex);
+        args.putInt("maxIndex", maxIndex);
+        quickSwitchPPTFragment.setArguments(args);
+        SwitchPPTFragmentPresenter switchPPTFragmentPresenter = new SwitchPPTFragmentPresenter(quickSwitchPPTFragment);
+        bindVP(quickSwitchPPTFragment, switchPPTFragmentPresenter);
+        showDialogFragment(quickSwitchPPTFragment);
+    }
+
+    @Override
+    public void notifyPageCurrent(int position) {
+        lppptFragment.updatePage(position);
+    }
+
 
     @Override
     public void navigateToPPTDrawing() {

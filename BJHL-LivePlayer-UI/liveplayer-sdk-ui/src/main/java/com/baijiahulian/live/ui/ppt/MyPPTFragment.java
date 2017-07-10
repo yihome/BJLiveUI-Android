@@ -2,6 +2,8 @@ package com.baijiahulian.live.ui.ppt;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 
 import com.baijiahulian.livecore.ppt.LPPPTFragment;
 import com.baijiahulian.livecore.ppt.whiteboard.LPWhiteBoardView;
@@ -43,6 +45,12 @@ public class MyPPTFragment extends LPPPTFragment implements PPTContract.View {
 //                presenter.switchWithMaximum();
 //            }
 //        });
+        mPageTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                presenter.showQuickSwitchPPTView(currentPageIndex, maxIndex);
+            }
+        });
     }
 
     public LPWhiteBoardView getLPWhiteBoardView(){
