@@ -51,6 +51,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
     private LPSubscribeObjectWithLastValue<String> fullScreenKVO;
     private int MAX_VIDEO_COUNT = 0;
     private boolean autoPlayPresenterVideo = true;
+    private boolean isEmptyPPT = false;
 
     // 显示视频或发言用户的分段列表 item为相应的tag或者userId;
     private List<String> displayList;
@@ -64,7 +65,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
 
     private Subscription subscriptionOfMediaNew, subscriptionOfMediaChange, subscriptionOfMediaClose,
             subscriptionSpeakApply, subscriptionSpeakResponse, subscriptionOfActiveUser, subscriptionOfFullScreen,
-            subscriptionOfUserOut, subscriptionOfPresenterChange;
+            subscriptionOfUserOut, subscriptionOfPresenterChange, subscriptionOfShareDesktopAndPlayMedia;
 
     public SpeakerPresenter(SpeakersContract.View view) {
         this.view = view;
@@ -262,10 +263,25 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new LPErrorPrintSubscriber<String>() {
                     @Override
-                    public void call(String userId) {
+                    public void call(String newPresenter) {
+                        // TODO: 2017/7/7 full screen
                         if (_displayPresenterSection == -1)
                             return;
-
+                        if (_displayPresenterSection < _displayVideoSection) {
+                            String lastPresenter = displayList.get(_displayPresenterSection);
+                            if (displayList.indexOf(newPresenter) < 0) {
+                                displayList.set(_displayPresenterSection, newPresenter);
+                                displayList.add(_displayApplySection - 1, lastPresenter);
+                                _displayApplySection++;
+                                view.notifyItemChanged(_displayPresenterSection);
+                                view.notifyItemInserted(_displayApplySection - 1);
+                            } else {
+                                displayList.set(_displayPresenterSection, newPresenter);
+                                displayList.set(displayList.indexOf(newPresenter), lastPresenter);
+                                view.notifyItemChanged(_displayPresenterSection);
+                                view.notifyItemChanged(displayList.indexOf(newPresenter));
+                            }
+                        }
                     }
                 });
 
@@ -321,6 +337,23 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                                 displayList.remove(position);
                             } else {
                                 throw new RuntimeException("position > displayList.size()");
+                            }
+                        }
+                    });
+        } else {
+            subscriptionOfShareDesktopAndPlayMedia = routerListener.getLiveRoom().getObservableOfPlayMedia()
+                    .mergeWith(routerListener.getLiveRoom().getObservableOfShareDesktop())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new LPErrorPrintSubscriber<Boolean>() {
+                        @Override
+                        public void call(Boolean aBoolean) {
+                            checkNotNull(routerListener.getLiveRoom().getTeacherUser());
+                            String teacherId = routerListener.getLiveRoom().getTeacherUser().getUserId();
+                            if (aBoolean
+                                    && displayList.indexOf(teacherId) >= _displayPresenterSection
+                                    && displayList.indexOf(teacherId) < _displaySpeakerSection
+                                    && !fullScreenKVO.getParameter().equals(teacherId)) {
+                                fullScreenKVO.setParameter(teacherId);
                             }
                         }
                     });
@@ -422,6 +455,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
         RxUtils.unSubscribe(subscriptionOfFullScreen);
         RxUtils.unSubscribe(subscriptionOfUserOut);
         RxUtils.unSubscribe(subscriptionOfPresenterChange);
+        RxUtils.unSubscribe(subscriptionOfShareDesktopAndPlayMedia);
     }
 
     @Override
@@ -524,7 +558,6 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
             view.showMaxVideoExceed();
             return;
         }
-
         view.notifyItemDeleted(position);
         displayList.remove(position);
 
@@ -705,4 +738,27 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                 _displaySpeakerSection + " " + _displayApplySection);
     }
 
+    public void notifyEmptyPPTStatus(Boolean isEmpty) {
+        if (isEmptyPPT == isEmpty) return;
+        isEmptyPPT = isEmpty;
+        if (isEmpty) {
+            if (displayList.indexOf(PPT_TAG) >= 0) {
+                _displayPresenterSection--;
+                _displayRecordSection--;
+                _displayVideoSection--;
+                _displaySpeakerSection--;
+                _displayApplySection--;
+                view.notifyItemDeleted(displayList.indexOf(PPT_TAG));
+            }
+        } else {
+            if (!PPT_TAG.equals(fullScreenKVO.getParameter())) {
+                _displayPresenterSection++;
+                _displayRecordSection++;
+                _displayVideoSection++;
+                _displaySpeakerSection++;
+                _displayApplySection++;
+                view.notifyViewAdded(getPPTFragment().getView(), 0);
+            }
+        }
+    }
 }

@@ -36,12 +36,17 @@ public class MyPPTFragment extends LPPPTFragment implements PPTContract.View {
                 }
             }
         });
+
 //        super.setOnDoubleTapListener(new LPWhiteBoardView.OnDoubleTapListener() {
 //            @Override
 //            public void onDoubleTap(LPWhiteBoardView whiteBoardView) {
 //                presenter.switchWithMaximum();
 //            }
 //        });
+    }
+
+    public LPWhiteBoardView getLPWhiteBoardView(){
+        return mWhiteBoardView;
     }
 
 

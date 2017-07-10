@@ -24,6 +24,7 @@ import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.OrientationEventListener;
+import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -161,6 +162,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private String sign;
     private IUserModel enterUser;
     private ViewGroup.LayoutParams lpBackground;
+    private Subscription subscriptionOfEmptyBoard;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -818,6 +820,12 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         lppptFragment.setLiveRoom(getLiveRoom());
         bindVP(lppptFragment, new PPTPresenter(lppptFragment));
         addFragment(R.id.activity_live_room_background_container, lppptFragment);
+        subscriptionOfEmptyBoard = lppptFragment.getObservableOfEmptyBoard().subscribe(new LPErrorPrintSubscriber<Boolean>() {
+            @Override
+            public void call(Boolean aBoolean) {
+                speakerPresenter.notifyEmptyPPTStatus(aBoolean);
+            }
+        });
 
         topBarFragment = new TopBarFragment();
         bindVP(topBarFragment, new TopBarPresenter(topBarFragment));
@@ -1212,6 +1220,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         }
 
         RxUtils.unSubscribe(subscriptionOfLoginConflict);
+        RxUtils.unSubscribe(subscriptionOfEmptyBoard);
 
         orientationEventListener = null;
 
