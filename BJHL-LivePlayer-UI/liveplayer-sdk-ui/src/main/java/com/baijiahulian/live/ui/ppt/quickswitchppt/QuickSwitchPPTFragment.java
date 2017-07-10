@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseDialogFragment;
 import com.baijiahulian.live.ui.utils.QueryPlus;
+import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.viewmodels.impl.LPDocListViewModel;
 import com.squareup.picasso.Picasso;
 
@@ -27,21 +28,21 @@ import java.util.List;
  * Created by szw on 17/7/4.
  */
 
-public class QuickSwitchPPTFragment extends BaseDialogFragment implements SwitchPPTContract.View{
+public class QuickSwitchPPTFragment extends BaseDialogFragment implements SwitchPPTContract.View {
     private SwitchPPTContract.Presenter presenter;
     private QueryPlus $;
     private List<LPDocListViewModel.DocModel> quickDocList = new ArrayList<>();
-    public static QuickSwitchPPTFragment newInstance(){
-        Bundle args  = new Bundle();
+    private QuickSwitchPPTAdapter adapter;
+    private boolean isStudent = false;
+    private int maxIndex;//学生可以快速滑动ppt的最大页数
+    private int currentIndex;
+
+    public static QuickSwitchPPTFragment newInstance() {
+        Bundle args = new Bundle();
         QuickSwitchPPTFragment quickSwitchPPTFragment = new QuickSwitchPPTFragment();
         quickSwitchPPTFragment.setArguments(args);
         return quickSwitchPPTFragment;
     }
-
-    public void setCurrentIndex(int currentIndex){
-        ((RecyclerView)$.id(R.id.dialog_switch_ppt_rv).view()).smoothScrollToPosition(currentIndex);
-    }
-
 
     @Override
     protected int getLayoutId() {
@@ -54,14 +55,19 @@ public class QuickSwitchPPTFragment extends BaseDialogFragment implements Switch
         $ = QueryPlus.with(contentView);
         LinearLayoutManager manager = new LinearLayoutManager(getActivity());
         manager.setOrientation(LinearLayoutManager.HORIZONTAL);
-        QuickSwitchPPTAdapter adapter = new QuickSwitchPPTAdapter();
-        ((RecyclerView)$.id(R.id.dialog_switch_ppt_rv).view()).setLayoutManager(manager);
-        ((RecyclerView)$.id(R.id.dialog_switch_ppt_rv).view()).setAdapter(adapter);
+        adapter = new QuickSwitchPPTAdapter();
+        ((RecyclerView) $.id(R.id.dialog_switch_ppt_rv).view()).setLayoutManager(manager);
+        ((RecyclerView) $.id(R.id.dialog_switch_ppt_rv).view()).setAdapter(adapter);
+        this.maxIndex = getArguments().getInt("maxIndex");
+        this.currentIndex = getArguments().getInt("currentIndex");
         initData();
     }
 
-    public void initData(){
+    public void initData() {
         quickDocList = presenter.getDocList();
+        if(isStudent){
+            quickDocList = quickDocList.subList(0, maxIndex + 1);
+        }
     }
 
     @Override
@@ -77,7 +83,25 @@ public class QuickSwitchPPTFragment extends BaseDialogFragment implements Switch
         this.presenter = presenter;
     }
 
-    class QuickSwitchPPTAdapter extends RecyclerView.Adapter<SwitchHolder>{
+    @Override
+    public void setIndex() {
+        ((RecyclerView) $.id(R.id.dialog_switch_ppt_rv).view()).smoothScrollToPosition(currentIndex);
+    }
+
+    @Override
+    public void setType(boolean isStudent) {
+        this.isStudent = isStudent;
+    }
+
+    @Override
+    public void docListChanged(List<LPDocListViewModel.DocModel> docModelList) {
+        if(isStudent){
+            quickDocList = docModelList.subList(0, maxIndex + 1);
+        }
+        adapter.notifyDataSetChanged();
+    }
+
+    class QuickSwitchPPTAdapter extends RecyclerView.Adapter<SwitchHolder> {
 
         @Override
         public SwitchHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -87,7 +111,7 @@ public class QuickSwitchPPTFragment extends BaseDialogFragment implements Switch
 
         @Override
         public void onBindViewHolder(SwitchHolder holder, final int position) {
-            Picasso.with(getActivity()).load(quickDocList.get(position+1).url).into(holder.PPTView);
+            Picasso.with(getActivity()).load(quickDocList.get(position + 1).url).into(holder.PPTView);
             holder.PPTOrder.setText(String.valueOf(position + 1));
             holder.PPTRL.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -103,10 +127,11 @@ public class QuickSwitchPPTFragment extends BaseDialogFragment implements Switch
         }
     }
 
-    class SwitchHolder extends RecyclerView.ViewHolder{
+    class SwitchHolder extends RecyclerView.ViewHolder {
         ImageView PPTView;
         TextView PPTOrder;
         RelativeLayout PPTRL;
+
         public SwitchHolder(View itemView) {
             super(itemView);
             this.PPTView = (ImageView) itemView.findViewById(R.id.item_ppt_view);

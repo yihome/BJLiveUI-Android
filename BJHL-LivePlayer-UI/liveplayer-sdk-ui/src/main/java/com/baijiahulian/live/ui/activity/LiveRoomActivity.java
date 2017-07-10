@@ -113,7 +113,6 @@ import static android.R.attr.path;
 import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 
 public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRouterListener {
-
     private FrameLayout flBackground;
     private FrameLayout flTop;
     private FrameLayout flLeft;
@@ -126,13 +125,10 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private FrameLayout flRight;
     private FrameLayout flSpeakers;
     private FrameLayout flCloudRecord;
-
     private LiveRoom liveRoom;
-
     private LoadingFragment loadingFragment;
     private TopBarFragment topBarFragment;
     private CloudRecordFragment cloudRecordFragment;
-
     private MyPPTFragment lppptFragment;
     private ChatFragment chatFragment;
     private ChatPresenter chatPresenter;
@@ -140,7 +136,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private LeftMenuFragment leftMenuFragment;
     private RightMenuFragment rightMenuFragment;
     private WindowManager windowManager;
-
     private SpeakersFragment speakersFragment;
     private SpeakerPresenter speakerPresenter;
     private RightMenuPresenter rightMenuPresenter;
@@ -148,12 +143,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private ErrorFragment errorFragment;
     private GlobalPresenter globalPresenter;
     private PPTLeftFragment pptLeftFragment;
-    private QuickSwitchPPTFragment quickSwitchPPTFragment;
     private RollCallDialogPresenter rollCallDialogPresenter;
     private QuizDialogFragment quizFragment;
     private QuizDialogPresenter quizPresenter;
-    private SwitchPPTFragmentPresenter switchPPTFragmentPresenter;
-
     private OrientationEventListener orientationEventListener; //处理屏幕旋转时本地录制视频的方向
     private int oldRotation;
 
@@ -957,20 +949,15 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     }
 
     @Override
-    public void navigateToQuickSwitchPPT(int currentIndex) {
-        if(quickSwitchPPTFragment == null){
-            quickSwitchPPTFragment = QuickSwitchPPTFragment.newInstance();
-        }
-        if(switchPPTFragmentPresenter == null){
-            switchPPTFragmentPresenter = new SwitchPPTFragmentPresenter();
-            switchPPTFragmentPresenter.setRouter(this);
-            switchPPTFragmentPresenter.subscribe();
-        }
-        quickSwitchPPTFragment.setPresenter(switchPPTFragmentPresenter);
+    public void navigateToQuickSwitchPPT(int currentIndex, int maxIndex) {
+        QuickSwitchPPTFragment quickSwitchPPTFragment =  QuickSwitchPPTFragment.newInstance();
+        Bundle args = new Bundle();
+        args.putInt("currentIndex", currentIndex);
+        args.putInt("maxIndex", maxIndex);
+        quickSwitchPPTFragment.setArguments(args);
+        SwitchPPTFragmentPresenter switchPPTFragmentPresenter = new SwitchPPTFragmentPresenter(quickSwitchPPTFragment);
+        bindVP(quickSwitchPPTFragment, switchPPTFragmentPresenter);
         showDialogFragment(quickSwitchPPTFragment);
-        quickSwitchPPTFragment.setCurrentIndex(currentIndex);
-
-
     }
 
     @Override
@@ -978,10 +965,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         lppptFragment.updatePage(position);
     }
 
-    @Override
-    public void notifyEditPPT() {
-        switchPPTFragmentPresenter.subscribe();
-    }
 
     @Override
     public void navigateToPPTDrawing() {

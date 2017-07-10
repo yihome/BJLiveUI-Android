@@ -12,7 +12,9 @@ import java.util.List;
 
 public class SwitchPPTContract {
     interface View extends BaseView<Presenter>{
-
+        void setIndex();
+        void setType(boolean isStudent);
+        void docListChanged(List<LPDocListViewModel.DocModel> docModelList);
     }
 
     interface Presenter extends BasePresenter{

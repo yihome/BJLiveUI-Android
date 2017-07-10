@@ -268,7 +268,6 @@ public class PPTManagePresenter implements PPTManageContract.Presenter {
                     @Override
                     public void onNext(String s) {
                         routerListener.getLiveRoom().getDocListVM().deleteDocument(s);
-                        routerListener.notifyEditPPT();
                     }
                 });
         view.showRemoveBtnDisable();

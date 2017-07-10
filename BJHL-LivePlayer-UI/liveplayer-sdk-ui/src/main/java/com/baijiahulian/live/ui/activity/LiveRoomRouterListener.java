@@ -26,10 +26,9 @@ public interface LiveRoomRouterListener {
 
     void navigateToMessageInput();
 
-    void navigateToQuickSwitchPPT(int index);
+    void navigateToQuickSwitchPPT(int index, int maxIndex);
 
     void notifyPageCurrent(int position);
-    void notifyEditPPT();
 
     void navigateToPPTDrawing();
 

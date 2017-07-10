@@ -47,7 +47,7 @@ public class MyPPTFragment extends LPPPTFragment implements PPTContract.View {
         mPageTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                presenter.showQuickSwitchPPTView(currentPageIndex);
+                presenter.showQuickSwitchPPTView(currentPageIndex, maxIndex);
             }
         });
     }
