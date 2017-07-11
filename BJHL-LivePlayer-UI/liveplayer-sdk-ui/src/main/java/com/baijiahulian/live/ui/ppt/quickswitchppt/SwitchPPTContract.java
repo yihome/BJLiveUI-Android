@@ -13,6 +13,7 @@ import java.util.List;
 public class SwitchPPTContract {
     interface View extends BaseView<Presenter>{
         void setIndex();
+        void setMaxIndex(int maxIndex);
         void setType(boolean isStudent);
         void docListChanged(List<LPDocListViewModel.DocModel> docModelList);
     }
@@ -20,5 +21,6 @@ public class SwitchPPTContract {
     interface Presenter extends BasePresenter{
         List<LPDocListViewModel.DocModel> getDocList();
         void setSwitchPosition(int position);
+        void notifyMaxIndexChange(int maxIndex);
     }
 }

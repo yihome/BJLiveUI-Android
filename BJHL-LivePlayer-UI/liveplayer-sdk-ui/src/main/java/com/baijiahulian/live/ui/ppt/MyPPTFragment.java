@@ -57,6 +57,11 @@ public class MyPPTFragment extends LPPPTFragment implements PPTContract.View {
         return mWhiteBoardView;
     }
 
+    @Override
+    public void setMaxPage(int maxIndex) {
+        super.setMaxPage(maxIndex);
+        presenter.updateQuickSwitchPPTView(maxIndex);
+    }
 
     @Override
     public void onDestroy() {

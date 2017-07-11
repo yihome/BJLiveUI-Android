@@ -73,4 +73,9 @@ public class SwitchPPTFragmentPresenter implements SwitchPPTContract.Presenter {
     public void setSwitchPosition(int position) {
         listener.notifyPageCurrent(position);
     }
+
+    @Override
+    public void notifyMaxIndexChange(int maxIndex) {
+        view.setMaxIndex(maxIndex);
+    }
 }

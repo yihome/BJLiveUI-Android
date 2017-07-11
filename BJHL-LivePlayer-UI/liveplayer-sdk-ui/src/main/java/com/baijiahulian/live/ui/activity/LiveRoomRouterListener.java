@@ -28,6 +28,8 @@ public interface LiveRoomRouterListener {
 
     void navigateToQuickSwitchPPT(int index, int maxIndex);
 
+    void updateQuickSwitchPPTMaxIndex(int index);
+
     void notifyPageCurrent(int position);
 
     void navigateToPPTDrawing();
