@@ -3,6 +3,7 @@ package com.baijiahulian.live.ui.speakerspanel;
 import com.baijiahulian.live.ui.base.BasePresenter;
 import com.baijiahulian.live.ui.base.BaseView;
 import com.baijiahulian.live.ui.ppt.MyPPTFragment;
+import com.baijiahulian.livecore.launch.LPEnterRoomNative;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
 import com.baijiahulian.livecore.wrapper.LPPlayer;
@@ -84,5 +85,7 @@ interface SpeakersContract {
         void clearScreen();
 
         boolean isAutoPlay();
+
+        LPEnterRoomNative.LPWaterMark getWaterMark();
     }
 }

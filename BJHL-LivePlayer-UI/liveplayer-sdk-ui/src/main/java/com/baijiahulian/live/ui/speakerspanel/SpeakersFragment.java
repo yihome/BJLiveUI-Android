@@ -62,7 +62,8 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
     protected void init(Bundle savedInstanceState) {
         super.init(savedInstanceState);
         container = (LinearLayout) $.id(R.id.fragment_speakers_container).view();
-        lpItem = new ViewGroup.LayoutParams(DisplayUtils.dip2px(getActivity(), 100), DisplayUtils.dip2px(getActivity(), 76));
+        lpItem = new ViewGroup.LayoutParams(DisplayUtils.dip2px(getActivity(), 100),
+                DisplayUtils.dip2px(getActivity(), 76));
     }
 
     private boolean attachVideoOnResume = false;
@@ -100,11 +101,12 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
             container.removeViewAt(position);
             if (model == null) return;
             if (model.isVideoOn() && presenter.isAutoPlay()) {
-                VideoView videoView = new VideoView(getActivity());
-                videoView.setNameText(model.getUser().getName());
+                VideoView videoView = new VideoView(getActivity(), model.getUser().getName(),
+                        presenter.getWaterMark().url, presenter.getWaterMark().pos);
                 container.addView(videoView, position, lpItem);
 
-                final GestureDetector gestureDetector = new GestureDetector(getActivity(), new ClickGestureDetector(model.getUser().getUserId()));
+                final GestureDetector gestureDetector = new GestureDetector(getActivity(),
+                        new ClickGestureDetector(model.getUser().getUserId()));
                 videoView.setOnTouchListener(new View.OnTouchListener() {
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
@@ -131,8 +133,8 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
             case VIEW_TYPE_PRESENTER:
                 IMediaModel presenterSpeakModel = presenter.getSpeakModel(position);
                 if (presenterSpeakModel.isVideoOn()) {
-                    VideoView videoView = new VideoView(getActivity());
-                    videoView.setNameText(presenterSpeakModel.getUser().getName());
+                    VideoView videoView = new VideoView(getActivity(), presenterSpeakModel.getUser().getName(),
+                            presenter.getWaterMark().url, presenter.getWaterMark().pos);
                     container.addView(videoView, position, lpItem);
 
                     final GestureDetector gestureDetector = new GestureDetector(getActivity(), new ClickGestureDetector(presenterSpeakModel.getUser().getUserId()));
@@ -171,11 +173,9 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                     presenter.getRecorder().attachVideo();
                 break;
             case VIEW_TYPE_VIDEO_PLAY:
-                VideoView videoView = new VideoView(getActivity());
                 IMediaModel model = presenter.getSpeakModel(position);
-                videoView.setNameText(model.getUser().getName());
+                VideoView videoView = new VideoView(getActivity(), model.getUser().getName());
                 container.addView(videoView, position, lpItem);
-
                 final GestureDetector gestureDetector = new GestureDetector(getActivity(), new ClickGestureDetector(model.getUser().getUserId()));
                 videoView.setOnTouchListener(new View.OnTouchListener() {
                     @Override

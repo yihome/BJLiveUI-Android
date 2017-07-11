@@ -7,6 +7,7 @@ import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 import com.baijiahulian.live.ui.ppt.MyPPTFragment;
 import com.baijiahulian.live.ui.utils.RxUtils;
 import com.baijiahulian.livecore.context.LPConstants;
+import com.baijiahulian.livecore.launch.LPEnterRoomNative;
 import com.baijiahulian.livecore.models.LPMediaModel;
 import com.baijiahulian.livecore.models.LPUserModel;
 import com.baijiahulian.livecore.models.imodels.IMediaControlModel;
@@ -672,6 +673,11 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
     @Override
     public boolean isAutoPlay() {
         return autoPlayPresenterVideo;
+    }
+
+    @Override
+    public LPEnterRoomNative.LPWaterMark getWaterMark() {
+        return routerListener.getLiveRoom().getPartnerConfig().waterMark;
     }
 
     @Override
