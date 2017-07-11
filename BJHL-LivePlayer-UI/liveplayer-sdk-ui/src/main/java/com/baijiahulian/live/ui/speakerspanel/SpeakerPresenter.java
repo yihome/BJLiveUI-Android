@@ -106,6 +106,10 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
         // init view
         for (int i = 0; i < displayList.size(); i++) {
             view.notifyItemInserted(i);
+            if (getItemViewType(i) != VIEW_TYPE_SPEAKER)
+                continue;
+            if (getSpeakModel(i).isVideoOn())
+                playVideo(getSpeakModel(i).getUser().getUserId());
         }
     }
 
@@ -733,11 +737,6 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
         printSections();
     }
 
-    private void printSections() {
-        LPLogger.e("section: " + _displayPresenterSection + " " + _displayRecordSection + " " + _displayVideoSection + " " +
-                _displaySpeakerSection + " " + _displayApplySection);
-    }
-
     public void notifyEmptyPPTStatus(Boolean isEmpty) {
         if (isEmptyPPT == isEmpty) return;
         isEmptyPPT = isEmpty;
@@ -760,5 +759,10 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                 view.notifyViewAdded(getPPTFragment().getView(), 0);
             }
         }
+    }
+
+    private void printSections() {
+        LPLogger.e("section: " + _displayPresenterSection + " " + _displayRecordSection + " " + _displayVideoSection + " " +
+                _displaySpeakerSection + " " + _displayApplySection);
     }
 }
