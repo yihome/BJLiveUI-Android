@@ -221,6 +221,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
 
     @Override
     public void notifyViewAdded(View view, int position) {
+        if(view.getParent() != null) return;
         container.addView(view, position, lpItem);
         if (presenter.getPPTFragment().getView() == view) {
             presenter.getPPTFragment().onResume();

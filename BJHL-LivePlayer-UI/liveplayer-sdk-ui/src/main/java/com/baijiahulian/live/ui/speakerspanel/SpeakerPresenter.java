@@ -748,7 +748,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                 _displayVideoSection--;
                 _displaySpeakerSection--;
                 _displayApplySection--;
-                view.notifyItemDeleted(displayList.indexOf(PPT_TAG));
+                view.removeViewAt(displayList.indexOf(PPT_TAG));
             }
         } else {
             if (!PPT_TAG.equals(fullScreenKVO.getParameter())) {
