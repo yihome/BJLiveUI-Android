@@ -141,6 +141,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private SpeakerPresenter speakerPresenter;
     private RightMenuPresenter rightMenuPresenter;
     private PPTManagePresenter pptManagePresenter;
+    private SwitchPPTFragmentPresenter switchPPTFragmentPresenter;
     private ErrorFragment errorFragment;
     private GlobalPresenter globalPresenter;
     private PPTLeftFragment pptLeftFragment;
@@ -978,9 +979,18 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         args.putInt("currentIndex", currentIndex);
         args.putInt("maxIndex", maxIndex);
         quickSwitchPPTFragment.setArguments(args);
-        SwitchPPTFragmentPresenter switchPPTFragmentPresenter = new SwitchPPTFragmentPresenter(quickSwitchPPTFragment);
+        switchPPTFragmentPresenter = new SwitchPPTFragmentPresenter(quickSwitchPPTFragment);
         bindVP(quickSwitchPPTFragment, switchPPTFragmentPresenter);
         showDialogFragment(quickSwitchPPTFragment);
+    }
+
+    @Override
+    public void updateQuickSwitchPPTMaxIndex(int index) {
+        if(switchPPTFragmentPresenter != null){
+            switchPPTFragmentPresenter.notifyMaxIndexChange(index);
+        }else{
+            return;
+        }
     }
 
     @Override

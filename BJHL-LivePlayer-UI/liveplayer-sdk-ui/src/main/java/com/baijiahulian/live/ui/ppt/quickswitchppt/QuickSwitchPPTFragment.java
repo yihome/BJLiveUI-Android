@@ -32,6 +32,7 @@ public class QuickSwitchPPTFragment extends BaseDialogFragment implements Switch
     private SwitchPPTContract.Presenter presenter;
     private QueryPlus $;
     private List<LPDocListViewModel.DocModel> quickDocList = new ArrayList<>();
+    private List<LPDocListViewModel.DocModel> docModelList = new ArrayList<>();
     private QuickSwitchPPTAdapter adapter;
     private boolean isStudent = false;
     private int maxIndex;//学生可以快速滑动ppt的最大页数
@@ -64,9 +65,11 @@ public class QuickSwitchPPTFragment extends BaseDialogFragment implements Switch
     }
 
     public void initData() {
-        quickDocList = presenter.getDocList();
+        docModelList = presenter.getDocList();
         if(isStudent){
-            quickDocList = quickDocList.subList(0, maxIndex + 1);
+            quickDocList = docModelList.subList(0, maxIndex + 1);
+        }else{
+            quickDocList.addAll(docModelList);
         }
     }
 
@@ -89,14 +92,27 @@ public class QuickSwitchPPTFragment extends BaseDialogFragment implements Switch
     }
 
     @Override
+    public void setMaxIndex(int updateMaxIndex) {
+        this.maxIndex = updateMaxIndex;
+        if(isStudent){
+                quickDocList = docModelList.subList(0, maxIndex + 1);
+        }
+        adapter.notifyDataSetChanged();
+    }
+
+    @Override
     public void setType(boolean isStudent) {
         this.isStudent = isStudent;
     }
 
     @Override
     public void docListChanged(List<LPDocListViewModel.DocModel> docModelList) {
+        this.docModelList.clear();
+        this.docModelList.addAll(docModelList);
         if(isStudent){
             quickDocList = docModelList.subList(0, maxIndex + 1);
+        }else{
+            quickDocList.addAll(docModelList);
         }
         adapter.notifyDataSetChanged();
     }
