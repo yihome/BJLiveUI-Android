@@ -37,6 +37,8 @@ interface SpeakersContract {
         void notifyViewAdded(android.view.View view, int position);
 
         void showMaxVideoExceed();
+
+        void notifyPresenterVideoSizeChange(int position, int height, int width);
     }
 
     interface Presenter extends BasePresenter {

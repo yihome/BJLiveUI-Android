@@ -2,6 +2,7 @@ package com.baijiahulian.live.ui.speakerspanel;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -46,6 +47,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
     private LinearLayout container;
     private RecorderView recorderView;
     private ViewGroup.LayoutParams lpItem;
+    private static final int SHRINK_THRESHOLD = 3;
 
     @Override
     public int getLayoutId() {
@@ -200,7 +202,11 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
             default:
                 break;
         }
-        presenter.changeBackgroundContainerSize(container.getChildCount() > 3);
+        presenter.changeBackgroundContainerSize(container.getChildCount() >= SHRINK_THRESHOLD);
+        if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT
+                && container.getChildCount() > 0) {
+            setBackGroundVisible(true);
+        }
     }
 
     @Override
@@ -210,7 +216,11 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
             if (presenter.getRecorder().isVideoAttached())
                 presenter.getRecorder().detachVideo();
         }
-        presenter.changeBackgroundContainerSize(container.getChildCount() > 3);
+        presenter.changeBackgroundContainerSize(container.getChildCount() >= SHRINK_THRESHOLD);
+        if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT
+                && container.getChildCount() == 0) {
+            setBackGroundVisible(false);
+        }
     }
 
     @Override
@@ -225,7 +235,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
 
     @Override
     public void notifyViewAdded(View view, int position) {
-        if(view.getParent() != null) return;
+        if (view.getParent() != null) return;
         container.addView(view, position, lpItem);
         if (presenter.getPPTFragment().getView() == view) {
             presenter.getPPTFragment().onResume();
@@ -249,6 +259,13 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
     @Override
     public void showMaxVideoExceed() {
         showToast(getString(R.string.live_speakers_max_video_exceed));
+    }
+
+    @Override
+    public void notifyPresenterVideoSizeChange(int position, int height, int width) {
+        if (container.getChildAt(position) instanceof VideoView) {
+            ((VideoView) container.getChildAt(position)).resizeWaterMark(height, width);
+        }
     }
 
     private View generateApplyView(final IUserModel model) {
@@ -396,6 +413,20 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                 .show();
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            setBackGroundVisible(true);
+        } else {
+            if (container.getChildCount() > 3) {
+                setBackGroundVisible(true);
+            } else {
+                setBackGroundVisible(false);
+            }
+        }
+    }
+
     private Subscription subscriptionOfClickable;
 
     private boolean clickableCheck() {
@@ -409,5 +440,15 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
             }
         });
         return true;
+    }
+
+    public void setBackGroundVisible(boolean visible) {
+        if (visible) {
+            if (container.getChildCount() == 0)
+                return;
+            $.id(R.id.fragment_speakers_scroll_view).backgroundDrawable(ContextCompat.getDrawable(getContext(), R.drawable.live_bg_speaker));
+        } else {
+            $.id(R.id.fragment_speakers_scroll_view).backgroundDrawable(null);
+        }
     }
 }

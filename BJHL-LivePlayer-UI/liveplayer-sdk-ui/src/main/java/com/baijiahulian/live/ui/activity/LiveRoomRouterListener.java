@@ -159,4 +159,6 @@ public interface LiveRoomRouterListener {
     boolean checkCameraPermission();
 
     void attachLocalAudio();
+
+    void resizeFullScreenWaterMark(int height, int width);
 }

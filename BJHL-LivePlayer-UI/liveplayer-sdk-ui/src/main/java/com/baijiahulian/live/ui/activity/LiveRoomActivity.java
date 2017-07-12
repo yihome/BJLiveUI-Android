@@ -10,6 +10,7 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.SensorManager;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,10 +23,9 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.OrientationEventListener;
-import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -81,6 +81,7 @@ import com.baijiahulian.live.ui.share.LPShareDialog;
 import com.baijiahulian.live.ui.speakerspanel.RecorderView;
 import com.baijiahulian.live.ui.speakerspanel.SpeakerPresenter;
 import com.baijiahulian.live.ui.speakerspanel.SpeakersFragment;
+import com.baijiahulian.live.ui.speakerspanel.VideoView;
 import com.baijiahulian.live.ui.topbar.TopBarFragment;
 import com.baijiahulian.live.ui.topbar.TopBarPresenter;
 import com.baijiahulian.live.ui.users.OnlineUserDialogFragment;
@@ -553,14 +554,17 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         isBackgroundContainerShrink = isShrink;
 
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            speakersFragment.setBackGroundVisible(true);
             return;
         }
 
         RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) flBackground.getLayoutParams();
         if (isBackgroundContainerShrink) {
             lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_speakers_container);
+            speakersFragment.setBackGroundVisible(true);
         } else {
             lp.addRule(RelativeLayout.BELOW, 0);
+            speakersFragment.setBackGroundVisible(false);
         }
         flBackground.setLayoutParams(lp);
     }
@@ -574,6 +578,14 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         flBackground.removeView(view);
         setZOrderMediaOverlayTrue(view);
         return view;
+    }
+
+    @Override
+    public void resizeFullScreenWaterMark(int height, int width) {
+        View view = flBackground.getChildAt(0);
+        if (view instanceof VideoView) {
+            ((VideoView) view).resizeWaterMark(height, width);
+        }
     }
 
     @Override
@@ -809,6 +821,12 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public void navigateToMain() {
 
+        AudioManager mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        int current = mAudioManager.getStreamVolume(AudioManager.STREAM_VOICE_CALL);
+        if (current <= 1) {
+            liveRoom.getPlayer().mute();
+        }
+
         globalPresenter = new GlobalPresenter();
         globalPresenter.setRouter(this);
         globalPresenter.subscribe();
@@ -916,8 +934,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
         //成功进入房间后统一不再显示
         shouldShowTechSupport = false;
-
-
     }
 
     @Override
@@ -957,7 +973,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void navigateToQuickSwitchPPT(int currentIndex, int maxIndex) {
-        QuickSwitchPPTFragment quickSwitchPPTFragment =  QuickSwitchPPTFragment.newInstance();
+        QuickSwitchPPTFragment quickSwitchPPTFragment = QuickSwitchPPTFragment.newInstance();
         Bundle args = new Bundle();
         args.putInt("currentIndex", currentIndex);
         args.putInt("maxIndex", maxIndex);
@@ -1315,6 +1331,31 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         } else {
             tryToCloseCloudRecord();
             super.finish();
+        }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+            AudioManager mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+            int current = mAudioManager.getStreamVolume(AudioManager.STREAM_VOICE_CALL);
+            if (current > 1) {
+                liveRoom.getPlayer().unMute();
+            }
+            mAudioManager.adjustStreamVolume(AudioManager.STREAM_VOICE_CALL, AudioManager.ADJUST_RAISE,
+                    AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_SHOW_UI);
+            return true;
+        } else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+            AudioManager mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+            int current = mAudioManager.getStreamVolume(AudioManager.STREAM_VOICE_CALL);
+            if (current <= 1) {
+                liveRoom.getPlayer().mute();
+            }
+            mAudioManager.adjustStreamVolume(AudioManager.STREAM_VOICE_CALL, AudioManager.ADJUST_LOWER,
+                    AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_SHOW_UI);
+            return true;
+        } else {
+            return super.onKeyDown(keyCode, event);
         }
     }
 

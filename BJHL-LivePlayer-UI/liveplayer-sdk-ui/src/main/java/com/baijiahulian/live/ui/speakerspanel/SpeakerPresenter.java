@@ -10,6 +10,7 @@ import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.launch.LPEnterRoomNative;
 import com.baijiahulian.livecore.models.LPMediaModel;
 import com.baijiahulian.livecore.models.LPUserModel;
+import com.baijiahulian.livecore.models.LPVideoSizeModel;
 import com.baijiahulian.livecore.models.imodels.IMediaControlModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
@@ -66,7 +67,8 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
 
     private Subscription subscriptionOfMediaNew, subscriptionOfMediaChange, subscriptionOfMediaClose,
             subscriptionSpeakApply, subscriptionSpeakResponse, subscriptionOfActiveUser, subscriptionOfFullScreen,
-            subscriptionOfUserOut, subscriptionOfPresenterChange, subscriptionOfShareDesktopAndPlayMedia;
+            subscriptionOfUserOut, subscriptionOfPresenterChange, subscriptionOfShareDesktopAndPlayMedia,
+            subscriptionOfVideoSizeChange;
 
     public SpeakerPresenter(SpeakersContract.View view) {
         this.view = view;
@@ -95,7 +97,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
         _displayVideoSection = displayList.size();
         _displaySpeakerSection = displayList.size();
         for (IMediaModel model : routerListener.getLiveRoom().getSpeakQueueVM().getSpeakQueueList()) {
-            if (!model.getUser().getUserId().equals(routerListener.getLiveRoom().getPresenterUser().getUserId())) {
+            if (routerListener.getLiveRoom().getPresenterUser() == null || !model.getUser().getUserId().equals(routerListener.getLiveRoom().getPresenterUser().getUserId())) {
                 // exclude presenter
                 displayList.add(model.getUser().getUserId());
             }
@@ -290,6 +292,28 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                     }
                 });
 
+        subscriptionOfVideoSizeChange = routerListener.getLiveRoom().getPlayer().getObservableOfVideoSizeChange()
+                .onBackpressureBuffer()
+                .observeOn(AndroidSchedulers.mainThread())
+                .filter(new Func1<LPVideoSizeModel, Boolean>() {
+                    @Override
+                    public Boolean call(LPVideoSizeModel lpVideoSizeModel) {
+                        return routerListener.getLiveRoom().getPresenterUser() != null &&
+                                lpVideoSizeModel.userId.equals(routerListener.getLiveRoom().getPresenterUser().getUserId());
+                    }
+                })
+                .subscribe(new LPBackPressureBufferedSubscriber<LPVideoSizeModel>() {
+                    @Override
+                    public void call(LPVideoSizeModel lpVideoSizeModel) {
+                        if (fullScreenKVO.getParameter().equals(lpVideoSizeModel.userId)) {
+                            routerListener.resizeFullScreenWaterMark(lpVideoSizeModel.height, lpVideoSizeModel.width);
+                        } else if (displayList.indexOf(lpVideoSizeModel.userId) != -1) {
+                            view.notifyPresenterVideoSizeChange(displayList.indexOf(lpVideoSizeModel.userId),
+                                    lpVideoSizeModel.height, lpVideoSizeModel.width);
+                        }
+                    }
+                });
+
         subscriptionOfUserOut = routerListener.getLiveRoom().getObservableOfUserOut().observeOn(AndroidSchedulers.mainThread())
                 .filter(new Func1<String, Boolean>() {
                     @Override
@@ -460,6 +484,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
         RxUtils.unSubscribe(subscriptionOfFullScreen);
         RxUtils.unSubscribe(subscriptionOfUserOut);
         RxUtils.unSubscribe(subscriptionOfPresenterChange);
+        RxUtils.unSubscribe(subscriptionOfVideoSizeChange);
         RxUtils.unSubscribe(subscriptionOfShareDesktopAndPlayMedia);
     }
 

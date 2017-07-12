@@ -1,6 +1,8 @@
 package com.baijiahulian.live.ui.utils;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.support.v4.view.ViewCompat;
 import android.util.SparseArray;
 import android.view.View;
 import android.widget.ImageView;
@@ -52,6 +54,11 @@ public class QueryPlus extends Query {
 
     public QueryPlus background(int color) {
         view.setBackgroundColor(color);
+        return this;
+    }
+
+    public QueryPlus backgroundDrawable(Drawable drawable) {
+        ViewCompat.setBackground(view, drawable);
         return this;
     }
 }
