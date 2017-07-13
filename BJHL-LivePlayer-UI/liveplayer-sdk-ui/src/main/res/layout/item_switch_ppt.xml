@@ -7,12 +7,14 @@
     android:layout_marginTop="20dp"
     android:layout_marginBottom="20dp"
     android:layout_marginRight="5dp"
-    android:layout_marginLeft="5dp">
+    android:layout_marginLeft="5dp"
+    android:background="@drawable/btn_dialog_disagree">
     <ImageView
         android:id="@+id/item_ppt_view"
         android:layout_width="110dp"
         android:layout_height="83dp"
-        android:scaleType="centerCrop"/>
+        android:scaleType="centerCrop"
+        android:layout_margin="0.5dp"/>
 
     <TextView
         android:id="@+id/item_ppt_order"
@@ -21,7 +23,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:textColor="@color/live_white"
-        android:text="4"
+        android:textSize="9sp"
         android:gravity="center"
         android:background="@color/live_transparent_opacity_02"/>
 </RelativeLayout>

@@ -16,8 +16,8 @@ import android.widget.TextView;
 
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseDialogFragment;
+import com.baijiahulian.live.ui.utils.AliCloudImageUtil;
 import com.baijiahulian.live.ui.utils.QueryPlus;
-import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.viewmodels.impl.LPDocListViewModel;
 import com.squareup.picasso.Picasso;
 
@@ -97,6 +97,7 @@ public class QuickSwitchPPTFragment extends BaseDialogFragment implements Switch
         if(isStudent){
                 quickDocList = docModelList.subList(0, maxIndex + 1);
         }
+        ((RecyclerView) $.id(R.id.dialog_switch_ppt_rv).view()).smoothScrollToPosition(maxIndex);
         adapter.notifyDataSetChanged();
     }
 
@@ -127,19 +128,23 @@ public class QuickSwitchPPTFragment extends BaseDialogFragment implements Switch
 
         @Override
         public void onBindViewHolder(SwitchHolder holder, final int position) {
-            Picasso.with(getActivity()).load(quickDocList.get(position + 1).url).into(holder.PPTView);
-            holder.PPTOrder.setText(String.valueOf(position + 1));
+            Picasso.with(getActivity()).load(AliCloudImageUtil.getScaledUrl(quickDocList.get(position).url)).into(holder.PPTView);
+            if(position == 0){
+                holder.PPTOrder.setText("白板");
+            }else{
+                holder.PPTOrder.setText(String.valueOf(position));
+            }
             holder.PPTRL.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    presenter.setSwitchPosition(position + 1);
+                    presenter.setSwitchPosition(position);
                 }
             });
         }
 
         @Override
         public int getItemCount() {
-            return quickDocList.size() - 1;
+            return quickDocList.size();
         }
     }
 

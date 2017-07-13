@@ -21,6 +21,7 @@ public class AliCloudImageUtil {
      * @return
      */
     public static String getScaledUrl(String url) {
+        url = url.split("@")[0];
         if (url.endsWith(".jpg") || url.endsWith(".jpeg") || url.endsWith(".png") || url.endsWith(".webp")
                 || url.endsWith(".bmp") || url.endsWith(".gif")) {
             if (isFromAliCloud(url)) {
