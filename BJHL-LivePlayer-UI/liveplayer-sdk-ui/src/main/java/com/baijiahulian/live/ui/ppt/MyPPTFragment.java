@@ -2,7 +2,6 @@ package com.baijiahulian.live.ui.ppt;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 
 import com.baijiahulian.livecore.ppt.LPPPTFragment;
@@ -38,6 +37,12 @@ public class MyPPTFragment extends LPPPTFragment implements PPTContract.View {
                 }
             }
         });
+
+        if(presenter.getBackgroundContainer().getChildAt(0) == getView()){
+            mWhiteBoardView.setZOrderMediaOverlay(false);
+        }else{
+            mWhiteBoardView.setZOrderMediaOverlay(true);
+        }
 
 //        super.setOnDoubleTapListener(new LPWhiteBoardView.OnDoubleTapListener() {
 //            @Override

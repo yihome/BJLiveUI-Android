@@ -194,6 +194,9 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                 IMediaModel speakerModel = presenter.getSpeakModel(position);
                 View view = generateSpeakView(speakerModel);
                 container.addView(view, position);
+                if (speakerModel.isVideoOn()) {
+                    presenter.playVideo(speakerModel.getUser().getUserId());
+                }
                 break;
             case VIEW_TYPE_APPLY:
                 View applyView = generateApplyView(presenter.getApplyModel(position));
@@ -211,6 +214,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
 
     @Override
     public void notifyItemDeleted(int position) {
+        if(container.getChildCount() <= position) return;
         container.removeViewAt(position);
         if (presenter.getItemViewType(position) == VIEW_TYPE_RECORD) {
             if (presenter.getRecorder().isVideoAttached())

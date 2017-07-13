@@ -1,5 +1,7 @@
 package com.baijiahulian.live.ui.activity;
 
+import android.widget.FrameLayout;
+
 import com.baijiahulian.live.ui.ppt.MyPPTFragment;
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.context.LPError;
@@ -138,6 +140,8 @@ public interface LiveRoomRouterListener {
     void changeBackgroundContainerSize(boolean isShrink);
 
     android.view.View removeFullScreenView();
+
+    FrameLayout getBackgroundContainer();
 
     void setFullScreenView(android.view.View view);
 

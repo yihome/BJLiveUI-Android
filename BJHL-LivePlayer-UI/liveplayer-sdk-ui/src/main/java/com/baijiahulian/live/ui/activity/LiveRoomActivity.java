@@ -582,6 +582,11 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     }
 
     @Override
+    public FrameLayout getBackgroundContainer(){
+        return flBackground;
+    }
+
+    @Override
     public void resizeFullScreenWaterMark(int height, int width) {
         View view = flBackground.getChildAt(0);
         if (view instanceof VideoView) {
@@ -1349,7 +1354,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
             AudioManager mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
             int current = mAudioManager.getStreamVolume(AudioManager.STREAM_VOICE_CALL);
-            if (current > 1) {
+            if (current >= 1) {
                 liveRoom.getPlayer().unMute();
             }
             mAudioManager.adjustStreamVolume(AudioManager.STREAM_VOICE_CALL, AudioManager.ADJUST_RAISE,

@@ -1,5 +1,7 @@
 package com.baijiahulian.live.ui.ppt;
 
+import android.widget.FrameLayout;
+
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 
 /**
@@ -32,6 +34,11 @@ public class PPTPresenter implements PPTContract.Presenter {
     @Override
     public void updateQuickSwitchPPTView(int maxIndex) {
         routerListener.updateQuickSwitchPPTMaxIndex(maxIndex);
+    }
+
+    @Override
+    public FrameLayout getBackgroundContainer() {
+        return routerListener.getBackgroundContainer();
     }
 
     @Override

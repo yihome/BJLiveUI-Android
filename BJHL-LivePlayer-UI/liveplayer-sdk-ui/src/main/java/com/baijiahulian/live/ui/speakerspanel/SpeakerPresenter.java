@@ -274,6 +274,10 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                         // TODO: 2017/7/7 full screen
                         if (_displayPresenterSection == -1)
                             return;
+                        if (TextUtils.isEmpty(newPresenter)) {
+                            // presenter is null
+                            return;
+                        }
                         if (_displayPresenterSection < _displayVideoSection) {
                             String lastPresenter = displayList.get(_displayPresenterSection);
                             if (displayList.indexOf(newPresenter) < 0) {
@@ -373,13 +377,23 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
             subscriptionOfShareDesktopAndPlayMedia = routerListener.getLiveRoom().getObservableOfPlayMedia()
                     .mergeWith(routerListener.getLiveRoom().getObservableOfShareDesktop())
                     .observeOn(AndroidSchedulers.mainThread())
+                    .filter(new Func1<Boolean, Boolean>() {
+                        @Override
+                        public Boolean call(Boolean aBoolean) {
+                            return aBoolean &&
+                                    routerListener.getLiveRoom().getPresenterUser() != null &&
+                                    routerListener.getLiveRoom().getTeacherUser() != null &&
+                                    routerListener.getLiveRoom().getPresenterUser().getUserId().equals(
+                                            routerListener.getLiveRoom().getTeacherUser().getUserId());
+                        }
+                    })
                     .subscribe(new LPErrorPrintSubscriber<Boolean>() {
                         @Override
                         public void call(Boolean aBoolean) {
-                            checkNotNull(routerListener.getLiveRoom().getTeacherUser());
+                            if (routerListener.getLiveRoom().getTeacherUser() == null)
+                                return;
                             String teacherId = routerListener.getLiveRoom().getTeacherUser().getUserId();
-                            if (aBoolean
-                                    && displayList.indexOf(teacherId) >= _displayPresenterSection
+                            if (displayList.indexOf(teacherId) >= _displayPresenterSection
                                     && displayList.indexOf(teacherId) < _displaySpeakerSection
                                     && !fullScreenKVO.getParameter().equals(teacherId)) {
                                 fullScreenKVO.setParameter(teacherId);
