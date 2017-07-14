@@ -154,7 +154,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                         displayList.add(_displayApplySection, iMediaModel.getUser().getUserId());
                         _displayApplySection++;
                         view.notifyItemInserted(_displayApplySection - 1);
-                        if (iMediaModel.isVideoOn() )
+                        if (iMediaModel.isVideoOn())
                             playVideo(iMediaModel.getUser().getUserId());
                         printSections();
                     }
@@ -202,9 +202,12 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                         } else if (position < _displaySpeakerSection) { // 视频打开用户
                             if (!iMediaModel.isVideoOn()) { // 通知视频关闭
                                 view.notifyItemDeleted(position);
-                                routerListener.getLiveRoom().getPlayer().playAVClose(getItem(position));
-                                routerListener.getLiveRoom().getPlayer().playAudio(getItem(position));
+                                // core 处理了
+//                                routerListener.getLiveRoom().getPlayer().playAVClose(getItem(position));
+//                                routerListener.getLiveRoom().getPlayer().playAudio(getItem(position));
                                 String item = displayList.remove(position);
+//                                if (getSpeakModel(item) == null)
+//                                    return;
                                 displayList.add(_displayApplySection - 1, item);
                                 _displaySpeakerSection--;
                                 view.notifyItemInserted(_displayApplySection - 1);
@@ -810,6 +813,18 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
         }
         printSections();
     }
+
+    @Override
+    public boolean isStopPublish() {
+        return isStopPublish;
+    }
+
+    @Override
+    public void setIsStopPublish(boolean b) {
+        isStopPublish = b;
+    }
+
+    private boolean isStopPublish = false;
 
     public void detachVideo() {
         if (RECORD_TAG.equals(fullScreenKVO.getParameter())) {

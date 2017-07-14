@@ -600,6 +600,12 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     }
 
     @Override
+    public void setIsStopPublish(boolean b) {
+        if (speakerPresenter != null)
+            speakerPresenter.setIsStopPublish(true);
+    }
+
+    @Override
     public void setFullScreenView(View view) {
         setZOrderMediaOverlayFalse(view);
         flBackground.addView(view, lpBackground);

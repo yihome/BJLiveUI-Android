@@ -235,8 +235,10 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
         if (container.getChildCount() <= position) return;
         container.removeViewAt(position);
         if (presenter.getItemViewType(position) == VIEW_TYPE_RECORD) {
-            if (presenter.getRecorder().isVideoAttached())
+            if (presenter.getRecorder().isVideoAttached() && !presenter.isStopPublish()) {
                 presenter.getRecorder().detachVideo();
+                presenter.setIsStopPublish(false);
+            }
         }
         presenter.changeBackgroundContainerSize(container.getChildCount() >= SHRINK_THRESHOLD);
         if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT

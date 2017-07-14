@@ -89,5 +89,9 @@ interface SpeakersContract {
         boolean isAutoPlay();
 
         LPEnterRoomNative.LPWaterMark getWaterMark();
+
+        boolean isStopPublish();
+
+        void setIsStopPublish(boolean b);
     }
 }
