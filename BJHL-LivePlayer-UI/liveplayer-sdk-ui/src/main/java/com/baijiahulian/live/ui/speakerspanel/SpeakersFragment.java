@@ -95,15 +95,16 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
         if (presenter.getItemViewType(position) == VIEW_TYPE_SPEAKER) {
             container.removeViewAt(position);
             container.addView(generateSpeakView(presenter.getSpeakModel(position)), position);
-            if (presenter.getSpeakModel(position).isVideoOn()) {
-                presenter.playVideo(presenter.getSpeakModel(position).getUser().getUserId());
-            }
+
+//            if (presenter.getSpeakModel(position).isVideoOn()) {
+//                presenter.playVideo(presenter.getSpeakModel(position).getUser().getUserId());
+//            }
         } else if (presenter.getItemViewType(position) == VIEW_TYPE_PRESENTER) {
             IMediaModel model = presenter.getSpeakModel(position);
             container.removeViewAt(position);
             if (model == null) return;
             if (model.isVideoOn() && presenter.isAutoPlay()) {
-                VideoView videoView = new VideoView(getActivity(), model.getUser().getName(),
+                VideoView videoView = new VideoView(getActivity(), model.getUser().getName() + getString(R.string.live_presenter_hint),
                         presenter.getWaterMark().url, presenter.getWaterMark().pos);
                 container.addView(videoView, position, lpItem);
 
@@ -123,6 +124,21 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                 presenter.getPlayer().playAudio(presenter.getItem(position));
                 container.addView(generateSpeakView(presenter.getSpeakModel(position)), position);
             }
+        } else if (presenter.getItemViewType(position) == VIEW_TYPE_VIDEO_PLAY) {
+            container.removeViewAt(position);
+            IMediaModel model = presenter.getSpeakModel(position);
+            VideoView videoView = new VideoView(getActivity(), model.getUser().getName());
+            container.addView(videoView, position, lpItem);
+            final GestureDetector gestureDetector = new GestureDetector(getActivity(), new ClickGestureDetector(model.getUser().getUserId()));
+            videoView.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    gestureDetector.onTouchEvent(event);
+                    return true;
+                }
+            });
+            presenter.getPlayer().playAVClose(presenter.getItem(position));
+            presenter.getPlayer().playVideo(presenter.getItem(position), videoView.getSurfaceView());
         }
     }
 
@@ -135,7 +151,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
             case VIEW_TYPE_PRESENTER:
                 IMediaModel presenterSpeakModel = presenter.getSpeakModel(position);
                 if (presenterSpeakModel.isVideoOn()) {
-                    VideoView videoView = new VideoView(getActivity(), presenterSpeakModel.getUser().getName(),
+                    VideoView videoView = new VideoView(getActivity(), presenterSpeakModel.getUser().getName() + getString(R.string.live_presenter_hint),
                             presenter.getWaterMark().url, presenter.getWaterMark().pos);
                     container.addView(videoView, position, lpItem);
 
@@ -194,9 +210,11 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                 IMediaModel speakerModel = presenter.getSpeakModel(position);
                 View view = generateSpeakView(speakerModel);
                 container.addView(view, position);
-                if (speakerModel.isVideoOn()) {
-                    presenter.playVideo(speakerModel.getUser().getUserId());
-                }
+
+//                if (speakerModel.isVideoOn()) {
+//                    presenter.playVideo(speakerModel.getUser().getUserId());
+//                }
+
                 break;
             case VIEW_TYPE_APPLY:
                 View applyView = generateApplyView(presenter.getApplyModel(position));
@@ -214,7 +232,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
 
     @Override
     public void notifyItemDeleted(int position) {
-        if(container.getChildCount() <= position) return;
+        if (container.getChildCount() <= position) return;
         container.removeViewAt(position);
         if (presenter.getItemViewType(position) == VIEW_TYPE_RECORD) {
             if (presenter.getRecorder().isVideoAttached())
@@ -235,6 +253,21 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
         }
         container.removeView(view);
         return view;
+    }
+
+    public void pptResume() {
+        presenter.getPPTFragment().setOnSingleTapListener(new LPWhiteBoardView.OnSingleTapListener() {
+            @Override
+            public void onSingleTap(LPWhiteBoardView whiteBoardView) {
+                showOptionDialog(PPT_TAG);
+            }
+        });
+        presenter.getPPTFragment().setOnDoubleTapListener(new LPWhiteBoardView.OnDoubleTapListener() {
+            @Override
+            public void onDoubleTap(LPWhiteBoardView whiteBoardView) {
+                presenter.setFullScreenTag(PPT_TAG);
+            }
+        });
     }
 
     @Override

@@ -167,4 +167,6 @@ public interface LiveRoomRouterListener {
     void attachLocalAudio();
 
     void resizeFullScreenWaterMark(int height, int width);
+
+    void notifyPPTResumeInSpeakers();
 }

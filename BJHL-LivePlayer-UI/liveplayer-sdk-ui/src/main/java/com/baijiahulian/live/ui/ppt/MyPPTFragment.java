@@ -42,6 +42,7 @@ public class MyPPTFragment extends LPPPTFragment implements PPTContract.View {
             mWhiteBoardView.setZOrderMediaOverlay(false);
         }else{
             mWhiteBoardView.setZOrderMediaOverlay(true);
+            presenter.notifyPPTResumeInSpeakers();
         }
 
 //        super.setOnDoubleTapListener(new LPWhiteBoardView.OnDoubleTapListener() {

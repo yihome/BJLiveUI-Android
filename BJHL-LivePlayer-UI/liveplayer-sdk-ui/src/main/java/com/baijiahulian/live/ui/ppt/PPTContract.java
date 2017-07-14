@@ -17,8 +17,13 @@ interface PPTContract {
 
     interface Presenter extends BasePresenter {
         void clearScreen();
+
         void showQuickSwitchPPTView(int currentIndex, int maxIndex);
+
         void updateQuickSwitchPPTView(int maxIndex);
+
         FrameLayout getBackgroundContainer();
+
+        void notifyPPTResumeInSpeakers();
     }
 }

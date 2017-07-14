@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -61,16 +60,6 @@ public class QuickSwitchPPTFragment extends BaseDialogFragment implements Switch
         ((RecyclerView) $.id(R.id.dialog_switch_ppt_rv).view()).setAdapter(adapter);
         this.maxIndex = getArguments().getInt("maxIndex");
         this.currentIndex = getArguments().getInt("currentIndex");
-        initData();
-    }
-
-    public void initData() {
-        docModelList = presenter.getDocList();
-        if(isStudent){
-            quickDocList = docModelList.subList(0, maxIndex + 1);
-        }else{
-            quickDocList.addAll(docModelList);
-        }
     }
 
     @Override
@@ -84,6 +73,7 @@ public class QuickSwitchPPTFragment extends BaseDialogFragment implements Switch
     @Override
     public void setPresenter(SwitchPPTContract.Presenter presenter) {
         this.presenter = presenter;
+        super.setBasePresenter(presenter);
     }
 
     @Override
@@ -94,8 +84,8 @@ public class QuickSwitchPPTFragment extends BaseDialogFragment implements Switch
     @Override
     public void setMaxIndex(int updateMaxIndex) {
         this.maxIndex = updateMaxIndex;
-        if(isStudent){
-                quickDocList = docModelList.subList(0, maxIndex + 1);
+        if (isStudent) {
+            quickDocList = docModelList.subList(0, maxIndex + 1);
         }
         ((RecyclerView) $.id(R.id.dialog_switch_ppt_rv).view()).smoothScrollToPosition(maxIndex);
         adapter.notifyDataSetChanged();
@@ -110,34 +100,36 @@ public class QuickSwitchPPTFragment extends BaseDialogFragment implements Switch
     public void docListChanged(List<LPDocListViewModel.DocModel> docModelList) {
         this.docModelList.clear();
         this.docModelList.addAll(docModelList);
-        if(isStudent){
-            quickDocList = docModelList.subList(0, maxIndex + 1);
-        }else{
+        if (isStudent) {
+            if (maxIndex > docModelList.size())
+                quickDocList.addAll(docModelList);
+            else
+                quickDocList.addAll(docModelList.subList(0, maxIndex + 1));
+        } else {
             quickDocList.addAll(docModelList);
         }
         adapter.notifyDataSetChanged();
     }
 
-    class QuickSwitchPPTAdapter extends RecyclerView.Adapter<SwitchHolder> {
+    private class QuickSwitchPPTAdapter extends RecyclerView.Adapter<SwitchHolder> {
 
         @Override
         public SwitchHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            SwitchHolder holder = new SwitchHolder(LayoutInflater.from(getActivity()).inflate(R.layout.item_switch_ppt, parent, false));
-            return holder;
+            return new SwitchHolder(LayoutInflater.from(getActivity()).inflate(R.layout.item_switch_ppt, parent, false));
         }
 
         @Override
-        public void onBindViewHolder(SwitchHolder holder, final int position) {
+        public void onBindViewHolder(final SwitchHolder holder, int position) {
             Picasso.with(getActivity()).load(AliCloudImageUtil.getScaledUrl(quickDocList.get(position).url)).into(holder.PPTView);
-            if(position == 0){
+            if (position == 0) {
                 holder.PPTOrder.setText("白板");
-            }else{
+            } else {
                 holder.PPTOrder.setText(String.valueOf(position));
             }
             holder.PPTRL.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    presenter.setSwitchPosition(position);
+                    presenter.setSwitchPosition(holder.getAdapterPosition());
                 }
             });
         }
@@ -153,7 +145,7 @@ public class QuickSwitchPPTFragment extends BaseDialogFragment implements Switch
         TextView PPTOrder;
         RelativeLayout PPTRL;
 
-        public SwitchHolder(View itemView) {
+        SwitchHolder(View itemView) {
             super(itemView);
             this.PPTView = (ImageView) itemView.findViewById(R.id.item_ppt_view);
             this.PPTOrder = (TextView) itemView.findViewById(R.id.item_ppt_order);

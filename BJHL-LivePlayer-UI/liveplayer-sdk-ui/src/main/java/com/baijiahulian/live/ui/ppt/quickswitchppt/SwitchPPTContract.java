@@ -9,18 +9,18 @@ import java.util.List;
 /**
  * Created by bjhl on 17/7/4.
  */
-
-public class SwitchPPTContract {
-    interface View extends BaseView<Presenter>{
+class SwitchPPTContract {
+    interface View extends BaseView<Presenter> {
         void setIndex();
+
         void setMaxIndex(int maxIndex);
+
         void setType(boolean isStudent);
+
         void docListChanged(List<LPDocListViewModel.DocModel> docModelList);
     }
 
-    interface Presenter extends BasePresenter{
-        List<LPDocListViewModel.DocModel> getDocList();
+    interface Presenter extends BasePresenter {
         void setSwitchPosition(int position);
-        void notifyMaxIndexChange(int maxIndex);
     }
 }

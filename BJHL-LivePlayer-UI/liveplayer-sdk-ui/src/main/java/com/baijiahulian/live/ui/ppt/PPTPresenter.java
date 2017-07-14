@@ -42,6 +42,11 @@ public class PPTPresenter implements PPTContract.Presenter {
     }
 
     @Override
+    public void notifyPPTResumeInSpeakers() {
+        routerListener.notifyPPTResumeInSpeakers();
+    }
+
+    @Override
     public void setRouter(LiveRoomRouterListener liveRoomRouterListener) {
         routerListener = liveRoomRouterListener;
     }

@@ -582,7 +582,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     }
 
     @Override
-    public FrameLayout getBackgroundContainer(){
+    public FrameLayout getBackgroundContainer() {
         return flBackground;
     }
 
@@ -592,6 +592,11 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         if (view instanceof VideoView) {
             ((VideoView) view).resizeWaterMark(height, width);
         }
+    }
+
+    @Override
+    public void notifyPPTResumeInSpeakers() {
+        speakersFragment.pptResume();
     }
 
     @Override
@@ -991,10 +996,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void updateQuickSwitchPPTMaxIndex(int index) {
-        if(switchPPTFragmentPresenter != null){
+        if (switchPPTFragmentPresenter != null) {
             switchPPTFragmentPresenter.notifyMaxIndexChange(index);
-        }else{
-            return;
         }
     }
 

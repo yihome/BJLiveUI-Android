@@ -278,8 +278,11 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                             // presenter is null
                             return;
                         }
-                        if (_displayPresenterSection < _displayVideoSection) {
+                        if (_displayPresenterSection < _displayRecordSection) {
                             String lastPresenter = displayList.get(_displayPresenterSection);
+                            if (TextUtils.isEmpty(lastPresenter)) {
+                                return;
+                            }
                             if (displayList.indexOf(newPresenter) < 0) {
                                 displayList.set(_displayPresenterSection, newPresenter);
                                 displayList.add(_displayApplySection - 1, lastPresenter);
@@ -287,12 +290,39 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                                 view.notifyItemChanged(_displayPresenterSection);
                                 view.notifyItemInserted(_displayApplySection - 1);
                             } else {
+                                // new presenter origin index
+                                int switchIndex = displayList.indexOf(newPresenter);
+                                getPlayer().playAVClose(newPresenter);
+                                getPlayer().playAVClose(lastPresenter);
                                 displayList.set(_displayPresenterSection, newPresenter);
-                                displayList.set(displayList.indexOf(newPresenter), lastPresenter);
                                 view.notifyItemChanged(_displayPresenterSection);
-                                view.notifyItemChanged(displayList.indexOf(newPresenter));
+                                view.notifyItemDeleted(switchIndex);
+                                IMediaModel lastSpeakModel = getSpeakModel(lastPresenter);
+                                boolean needToAdd = lastSpeakModel.isVideoOn() || lastSpeakModel.isAudioOn();
+                                displayList.remove(switchIndex);
+                                if (needToAdd) {
+                                    if (switchIndex < _displaySpeakerSection) {
+                                        _displaySpeakerSection--;
+                                        _displayApplySection--;
+                                    } else if (switchIndex < _displayApplySection) {
+                                        _displayApplySection--;
+                                    }
+                                    displayList.add(_displayApplySection, lastPresenter);
+                                    if (lastSpeakModel.isAudioOn())
+                                        getPlayer().playAudio(lastPresenter);
+                                    _displayApplySection++;
+                                    view.notifyItemInserted(_displayApplySection - 1);
+                                } else {
+                                    if (switchIndex < _displaySpeakerSection) {
+                                        _displaySpeakerSection--;
+                                        _displayApplySection--;
+                                    } else if (switchIndex < _displayApplySection) {
+                                        _displayApplySection--;
+                                    }
+                                }
                             }
                         }
+                        printSections();
                     }
                 });
 

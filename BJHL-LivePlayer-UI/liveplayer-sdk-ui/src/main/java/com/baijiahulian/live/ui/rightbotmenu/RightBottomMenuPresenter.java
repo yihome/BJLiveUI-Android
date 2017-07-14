@@ -110,7 +110,6 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
                 view.showZoomIn();
             }
         }
-
     }
 
     @Override
