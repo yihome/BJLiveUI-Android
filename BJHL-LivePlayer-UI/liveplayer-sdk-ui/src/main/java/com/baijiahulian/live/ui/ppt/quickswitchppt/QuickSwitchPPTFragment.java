@@ -84,8 +84,9 @@ public class QuickSwitchPPTFragment extends BaseDialogFragment implements Switch
     @Override
     public void setMaxIndex(int updateMaxIndex) {
         this.maxIndex = updateMaxIndex;
+        this.quickDocList.clear();
         if (isStudent) {
-            quickDocList = docModelList.subList(0, maxIndex + 1);
+            quickDocList.addAll(docModelList.subList(0, maxIndex + 1));
         }
         ((RecyclerView) $.id(R.id.dialog_switch_ppt_rv).view()).smoothScrollToPosition(maxIndex);
         adapter.notifyDataSetChanged();
@@ -98,13 +99,15 @@ public class QuickSwitchPPTFragment extends BaseDialogFragment implements Switch
 
     @Override
     public void docListChanged(List<LPDocListViewModel.DocModel> docModelList) {
+        this.quickDocList.clear();
         this.docModelList.clear();
         this.docModelList.addAll(docModelList);
         if (isStudent) {
             if (maxIndex > docModelList.size())
                 quickDocList.addAll(docModelList);
-            else
+            else{
                 quickDocList.addAll(docModelList.subList(0, maxIndex + 1));
+            }
         } else {
             quickDocList.addAll(docModelList);
         }
