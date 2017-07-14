@@ -133,6 +133,8 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                 .subscribe(new LPErrorPrintSubscriber<IMediaModel>() {
                     @Override
                     public void call(IMediaModel iMediaModel) {
+                        if (!iMediaModel.isVideoOn() && !iMediaModel.isAudioOn())
+                            return; // 兼容iOS下课发media_publish
                         if (routerListener.getLiveRoom().getPresenterUser() != null
                                 && iMediaModel.getUser().getUserId().equals(routerListener.getLiveRoom().getPresenterUser().getUserId())) {
                             if (_displayPresenterSection < displayList.size() &&
@@ -331,6 +333,13 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                                     }
                                 }
                             }
+                        } else {
+                            displayList.add(_displayPresenterSection, newPresenter);
+                            _displayRecordSection++;
+                            _displaySpeakerSection++;
+                            _displayVideoSection++;
+                            _displayApplySection++;
+                            view.notifyItemInserted(_displayPresenterSection);
                         }
                         printSections();
                     }
@@ -488,7 +497,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
 
                             int position = -1;
                             if (!TextUtils.isEmpty(lastTag)) {
-                                if (PPT_TAG.equals(lastTag)) {
+                                if (PPT_TAG.equals(lastTag) && !isEmptyPPT) {
                                     position = 0;
                                     displayList.add(0, PPT_TAG);
                                     _displayPresenterSection++;
@@ -518,8 +527,11 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                                 }
                             }
 
-                            if (!TextUtils.isEmpty(lastTag))
-                                view.notifyViewAdded(view1, position);
+                            if (!TextUtils.isEmpty(lastTag)) {
+                                if (!PPT_TAG.equals(lastTag) || !isEmptyPPT) {
+                                    view.notifyViewAdded(view1, position);
+                                }
+                            }
                             routerListener.setFullScreenView(view2);
                         }
                         printSections();
@@ -687,11 +699,6 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
     public void closeSpeaking(String userId) {
         int position = displayList.indexOf(userId);
         if (position == -1) return;
-//        if (speakList.get(position - applyList.size()).getUser().getUserId().equals(routerListener.getCurrentVideoPlayingUserId())) {
-//            routerListener.playVideoClose(speakList.get(position - applyList.size()).getUser().getUserId());
-//            if (!routerListener.isCurrentUserTeacher())
-//                routerListener.setVideoManipulated(true);
-//        }
         routerListener.getLiveRoom().getSpeakQueueVM().closeOtherSpeak(userId);
     }
 
@@ -818,27 +825,27 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
     }
 
     public void notifyEmptyPPTStatus(Boolean isEmpty) {
-//        if (isEmptyPPT == isEmpty) return;
-//        isEmptyPPT = isEmpty;
-//        if (isEmpty) {
-//            if (displayList.indexOf(PPT_TAG) >= 0) {
-//                _displayPresenterSection--;
-//                _displayRecordSection--;
-//                _displayVideoSection--;
-//                _displaySpeakerSection--;
-//                _displayApplySection--;
-//                view.removeViewAt(displayList.indexOf(PPT_TAG));
-//            }
-//        } else {
-//            if (!PPT_TAG.equals(fullScreenKVO.getParameter())) {
-//                _displayPresenterSection++;
-//                _displayRecordSection++;
-//                _displayVideoSection++;
-//                _displaySpeakerSection++;
-//                _displayApplySection++;
-//                view.notifyViewAdded(getPPTFragment().getView(), 0);
-//            }
-//        }
+        if (isEmptyPPT == isEmpty) return;
+        isEmptyPPT = isEmpty;
+        if (isEmptyPPT) {
+            if (displayList.indexOf(PPT_TAG) >= 0) {
+                _displayPresenterSection--;
+                _displayRecordSection--;
+                _displayVideoSection--;
+                _displaySpeakerSection--;
+                _displayApplySection--;
+                view.removeViewAt(displayList.indexOf(PPT_TAG));
+            }
+        } else {
+            if (!PPT_TAG.equals(fullScreenKVO.getParameter())) {
+                _displayPresenterSection++;
+                _displayRecordSection++;
+                _displayVideoSection++;
+                _displaySpeakerSection++;
+                _displayApplySection++;
+                view.notifyViewAdded(getPPTFragment().getView(), 0);
+            }
+        }
     }
 
     private void printSections() {
