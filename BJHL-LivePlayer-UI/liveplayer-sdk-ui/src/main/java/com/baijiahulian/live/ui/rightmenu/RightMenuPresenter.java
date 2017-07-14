@@ -72,12 +72,11 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
             return;
         }
 
-        if (liveRoomRouterListener.getLiveRoom().getForbidRaiseHandStatus()) {
-            view.showHandUpForbid();
-            return;
-        }
-
         if (speakApplyStatus == RightMenuContract.STUDENT_SPEAK_APPLY_NONE) {
+            if (liveRoomRouterListener.getLiveRoom().getForbidRaiseHandStatus()) {
+                view.showHandUpForbid();
+                return;
+            }
             liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().requestSpeakApply();
             speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_APPLYING;
             view.showWaitingTeacherAgree();
@@ -206,7 +205,13 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                                 liveRoomRouterListener.getLiveRoom().getRecorder().publish();
                                 liveRoomRouterListener.attachLocalAudio();
                                 if (liveRoomRouterListener.getLiveRoom().getAutoOpenCameraStatus()) {
-                                    liveRoomRouterListener.attachLocalVideo();
+                                    Observable.timer(1, TimeUnit.SECONDS).observeOn(AndroidSchedulers.mainThread())
+                                            .subscribe(new LPErrorPrintSubscriber<Long>() {
+                                                @Override
+                                                public void call(Long aLong) {
+                                                    liveRoomRouterListener.attachLocalVideo();
+                                                }
+                                            });
                                 }
                             } else {
                                 RxUtils.unSubscribe(subscriptionOfSpeakApplyCounter);
