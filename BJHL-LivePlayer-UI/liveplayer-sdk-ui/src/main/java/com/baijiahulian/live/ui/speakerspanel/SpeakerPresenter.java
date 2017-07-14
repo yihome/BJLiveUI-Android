@@ -152,6 +152,8 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                         displayList.add(_displayApplySection, iMediaModel.getUser().getUserId());
                         _displayApplySection++;
                         view.notifyItemInserted(_displayApplySection - 1);
+                        if (iMediaModel.isVideoOn())
+                            playVideo(iMediaModel.getUser().getUserId());
                         printSections();
                     }
                 });
@@ -207,6 +209,8 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                             }
                         } else if (position < _displayApplySection) { // 视频未打开用户
                             view.notifyItemChanged(position);
+                            if (iMediaModel.isVideoOn())
+                                playVideo(iMediaModel.getUser().getUserId());
                         } else {
                             throw new RuntimeException("position > _displayApplySection");
                         }
@@ -285,7 +289,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                             }
                             if (displayList.indexOf(newPresenter) < 0) {
                                 displayList.set(_displayPresenterSection, newPresenter);
-                                displayList.add(_displayApplySection - 1, lastPresenter);
+                                displayList.add(_displayApplySection, lastPresenter);
                                 _displayApplySection++;
                                 view.notifyItemChanged(_displayPresenterSection);
                                 view.notifyItemInserted(_displayApplySection - 1);
@@ -298,7 +302,13 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                                 view.notifyItemChanged(_displayPresenterSection);
                                 view.notifyItemDeleted(switchIndex);
                                 IMediaModel lastSpeakModel = getSpeakModel(lastPresenter);
-                                boolean needToAdd = lastSpeakModel.isVideoOn() || lastSpeakModel.isAudioOn();
+
+                                boolean needToAdd;
+                                if (lastSpeakModel == null) {
+                                    needToAdd = false;
+                                } else {
+                                    needToAdd = lastSpeakModel.isVideoOn() || lastSpeakModel.isAudioOn();
+                                }
                                 displayList.remove(switchIndex);
                                 if (needToAdd) {
                                     if (switchIndex < _displaySpeakerSection) {
@@ -564,16 +574,6 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
     }
 
     @Override
-    public IMediaModel getSpeakModel(String userId) {
-        for (IMediaModel model : routerListener.getLiveRoom().getSpeakQueueVM().getSpeakQueueList()) {
-            if (model.getUser().getUserId().equals(userId)) {
-                return model;
-            }
-        }
-        return null;
-    }
-
-    @Override
     public LPRecorder getRecorder() {
         return routerListener.getLiveRoom().getRecorder();
     }
@@ -595,8 +595,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
     }
 
     @Override
-    public IMediaModel getSpeakModel(int position) {
-        String userId = displayList.get(position);
+    public IMediaModel getSpeakModel(String userId) {
         for (IMediaModel model : routerListener.getLiveRoom().getSpeakQueueVM().getSpeakQueueList()) {
             if (model.getUser().getUserId().equals(userId)) {
                 return model;
@@ -610,6 +609,12 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
             return model;
         }
         return null;
+    }
+
+    @Override
+    public IMediaModel getSpeakModel(int position) {
+        String userId = displayList.get(position);
+        return getSpeakModel(userId);
     }
 
     @Override
@@ -813,27 +818,27 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
     }
 
     public void notifyEmptyPPTStatus(Boolean isEmpty) {
-        if (isEmptyPPT == isEmpty) return;
-        isEmptyPPT = isEmpty;
-        if (isEmpty) {
-            if (displayList.indexOf(PPT_TAG) >= 0) {
-                _displayPresenterSection--;
-                _displayRecordSection--;
-                _displayVideoSection--;
-                _displaySpeakerSection--;
-                _displayApplySection--;
-                view.removeViewAt(displayList.indexOf(PPT_TAG));
-            }
-        } else {
-            if (!PPT_TAG.equals(fullScreenKVO.getParameter())) {
-                _displayPresenterSection++;
-                _displayRecordSection++;
-                _displayVideoSection++;
-                _displaySpeakerSection++;
-                _displayApplySection++;
-                view.notifyViewAdded(getPPTFragment().getView(), 0);
-            }
-        }
+//        if (isEmptyPPT == isEmpty) return;
+//        isEmptyPPT = isEmpty;
+//        if (isEmpty) {
+//            if (displayList.indexOf(PPT_TAG) >= 0) {
+//                _displayPresenterSection--;
+//                _displayRecordSection--;
+//                _displayVideoSection--;
+//                _displaySpeakerSection--;
+//                _displayApplySection--;
+//                view.removeViewAt(displayList.indexOf(PPT_TAG));
+//            }
+//        } else {
+//            if (!PPT_TAG.equals(fullScreenKVO.getParameter())) {
+//                _displayPresenterSection++;
+//                _displayRecordSection++;
+//                _displayVideoSection++;
+//                _displaySpeakerSection++;
+//                _displayApplySection++;
+//                view.notifyViewAdded(getPPTFragment().getView(), 0);
+//            }
+//        }
     }
 
     private void printSections() {

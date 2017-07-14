@@ -328,8 +328,11 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
     private View generateSpeakView(final IMediaModel model) {
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.item_speak_speaker, container, false);
         QueryPlus q = QueryPlus.with(view);
+        if (presenter.getItemViewType(model.getUser().getUserId()) == VIEW_TYPE_PRESENTER)
+            q.id(R.id.item_speak_speaker_name).text(model.getUser().getName() + getString(R.string.live_presenter_hint));
+        else
+            q.id(R.id.item_speak_speaker_name).text(model.getUser().getName());
         q.id(R.id.item_speak_speaker_avatar).image(getActivity(), model.getUser().getAvatar());
-        q.id(R.id.item_speak_speaker_name).text(model.getUser().getName());
         q.id(R.id.item_speak_speaker_video_label).visibility(model.isVideoOn() ? View.VISIBLE : View.GONE);
         q.contentView().setOnClickListener(new View.OnClickListener() {
             @Override
