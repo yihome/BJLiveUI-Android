@@ -39,6 +39,8 @@ interface SpeakersContract {
         void showMaxVideoExceed();
 
         void notifyPresenterVideoSizeChange(int position, int height, int width);
+
+        void notifyFullScreenPresenterStatusChange(int position, boolean b);
     }
 
     interface Presenter extends BasePresenter {

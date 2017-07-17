@@ -171,4 +171,6 @@ public interface LiveRoomRouterListener {
     void notifyPPTResumeInSpeakers();
 
     void setIsStopPublish(boolean b);
+
+    void notifyFullScreenPresenterStatusChange(String id, boolean isPresenter);
 }

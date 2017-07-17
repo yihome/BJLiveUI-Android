@@ -606,6 +606,14 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     }
 
     @Override
+    public void notifyFullScreenPresenterStatusChange(String id, boolean isPresenter) {
+//        View view = flBackground.getChildAt(0);
+//        if (view instanceof VideoView) {
+//            ((VideoView) view).setIsPresenter(isPresenter);
+//        }
+    }
+
+    @Override
     public void setFullScreenView(View view) {
         setZOrderMediaOverlayFalse(view);
         flBackground.addView(view, lpBackground);

@@ -115,6 +115,28 @@ public class VideoView extends FrameLayout {
         }
     }
 
+//    public void setIsPresenter(boolean isPresenter) {
+//        String hint = getContext().getString(R.string.live_presenter_hint);
+//        if (!isPresenter) {
+//            waterMarkUrl = null;
+//            if (name.contains(hint)) {
+//                name = name.substring(0, name.indexOf(hint));
+//                tvName.setText(name);
+//            }
+//            for (int i = 0; i < this.getChildCount(); i++) {
+//                if (this.getChildAt(i) == ivWaterMark) {
+//                    this.removeViewAt(i);
+//                    break;
+//                }
+//            }
+//        } else {
+//            if (!name.contains(hint)) {
+//                name = name + hint;
+//                tvName.setText(name);
+//            }
+//        }
+//    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);

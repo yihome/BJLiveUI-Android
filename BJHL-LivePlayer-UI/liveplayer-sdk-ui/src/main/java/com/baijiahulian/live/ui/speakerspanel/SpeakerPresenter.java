@@ -13,6 +13,7 @@ import com.baijiahulian.livecore.models.LPUserModel;
 import com.baijiahulian.livecore.models.LPVideoSizeModel;
 import com.baijiahulian.livecore.models.imodels.IMediaControlModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
+import com.baijiahulian.livecore.models.imodels.IUserInModel;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
 import com.baijiahulian.livecore.utils.LPBackPressureBufferedSubscriber;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
@@ -64,11 +65,12 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
     private int _displayVideoSection = -1;     //视频发言分段
     private int _displaySpeakerSection = -1;   //未开视频发言分段
     private int _displayApplySection = -1;     //请求发言用户分段
+    private IUserModel tempUserIn;
 
     private Subscription subscriptionOfMediaNew, subscriptionOfMediaChange, subscriptionOfMediaClose,
             subscriptionSpeakApply, subscriptionSpeakResponse, subscriptionOfActiveUser, subscriptionOfFullScreen,
             subscriptionOfUserOut, subscriptionOfPresenterChange, subscriptionOfShareDesktopAndPlayMedia,
-            subscriptionOfVideoSizeChange;
+            subscriptionOfVideoSizeChange, subscriptionOfUserIn;
 
     public SpeakerPresenter(SpeakersContract.View view) {
         this.view = view;
@@ -206,8 +208,6 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
 //                                routerListener.getLiveRoom().getPlayer().playAVClose(getItem(position));
 //                                routerListener.getLiveRoom().getPlayer().playAudio(getItem(position));
                                 String item = displayList.remove(position);
-//                                if (getSpeakModel(item) == null)
-//                                    return;
                                 displayList.add(_displayApplySection - 1, item);
                                 _displaySpeakerSection--;
                                 view.notifyItemInserted(_displayApplySection - 1);
@@ -228,7 +228,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                 .subscribe(new LPErrorPrintSubscriber<IMediaModel>() {
                     @Override
                     public void call(IMediaModel iMediaModel) {
-                        if (fullScreenKVO.getParameter().equals(iMediaModel.getUser().getUserId())) {
+                        if (iMediaModel.getUser().getUserId().equals(fullScreenKVO.getParameter())) {
                             // full screen user
                             fullScreenKVO.setParameter(null);
                             if (routerListener.getLiveRoom().getPresenterUser() != null
@@ -275,18 +275,56 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                     }
                 });
 
+        subscriptionOfUserIn = routerListener.getLiveRoom().getObservableOfUserIn().observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<IUserInModel>() {
+                    @Override
+                    public void call(IUserInModel iUserInModel) {
+                        tempUserIn = iUserInModel.getUser();
+                    }
+                });
+
         subscriptionOfPresenterChange = routerListener.getLiveRoom().getSpeakQueueVM().getObservableOfPresenterChange()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new LPErrorPrintSubscriber<String>() {
                     @Override
                     public void call(String newPresenter) {
-                        // TODO: 2017/7/7 full screen
                         if (_displayPresenterSection == -1)
                             return;
                         if (TextUtils.isEmpty(newPresenter)) {
                             // presenter is null
                             return;
                         }
+
+                        if (!PPT_TAG.equals(fullScreenKVO.getParameter())) {
+                            View ppt = view.removeViewAt(displayList.indexOf(PPT_TAG));
+                            View fullScreenView = routerListener.removeFullScreenView();
+                            String fullId = fullScreenKVO.getParameter();
+                            displayList.remove(PPT_TAG);
+                            _displaySpeakerSection--;
+                            _displayPresenterSection--;
+                            _displayVideoSection--;
+                            _displayRecordSection--;
+                            _displayApplySection--;
+//                            getPlayer().playAVClose(fullId);
+                            if (_displayPresenterSection < _displayRecordSection) {
+                                // 旧主讲在列表，全屏换下来到video section
+                                displayList.add(_displaySpeakerSection, fullId);
+                                _displaySpeakerSection++;
+                                _displayApplySection++;
+                                view.notifyViewAdded(fullScreenView, _displaySpeakerSection - 1);
+                            } else {
+                                // 旧主讲在全屏，换下来到presenter section
+                                displayList.add(_displayPresenterSection, fullId);
+                                _displayRecordSection++;
+                                _displayVideoSection++;
+                                _displaySpeakerSection++;
+                                _displayApplySection++;
+                                view.notifyViewAdded(fullScreenView, _displayPresenterSection);
+                            }
+                            routerListener.setFullScreenView(ppt);
+                            fullScreenKVO.setParameterWithoutNotify(PPT_TAG);
+                        }
+
                         if (_displayPresenterSection < _displayRecordSection) {
                             String lastPresenter = displayList.get(_displayPresenterSection);
                             if (TextUtils.isEmpty(lastPresenter)) {
@@ -373,7 +411,9 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                     }
                 });
 
-        subscriptionOfUserOut = routerListener.getLiveRoom().getObservableOfUserOut().observeOn(AndroidSchedulers.mainThread())
+        subscriptionOfUserOut = routerListener.getLiveRoom()
+                .getObservableOfUserOut()
+                .observeOn(AndroidSchedulers.mainThread())
                 .filter(new Func1<String, Boolean>() {
                     @Override
                     public Boolean call(String s) {
@@ -400,62 +440,41 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                     }
                 });
 
-        if (routerListener.isTeacherOrAssistant()) {
-
-            subscriptionSpeakApply = routerListener.getLiveRoom().getSpeakQueueVM().getObservableOfSpeakApply()
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new LPErrorPrintSubscriber<IMediaModel>() {
-                        @Override
-                        public void call(IMediaModel iMediaModel) {
-                            displayList.add(iMediaModel.getUser().getUserId());
-                            view.notifyItemInserted(displayList.size() - 1);
+        subscriptionOfShareDesktopAndPlayMedia = routerListener.getLiveRoom().
+                getObservableOfPlayMedia().mergeWith(routerListener.getLiveRoom().
+                getObservableOfShareDesktop())
+                .filter(new Func1<Boolean, Boolean>() {
+                    @Override
+                    public Boolean call(Boolean aBoolean) {
+                        // 不是老师都自动全屏
+                        return routerListener.getLiveRoom().getCurrentUser() != null
+                                && routerListener.getLiveRoom().getCurrentUser().getType() != LPConstants.LPUserType.Teacher;
+                    }
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .filter(new Func1<Boolean, Boolean>() {
+                    @Override
+                    public Boolean call(Boolean aBoolean) {
+                        return aBoolean &&
+                                routerListener.getLiveRoom().getPresenterUser() != null &&
+                                routerListener.getLiveRoom().getTeacherUser() != null &&
+                                routerListener.getLiveRoom().getPresenterUser().getUserId().equals(
+                                        routerListener.getLiveRoom().getTeacherUser().getUserId());
+                    }
+                })
+                .subscribe(new LPErrorPrintSubscriber<Boolean>() {
+                    @Override
+                    public void call(Boolean aBoolean) {
+                        if (routerListener.getLiveRoom().getTeacherUser() == null)
+                            return;
+                        String teacherId = routerListener.getLiveRoom().getTeacherUser().getUserId();
+                        if (displayList.indexOf(teacherId) >= _displayPresenterSection
+                                && displayList.indexOf(teacherId) < _displaySpeakerSection
+                                && !fullScreenKVO.getParameter().equals(teacherId)) {
+                            fullScreenKVO.setParameter(teacherId);
                         }
-                    });
-
-            subscriptionSpeakResponse = routerListener.getLiveRoom().getSpeakQueueVM().getObservableOfSpeakResponse()
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new LPErrorPrintSubscriber<IMediaControlModel>() {
-                        @Override
-                        public void call(IMediaControlModel iMediaControlModel) {
-                            int position = displayList.indexOf(iMediaControlModel.getUser().getUserId());
-                            if (position < _displayApplySection) {
-                                throw new RuntimeException("position < _displayApplySection");
-                            } else if (position < displayList.size()) {
-                                view.notifyItemDeleted(position);
-                                displayList.remove(position);
-                            } else {
-                                throw new RuntimeException("position > displayList.size()");
-                            }
-                        }
-                    });
-        } else {
-            subscriptionOfShareDesktopAndPlayMedia = routerListener.getLiveRoom().getObservableOfPlayMedia()
-                    .mergeWith(routerListener.getLiveRoom().getObservableOfShareDesktop())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .filter(new Func1<Boolean, Boolean>() {
-                        @Override
-                        public Boolean call(Boolean aBoolean) {
-                            return aBoolean &&
-                                    routerListener.getLiveRoom().getPresenterUser() != null &&
-                                    routerListener.getLiveRoom().getTeacherUser() != null &&
-                                    routerListener.getLiveRoom().getPresenterUser().getUserId().equals(
-                                            routerListener.getLiveRoom().getTeacherUser().getUserId());
-                        }
-                    })
-                    .subscribe(new LPErrorPrintSubscriber<Boolean>() {
-                        @Override
-                        public void call(Boolean aBoolean) {
-                            if (routerListener.getLiveRoom().getTeacherUser() == null)
-                                return;
-                            String teacherId = routerListener.getLiveRoom().getTeacherUser().getUserId();
-                            if (displayList.indexOf(teacherId) >= _displayPresenterSection
-                                    && displayList.indexOf(teacherId) < _displaySpeakerSection
-                                    && !fullScreenKVO.getParameter().equals(teacherId)) {
-                                fullScreenKVO.setParameter(teacherId);
-                            }
-                        }
-                    });
-        }
+                    }
+                });
 
         subscriptionOfFullScreen = fullScreenKVO.newObservableOfParameterChanged()
                 .onBackpressureBuffer()
@@ -541,6 +560,36 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                         printSections();
                     }
                 });
+
+        if (routerListener.isTeacherOrAssistant()) {
+
+            subscriptionSpeakApply = routerListener.getLiveRoom().getSpeakQueueVM().getObservableOfSpeakApply()
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new LPErrorPrintSubscriber<IMediaModel>() {
+                        @Override
+                        public void call(IMediaModel iMediaModel) {
+                            displayList.add(iMediaModel.getUser().getUserId());
+                            view.notifyItemInserted(displayList.size() - 1);
+                        }
+                    });
+
+            subscriptionSpeakResponse = routerListener.getLiveRoom().getSpeakQueueVM().getObservableOfSpeakResponse()
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new LPErrorPrintSubscriber<IMediaControlModel>() {
+                        @Override
+                        public void call(IMediaControlModel iMediaControlModel) {
+                            int position = displayList.indexOf(iMediaControlModel.getUser().getUserId());
+                            if (position < _displayApplySection) {
+                                throw new RuntimeException("position < _displayApplySection");
+                            } else if (position < displayList.size()) {
+                                view.notifyItemDeleted(position);
+                                displayList.remove(position);
+                            } else {
+                                throw new RuntimeException("position > displayList.size()");
+                            }
+                        }
+                    });
+        }
     }
 
     @Override
@@ -552,6 +601,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
         RxUtils.unSubscribe(subscriptionSpeakResponse);
         RxUtils.unSubscribe(subscriptionOfActiveUser);
         RxUtils.unSubscribe(subscriptionOfFullScreen);
+        RxUtils.unSubscribe(subscriptionOfUserIn);
         RxUtils.unSubscribe(subscriptionOfUserOut);
         RxUtils.unSubscribe(subscriptionOfPresenterChange);
         RxUtils.unSubscribe(subscriptionOfVideoSizeChange);
@@ -624,10 +674,16 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
             model.user = (LPUserModel) routerListener.getLiveRoom().getPresenterUser();
             return model;
         }
+
+        if (tempUserIn != null && tempUserIn.getUserId().equals(userId)) {
+            LPMediaModel model = new LPMediaModel();
+            model.user = (LPUserModel) tempUserIn;
+            return model;
+        }
         // mismatching
-//        LPMediaModel model = new LPMediaModel();
-//        model.user = (LPUserModel) routerListener.getLiveRoom().getOnlineUserVM().getUserById(userId);
-        return null;
+        LPMediaModel model = new LPMediaModel();
+        model.user = (LPUserModel) routerListener.getLiveRoom().getOnlineUserVM().getUserById(userId);
+        return model;
     }
 
     @Override
@@ -650,7 +706,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
         }
 
         IMediaModel model = getSpeakModel(fullScreenKVO.getParameter());
-        boolean isFullScreenStudentVideo = model != null && model.getUser().getType() == LPConstants.LPUserType.Student;
+        boolean isFullScreenStudentVideo = model.getUser() != null && model.getUser().getType() == LPConstants.LPUserType.Student;
 
         if (_displaySpeakerSection - _displayVideoSection + (isFullScreenStudentVideo ? 1 : 0) >= MAX_VIDEO_COUNT) {
             view.showMaxVideoExceed();

@@ -307,6 +307,14 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
         }
     }
 
+    @Override
+    public void notifyFullScreenPresenterStatusChange(int position, boolean b) {
+//        View view = container.getChildAt(position);
+//        if (view instanceof VideoView) {
+//            ((VideoView) view).setIsPresenter(b);
+//        }
+    }
+
     private View generateApplyView(final IUserModel model) {
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.item_speak_apply, container, false);
         QueryPlus q = QueryPlus.with(view);
