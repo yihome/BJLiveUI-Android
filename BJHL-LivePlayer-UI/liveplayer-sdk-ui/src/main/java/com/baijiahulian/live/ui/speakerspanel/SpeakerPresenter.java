@@ -52,7 +52,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
     private LiveRoomRouterListener routerListener;
     private SpeakersContract.View view;
     private LPSubscribeObjectWithLastValue<String> fullScreenKVO;
-    private int MAX_VIDEO_COUNT = 0;
+    private static final int MAX_VIDEO_COUNT = 6;
     private boolean autoPlayPresenterVideo = true;
     private boolean isEmptyPPT = false;
 
@@ -80,7 +80,6 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
     @Override
     public void setRouter(LiveRoomRouterListener liveRoomRouterListener) {
         routerListener = liveRoomRouterListener;
-        MAX_VIDEO_COUNT = routerListener.getLiveRoom().getPlayer().getMaxSupportedVideoSize() - 1;
     }
 
     private void initView() {

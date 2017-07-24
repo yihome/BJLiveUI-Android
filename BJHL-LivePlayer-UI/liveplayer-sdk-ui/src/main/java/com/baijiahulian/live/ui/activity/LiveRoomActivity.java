@@ -1020,7 +1020,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         lppptFragment.updatePage(position);
     }
 
-
     @Override
     public void navigateToPPTDrawing() {
         checkNotNull(lppptFragment);

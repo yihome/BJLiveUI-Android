@@ -57,6 +57,8 @@ interface SettingContract {
         void showForbidRaiseHandOn();
 
         void showForbidRaiseHandOff();
+
+        void showSwitchLinkTypeError();
     }
 
     interface Presenter extends BasePresenter {

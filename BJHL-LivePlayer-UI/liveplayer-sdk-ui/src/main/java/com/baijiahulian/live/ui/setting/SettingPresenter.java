@@ -257,26 +257,27 @@ public class SettingPresenter implements SettingContract.Presenter {
 
     @Override
     public void setUpLinkTCP() {
-        recorder.setLinkType(LPConstants.LPLinkType.TCP);
-        view.showUpLinkTCP();
+        if (recorder.setLinkType(LPConstants.LPLinkType.TCP)) view.showUpLinkTCP();
+        else view.showSwitchLinkTypeError();
+
     }
 
     @Override
     public void setUpLinkUDP() {
-        recorder.setLinkType(LPConstants.LPLinkType.UDP);
-        view.showUpLinkUDP();
+        if (recorder.setLinkType(LPConstants.LPLinkType.UDP)) view.showUpLinkUDP();
+        else view.showSwitchLinkTypeError();
     }
 
     @Override
     public void setDownLinkTCP() {
-        player.setLinkType(LPConstants.LPLinkType.TCP);
-        view.showDownLinkTCP();
+        if (player.setLinkType(LPConstants.LPLinkType.TCP)) view.showDownLinkTCP();
+        else view.showSwitchLinkTypeError();
     }
 
     @Override
     public void setDownLinkUDP() {
-        player.setLinkType(LPConstants.LPLinkType.UDP);
-        view.showDownLinkUDP();
+        if (player.setLinkType(LPConstants.LPLinkType.UDP)) view.showDownLinkUDP();
+        else view.showSwitchLinkTypeError();
     }
 
     @Override

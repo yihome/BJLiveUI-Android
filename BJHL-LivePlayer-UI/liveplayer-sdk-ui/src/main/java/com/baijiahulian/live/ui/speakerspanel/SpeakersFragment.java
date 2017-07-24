@@ -104,8 +104,13 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
             container.removeViewAt(position);
             if (model == null) return;
             if (model.isVideoOn() && presenter.isAutoPlay()) {
-                VideoView videoView = new VideoView(getActivity(), model.getUser().getName() + getString(R.string.live_presenter_hint),
-                        presenter.getWaterMark().url, presenter.getWaterMark().pos);
+                VideoView videoView;
+                if(presenter.getWaterMark() != null) {
+                    videoView = new VideoView(getActivity(), model.getUser().getName() + getString(R.string.live_presenter_hint),
+                            presenter.getWaterMark().url, presenter.getWaterMark().pos);
+                }else{
+                    videoView = new VideoView(getActivity(), model.getUser().getName());
+                }
                 container.addView(videoView, position, lpItem);
 
                 final GestureDetector gestureDetector = new GestureDetector(getActivity(),
@@ -151,8 +156,13 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
             case VIEW_TYPE_PRESENTER:
                 IMediaModel presenterSpeakModel = presenter.getSpeakModel(position);
                 if (presenterSpeakModel.isVideoOn()) {
-                    VideoView videoView = new VideoView(getActivity(), presenterSpeakModel.getUser().getName() + getString(R.string.live_presenter_hint),
-                            presenter.getWaterMark().url, presenter.getWaterMark().pos);
+                    VideoView videoView;
+                    if (presenter.getWaterMark() == null) {
+                        videoView = new VideoView(getActivity(), presenterSpeakModel.getUser().getName());
+                    } else {
+                        videoView = new VideoView(getActivity(), presenterSpeakModel.getUser().getName() + getString(R.string.live_presenter_hint),
+                                presenter.getWaterMark().url, presenter.getWaterMark().pos);
+                    }
                     container.addView(videoView, position, lpItem);
 
                     final GestureDetector gestureDetector = new GestureDetector(getActivity(), new ClickGestureDetector(presenterSpeakModel.getUser().getUserId()));

@@ -313,6 +313,11 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
     }
 
     @Override
+    public void showSwitchLinkTypeError() {
+        showToast(getString(R.string.live_switch_link_type_error));
+    }
+
+    @Override
     public void setPresenter(SettingContract.Presenter presenter) {
         super.setBasePresenter(presenter);
         this.presenter = presenter;
