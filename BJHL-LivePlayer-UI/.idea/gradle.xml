@@ -6,6 +6,16 @@
         <option name="distributionType" value="LOCAL" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="gradleHome" value="/usr/local/Cellar/gradle/3.4.1/libexec" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/../../android-live-core/BJHL-LivePlayer/liveplayer-sdk-core" />
+            <option value="$PROJECT_DIR$/../../android-live-core/BJHL-LivePlayer/liveplayer-sdk-core-ppt" />
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/liveplayer-sdk-ui" />
+          </set>
+        </option>
+        <option name="resolveModulePerSourceSet" value="false" />
       </GradleProjectSettings>
     </option>
   </component>

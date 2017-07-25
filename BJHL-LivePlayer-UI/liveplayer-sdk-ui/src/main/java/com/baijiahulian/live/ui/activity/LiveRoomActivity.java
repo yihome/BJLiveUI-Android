@@ -614,6 +614,23 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     }
 
     @Override
+    public void showForceSpeakDlg() {
+        new MaterialDialog.Builder(this)
+                .content(R.string.live_force_speak_tip)
+                .positiveText(getString(R.string.live_i_got_it))
+                .positiveColor(ContextCompat.getColor(LiveRoomActivity.this, R.color.live_blue))
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
+                        materialDialog.dismiss();
+                    }
+                })
+                .canceledOnTouchOutside(true)
+                .build()
+                .show();
+    }
+
+    @Override
     public void setFullScreenView(View view) {
         setZOrderMediaOverlayFalse(view);
         flBackground.addView(view, lpBackground);

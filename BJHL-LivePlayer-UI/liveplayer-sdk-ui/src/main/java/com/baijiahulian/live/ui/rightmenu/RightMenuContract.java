@@ -48,6 +48,8 @@ public interface RightMenuContract {
         void showWaitingTeacherAgree();
 
         void showAutoSpeak();
+
+        void showForceSpeak();
     }
 
     interface Presenter extends BasePresenter {

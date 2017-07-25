@@ -173,4 +173,6 @@ public interface LiveRoomRouterListener {
     void setIsStopPublish(boolean b);
 
     void notifyFullScreenPresenterStatusChange(String id, boolean isPresenter);
+
+    void showForceSpeakDlg();
 }

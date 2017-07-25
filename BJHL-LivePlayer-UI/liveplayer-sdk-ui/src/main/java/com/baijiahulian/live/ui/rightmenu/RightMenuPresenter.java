@@ -169,9 +169,11 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                         @Override
                         public void call(IMediaControlModel iMediaControlModel) {
                             if (iMediaControlModel.isApplyAgreed()) {
-                                // 邀请发言
+                                // 强制发言
                                 speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_SPEAKING;
                                 liveRoomRouterListener.enableSpeakerMode();
+                                view.showForceSpeak();
+                                liveRoomRouterListener.showForceSpeakDlg();
                             } else {
                                 // 结束发言模式
                                 RxUtils.unSubscribe(subscriptionOfSpeakApplyCounter);
