@@ -110,6 +110,8 @@
     <string name="live_exit_hint_content">确定要退出直播教室吗？</string>
     <string name="live_audio_room_error">音频课不能开启摄像头</string>
     <string name="live_sweet_hint">温馨提示</string>
+    <string name="live_mobile_network_hint">正在使用3G/4G网络，可手动关闭视频以减少流量</string>
+    <string name="live_mobile_network_confirm">知道了</string>
     <string name="live_switch_link_type_error">该房间不能切换链路类型</string>
     <string name="live_presenter_hint">(主讲)</string>
     <string name="live_no_camera_permission">摄像头权限获取失败，请前往系统设置中允许访问摄像头</string>
