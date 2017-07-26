@@ -196,7 +196,8 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                                 speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_SPEAKING;
                                 liveRoomRouterListener.enableSpeakerMode();
                                 view.showForceSpeak();
-                                liveRoomRouterListener.showForceSpeakDlg();
+                                liveRoomRouterListener.showForceSpeakDlg(iMediaControlModel);
+
                             } else {
                                 // 结束发言模式
                                 RxUtils.unSubscribe(subscriptionOfSpeakApplyCounter);

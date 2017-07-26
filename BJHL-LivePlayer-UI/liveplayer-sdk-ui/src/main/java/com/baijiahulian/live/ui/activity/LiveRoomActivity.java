@@ -95,8 +95,10 @@ import com.baijiahulian.livecore.context.OnLiveRoomListener;
 import com.baijiahulian.livecore.listener.OnPhoneRollCallListener;
 import com.baijiahulian.livecore.models.LPJsonModel;
 import com.baijiahulian.livecore.models.imodels.ILoginConflictModel;
+import com.baijiahulian.livecore.models.imodels.IMediaControlModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
+import com.baijiahulian.livecore.models.roomresponse.LPResRoomMediaControlModel;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 import com.baijiahulian.livecore.wrapper.exception.NotInitializedException;
 import com.squareup.picasso.Picasso;
@@ -616,7 +618,11 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     }
 
     @Override
-    public void showForceSpeakDlg() {
+    public void showForceSpeakDlg(IMediaControlModel iMediaControlModel) {
+        LPResRoomMediaControlModel lpResRoomMediaControlModel = (LPResRoomMediaControlModel) iMediaControlModel;
+        if (speakerPresenter != null && lpResRoomMediaControlModel != null && lpResRoomMediaControlModel.isVideoOn()) {
+            speakerPresenter.attachVideo();
+        }
         new MaterialDialog.Builder(this)
                 .content(R.string.live_force_speak_tip)
                 .positiveText(getString(R.string.live_i_got_it))

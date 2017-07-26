@@ -8,6 +8,7 @@ import com.baijiahulian.livecore.context.LPError;
 import com.baijiahulian.livecore.context.LiveRoom;
 import com.baijiahulian.livecore.listener.OnPhoneRollCallListener;
 import com.baijiahulian.livecore.models.LPJsonModel;
+import com.baijiahulian.livecore.models.imodels.IMediaControlModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 
 /**
@@ -174,7 +175,8 @@ public interface LiveRoomRouterListener {
 
     void notifyFullScreenPresenterStatusChange(String id, boolean isPresenter);
 
-    void showForceSpeakDlg();
+    void showForceSpeakDlg(IMediaControlModel iMediaControlModel);
 
     void showSpeakInviteDlg(int invite); //0 取消 1邀请
+
 }
