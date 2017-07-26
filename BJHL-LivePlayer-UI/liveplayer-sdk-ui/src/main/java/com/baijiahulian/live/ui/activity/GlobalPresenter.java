@@ -9,6 +9,7 @@ import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.context.LPError;
 import com.baijiahulian.livecore.listener.OnPhoneRollCallListener;
 import com.baijiahulian.livecore.models.LPJsonModel;
+import com.baijiahulian.livecore.models.LPSpeakInviteModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.models.imodels.IUserInModel;
 import com.baijiahulian.livecore.models.responsedebug.LPResRoomDebugModel;
@@ -270,6 +271,11 @@ public class GlobalPresenter implements BasePresenter {
         RxUtils.unSubscribe(subscriptionOfTeacherMedia);
         RxUtils.unSubscribe(subscriptionOfUserIn);
         RxUtils.unSubscribe(subscriptionOfUserOut);
+        RxUtils.unSubscribe(subscriptionOfQuizStart);
+        RxUtils.unSubscribe(subscriptionOfQuizRes);
+        RxUtils.unSubscribe(subscriptionOfQuizEnd);
+        RxUtils.unSubscribe(subscriptionOfQuizSolution);
+        RxUtils.unSubscribe(subscriptionOfDebug);
     }
 
     @Override

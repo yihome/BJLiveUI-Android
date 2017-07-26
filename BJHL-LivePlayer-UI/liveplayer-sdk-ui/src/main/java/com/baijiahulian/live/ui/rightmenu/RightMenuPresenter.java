@@ -3,6 +3,7 @@ package com.baijiahulian.live.ui.rightmenu;
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 import com.baijiahulian.live.ui.utils.RxUtils;
 import com.baijiahulian.livecore.context.LPConstants;
+import com.baijiahulian.livecore.models.LPSpeakInviteModel;
 import com.baijiahulian.livecore.models.imodels.IMediaControlModel;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 
@@ -27,7 +28,7 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
     private RightMenuContract.View view;
     private LPConstants.LPUserType currentUserType;
     private Subscription subscriptionOfMediaControl, subscriptionOfSpeakApplyCounter,
-            subscriptionOfClassEnd, subscriptionOfSpeakApplyResponse;
+            subscriptionOfClassEnd, subscriptionOfSpeakApplyResponse, subscriptionOfSpeakInvite;
     private int speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_NONE;
     private boolean isDrawing = false;
 
@@ -145,6 +146,28 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
     }
 
     @Override
+    public void onSpeakInvite(int confirm) {
+        liveRoomRouterListener.getLiveRoom().sendSpeakInvite(confirm);
+        if (confirm == 1) {
+            //接受
+            speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_SPEAKING;
+            liveRoomRouterListener.getLiveRoom().getRecorder().publish();
+            liveRoomRouterListener.attachLocalAudio();
+            if (liveRoomRouterListener.getLiveRoom().getAutoOpenCameraStatus()) {
+                Observable.timer(1, TimeUnit.SECONDS).observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new LPErrorPrintSubscriber<Long>() {
+                            @Override
+                            public void call(Long aLong) {
+                                liveRoomRouterListener.attachLocalVideo();
+                            }
+                        });
+            }
+            view.showForceSpeak();
+            liveRoomRouterListener.enableSpeakerMode();
+        }
+    }
+
+    @Override
     public void setRouter(LiveRoomRouterListener liveRoomRouterListener) {
         this.liveRoomRouterListener = liveRoomRouterListener;
     }
@@ -169,9 +192,11 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                         @Override
                         public void call(IMediaControlModel iMediaControlModel) {
                             if (iMediaControlModel.isApplyAgreed()) {
-                                // 邀请发言
+                                // 强制发言
                                 speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_SPEAKING;
                                 liveRoomRouterListener.enableSpeakerMode();
+                                view.showForceSpeak();
+                                liveRoomRouterListener.showForceSpeakDlg();
                             } else {
                                 // 结束发言模式
                                 RxUtils.unSubscribe(subscriptionOfSpeakApplyCounter);
@@ -188,6 +213,7 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                             }
                         }
                     });
+
             subscriptionOfSpeakApplyResponse = liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getObservableOfSpeakResponse()
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new LPErrorPrintSubscriber<IMediaControlModel>() {
@@ -258,6 +284,19 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
             view.showAutoSpeak();
             speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_SPEAKING;
         }
+
+        //邀请发言
+        subscriptionOfSpeakInvite = liveRoomRouterListener.getLiveRoom().getObservableOfSpeakInvite()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<LPSpeakInviteModel>() {
+                    @Override
+                    public void call(LPSpeakInviteModel lpSpeakInviteModel) {
+                        if (liveRoomRouterListener.getLiveRoom().getCurrentUser().getUserId().equals(lpSpeakInviteModel.to)) {
+                            liveRoomRouterListener.showSpeakInviteDlg(lpSpeakInviteModel.invite);
+                        }
+                    }
+                });
+
     }
 
     @Override

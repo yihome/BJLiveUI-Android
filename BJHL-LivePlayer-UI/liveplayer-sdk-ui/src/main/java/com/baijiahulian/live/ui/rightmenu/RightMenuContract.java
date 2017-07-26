@@ -48,6 +48,8 @@ public interface RightMenuContract {
         void showWaitingTeacherAgree();
 
         void showAutoSpeak();
+
+        void showForceSpeak();
     }
 
     interface Presenter extends BasePresenter {
@@ -60,5 +62,7 @@ public interface RightMenuContract {
         void speakApply();
 
         void changePPTDrawBtnStatus(boolean shouldShow);
+
+        void onSpeakInvite(int confirm);
     }
 }

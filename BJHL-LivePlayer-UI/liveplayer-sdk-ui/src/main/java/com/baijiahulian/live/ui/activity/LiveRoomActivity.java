@@ -99,6 +99,7 @@ import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 import com.baijiahulian.livecore.wrapper.exception.NotInitializedException;
+import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -163,6 +164,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private ViewGroup.LayoutParams lpBackground;
     private Subscription subscriptionOfEmptyBoard;
     private boolean mobileNetworkDialogShown = false;
+    private MaterialDialog speakInviteDlg;  //取消用
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -632,6 +634,56 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 //        if (view instanceof VideoView) {
 //            ((VideoView) view).setIsPresenter(isPresenter);
 //        }
+    }
+
+    @Override
+    public void showForceSpeakDlg() {
+        new MaterialDialog.Builder(this)
+                .content(R.string.live_force_speak_tip)
+                .positiveText(getString(R.string.live_i_got_it))
+                .positiveColor(ContextCompat.getColor(LiveRoomActivity.this, R.color.live_blue))
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
+                        materialDialog.dismiss();
+                    }
+                })
+                .canceledOnTouchOutside(true)
+                .build()
+                .show();
+    }
+
+    @Override
+    public void showSpeakInviteDlg(int invite) {
+        if (invite == 0) {
+            if (speakInviteDlg != null && speakInviteDlg.isShowing()) {
+                speakInviteDlg.dismiss();
+                return;
+            }
+        }
+        speakInviteDlg = new MaterialDialog.Builder(this)
+                .content(R.string.live_invite_speak_tip)
+                .positiveText(getString(R.string.live_agree))
+                .negativeText(getString(R.string.live_disagree))
+                .positiveColor(ContextCompat.getColor(LiveRoomActivity.this, R.color.live_blue))
+                .negativeColor(ContextCompat.getColor(LiveRoomActivity.this, R.color.live_blue))
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
+                        rightMenuPresenter.onSpeakInvite(1);
+                        materialDialog.dismiss();
+                    }
+                })
+                .onNegative(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        rightMenuPresenter.onSpeakInvite(0);
+                        dialog.dismiss();
+                    }
+                })
+                .canceledOnTouchOutside(true)
+                .build();
+        speakInviteDlg.show();
     }
 
     @Override
