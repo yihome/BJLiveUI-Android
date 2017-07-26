@@ -162,6 +162,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private IUserModel enterUser;
     private ViewGroup.LayoutParams lpBackground;
     private Subscription subscriptionOfEmptyBoard;
+    private boolean mobileNetworkDialogShown = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -381,6 +382,26 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                                         showNetError(error);
                                     }
                                 });
+                        break;
+                    case LPError.CODE_ERROR_NETWORK_MOBILE:
+                        if (!mobileNetworkDialogShown) {
+                            mobileNetworkDialogShown = true;
+                            new MaterialDialog.Builder(LiveRoomActivity.this)
+                                    .content(getString(R.string.live_mobile_network_hint))
+                                    .positiveText(getString(R.string.live_mobile_network_confirm))
+                                    .positiveColor(ContextCompat.getColor(LiveRoomActivity.this, R.color.live_blue))
+                                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                                        @Override
+                                        public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
+                                            materialDialog.dismiss();
+                                        }
+                                    })
+                                    .canceledOnTouchOutside(true)
+                                    .build()
+                                    .show();
+                        } else {
+                            showMessage(getString(R.string.live_mobile_network_hint));
+                        }
                         break;
                     case LPError.CODE_ERROR_LOGIN_CONFLICT:
                         break;
