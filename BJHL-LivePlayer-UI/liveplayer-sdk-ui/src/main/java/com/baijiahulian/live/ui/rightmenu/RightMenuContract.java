@@ -62,5 +62,7 @@ public interface RightMenuContract {
         void speakApply();
 
         void changePPTDrawBtnStatus(boolean shouldShow);
+
+        void onSpeakInvite(int confirm);
     }
 }

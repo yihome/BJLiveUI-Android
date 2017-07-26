@@ -175,4 +175,6 @@ public interface LiveRoomRouterListener {
     void notifyFullScreenPresenterStatusChange(String id, boolean isPresenter);
 
     void showForceSpeakDlg();
+
+    void showSpeakInviteDlg(int invite); //0 取消 1邀请
 }
