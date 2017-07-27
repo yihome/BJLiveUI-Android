@@ -432,7 +432,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
             case VIEW_TYPE_VIDEO_PLAY:
                 options.add(getString(R.string.live_full_screen));
                 options.add(getString(R.string.live_close_video));
-                if (presenter.isTeacherOrAssistant())
+                if (presenter.isTeacherOrAssistant() && presenter.isMultiClass())
                     options.add(getString(R.string.live_close_speaking));
                 break;
             case VIEW_TYPE_SPEAKER:
@@ -440,7 +440,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                 if (model != null) {
                     if (model.isVideoOn())
                         options.add(getString(R.string.live_open_video));
-                    if (presenter.isTeacherOrAssistant())
+                    if (presenter.isTeacherOrAssistant() && presenter.isMultiClass())
                         options.add(getString(R.string.live_close_speaking));
                 }
                 break;

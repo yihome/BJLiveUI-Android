@@ -101,7 +101,6 @@ import com.baijiahulian.livecore.models.imodels.IUserModel;
 import com.baijiahulian.livecore.models.roomresponse.LPResRoomMediaControlModel;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 import com.baijiahulian.livecore.wrapper.exception.NotInitializedException;
-import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -693,6 +692,11 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     }
 
     @Override
+    public LPConstants.LPRoomType getRoomType() {
+        return liveRoom.getRoomType();
+    }
+
+    @Override
     public void setFullScreenView(View view) {
         setZOrderMediaOverlayFalse(view);
         flBackground.addView(view, lpBackground);
@@ -801,10 +805,14 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         if (PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(LiveRoomActivity.this, Manifest.permission.CAMERA)) {
             return true;
         } else {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(LiveRoomActivity.this, Manifest.permission.CAMERA)) {
-                ActivityCompat.requestPermissions(LiveRoomActivity.this, new String[]{Manifest.permission.CAMERA}, REQUEST_CODE_PERMISSION_CAMERA);
+            if (Build.VERSION.SDK_INT >= 23) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(LiveRoomActivity.this, Manifest.permission.CAMERA)) {
+                    ActivityCompat.requestPermissions(LiveRoomActivity.this, new String[]{Manifest.permission.CAMERA}, REQUEST_CODE_PERMISSION_CAMERA);
+                } else {
+                    showSystemSettingDialog(REQUEST_CODE_PERMISSION_CAMERA);
+                }
             } else {
-                showSystemSettingDialog(REQUEST_CODE_PERMISSION_CAMERA);
+                ActivityCompat.requestPermissions(LiveRoomActivity.this, new String[]{Manifest.permission.CAMERA}, REQUEST_CODE_PERMISSION_CAMERA);
             }
         }
         return false;
@@ -814,10 +822,14 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         if (PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(LiveRoomActivity.this, Manifest.permission.RECORD_AUDIO)) {
             return true;
         } else {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(LiveRoomActivity.this, Manifest.permission.RECORD_AUDIO)) {
-                ActivityCompat.requestPermissions(LiveRoomActivity.this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_CODE_PERMISSION_MIC);
+            if (Build.VERSION.SDK_INT >= 23) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(LiveRoomActivity.this, Manifest.permission.RECORD_AUDIO)) {
+                    ActivityCompat.requestPermissions(LiveRoomActivity.this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_CODE_PERMISSION_MIC);
+                } else {
+                    showSystemSettingDialog(REQUEST_CODE_PERMISSION_MIC);
+                }
             } else {
-                showSystemSettingDialog(REQUEST_CODE_PERMISSION_MIC);
+                ActivityCompat.requestPermissions(LiveRoomActivity.this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_CODE_PERMISSION_MIC);
             }
         }
         return false;
@@ -1028,6 +1040,13 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                             attachLocalVideo();
                             if (liveRoom.getAutoStartCloudRecordStatus() == 1) {
                                 liveRoom.requestCloudRecord(true);
+                            }
+                        } else if (liveRoom.getCurrentUser().getType() == LPConstants.LPUserType.Student) {
+                            if (liveRoom.getRoomType() == LPConstants.LPRoomType.Signal ||
+                                    liveRoom.getRoomType() == LPConstants.LPRoomType.SmallGroup) {
+                                liveRoom.getRecorder().publish();
+                                attachLocalAudio();
+                                attachLocalVideo();
                             }
                         }
 

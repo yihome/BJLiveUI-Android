@@ -879,6 +879,11 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
         isStopPublish = b;
     }
 
+    @Override
+    public boolean isMultiClass() {
+        return routerListener.getRoomType() == LPConstants.LPRoomType.Multi;
+    }
+
     private boolean isStopPublish = false;
 
     public void detachVideo() {

@@ -95,5 +95,7 @@ interface SpeakersContract {
         boolean isStopPublish();
 
         void setIsStopPublish(boolean b);
+
+        boolean isMultiClass();
     }
 }

@@ -1,11 +1,11 @@
 include ':app', ':liveplayer-sdk-ui', ':liveplayer-sdk-core', ':liveplayer-sdk-core-ppt'//, ':liveplayer'
 //include ':library', ':library-ws', 'rxlibrary'
 
-//project(':liveplayer-sdk-core').projectDir = new File('/Users/Shubo/Desktop/workspace/liveplayer/liveplayer-android-sdk-core/BJHL-LivePlayer/liveplayer-sdk-core')
-//project(':liveplayer-sdk-core-ppt').projectDir = new File('/Users/Shubo/Desktop/workspace/liveplayer/liveplayer-android-sdk-core/BJHL-LivePlayer/liveplayer-sdk-core-ppt')
+project(':liveplayer-sdk-core').projectDir = new File('/Users/Shubo/Desktop/workspace/liveplayer/liveplayer-android-sdk-core/BJHL-LivePlayer/liveplayer-sdk-core')
+project(':liveplayer-sdk-core-ppt').projectDir = new File('/Users/Shubo/Desktop/workspace/liveplayer/liveplayer-android-sdk-core/BJHL-LivePlayer/liveplayer-sdk-core-ppt')
 
-project(':liveplayer-sdk-core').projectDir = new File('/Users/wangkangfei/project/player/android-live-core/BJHL-LivePlayer/liveplayer-sdk-core')
-project(':liveplayer-sdk-core-ppt').projectDir = new File('/Users/wangkangfei/project/player/android-live-core/BJHL-LivePlayer/liveplayer-sdk-core-ppt')
+//project(':liveplayer-sdk-core').projectDir = new File('/Users/wangkangfei/project/player/android-live-core/BJHL-LivePlayer/liveplayer-sdk-core')
+//project(':liveplayer-sdk-core-ppt').projectDir = new File('/Users/wangkangfei/project/player/android-live-core/BJHL-LivePlayer/liveplayer-sdk-core-ppt')
 
 //project(':library').projectDir = new File('/Users/Shubo/Desktop/workspace/common-networkv2/CommonNetworkV2/library')
 //project(':library-ws').projectDir = new File('/Users/Shubo/Desktop/workspace/common-networkv2/CommonNetworkV2/library-ws')
