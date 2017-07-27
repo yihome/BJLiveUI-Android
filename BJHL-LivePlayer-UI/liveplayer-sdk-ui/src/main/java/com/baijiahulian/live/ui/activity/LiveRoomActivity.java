@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -30,12 +31,15 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.baijiahulian.avsdk.liveplayer.LivePlayer;
 import com.baijiahulian.live.ui.LiveSDKWithUI;
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.announcement.AnnouncementFragment;
@@ -167,6 +171,11 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private Subscription subscriptionOfEmptyBoard;
     private boolean mobileNetworkDialogShown = false;
     private MaterialDialog speakInviteDlg;  //取消用
+    //debug
+    private RadioGroup rgAecMode, rgAecmMode, rgAudioSourceMode, rgCommunication;
+    private EditText etDebugAecDelay;
+    private int aecMode = 0, aecmMode = 0, audioSource = 0, delay;
+    private boolean isCommunication = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -690,6 +699,109 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                 .canceledOnTouchOutside(true)
                 .build();
         speakInviteDlg.show();
+    }
+
+    @Override
+    public void showDebugPanel() {
+        MaterialDialog dlg = new MaterialDialog.Builder(this)
+                .title("debug面板")
+                .customView(R.layout.dlg_lp_debug_panel, true)
+                .positiveText("确认")
+                .negativeText("取消")
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        String s = etDebugAecDelay.getText().toString().trim();
+                        if (TextUtils.isEmpty(s)) {
+                            delay = 0;
+                        } else {
+                            delay = Integer.valueOf(s);
+                        }
+                        getLiveRoom().getLivePlayer().setAecParameters(aecMode, aecmMode, delay);
+                        getLiveRoom().getLivePlayer().setAudioSource(audioSource);
+                        getLiveRoom().getLivePlayer().setCommunicationMode(isCommunication);
+                        dialog.dismiss();
+                        Toast.makeText(LiveRoomActivity.this, "aecMode: " + aecMode + "\naecmMode: " + aecmMode + "\ndelay: " + delay + "\naudio source: " + audioSource + "\n 通话模式：" + isCommunication, Toast.LENGTH_LONG).show();
+                    }
+                })
+                .onNegative(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        dialog.dismiss();
+                    }
+                })
+                .build();
+        rgAecMode = (RadioGroup) dlg.getCustomView().findViewById(R.id.rg_lp_debug_mode_aec);
+        rgAecmMode = (RadioGroup) dlg.getCustomView().findViewById(R.id.rg_lp_debug_mode_aecm);
+        rgAudioSourceMode = (RadioGroup) dlg.getCustomView().findViewById(R.id.rg_lp_debug_mode_audio_source);
+        rgCommunication = (RadioGroup) dlg.getCustomView().findViewById(R.id.rg_lp_debug_mode_is_communication);
+        etDebugAecDelay = (EditText) dlg.getCustomView().findViewById(R.id.et_debug_aec_delay);
+        rgAecMode.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
+                if (checkedId == R.id.aec_unchanged) {
+                    aecMode = 0;
+                } else if (checkedId == R.id.aec_default) {
+                    aecMode = 1;
+                } else if (checkedId == R.id.aec_conference) {
+                    aecMode = 2;
+                } else if (checkedId == R.id.aec_aec) {
+                    aecMode = 3;
+                } else if (checkedId == R.id.aec_aecm) {
+                    aecMode = 4;
+                }
+            }
+        });
+        rgAecmMode.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
+                if (checkedId == R.id.aecm_quiet_or_headset) {
+                    aecmMode = 0;
+                } else if (checkedId == R.id.aecm_ear_piece) {
+                    aecmMode = 1;
+                } else if (checkedId == R.id.aecm_loud_ear_piece) {
+                    aecmMode = 2;
+                } else if (checkedId == R.id.aecm_speaker_phone) {
+                    aecmMode = 3;
+                } else if (checkedId == R.id.aecm_loud_speaker_phone) {
+                    aecmMode = 4;
+                }
+            }
+        });
+        rgAudioSourceMode.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
+                if (checkedId == R.id.audio_source_default) {
+                    audioSource = 0;
+                } else if (checkedId == R.id.audio_source_mic) {
+                    audioSource = 1;
+                } else if (checkedId == R.id.audio_source_uplink) {
+                    audioSource = 2;
+                } else if (checkedId == R.id.audio_source_downlink) {
+                    audioSource = 3;
+                } else if (checkedId == R.id.audio_source_voice_call) {
+                    audioSource = 4;
+                } else if (checkedId == R.id.audio_source_camcorder) {
+                    audioSource = 5;
+                } else if (checkedId == R.id.audio_source_recognition) {
+                    audioSource = 6;
+                } else if (checkedId == R.id.audio_source_communication) {
+                    audioSource = 7;
+                }
+            }
+        });
+        rgCommunication.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
+                if (checkedId == R.id.communication_on) {
+                    isCommunication = true;
+                } else if (checkedId == R.id.communication_off) {
+                    isCommunication = false;
+                }
+            }
+        });
+
+        dlg.show();
     }
 
     @Override

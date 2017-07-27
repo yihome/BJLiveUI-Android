@@ -179,4 +179,6 @@ public interface LiveRoomRouterListener {
 
     void showSpeakInviteDlg(int invite); //0 取消 1邀请
 
+    void showDebugPanel(); //弹出debug面板
+
 }
