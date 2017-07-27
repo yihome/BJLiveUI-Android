@@ -1,5 +1,7 @@
 package com.baijiahulian.live.ui.chat;
 
+import android.text.TextUtils;
+
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 
 import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
@@ -21,6 +23,11 @@ public class MessageSendPresenter implements MessageSendContract.Presenter {
     public void sendMessage(String message) {
         checkNotNull(routerListener);
         routerListener.getLiveRoom().getChatVM().sendMessage(message);
+        if (!TextUtils.isEmpty(message)) {
+            if (message.startsWith("/dev")) {
+                routerListener.showDebugPanel();
+            }
+        }
         view.showMessageSuccess();
     }
 

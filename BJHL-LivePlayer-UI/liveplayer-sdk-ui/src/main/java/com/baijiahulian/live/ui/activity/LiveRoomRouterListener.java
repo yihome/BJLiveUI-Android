@@ -181,4 +181,6 @@ public interface LiveRoomRouterListener {
 
     LPConstants.LPRoomType getRoomType();
 
+    void showDebugPanel(); //弹出debug面板
+
 }
