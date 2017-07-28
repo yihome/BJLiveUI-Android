@@ -672,8 +672,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         if (invite == 0) {
             if (speakInviteDlg != null && speakInviteDlg.isShowing()) {
                 speakInviteDlg.dismiss();
-                return;
             }
+            return;
         }
         speakInviteDlg = new MaterialDialog.Builder(this)
                 .content(R.string.live_invite_speak_tip)
@@ -720,9 +720,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                         } else {
                             delay = Integer.valueOf(s);
                         }
-                        getLiveRoom().getLivePlayer().setAecParameters(aecMode, aecmMode, delay);
-                        getLiveRoom().getLivePlayer().setAudioSource(audioSource);
-                        getLiveRoom().getLivePlayer().setCommunicationMode(isCommunication);
+//                        getLiveRoom().getLivePlayer().setAecParameters(aecMode, aecmMode, delay);
+//                        getLiveRoom().getLivePlayer().setAudioSource(audioSource);
+//                        getLiveRoom().getLivePlayer().setCommunicationMode(isCommunication);
                         dialog.dismiss();
                         Toast.makeText(LiveRoomActivity.this, "aecMode: " + aecMode + "\naecmMode: " + aecmMode + "\ndelay: " + delay + "\naudio source: " + audioSource + "\n 通话模式：" + isCommunication, Toast.LENGTH_LONG).show();
                     }

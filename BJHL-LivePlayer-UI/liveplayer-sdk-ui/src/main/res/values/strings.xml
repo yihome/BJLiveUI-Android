@@ -117,8 +117,8 @@
     <string name="live_no_camera_permission">摄像头权限获取失败，请前往系统设置中允许访问摄像头</string>
     <string name="live_no_mic_permission">麦克风权限获取失败，请前往系统设置中允许访问麦克风</string>
     <string name="live_i_got_it">知道了</string>
-    <string name="live_force_speak_tip">老师已指定你上麦，现在可以发言了</string>
-    <string name="live_invite_speak_tip">老师已邀请你上麦，是否同意？</string>
+    <string name="live_force_speak_tip">老师开启了你的音频和视频，现在可以发言了</string>
+    <string name="live_invite_speak_tip">老师邀请你上麦发言</string>
 
 </resources>
 
