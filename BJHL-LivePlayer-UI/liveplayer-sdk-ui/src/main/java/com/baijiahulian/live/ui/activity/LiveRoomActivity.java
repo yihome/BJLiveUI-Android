@@ -670,8 +670,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         if (invite == 0) {
             if (speakInviteDlg != null && speakInviteDlg.isShowing()) {
                 speakInviteDlg.dismiss();
-                return;
             }
+            return;
         }
         speakInviteDlg = new MaterialDialog.Builder(this)
                 .content(R.string.live_invite_speak_tip)
