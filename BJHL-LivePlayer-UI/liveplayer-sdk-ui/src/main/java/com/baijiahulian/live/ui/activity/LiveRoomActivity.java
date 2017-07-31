@@ -39,7 +39,6 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.baijiahulian.avsdk.liveplayer.LivePlayer;
 import com.baijiahulian.live.ui.LiveSDKWithUI;
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.announcement.AnnouncementFragment;
@@ -181,7 +180,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_live_room);
-
         initViews();
 
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -386,7 +384,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                 switch ((int) error.getCode()) {
                     case LPError.CODE_ERROR_ROOMSERVER_LOSE_CONNECTION:
                     case LPError.CODE_ERROR_NETWORK_FAILURE:
-                    case LPError.CODE_ERROR_CHATSERVER_LOSE_CONNECTION:
+//                    case LPError.CODE_ERROR_CHATSERVER_LOSE_CONNECTION:
                         Observable.just(1).observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(new LPErrorPrintSubscriber<Integer>() {
                                     @Override
@@ -720,9 +718,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                         } else {
                             delay = Integer.valueOf(s);
                         }
-                        getLiveRoom().getLivePlayer().setAecParameters(aecMode, aecmMode, delay);
-                        getLiveRoom().getLivePlayer().setAudioSource(audioSource);
-                        getLiveRoom().getLivePlayer().setCommunicationMode(isCommunication);
+//                        getLiveRoom().getLivePlayer().setAecParameters(aecMode, aecmMode, delay);
+//                        getLiveRoom().getLivePlayer().setAudioSource(audioSource);
+//                        getLiveRoom().getLivePlayer().setCommunicationMode(isCommunication);
                         dialog.dismiss();
                         Toast.makeText(LiveRoomActivity.this, "aecMode: " + aecMode + "\naecmMode: " + aecmMode + "\ndelay: " + delay + "\naudio source: " + audioSource + "\n 通话模式：" + isCommunication, Toast.LENGTH_LONG).show();
                     }
@@ -805,6 +803,22 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         });
 
         dlg.show();
+    }
+
+    @Override
+    public void enableStudentSpeakMode() {
+        if (liveRoom.getCurrentUser().getType() == LPConstants.LPUserType.Student) {
+            if (liveRoom.getRoomType() == LPConstants.LPRoomType.Signal ||
+                    liveRoom.getRoomType() == LPConstants.LPRoomType.SmallGroup) {
+                if(liveRoom.isClassStarted()) {
+                    liveRoom.getRecorder().publish();
+                    attachLocalAudio();
+                    if(liveRoom.getAutoOpenCameraStatus()){
+                        attachLocalVideo();
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -1155,9 +1169,13 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                         } else if (liveRoom.getCurrentUser().getType() == LPConstants.LPUserType.Student) {
                             if (liveRoom.getRoomType() == LPConstants.LPRoomType.Signal ||
                                     liveRoom.getRoomType() == LPConstants.LPRoomType.SmallGroup) {
-                                liveRoom.getRecorder().publish();
-                                attachLocalAudio();
-                                attachLocalVideo();
+                                if(liveRoom.isClassStarted()) {
+                                    liveRoom.getRecorder().publish();
+                                    attachLocalAudio();
+                                    if(liveRoom.getAutoOpenCameraStatus()){
+                                        attachLocalVideo();
+                                    }
+                                }
                             }
                         }
 

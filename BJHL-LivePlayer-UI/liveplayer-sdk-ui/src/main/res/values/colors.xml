@@ -8,6 +8,7 @@
     <color name="secondary_text">#757575</color>
     <color name="icons">#FFFFFF</color>
     <color name="divider">#BDBDBD</color>
+    <color name="live_color_bg">#DDDDDE</color>
 
     <color name="live_text_color">#3D3D3E</color>
     <color name="live_text_color_mid_light">#6D6D6E</color>
@@ -32,6 +33,6 @@
     <color name="live_transparent_opacity_02">#33000000</color>
     <color name="live_transparent_opacity_06">#99000000</color>
     <color name="live_selector_not_pressed">#dedede</color>
-    <color name="live_grey_tech_support">#FFFFFF</color>
+    <color name="live_grey_tech_support">#CDCDCE</color>
 
 </resources>

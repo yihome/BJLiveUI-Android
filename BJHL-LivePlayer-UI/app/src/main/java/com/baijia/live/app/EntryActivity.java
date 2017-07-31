@@ -14,7 +14,6 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.baijiahulian.avsdk.liveplayer.LivePlayer;
 import com.baijiahulian.live.ui.LiveSDKWithUI;
 
 /**
@@ -90,18 +89,18 @@ public class EntryActivity extends AppCompatActivity {
                 } else {
                     sampleRate = Integer.valueOf(s);
                 }
-                LivePlayer.setAudiorecordSampleRate(sampleRate);
-                LivePlayer.enbaleAEC(enableAec);
+//                LivePlayer.setAudiorecordSampleRate(sampleRate);
+//                LivePlayer.enbaleAEC(enableAec);
                 Toast.makeText(EntryActivity.this, "已设置音频信息，采样率：" + String.valueOf(sampleRate) + "  是否开硬件消回音：" + enableAec, Toast.LENGTH_LONG).show();
             }
         });
     }
 
     private void initData() {
-        if (LivePlayer.isAecSupported()) {
-            tvIsAecSupported.setText("当前手机是否支持硬件消除回音: 支持");
-        } else {
-            tvIsAecSupported.setText("当前手机是否支持硬件消除回音: 不支持");
-        }
+//        if (LivePlayer.isAecSupported()) {
+//            tvIsAecSupported.setText("当前手机是否支持硬件消除回音: 支持");
+//        } else {
+//            tvIsAecSupported.setText("当前手机是否支持硬件消除回音: 不支持");
+//        }
     }
 }

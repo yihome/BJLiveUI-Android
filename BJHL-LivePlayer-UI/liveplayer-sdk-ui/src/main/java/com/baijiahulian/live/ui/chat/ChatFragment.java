@@ -161,7 +161,7 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
             if (message.getFrom().getType() == LPConstants.LPUserType.Teacher) {
                 color = ContextCompat.getColor(getContext(), R.color.live_blue);
             } else {
-                color = ContextCompat.getColor(getContext(), R.color.live_yellow);
+                color = ContextCompat.getColor(getContext(), R.color.secondary_text);
             }
 
             String name = message.getFrom().getName() + "：";

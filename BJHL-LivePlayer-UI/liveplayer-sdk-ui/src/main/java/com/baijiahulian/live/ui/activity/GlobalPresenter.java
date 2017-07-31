@@ -52,6 +52,7 @@ public class GlobalPresenter implements BasePresenter {
                     @Override
                     public void call(Void aVoid) {
                         routerListener.showMessageClassStart();
+                        routerListener.enableStudentSpeakMode();
                     }
                 });
         subscriptionOfClassEnd = routerListener.getLiveRoom().getObservableOfClassEnd()

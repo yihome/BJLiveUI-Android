@@ -9,7 +9,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/live_item_chat_bg"
-        android:textColor="@color/live_white"
+        android:textColor="@color/primary_text"
         android:padding="5dp"
         android:layout_marginBottom="5dp"/>
 
