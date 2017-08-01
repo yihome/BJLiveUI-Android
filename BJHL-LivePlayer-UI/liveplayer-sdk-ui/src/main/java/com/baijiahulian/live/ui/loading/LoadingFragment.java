@@ -43,17 +43,15 @@ public class LoadingFragment extends BaseFragment implements LoadingContract.Vie
         } else {
             setTechSupportVisibility(true);
         }
-        if (!presenter.isReconnect()) {
-            LiveRoom room;
-            if (presenter.isJoinCode()) {
-                room = LiveSDK.enterRoom(getActivity(), presenter.getCode(), presenter.getName(), presenter.getLaunchListener());
-            } else {
-                room = LiveSDK.enterRoom(getActivity(), presenter.getRoomId(), presenter.getUser().getNumber(),
-                        presenter.getUser().getName(), presenter.getUser().getType(), presenter.getUser().getAvatar(),
-                        presenter.getSign(), presenter.getLaunchListener());
-            }
-            presenter.setLiveRoom(room);
+        LiveRoom room;
+        if (presenter.isJoinCode()) {
+            room = LiveSDK.enterRoom(getActivity(), presenter.getCode(), presenter.getName(), presenter.getLaunchListener());
+        } else {
+            room = LiveSDK.enterRoom(getActivity(), presenter.getRoomId(), presenter.getUser().getNumber(),
+                    presenter.getUser().getName(), presenter.getUser().getType(), presenter.getUser().getAvatar(),
+                    presenter.getSign(), presenter.getLaunchListener());
         }
+        presenter.setLiveRoom(room);
     }
 
     private ObjectAnimator animator;

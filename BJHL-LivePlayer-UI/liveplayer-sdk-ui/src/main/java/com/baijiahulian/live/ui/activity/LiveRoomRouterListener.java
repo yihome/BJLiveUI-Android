@@ -87,8 +87,6 @@ public interface LiveRoomRouterListener {
 
     void sendImageMessage(String path);
 
-    void showReconnectSuccess();
-
     void showMessage(String message);
 
     void saveTeacherMediaStatus(IMediaModel model);
