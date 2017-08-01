@@ -180,7 +180,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_live_room);
-
         initViews();
 
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -385,7 +384,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                 switch ((int) error.getCode()) {
                     case LPError.CODE_ERROR_ROOMSERVER_LOSE_CONNECTION:
                     case LPError.CODE_ERROR_NETWORK_FAILURE:
-                    case LPError.CODE_ERROR_CHATSERVER_LOSE_CONNECTION:
+//                    case LPError.CODE_ERROR_CHATSERVER_LOSE_CONNECTION:
                         Observable.just(1).observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(new LPErrorPrintSubscriber<Integer>() {
                                     @Override
@@ -816,6 +815,22 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     }
 
     @Override
+    public void enableStudentSpeakMode() {
+        if (liveRoom.getCurrentUser().getType() == LPConstants.LPUserType.Student) {
+            if (liveRoom.getRoomType() == LPConstants.LPRoomType.Signal ||
+                    liveRoom.getRoomType() == LPConstants.LPRoomType.SmallGroup) {
+                if(liveRoom.isClassStarted()) {
+                    liveRoom.getRecorder().publish();
+                    attachLocalAudio();
+                    if(liveRoom.getAutoOpenCameraStatus()){
+                        attachLocalVideo();
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
     public void setFullScreenView(View view) {
         setZOrderMediaOverlayFalse(view);
         flBackground.addView(view, lpBackground);
@@ -1163,9 +1178,13 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                         } else if (liveRoom.getCurrentUser().getType() == LPConstants.LPUserType.Student) {
                             if (liveRoom.getRoomType() == LPConstants.LPRoomType.Signal ||
                                     liveRoom.getRoomType() == LPConstants.LPRoomType.SmallGroup) {
-                                liveRoom.getRecorder().publish();
-                                attachLocalAudio();
-                                attachLocalVideo();
+                                if(liveRoom.isClassStarted()) {
+                                    liveRoom.getRecorder().publish();
+                                    attachLocalAudio();
+                                    if(liveRoom.getAutoOpenCameraStatus()){
+                                        attachLocalVideo();
+                                    }
+                                }
                             }
                         }
 

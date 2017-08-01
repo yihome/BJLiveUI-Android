@@ -183,4 +183,5 @@ public interface LiveRoomRouterListener {
 
     void showDebugPanel(); //弹出debug面板
 
+    void enableStudentSpeakMode();
 }

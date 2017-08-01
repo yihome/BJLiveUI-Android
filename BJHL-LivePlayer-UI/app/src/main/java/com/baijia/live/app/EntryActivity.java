@@ -14,7 +14,6 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.baijiahulian.avsdk.liveplayer.LivePlayer;
 import com.baijiahulian.live.ui.LiveSDKWithUI;
 
 /**
