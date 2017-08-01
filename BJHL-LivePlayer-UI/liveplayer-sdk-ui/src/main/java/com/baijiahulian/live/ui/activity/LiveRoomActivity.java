@@ -39,7 +39,6 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.baijiahulian.avsdk.liveplayer.LivePlayer;
 import com.baijiahulian.live.ui.LiveSDKWithUI;
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.announcement.AnnouncementFragment;
@@ -649,11 +648,20 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public void showForceSpeakDlg(IMediaControlModel iMediaControlModel) {
         LPResRoomMediaControlModel lpResRoomMediaControlModel = (LPResRoomMediaControlModel) iMediaControlModel;
-        if (speakerPresenter != null && lpResRoomMediaControlModel != null && lpResRoomMediaControlModel.isVideoOn()) {
+        if (lpResRoomMediaControlModel == null) return;
+        if (speakerPresenter != null && getLiveRoom().getAutoOpenCameraStatus()) {
             speakerPresenter.attachVideo();
         }
+        int tipRes = R.string.live_force_speak_tip_all;
+        if (lpResRoomMediaControlModel.isAudioOn() && getLiveRoom().getAutoOpenCameraStatus()) {
+            tipRes = R.string.live_force_speak_tip_all;
+        } else if (lpResRoomMediaControlModel.isAudioOn()) {
+            tipRes = R.string.live_force_speak_tip_audio;
+        } else if (getLiveRoom().getAutoOpenCameraStatus()) {
+            tipRes = R.string.live_force_speak_tip_video;
+        }
         new MaterialDialog.Builder(this)
-                .content(R.string.live_force_speak_tip)
+                .content(tipRes)
                 .positiveText(getString(R.string.live_i_got_it))
                 .positiveColor(ContextCompat.getColor(LiveRoomActivity.this, R.color.live_blue))
                 .onPositive(new MaterialDialog.SingleButtonCallback() {
