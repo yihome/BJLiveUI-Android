@@ -376,22 +376,17 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     }
 
     @Override
-    public void setLiveRoom(LiveRoom liveRoom) {
+    public void setLiveRoom(final LiveRoom liveRoom) {
         this.liveRoom = liveRoom;
         liveRoom.setOnLiveRoomListener(new OnLiveRoomListener() {
             @Override
             public void onError(final LPError error) {
                 switch ((int) error.getCode()) {
                     case LPError.CODE_ERROR_ROOMSERVER_LOSE_CONNECTION:
+                        doReEnterRoom();
+                        break;
                     case LPError.CODE_ERROR_NETWORK_FAILURE:
-//                    case LPError.CODE_ERROR_CHATSERVER_LOSE_CONNECTION:
-                        Observable.just(1).observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(new LPErrorPrintSubscriber<Integer>() {
-                                    @Override
-                                    public void call(Integer integer) {
-                                        showNetError(error);
-                                    }
-                                });
+                        showMessage(error.getMessage());
                         break;
                     case LPError.CODE_ERROR_NETWORK_MOBILE:
                         if (!mobileNetworkDialogShown) {
@@ -810,10 +805,10 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         if (liveRoom.getCurrentUser().getType() == LPConstants.LPUserType.Student) {
             if (liveRoom.getRoomType() == LPConstants.LPRoomType.Signal ||
                     liveRoom.getRoomType() == LPConstants.LPRoomType.SmallGroup) {
-                if(liveRoom.isClassStarted()) {
+                if (liveRoom.isClassStarted()) {
                     liveRoom.getRecorder().publish();
                     attachLocalAudio();
-                    if(liveRoom.getAutoOpenCameraStatus()){
+                    if (liveRoom.getAutoOpenCameraStatus()) {
                         attachLocalVideo();
                     }
                 }
@@ -1169,10 +1164,10 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                         } else if (liveRoom.getCurrentUser().getType() == LPConstants.LPUserType.Student) {
                             if (liveRoom.getRoomType() == LPConstants.LPRoomType.Signal ||
                                     liveRoom.getRoomType() == LPConstants.LPRoomType.SmallGroup) {
-                                if(liveRoom.isClassStarted()) {
+                                if (liveRoom.isClassStarted()) {
                                     liveRoom.getRecorder().publish();
                                     attachLocalAudio();
-                                    if(liveRoom.getAutoOpenCameraStatus()){
+                                    if (liveRoom.getAutoOpenCameraStatus()) {
                                         attachLocalVideo();
                                     }
                                 }
