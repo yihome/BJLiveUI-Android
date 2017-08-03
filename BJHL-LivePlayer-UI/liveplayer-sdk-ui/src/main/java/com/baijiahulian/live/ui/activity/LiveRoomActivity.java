@@ -778,7 +778,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                                                 break;
                                         }
                                         builder.append("\n" + userMediaModels.get(i).getUser().getName() + "  ↓ ")
-                                                .append("\nvideoBytesPerSecond:" + videoBytesPerSecond + "  audioBytesPerSecond:" + audioBytesPerSecond
+                                                .append("\nvideoBytesPerSecond:" + videoBytesPerSecond * 8 / 1024 + "kb/s  audioBytesPerSecond:" + audioBytesPerSecond * 8 / 1024 + "kb/s"
                                                         + "\nvideoBufferLength:" + videoBufferLength + "  audioBufferLength:" + audioBufferLength
                                                         + "\nvideoLossRate:" + videoLossRate + "  audioLossRate:" + audioLossRate
                                                         + "\nLinkType:" + tcpOrUdp
