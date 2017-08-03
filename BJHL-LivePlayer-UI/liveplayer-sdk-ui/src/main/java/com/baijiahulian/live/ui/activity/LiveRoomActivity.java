@@ -207,9 +207,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         loadingFragment.setArguments(args);
         LoadingPresenter loadingPresenter;
         if (roomId == -1) {
-            loadingPresenter = new LoadingPresenter(loadingFragment, code, name, false);
+            loadingPresenter = new LoadingPresenter(loadingFragment, code, name);
         } else {
-            loadingPresenter = new LoadingPresenter(loadingFragment, roomId, sign, enterUser, false);
+            loadingPresenter = new LoadingPresenter(loadingFragment, roomId, sign, enterUser);
         }
         bindVP(loadingFragment, loadingPresenter);
         addFragment(R.id.activity_live_room_loading, loadingFragment);
@@ -277,7 +277,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                     Bundle args = new Bundle();
                     args.putBoolean("show_tech_support", shouldShowTechSupport);
                     loadingFragment.setArguments(args);
-                    LoadingPresenter loadingPresenter = new LoadingPresenter(loadingFragment, code, nickName, false);
+                    LoadingPresenter loadingPresenter = new LoadingPresenter(loadingFragment, code, nickName);
                     bindVP(loadingFragment, loadingPresenter);
                     addFragment(R.id.activity_live_room_loading, loadingFragment);
                 }
@@ -385,22 +385,17 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     }
 
     @Override
-    public void setLiveRoom(LiveRoom liveRoom) {
+    public void setLiveRoom(final LiveRoom liveRoom) {
         this.liveRoom = liveRoom;
         liveRoom.setOnLiveRoomListener(new OnLiveRoomListener() {
             @Override
             public void onError(final LPError error) {
                 switch ((int) error.getCode()) {
                     case LPError.CODE_ERROR_ROOMSERVER_LOSE_CONNECTION:
+                        doReEnterRoom();
+                        break;
                     case LPError.CODE_ERROR_NETWORK_FAILURE:
-//                    case LPError.CODE_ERROR_CHATSERVER_LOSE_CONNECTION:
-                        Observable.just(1).observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(new LPErrorPrintSubscriber<Integer>() {
-                                    @Override
-                                    public void call(Integer integer) {
-                                        showNetError(error);
-                                    }
-                                });
+                        showMessage(error.getMessage());
                         break;
                     case LPError.CODE_ERROR_NETWORK_MOBILE:
                         if (!mobileNetworkDialogShown) {
@@ -1149,9 +1144,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         loadingFragment.setArguments(args);
         LoadingPresenter loadingPresenter;
         if (roomId == -1) {
-            loadingPresenter = new LoadingPresenter(loadingFragment, code, name, false);
+            loadingPresenter = new LoadingPresenter(loadingFragment, code, name);
         } else {
-            loadingPresenter = new LoadingPresenter(loadingFragment, roomId, sign, enterUser, false);
+            loadingPresenter = new LoadingPresenter(loadingFragment, roomId, sign, enterUser);
         }
         bindVP(loadingFragment, loadingPresenter);
         addFragment(R.id.activity_live_room_loading, loadingFragment);
@@ -1545,10 +1540,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public void sendImageMessage(String path) {
         chatPresenter.sendImageMessage(path);
-    }
-
-    @Override
-    public void showReconnectSuccess() {
     }
 
     public void showSavePicDialog(byte[] bmpArray) {

@@ -35,8 +35,6 @@ interface LoadingContract {
 
         void setLiveRoom(LiveRoom liveRoom);
 
-        boolean isReconnect();
-
         boolean isJoinCode();
     }
 }

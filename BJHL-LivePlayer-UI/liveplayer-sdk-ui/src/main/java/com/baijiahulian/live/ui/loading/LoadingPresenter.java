@@ -5,7 +5,6 @@ import com.baijiahulian.livecore.context.LPError;
 import com.baijiahulian.livecore.context.LiveRoom;
 import com.baijiahulian.livecore.launch.LPLaunchListener;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
-import com.baijiahulian.livecore.utils.LPSDKTaskQueue;
 
 /**
  * Created by Shubo on 2017/2/14.
@@ -18,22 +17,19 @@ public class LoadingPresenter implements LoadingContract.Presenter {
     private LoadingContract.View view;
     private String code, name, sign;
     private long roomId;
-    private boolean isReconnecting;
     private IUserModel userModel;
     private boolean isJoinCode;
 
-    public LoadingPresenter(LoadingContract.View view, String code, String name, final boolean isReconnecting) {
+    public LoadingPresenter(LoadingContract.View view, String code, String name) {
         this.view = view;
         this.code = code;
         this.name = name;
-        this.isReconnecting = isReconnecting;
         isJoinCode = true;
         initListener();
     }
 
-    public LoadingPresenter(LoadingContract.View view, long roomId, String sign, IUserModel model, final boolean isReconnecting) {
+    public LoadingPresenter(LoadingContract.View view, long roomId, String sign, IUserModel model) {
         this.view = view;
-        this.isReconnecting = isReconnecting;
         this.roomId = roomId;
         this.sign = sign;
         this.userModel = model;
@@ -58,12 +54,8 @@ public class LoadingPresenter implements LoadingContract.Presenter {
 
             @Override
             public void onLaunchSuccess(LiveRoom liveRoom) {
-                if (isReconnecting) {
-                    routerListener.showReconnectSuccess();
-                } else {
-                    routerListener.setLiveRoom(liveRoom);
-                    routerListener.navigateToMain();
-                }
+                routerListener.setLiveRoom(liveRoom);
+                routerListener.navigateToMain();
             }
         };
     }
@@ -108,10 +100,6 @@ public class LoadingPresenter implements LoadingContract.Presenter {
         routerListener.setLiveRoom(liveRoom);
     }
 
-    @Override
-    public boolean isReconnect() {
-        return isReconnecting;
-    }
 
     @Override
     public boolean isJoinCode() {
@@ -120,10 +108,6 @@ public class LoadingPresenter implements LoadingContract.Presenter {
 
     @Override
     public void subscribe() {
-        if (isReconnecting) {
-            LPSDKTaskQueue queue = routerListener.getLiveRoom().createReconnectTaskQueue(launchListener);
-            queue.start();
-        }
     }
 
     @Override
