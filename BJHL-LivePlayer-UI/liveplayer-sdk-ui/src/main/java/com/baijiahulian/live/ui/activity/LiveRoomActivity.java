@@ -414,7 +414,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                                     .build()
                                     .show();
                         } else {
-                            showMessage(getString(R.string.live_mobile_network_hint));
+                            showMessage(getString(R.string.live_mobile_network_hint_less));
                         }
                         break;
                     case LPError.CODE_ERROR_LOGIN_CONFLICT:
@@ -1023,15 +1023,15 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         if (PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(LiveRoomActivity.this, Manifest.permission.CAMERA)) {
             return true;
         } else {
-            if (Build.VERSION.SDK_INT >= 23) {
-                if (ActivityCompat.shouldShowRequestPermissionRationale(LiveRoomActivity.this, Manifest.permission.CAMERA)) {
-                    ActivityCompat.requestPermissions(LiveRoomActivity.this, new String[]{Manifest.permission.CAMERA}, REQUEST_CODE_PERMISSION_CAMERA);
-                } else {
-                    showSystemSettingDialog(REQUEST_CODE_PERMISSION_CAMERA);
-                }
-            } else {
+//            if (Build.VERSION.SDK_INT >= 23) {
+//                if (ActivityCompat.shouldShowRequestPermissionRationale(LiveRoomActivity.this, Manifest.permission.CAMERA)) {
+//                    ActivityCompat.requestPermissions(LiveRoomActivity.this, new String[]{Manifest.permission.CAMERA}, REQUEST_CODE_PERMISSION_CAMERA);
+//                } else {
+//                    showSystemSettingDialog(REQUEST_CODE_PERMISSION_CAMERA);
+//                }
+//            } else {
                 ActivityCompat.requestPermissions(LiveRoomActivity.this, new String[]{Manifest.permission.CAMERA}, REQUEST_CODE_PERMISSION_CAMERA);
-            }
+//            }
         }
         return false;
     }
@@ -1040,15 +1040,15 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         if (PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(LiveRoomActivity.this, Manifest.permission.RECORD_AUDIO)) {
             return true;
         } else {
-            if (Build.VERSION.SDK_INT >= 23) {
-                if (ActivityCompat.shouldShowRequestPermissionRationale(LiveRoomActivity.this, Manifest.permission.RECORD_AUDIO)) {
-                    ActivityCompat.requestPermissions(LiveRoomActivity.this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_CODE_PERMISSION_MIC);
-                } else {
-                    showSystemSettingDialog(REQUEST_CODE_PERMISSION_MIC);
-                }
-            } else {
+//            if (Build.VERSION.SDK_INT >= 23) {
+//                if (ActivityCompat.shouldShowRequestPermissionRationale(LiveRoomActivity.this, Manifest.permission.RECORD_AUDIO)) {
+//                    ActivityCompat.requestPermissions(LiveRoomActivity.this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_CODE_PERMISSION_MIC);
+//                } else {
+//                    showSystemSettingDialog(REQUEST_CODE_PERMISSION_MIC);
+//                }
+//            } else {
                 ActivityCompat.requestPermissions(LiveRoomActivity.this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_CODE_PERMISSION_MIC);
-            }
+//            }
         }
         return false;
     }

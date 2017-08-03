@@ -24,6 +24,7 @@ import com.baijiahulian.livecore.wrapper.LPRecorder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -193,7 +194,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                         if (position == -1) { // 未在speaker列表
                             return;
                         }
-                        if (position == _displayPresenterSection) {
+                        if (position < _displayRecordSection) {
                             view.notifyItemChanged(position);
                             printSections();
                             return;
@@ -283,6 +284,13 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                 });
 
         subscriptionOfPresenterChange = routerListener.getLiveRoom().getSpeakQueueVM().getObservableOfPresenterChange()
+                .delay(100, TimeUnit.MILLISECONDS)
+                .filter(new Func1<String, Boolean>() {
+                    @Override
+                    public Boolean call(String s) {
+                        return !routerListener.isTeacherOrAssistant();
+                    }
+                })
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new LPErrorPrintSubscriber<String>() {
                     @Override
@@ -416,7 +424,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                 .filter(new Func1<String, Boolean>() {
                     @Override
                     public Boolean call(String s) {
-                        return routerListener.getLiveRoom().getPresenterUser() == null ||
+                        return routerListener.getLiveRoom().getPresenterUser() != null &&
                                 routerListener.getLiveRoom().getPresenterUser().getUserId().equals(s); // 主讲人退出教室
                     }
                 })

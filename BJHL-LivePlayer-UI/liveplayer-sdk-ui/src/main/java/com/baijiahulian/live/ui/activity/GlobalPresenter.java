@@ -9,11 +9,12 @@ import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.context.LPError;
 import com.baijiahulian.livecore.listener.OnPhoneRollCallListener;
 import com.baijiahulian.livecore.models.LPJsonModel;
-import com.baijiahulian.livecore.models.LPSpeakInviteModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.models.imodels.IUserInModel;
 import com.baijiahulian.livecore.models.responsedebug.LPResRoomDebugModel;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
+
+import java.util.concurrent.TimeUnit;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -93,7 +94,7 @@ public class GlobalPresenter implements BasePresenter {
                             return !routerListener.isTeacherOrAssistant() && iMediaModel.getUser().getType() == LPConstants.LPUserType.Teacher;
                         }
                     })
-//                    .throttleFirst(500, TimeUnit.MILLISECONDS)
+                    .throttleLast(500, TimeUnit.MILLISECONDS)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new LPErrorPrintSubscriber<IMediaModel>() {
                         @Override
@@ -104,20 +105,12 @@ public class GlobalPresenter implements BasePresenter {
                             if (iMediaModel.isVideoOn() && iMediaModel.isAudioOn()) {
                                 if (!teacherVideoOn || !teacherAudioOn) {
                                     routerListener.showMessageTeacherOpenAV();
-//                                    if (!isVideoManipulated && routerListener.getCurrentVideoUser() == null) {
-//                                        routerListener.playVideo(iMediaModel.getUser().getUserId());
-//                                        routerListener.setCurrentVideoUser(iMediaModel);
-//                                    }
                                 }
                             } else if (iMediaModel.isVideoOn()) {
                                 if (teacherAudioOn && teacherVideoOn) {
                                     routerListener.showMessageTeacherCloseAudio();
                                 } else if (!teacherVideoOn) {
                                     routerListener.showMessageTeacherOpenVideo();
-//                                    if (!isVideoManipulated && routerListener.getCurrentVideoUser() == null) {
-//                                        routerListener.playVideo(iMediaModel.getUser().getUserId());
-//                                        routerListener.setCurrentVideoUser(iMediaModel);
-//                                    }
                                 }
                             } else if (iMediaModel.isAudioOn()) {
                                 if (teacherAudioOn && teacherVideoOn) {
