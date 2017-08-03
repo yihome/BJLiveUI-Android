@@ -2,7 +2,8 @@ package com.baijiahulian.live.ui.speakerspanel;
 
 import android.content.Context;
 
-import com.baijiahulian.avsdk.liveplayer.CameraGLSurfaceView;
+import com.baijia.baijiashilian.liveplayer.CameraGLSurfaceView;
+
 
 /**
  * Created by Shubo on 2017/6/10.

@@ -35,10 +35,12 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.baijia.baijiashilian.liveplayer.LivePlayerInfo;
 import com.baijiahulian.live.ui.LiveSDKWithUI;
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.announcement.AnnouncementFragment;
@@ -104,11 +106,15 @@ import com.baijiahulian.livecore.models.imodels.IUserModel;
 import com.baijiahulian.livecore.models.roomresponse.LPResRoomMediaControlModel;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 import com.baijiahulian.livecore.wrapper.exception.NotInitializedException;
+import com.baijiahulian.livecore.wrapper.model.LPAVMediaModel;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import rx.Observable;
@@ -156,7 +162,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private OrientationEventListener orientationEventListener; //处理屏幕旋转时本地录制视频的方向
     private int oldRotation;
 
-    private Subscription subscriptionOfLoginConflict;
+    private Subscription subscriptionOfLoginConflict, subscriptionOfStreamInfo, subscriptionOfOnlineUserDebug;
 
     private boolean isClearScreen;//是否已经清屏，作用于视频采集和远程视频ui的调整
     private String code, name;
@@ -174,6 +180,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private EditText etDebugAecDelay;
     private int aecMode = 0, aecmMode = 0, audioSource = 0, delay;
     private boolean isCommunication = true;
+    private TextView tvStreamInfo;
+    //    private List<IUserModel> userModels;
+    private List<IMediaModel> userMediaModels;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -712,7 +721,87 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         return liveRoom.getRoomType();
     }
 
-    public void showDebugPanel() {
+
+    @Override
+    public void showDebugBtn() {
+        if (leftMenuFragment != null) {
+            leftMenuFragment.showDebugBtn();
+        }
+    }
+
+    @Override
+    public void showStreamDebugPanel() {
+        userMediaModels = getLiveRoom().getSpeakQueueVM().getSpeakQueueList();
+        subscriptionOfOnlineUserDebug = getLiveRoom().getSpeakQueueVM().getObservableOfMediaNew()
+                .mergeWith(getLiveRoom().getSpeakQueueVM().getObservableOfMediaChange())
+                .mergeWith(getLiveRoom().getSpeakQueueVM().getObservableOfMediaClose())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<IMediaModel>() {
+                    @Override
+                    public void call(IMediaModel mediaModel) {
+                        userMediaModels = getLiveRoom().getSpeakQueueVM().getSpeakQueueList();
+                    }
+                });
+
+        MaterialDialog dlg = new MaterialDialog.Builder(this)
+                .title("流信息")
+                .customView(R.layout.dlg_lp_debug_stream, true)
+                .cancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        RxUtils.unSubscribe(subscriptionOfStreamInfo);
+                        RxUtils.unSubscribe(subscriptionOfOnlineUserDebug);
+                    }
+                }).build();
+        tvStreamInfo = (TextView) dlg.getCustomView().findViewById(R.id.tv_dlg_debug_stream);
+        subscriptionOfStreamInfo = Observable.interval(1500, TimeUnit.MILLISECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<Long>() {
+                    @Override
+                    public void call(Long aLong) {
+                        if (userMediaModels != null && userMediaModels.size() > 0) {
+                            StringBuilder builder = new StringBuilder();
+                            for (int i = 0; i < userMediaModels.size(); i++) {
+                                ConcurrentHashMap<Integer, LPAVMediaModel> map = getLiveRoom().getPlayer().getChmUserStream();
+                                if (map != null && map.size() > 0) {
+                                    LPAVMediaModel mediaModel = map.get(Integer.valueOf(userMediaModels.get(i).getUser().getUserId()));
+                                    if (mediaModel != null) {
+                                        LivePlayerInfo info = getLiveRoom().getLivePlayer().getStreamInfo(mediaModel.streamId);
+                                        int videoBytesPerSecond = (int) ((HashMap) info.getPlayInfoObject().get("stream")).get("videoBytesPerSecond");
+                                        int audioBytesPerSecond = (int) ((HashMap) info.getPlayInfoObject().get("stream")).get("audioBytesPerSecond");
+                                        double videoBufferLength = (double) ((HashMap) info.getPlayInfoObject().get("stream")).get("videoBufferLength");
+                                        double audioBufferLength = (double) ((HashMap) info.getPlayInfoObject().get("stream")).get("audioBufferLength");
+                                        int videoLossRate = (int) ((HashMap) info.getPlayInfoObject().get("stream")).get("videoLossRate");
+                                        int audioLossRate = (int) ((HashMap) info.getPlayInfoObject().get("stream")).get("audioLossRate");
+                                        String tcpOrUdp = "";
+                                        switch (mediaModel.userLinkType) {
+                                            case TCP:
+                                                tcpOrUdp = "TCP";
+                                                break;
+                                            case UDP:
+                                                tcpOrUdp = "UDP";
+                                                break;
+                                        }
+                                        builder.append("\n" + userMediaModels.get(i).getUser().getName() + "  ↓ ")
+                                                .append("\nvideoBytesPerSecond:" + videoBytesPerSecond + "  audioBytesPerSecond:" + audioBytesPerSecond
+                                                        + "\nvideoBufferLength:" + videoBufferLength + "  audioBufferLength:" + audioBufferLength
+                                                        + "\nvideoLossRate:" + videoLossRate + "  audioLossRate:" + audioLossRate
+                                                        + "\nLinkType:" + tcpOrUdp
+                                                        + "\n=====================");
+                                    }
+                                }
+                            }
+                            tvStreamInfo.setText(builder.toString());
+                        } else {
+                            tvStreamInfo.setText("没有发言用户");
+                        }
+                    }
+                });
+        dlg.show();
+    }
+
+    @Override
+    public void showHuiyinDebugPanel() {
         MaterialDialog dlg = new MaterialDialog.Builder(this)
                 .title("debug面板")
                 .customView(R.layout.dlg_lp_debug_panel, true)
@@ -819,10 +908,10 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         if (liveRoom.getCurrentUser().getType() == LPConstants.LPUserType.Student) {
             if (liveRoom.getRoomType() == LPConstants.LPRoomType.Signal ||
                     liveRoom.getRoomType() == LPConstants.LPRoomType.SmallGroup) {
-                if(liveRoom.isClassStarted()) {
+                if (liveRoom.isClassStarted()) {
                     liveRoom.getRecorder().publish();
                     attachLocalAudio();
-                    if(liveRoom.getAutoOpenCameraStatus()){
+                    if (liveRoom.getAutoOpenCameraStatus()) {
                         attachLocalVideo();
                     }
                 }
@@ -1178,10 +1267,10 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                         } else if (liveRoom.getCurrentUser().getType() == LPConstants.LPUserType.Student) {
                             if (liveRoom.getRoomType() == LPConstants.LPRoomType.Signal ||
                                     liveRoom.getRoomType() == LPConstants.LPRoomType.SmallGroup) {
-                                if(liveRoom.isClassStarted()) {
+                                if (liveRoom.isClassStarted()) {
                                     liveRoom.getRecorder().publish();
                                     attachLocalAudio();
-                                    if(liveRoom.getAutoOpenCameraStatus()){
+                                    if (liveRoom.getAutoOpenCameraStatus()) {
                                         attachLocalVideo();
                                     }
                                 }

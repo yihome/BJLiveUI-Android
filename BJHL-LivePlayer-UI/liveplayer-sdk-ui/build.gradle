@@ -25,7 +25,7 @@ dependencies {
 
     compile 'com.squareup.picasso:picasso:2.5.2'
 
-    compile 'com.baijia.common:common-image-crop:1.2.0' // image crop
+    compile 'com.baijia.common:common-image-crop:1.2.1' // image crop
 
     compile 'com.afollestad.material-dialogs:commons:0.9.4.5'
 

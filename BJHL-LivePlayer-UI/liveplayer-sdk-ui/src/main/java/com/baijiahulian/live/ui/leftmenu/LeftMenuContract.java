@@ -10,6 +10,8 @@ import com.baijiahulian.live.ui.base.BaseView;
 interface LeftMenuContract {
     interface View extends BaseView<Presenter> {
         void notifyClearScreenChanged(boolean isCleared);
+
+        void showDebugBtn();
     }
 
     interface Presenter extends BasePresenter {
@@ -28,5 +30,9 @@ interface LeftMenuContract {
          * 自己是否被禁言（student）
          */
         boolean isForbiddenByTeacher();
+
+        void showHuiyinDebugPanel();
+
+        void showStreamDebugPanel();
     }
 }

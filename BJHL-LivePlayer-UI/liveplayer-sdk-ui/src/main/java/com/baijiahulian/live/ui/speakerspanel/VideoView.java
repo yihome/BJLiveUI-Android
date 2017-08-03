@@ -15,7 +15,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.baijiahulian.avsdk.liveplayer.ViESurfaceViewRenderer;
+import com.baijia.baijiashilian.liveplayer.ViESurfaceViewRenderer;
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.utils.DisplayUtils;
 import com.squareup.picasso.Picasso;

@@ -25,7 +25,7 @@ public class MessageSendPresenter implements MessageSendContract.Presenter {
         routerListener.getLiveRoom().getChatVM().sendMessage(message);
         if (!TextUtils.isEmpty(message)) {
             if (message.startsWith("/dev")) {
-                routerListener.showDebugPanel();
+                routerListener.showDebugBtn();
             }
         }
         view.showMessageSuccess();

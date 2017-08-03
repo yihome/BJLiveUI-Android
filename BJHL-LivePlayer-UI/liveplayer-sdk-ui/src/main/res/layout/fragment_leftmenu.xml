@@ -10,11 +10,32 @@
         android:layout_height="wrap_content"
         android:layout_marginRight="@dimen/activity_live_room_margin"
         android:src="@drawable/live_ic_clear"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
     <ImageView
         android:id="@+id/fragment_left_menu_send_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/live_ic_send_msg" />
+
+    <TextView
+        android:id="@+id/fragment_left_menu_stream"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:text="流信息"
+        android:textColor="#039479"
+        android:textSize="17sp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/fragment_left_menu_huiyin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:text="回音配置"
+        android:textColor="#15bae4"
+        android:textSize="17sp"
+        android:visibility="gone" />
+
 </LinearLayout>

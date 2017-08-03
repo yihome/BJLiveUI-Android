@@ -52,6 +52,16 @@ public class LeftMenuPresenter implements LeftMenuContract.Presenter {
     }
 
     @Override
+    public void showHuiyinDebugPanel() {
+        routerListener.showHuiyinDebugPanel();
+    }
+
+    @Override
+    public void showStreamDebugPanel() {
+        routerListener.showStreamDebugPanel();
+    }
+
+    @Override
     public void setRouter(LiveRoomRouterListener liveRoomRouterListener) {
         routerListener = liveRoomRouterListener;
     }
