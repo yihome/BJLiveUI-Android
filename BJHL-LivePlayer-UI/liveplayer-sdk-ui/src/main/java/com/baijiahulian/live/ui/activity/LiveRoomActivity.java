@@ -907,7 +907,13 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                     liveRoom.getRecorder().publish();
                     attachLocalAudio();
                     if (liveRoom.getAutoOpenCameraStatus()) {
-                        attachLocalVideo();
+                        Observable.timer(500, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(new LPErrorPrintSubscriber<Long>() {
+                                    @Override
+                                    public void call(Long aLong) {
+                                        attachLocalVideo();
+                                    }
+                                });
                     }
                 }
             }
@@ -1260,18 +1266,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                                 liveRoom.requestCloudRecord(true);
                             }
                         } else if (liveRoom.getCurrentUser().getType() == LPConstants.LPUserType.Student) {
-                            if (liveRoom.getRoomType() == LPConstants.LPRoomType.Signal ||
-                                    liveRoom.getRoomType() == LPConstants.LPRoomType.SmallGroup) {
-                                if (liveRoom.isClassStarted()) {
-                                    liveRoom.getRecorder().publish();
-                                    attachLocalAudio();
-                                    if (liveRoom.getAutoOpenCameraStatus()) {
-                                        attachLocalVideo();
-                                    }
-                                }
-                            }
+                            enableStudentSpeakMode();
                         }
-
                         if (!isTeacherOrAssistant() && liveRoom.getTeacherUser() == null)
                             showMessage("老师不在教室");
                     }

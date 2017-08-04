@@ -18,7 +18,7 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
 
     private LiveRoomRouterListener liveRoomRouterListener;
 
-    private Subscription subscriptionOfCamera, subscriptionOfMic, subscriptionOfVolume;
+    private Subscription subscriptionOfCamera, subscriptionOfMic, subscriptionOfVolume, subscriptionOfClassStart;
 
     public RightBottomMenuPresenter(RightBottomMenuContract.View view) {
         this.view = view;
@@ -155,9 +155,26 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
             //竖屏
             view.showZoomIn();
         }
-        if (liveRoomRouterListener.getLiveRoom().getCurrentUser().getType() == LPConstants.LPUserType.Student &&
-                liveRoomRouterListener.getLiveRoom().getRoomType() != LPConstants.LPRoomType.Multi) {
-            view.enableSpeakerMode();
+        subscriptionOfClassStart = liveRoomRouterListener.getLiveRoom().getObservableOfClassStart()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<Void>() {
+                    @Override
+                    public void call(Void aVoid) {
+                        if ((liveRoomRouterListener.getLiveRoom().getCurrentUser().getType() == LPConstants.LPUserType.Student &&
+                                liveRoomRouterListener.getLiveRoom().getRoomType() != LPConstants.LPRoomType.Multi) || liveRoomRouterListener.isTeacherOrAssistant()) {
+                            view.enableSpeakerMode();
+                        } else {
+                            view.disableSpeakerMode();
+                        }
+                    }
+                });
+        if(liveRoomRouterListener.getLiveRoom().getCurrentUser().getType() == LPConstants.LPUserType.Student &&
+                liveRoomRouterListener.getLiveRoom().getRoomType() != LPConstants.LPRoomType.Multi){
+            if(liveRoomRouterListener.getLiveRoom().isClassStarted()){
+                view.enableSpeakerMode();
+            }else{
+                view.disableSpeakerMode();
+            }
         }
     }
 
