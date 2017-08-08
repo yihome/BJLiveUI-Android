@@ -15,6 +15,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.PersistableBundle;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.IdRes;
@@ -185,6 +186,16 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private List<IMediaModel> userMediaModels;
 
     @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(outState, outPersistentState);
+        outState.putString("code", code);
+        outState.putString("name", name);
+        outState.putLong("roomId", roomId);
+        outState.putString("sign", sign);
+        outState.putSerializable("user", enterUser);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         super.onCreate(savedInstanceState);
@@ -194,12 +205,19 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             onConfigurationChanged(getResources().getConfiguration());
         }
-
-        code = getIntent().getStringExtra("code");
-        name = getIntent().getStringExtra("name");
-        roomId = getIntent().getLongExtra("roomId", -1);
-        sign = getIntent().getStringExtra("sign");
-        enterUser = (IUserModel) getIntent().getSerializableExtra("user");
+        if(savedInstanceState == null) {
+            code = getIntent().getStringExtra("code");
+            name = getIntent().getStringExtra("name");
+            roomId = getIntent().getLongExtra("roomId", -1);
+            sign = getIntent().getStringExtra("sign");
+            enterUser = (IUserModel) getIntent().getSerializableExtra("user");
+        }else{
+            code = savedInstanceState.getString("code");
+            name = savedInstanceState.getString("name");
+            roomId = savedInstanceState.getLong("roomId", -1);
+            sign = savedInstanceState.getString("sign");
+            enterUser = (IUserModel) savedInstanceState.getSerializable("user");
+        }
 
         loadingFragment = new LoadingFragment();
         Bundle args = new Bundle();
