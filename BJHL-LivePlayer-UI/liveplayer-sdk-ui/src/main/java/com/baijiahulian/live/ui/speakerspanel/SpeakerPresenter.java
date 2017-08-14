@@ -193,7 +193,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                         if (position == -1) { // 未在speaker列表
                             return;
                         }
-                        if (position == _displayPresenterSection) {
+                        if (position < _displayRecordSection) {
                             view.notifyItemChanged(position);
                             printSections();
                             return;
@@ -283,12 +283,16 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                 });
 
         subscriptionOfPresenterChange = routerListener.getLiveRoom().getSpeakQueueVM().getObservableOfPresenterChange()
+                .filter(new Func1<String, Boolean>() {
+                    @Override
+                    public Boolean call(String s) {
+                        return !routerListener.isTeacherOrAssistant() && _displayPresenterSection != -1;
+                    }
+                })
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new LPErrorPrintSubscriber<String>() {
                     @Override
                     public void call(String newPresenter) {
-                        if (_displayPresenterSection == -1)
-                            return;
                         if (TextUtils.isEmpty(newPresenter)) {
                             // presenter is null
                             return;
@@ -416,7 +420,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                 .filter(new Func1<String, Boolean>() {
                     @Override
                     public Boolean call(String s) {
-                        return routerListener.getLiveRoom().getPresenterUser() == null ||
+                        return routerListener.getLiveRoom().getPresenterUser() != null &&
                                 routerListener.getLiveRoom().getPresenterUser().getUserId().equals(s); // 主讲人退出教室
                     }
                 })
@@ -450,7 +454,6 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                                 && routerListener.getLiveRoom().getCurrentUser().getType() != LPConstants.LPUserType.Teacher;
                     }
                 })
-                .observeOn(AndroidSchedulers.mainThread())
                 .filter(new Func1<Boolean, Boolean>() {
                     @Override
                     public Boolean call(Boolean aBoolean) {
@@ -461,6 +464,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                                         routerListener.getLiveRoom().getTeacherUser().getUserId());
                     }
                 })
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new LPErrorPrintSubscriber<Boolean>() {
                     @Override
                     public void call(Boolean aBoolean) {
@@ -469,7 +473,9 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                         String teacherId = routerListener.getLiveRoom().getTeacherUser().getUserId();
                         if (displayList.indexOf(teacherId) >= _displayPresenterSection
                                 && displayList.indexOf(teacherId) < _displaySpeakerSection
-                                && !fullScreenKVO.getParameter().equals(teacherId)) {
+                                && !fullScreenKVO.getParameter().equals(teacherId)
+                                && getSpeakModel(teacherId) != null
+                                && getSpeakModel(teacherId).isVideoOn()) {
                             fullScreenKVO.setParameter(teacherId);
                         }
                     }

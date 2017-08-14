@@ -28,7 +28,8 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
     private RightMenuContract.View view;
     private LPConstants.LPUserType currentUserType;
     private Subscription subscriptionOfMediaControl, subscriptionOfSpeakApplyCounter,
-            subscriptionOfClassEnd, subscriptionOfSpeakApplyResponse, subscriptionOfSpeakInvite;
+            subscriptionOfClassEnd, subscriptionOfSpeakApplyResponse, subscriptionOfSpeakInvite,
+            subscriptionOfClassStart;
     private int speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_NONE;
     private boolean isDrawing = false;
 
@@ -279,6 +280,17 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                     }
                 });
 
+        subscriptionOfClassStart = liveRoomRouterListener.getLiveRoom().getObservableOfClassStart()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<Void>() {
+                    @Override
+                    public void call(Void aVoid) {
+                        if (liveRoomRouterListener.getLiveRoom().getCurrentUser().getType() == LPConstants.LPUserType.Student &&
+                                liveRoomRouterListener.getLiveRoom().getRoomType() != LPConstants.LPRoomType.Multi) {
+                            speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_SPEAKING;
+                        }
+                    }
+                });
 
         if (liveRoomRouterListener.getLiveRoom().getCurrentUser().getType() == LPConstants.LPUserType.Student &&
                 liveRoomRouterListener.getLiveRoom().getRoomType() != LPConstants.LPRoomType.Multi) {
@@ -306,6 +318,8 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
         RxUtils.unSubscribe(subscriptionOfSpeakApplyCounter);
         RxUtils.unSubscribe(subscriptionOfSpeakApplyResponse);
         RxUtils.unSubscribe(subscriptionOfClassEnd);
+        RxUtils.unSubscribe(subscriptionOfSpeakInvite);
+        RxUtils.unSubscribe(subscriptionOfClassStart);
     }
 
     @Override

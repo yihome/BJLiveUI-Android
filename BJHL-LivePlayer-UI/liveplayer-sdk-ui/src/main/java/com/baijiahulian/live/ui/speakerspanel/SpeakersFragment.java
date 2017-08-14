@@ -92,6 +92,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
 
     @Override
     public void notifyItemChanged(int position) {
+        if (container == null) return;
         if (presenter.getItemViewType(position) == VIEW_TYPE_SPEAKER) {
             container.removeViewAt(position);
             container.addView(generateSpeakView(presenter.getSpeakModel(position)), position);
@@ -105,10 +106,10 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
             if (model == null) return;
             if (model.isVideoOn() && presenter.isAutoPlay()) {
                 VideoView videoView;
-                if(presenter.getWaterMark() != null) {
+                if (presenter.getWaterMark() != null) {
                     videoView = new VideoView(getActivity(), model.getUser().getName() + getString(R.string.live_presenter_hint),
                             presenter.getWaterMark().url, presenter.getWaterMark().pos);
-                }else{
+                } else {
                     videoView = new VideoView(getActivity(), model.getUser().getName());
                 }
                 container.addView(videoView, position, lpItem);
@@ -149,6 +150,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
 
     @Override
     public void notifyItemInserted(int position) {
+        if (container == null) return;
         switch (presenter.getItemViewType(position)) {
             case VIEW_TYPE_PPT:
 //                container.addView(presenter.getPPTView(), position);
@@ -242,6 +244,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
 
     @Override
     public void notifyItemDeleted(int position) {
+        if (container == null) return;
         if (container.getChildCount() <= position) return;
         container.removeViewAt(position);
         if (presenter.getItemViewType(position) == VIEW_TYPE_RECORD) {
@@ -312,6 +315,8 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
 
     @Override
     public void notifyPresenterVideoSizeChange(int position, int height, int width) {
+        if (container == null) return;
+
         if (container.getChildAt(position) instanceof VideoView) {
             ((VideoView) container.getChildAt(position)).resizeWaterMark(height, width);
         }

@@ -16,6 +16,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.PersistableBundle;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.IdRes;
@@ -187,6 +188,16 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private List<IMediaModel> userMediaModels;
 
     @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(outState, outPersistentState);
+        outState.putString("code", code);
+        outState.putString("name", name);
+        outState.putLong("roomId", roomId);
+        outState.putString("sign", sign);
+        outState.putSerializable("user", enterUser);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         super.onCreate(savedInstanceState);
@@ -196,12 +207,19 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             onConfigurationChanged(getResources().getConfiguration());
         }
-
-        code = getIntent().getStringExtra("code");
-        name = getIntent().getStringExtra("name");
-        roomId = getIntent().getLongExtra("roomId", -1);
-        sign = getIntent().getStringExtra("sign");
-        enterUser = (IUserModel) getIntent().getSerializableExtra("user");
+        if(savedInstanceState == null) {
+            code = getIntent().getStringExtra("code");
+            name = getIntent().getStringExtra("name");
+            roomId = getIntent().getLongExtra("roomId", -1);
+            sign = getIntent().getStringExtra("sign");
+            enterUser = (IUserModel) getIntent().getSerializableExtra("user");
+        }else{
+            code = savedInstanceState.getString("code");
+            name = savedInstanceState.getString("name");
+            roomId = savedInstanceState.getLong("roomId", -1);
+            sign = savedInstanceState.getString("sign");
+            enterUser = (IUserModel) savedInstanceState.getSerializable("user");
+        }
 
         loadingFragment = new LoadingFragment();
         Bundle args = new Bundle();
@@ -416,7 +434,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                                     .build()
                                     .show();
                         } else {
-                            showMessage(getString(R.string.live_mobile_network_hint));
+                            showMessage(getString(R.string.live_mobile_network_hint_less));
                         }
                         break;
                     case LPError.CODE_ERROR_LOGIN_CONFLICT:
@@ -920,7 +938,13 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                     liveRoom.getRecorder().publish();
                     attachLocalAudio();
                     if (liveRoom.getAutoOpenCameraStatus()) {
-                        attachLocalVideo();
+                        Observable.timer(500, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(new LPErrorPrintSubscriber<Long>() {
+                                    @Override
+                                    public void call(Long aLong) {
+                                        attachLocalVideo();
+                                    }
+                                });
                     }
                 }
             }
@@ -1036,15 +1060,15 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         if (PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(LiveRoomActivity.this, Manifest.permission.CAMERA)) {
             return true;
         } else {
-            if (Build.VERSION.SDK_INT >= 23) {
-                if (ActivityCompat.shouldShowRequestPermissionRationale(LiveRoomActivity.this, Manifest.permission.CAMERA)) {
-                    ActivityCompat.requestPermissions(LiveRoomActivity.this, new String[]{Manifest.permission.CAMERA}, REQUEST_CODE_PERMISSION_CAMERA);
-                } else {
-                    showSystemSettingDialog(REQUEST_CODE_PERMISSION_CAMERA);
-                }
-            } else {
+//            if (Build.VERSION.SDK_INT >= 23) {
+//                if (ActivityCompat.shouldShowRequestPermissionRationale(LiveRoomActivity.this, Manifest.permission.CAMERA)) {
+//                    ActivityCompat.requestPermissions(LiveRoomActivity.this, new String[]{Manifest.permission.CAMERA}, REQUEST_CODE_PERMISSION_CAMERA);
+//                } else {
+//                    showSystemSettingDialog(REQUEST_CODE_PERMISSION_CAMERA);
+//                }
+//            } else {
                 ActivityCompat.requestPermissions(LiveRoomActivity.this, new String[]{Manifest.permission.CAMERA}, REQUEST_CODE_PERMISSION_CAMERA);
-            }
+//            }
         }
         return false;
     }
@@ -1053,15 +1077,15 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         if (PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(LiveRoomActivity.this, Manifest.permission.RECORD_AUDIO)) {
             return true;
         } else {
-            if (Build.VERSION.SDK_INT >= 23) {
-                if (ActivityCompat.shouldShowRequestPermissionRationale(LiveRoomActivity.this, Manifest.permission.RECORD_AUDIO)) {
-                    ActivityCompat.requestPermissions(LiveRoomActivity.this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_CODE_PERMISSION_MIC);
-                } else {
-                    showSystemSettingDialog(REQUEST_CODE_PERMISSION_MIC);
-                }
-            } else {
+//            if (Build.VERSION.SDK_INT >= 23) {
+//                if (ActivityCompat.shouldShowRequestPermissionRationale(LiveRoomActivity.this, Manifest.permission.RECORD_AUDIO)) {
+//                    ActivityCompat.requestPermissions(LiveRoomActivity.this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_CODE_PERMISSION_MIC);
+//                } else {
+//                    showSystemSettingDialog(REQUEST_CODE_PERMISSION_MIC);
+//                }
+//            } else {
                 ActivityCompat.requestPermissions(LiveRoomActivity.this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_CODE_PERMISSION_MIC);
-            }
+//            }
         }
         return false;
     }
@@ -1273,18 +1297,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                                 liveRoom.requestCloudRecord(true);
                             }
                         } else if (liveRoom.getCurrentUser().getType() == LPConstants.LPUserType.Student) {
-                            if (liveRoom.getRoomType() == LPConstants.LPRoomType.Signal ||
-                                    liveRoom.getRoomType() == LPConstants.LPRoomType.SmallGroup) {
-                                if (liveRoom.isClassStarted()) {
-                                    liveRoom.getRecorder().publish();
-                                    attachLocalAudio();
-                                    if (liveRoom.getAutoOpenCameraStatus()) {
-                                        attachLocalVideo();
-                                    }
-                                }
-                            }
+                            enableStudentSpeakMode();
                         }
-
                         if (!isTeacherOrAssistant() && liveRoom.getTeacherUser() == null)
                             showMessage("老师不在教室");
                     }
