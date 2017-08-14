@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -31,6 +32,7 @@ import android.view.OrientationEventListener;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -756,17 +758,28 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                     }
                 });
 
-        MaterialDialog dlg = new MaterialDialog.Builder(this)
-                .title("流信息")
-                .customView(R.layout.dlg_lp_debug_stream, true)
-                .cancelListener(new DialogInterface.OnCancelListener() {
-                    @Override
-                    public void onCancel(DialogInterface dialog) {
-                        RxUtils.unSubscribe(subscriptionOfStreamInfo);
-                        RxUtils.unSubscribe(subscriptionOfOnlineUserDebug);
-                    }
-                }).build();
-        tvStreamInfo = (TextView) dlg.getCustomView().findViewById(R.id.tv_dlg_debug_stream);
+//        MaterialDialog dlg = new MaterialDialog.Builder(this)
+//                .title("流信息")
+//                .backgroundColor(Color.parseColor("#00000000"))
+//                .customView(R.layout.dlg_lp_debug_stream, true)
+//                .cancelListener(new DialogInterface.OnCancelListener() {
+//                    @Override
+//                    public void onCancel(DialogInterface dialog) {
+//                        RxUtils.unSubscribe(subscriptionOfStreamInfo);
+//                        RxUtils.unSubscribe(subscriptionOfOnlineUserDebug);
+//                    }
+//                }).build();
+        View layout = getLayoutInflater().inflate(R.layout.dlg_lp_debug_stream, null);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog dlg = builder.create();
+        dlg.setView(layout);
+
+        Window window = dlg.getWindow();
+        WindowManager.LayoutParams lp = window.getAttributes();
+        lp.alpha = 0.2f;
+        window.setAttributes(lp);
+
+        tvStreamInfo = (TextView) layout.findViewById(R.id.tv_dlg_debug_stream);
         subscriptionOfStreamInfo = Observable.interval(1500, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new LPErrorPrintSubscriber<Long>() {
