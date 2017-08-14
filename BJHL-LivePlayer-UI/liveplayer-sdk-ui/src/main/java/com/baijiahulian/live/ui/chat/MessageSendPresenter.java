@@ -22,12 +22,13 @@ public class MessageSendPresenter implements MessageSendContract.Presenter {
     @Override
     public void sendMessage(String message) {
         checkNotNull(routerListener);
-        routerListener.getLiveRoom().getChatVM().sendMessage(message);
         if (!TextUtils.isEmpty(message)) {
             if (message.startsWith("/dev")) {
                 routerListener.showDebugBtn();
+                return;
             }
         }
+        routerListener.getLiveRoom().getChatVM().sendMessage(message);
         view.showMessageSuccess();
     }
 
