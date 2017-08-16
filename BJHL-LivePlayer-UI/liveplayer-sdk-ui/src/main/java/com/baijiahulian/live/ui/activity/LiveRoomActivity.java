@@ -9,7 +9,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -629,7 +628,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     public View removeFullScreenView() {
         View view = flBackground.getChildAt(0);
         if (view == lppptFragment.getView()) {
-            lppptFragment.onPause();
+            lppptFragment.onStop();
         }
         flBackground.removeView(view);
         setZOrderMediaOverlayTrue(view);
@@ -956,7 +955,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         setZOrderMediaOverlayFalse(view);
         flBackground.addView(view, lpBackground);
         if (view == lppptFragment.getView()) {
-            lppptFragment.onResume();
+            lppptFragment.onStart();
         } else if (view instanceof RecorderView) {
             liveRoom.getRecorder().invalidVideo();
         }

@@ -50,6 +50,8 @@ public interface RightMenuContract {
         void showAutoSpeak();
 
         void showForceSpeak();
+
+        void hideUserList();
     }
 
     interface Presenter extends BasePresenter {

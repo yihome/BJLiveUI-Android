@@ -264,7 +264,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
     public View removeViewAt(int position) {
         View view = container.getChildAt(position);
         if (presenter.getPPTFragment().getView() == view) {
-            presenter.getPPTFragment().onPause();
+            presenter.getPPTFragment().onStop();
         }
         container.removeView(view);
         return view;
@@ -290,7 +290,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
         if (view.getParent() != null) return;
         container.addView(view, position, lpItem);
         if (presenter.getPPTFragment().getView() == view) {
-            presenter.getPPTFragment().onResume();
+            presenter.getPPTFragment().onStart();
             presenter.getPPTFragment().setOnSingleTapListener(new LPWhiteBoardView.OnSingleTapListener() {
                 @Override
                 public void onSingleTap(LPWhiteBoardView whiteBoardView) {

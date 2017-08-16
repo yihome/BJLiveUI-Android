@@ -173,6 +173,11 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
     }
 
     @Override
+    public void hideUserList() {
+        $.id(R.id.fragment_right_online_user).gone();
+    }
+
+    @Override
     public void setPresenter(RightMenuContract.Presenter presenter) {
         super.setBasePresenter(presenter);
         this.presenter = presenter;

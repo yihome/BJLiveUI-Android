@@ -177,11 +177,14 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
     public void subscribe() {
         checkNotNull(liveRoomRouterListener);
         currentUserType = liveRoomRouterListener.getLiveRoom().getCurrentUser().getType();
-        if (currentUserType == LPConstants.LPUserType.Teacher
-                || currentUserType == LPConstants.LPUserType.Assistant) {
+
+        if (liveRoomRouterListener.isTeacherOrAssistant()) {
             view.showTeacherRightMenu();
         } else {
             view.showStudentRightMenu();
+            if(liveRoomRouterListener.getLiveRoom().getPartnerConfig().liveHideUserList == 1){
+                view.hideUserList();
+            }
         }
 
         if (!liveRoomRouterListener.isTeacherOrAssistant()) {
