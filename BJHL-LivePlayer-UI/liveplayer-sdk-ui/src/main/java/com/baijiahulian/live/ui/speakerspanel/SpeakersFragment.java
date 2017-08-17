@@ -1,5 +1,6 @@
 package com.baijiahulian.live.ui.speakerspanel;
 
+import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -8,7 +9,12 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
+import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.baijiahulian.live.ui.R;
@@ -47,6 +53,8 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
     private LinearLayout container;
     private RecorderView recorderView;
     private ViewGroup.LayoutParams lpItem;
+    private TextView speakerRequest;
+    private HorizontalScrollView scrollView;
     private static final int SHRINK_THRESHOLD = 3;
 
     @Override
@@ -64,6 +72,8 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
     protected void init(Bundle savedInstanceState) {
         super.init(savedInstanceState);
         container = (LinearLayout) $.id(R.id.fragment_speakers_container).view();
+        speakerRequest = (TextView) $.id(R.id.fragment_speakers_new_request_toast).view();
+        scrollView = (HorizontalScrollView) $.id(R.id.fragment_speakers_scroll_view).view();
         lpItem = new ViewGroup.LayoutParams(DisplayUtils.dip2px(getActivity(), 100),
                 DisplayUtils.dip2px(getActivity(), 76));
     }
@@ -149,7 +159,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
     }
 
     @Override
-    public void notifyItemInserted(int position) {
+    public void notifyItemInserted(final int position) {
         if (container == null) return;
         switch (presenter.getItemViewType(position)) {
             case VIEW_TYPE_PPT:
@@ -231,6 +241,19 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
             case VIEW_TYPE_APPLY:
                 View applyView = generateApplyView(presenter.getApplyModel(position));
                 container.addView(applyView, position);
+                final ViewGroup.LayoutParams params = applyView.getLayoutParams();
+                WindowManager wm = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
+                if ((position + 1) * params.width > wm.getDefaultDisplay().getWidth())
+                    speakerRequest.setVisibility(View.VISIBLE);
+                speakerRequest.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        speakerRequest.setAnimation(createAnimation());
+                        speakerRequest.startAnimation(createAnimation());
+                        speakerRequest.setVisibility(View.GONE);
+                        scrollView.smoothScrollTo((position + 1) * params.width, 0);
+                    }
+                });
                 break;
             default:
                 break;
@@ -240,6 +263,12 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                 && container.getChildCount() > 0) {
             setBackGroundVisible(true);
         }
+    }
+
+    private Animation createAnimation() {
+        TranslateAnimation animation = new TranslateAnimation(0, 2 * speakerRequest.getWidth(), 0, 0);
+        animation.setDuration(500);
+        return animation;
     }
 
     @Override

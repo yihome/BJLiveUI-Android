@@ -206,13 +206,13 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             onConfigurationChanged(getResources().getConfiguration());
         }
-        if(savedInstanceState == null) {
+        if (savedInstanceState == null) {
             code = getIntent().getStringExtra("code");
             name = getIntent().getStringExtra("name");
             roomId = getIntent().getLongExtra("roomId", -1);
             sign = getIntent().getStringExtra("sign");
             enterUser = (IUserModel) getIntent().getSerializableExtra("user");
-        }else{
+        } else {
             code = savedInstanceState.getString("code");
             name = savedInstanceState.getString("name");
             roomId = savedInstanceState.getLong("roomId", -1);
@@ -1066,7 +1066,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 //                    showSystemSettingDialog(REQUEST_CODE_PERMISSION_CAMERA);
 //                }
 //            } else {
-                ActivityCompat.requestPermissions(LiveRoomActivity.this, new String[]{Manifest.permission.CAMERA}, REQUEST_CODE_PERMISSION_CAMERA);
+            ActivityCompat.requestPermissions(LiveRoomActivity.this, new String[]{Manifest.permission.CAMERA}, REQUEST_CODE_PERMISSION_CAMERA);
 //            }
         }
         return false;
@@ -1083,7 +1083,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 //                    showSystemSettingDialog(REQUEST_CODE_PERMISSION_MIC);
 //                }
 //            } else {
-                ActivityCompat.requestPermissions(LiveRoomActivity.this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_CODE_PERMISSION_MIC);
+            ActivityCompat.requestPermissions(LiveRoomActivity.this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_CODE_PERMISSION_MIC);
 //            }
         }
         return false;
