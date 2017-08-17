@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onShareClicked(Context context, int i) {
-                // i 为setShareList()中数组的position
+                // i 为LPShareModel里getShareType的值
             }
 
             @Override
@@ -115,7 +115,6 @@ public class MainActivity extends AppCompatActivity {
                 // 触发集成方异步获取分享信息
             }
         });
-
         LiveSDKWithUI.setEnterRoomConflictListener(new LiveSDKWithUI.RoomEnterConflictListener() {
             @Override
             public void onConflict(Context context, LPConstants.LPEndType endType, final LiveSDKWithUI.LPRoomExitCallback callback) {

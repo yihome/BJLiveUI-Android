@@ -9,7 +9,7 @@ maven { url 'https://raw.github.com/baijia/maven/master/' }
 * 在build.gradle中添加依赖
 ```groovy
 dependencies {
-	compile 'com.baijia.live:liveplayer-sdk-ui:0.0.7'
+	compile 'com.baijia.live:liveplayer-sdk-ui:0.2.0'
 }
 ```
 
