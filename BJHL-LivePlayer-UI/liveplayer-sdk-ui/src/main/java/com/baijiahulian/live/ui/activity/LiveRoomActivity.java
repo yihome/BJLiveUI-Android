@@ -126,6 +126,7 @@ import rx.functions.Action1;
 
 import static android.R.attr.path;
 import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
+import static com.bjhl.hubble.sdk.HubbleStatisticsSDK.getContext;
 
 public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRouterListener {
     private FrameLayout flBackground;
@@ -206,13 +207,13 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             onConfigurationChanged(getResources().getConfiguration());
         }
-        if(savedInstanceState == null) {
+        if (savedInstanceState == null) {
             code = getIntent().getStringExtra("code");
             name = getIntent().getStringExtra("name");
             roomId = getIntent().getLongExtra("roomId", -1);
             sign = getIntent().getStringExtra("sign");
             enterUser = (IUserModel) getIntent().getSerializableExtra("user");
-        }else{
+        } else {
             code = savedInstanceState.getString("code");
             name = savedInstanceState.getString("name");
             roomId = savedInstanceState.getLong("roomId", -1);
@@ -1066,7 +1067,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 //                    showSystemSettingDialog(REQUEST_CODE_PERMISSION_CAMERA);
 //                }
 //            } else {
-                ActivityCompat.requestPermissions(LiveRoomActivity.this, new String[]{Manifest.permission.CAMERA}, REQUEST_CODE_PERMISSION_CAMERA);
+            ActivityCompat.requestPermissions(LiveRoomActivity.this, new String[]{Manifest.permission.CAMERA}, REQUEST_CODE_PERMISSION_CAMERA);
 //            }
         }
         return false;
@@ -1083,7 +1084,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 //                    showSystemSettingDialog(REQUEST_CODE_PERMISSION_MIC);
 //                }
 //            } else {
-                ActivityCompat.requestPermissions(LiveRoomActivity.this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_CODE_PERMISSION_MIC);
+            ActivityCompat.requestPermissions(LiveRoomActivity.this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_CODE_PERMISSION_MIC);
 //            }
         }
         return false;
@@ -1630,6 +1631,36 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
         getLiveRoom().quitRoom();
         clearStaticCallback();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (exitListener != null) {
+            super.onBackPressed();
+        } else {
+            new MaterialDialog.Builder(this)
+                    .title(getString(R.string.live_exit_hint_title))
+                    .content(getString(R.string.live_exit_hint_content))
+                    .contentColor(ContextCompat.getColor(getContext(), R.color.live_text_color_light))
+                    .positiveColor(ContextCompat.getColor(getContext(), R.color.live_blue))
+                    .positiveText(getString(R.string.live_exit_hint_confirm))
+                    .negativeColor(ContextCompat.getColor(getContext(), R.color.live_text_color))
+                    .negativeText(getString(R.string.live_cancel))
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
+                            finish();
+                        }
+                    })
+                    .onNegative(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
+                            materialDialog.dismiss();
+                        }
+                    })
+                    .build()
+                    .show();
+        }
     }
 
     //初始化时检测屏幕方向，以此设置聊天页面是否可隐藏

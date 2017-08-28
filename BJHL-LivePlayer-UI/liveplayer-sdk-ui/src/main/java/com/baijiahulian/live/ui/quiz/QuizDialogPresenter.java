@@ -1,10 +1,6 @@
 package com.baijiahulian.live.ui.quiz;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
-import com.baijiahulian.livecore.models.LPJsonModel;
-import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
-
-import rx.Subscription;
 
 /**
  * Created by wangkangfei on 17/5/31.
