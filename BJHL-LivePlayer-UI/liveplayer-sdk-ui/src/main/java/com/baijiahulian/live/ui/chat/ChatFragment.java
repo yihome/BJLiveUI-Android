@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.ColorInt;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -29,15 +30,11 @@ import com.baijiahulian.live.ui.utils.DisplayUtils;
 import com.baijiahulian.live.ui.utils.LinearLayoutWrapManager;
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.models.imodels.IMessageModel;
-import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
-
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
 
 /**
  * Created by Shubo on 2017/2/23.
@@ -51,6 +48,9 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
     LinearLayoutManager mLayoutManager;
     private ColorDrawable failedColorDrawable;
     private int emojiSize;
+    private int backgroundRes;
+    @ColorInt
+    private int textColor;
 
     @Override
     public int getLayoutId() {
@@ -62,27 +62,34 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
         super.init(savedInstanceState);
         failedColorDrawable = new ColorDrawable(ContextCompat.getColor(getContext(), R.color.live_half_transparent));
         emojiSize = (int) (DisplayUtils.getScreenDensity(getContext()) * 32);
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            backgroundRes = R.drawable.live_item_chat_bg_land;
+            textColor = ContextCompat.getColor(getContext(), R.color.live_white);
+        } else {
+            backgroundRes = R.drawable.live_item_chat_bg;
+            textColor = ContextCompat.getColor(getContext(), R.color.primary_text);
+        }
 
         adapter = new MessageAdapter();
         mLayoutManager = new LinearLayoutWrapManager(getContext());
         mLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-//        mLayoutManager.setStackFromEnd(true);
 
         recyclerView = (RecyclerView) $.id(R.id.fragment_chat_recycler).view();
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setAdapter(adapter);
+
+
     }
 
     @Override
     public void notifyDataChanged() {
-        Observable.just(1).observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<Integer>() {
-                    @Override
-                    public void call(Integer integer) {
-                        adapter.notifyDataSetChanged();
-                        recyclerView.smoothScrollToPosition(adapter.getItemCount());
-                    }
-                });
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                adapter.notifyDataSetChanged();
+                recyclerView.smoothScrollToPosition(adapter.getItemCount());
+            }
+        });
     }
 
     @Override
@@ -99,6 +106,14 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            backgroundRes = R.drawable.live_item_chat_bg_land;
+            textColor = ContextCompat.getColor(getContext(), R.color.live_white);
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            backgroundRes = R.drawable.live_item_chat_bg;
+            textColor = ContextCompat.getColor(getContext(), R.color.primary_text);
+        }
+        adapter.notifyDataSetChanged();
     }
 
     @Override
@@ -171,11 +186,11 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
             if (holder instanceof TextViewHolder) {
                 TextViewHolder textViewHolder = (TextViewHolder) holder;
                 textViewHolder.textView.setText(spanText);
+                textViewHolder.textView.setTextColor(textColor);
                 textViewHolder.textView.append(message.getContent());
                 if (message.getFrom().getType() == LPConstants.LPUserType.Teacher ||
                         message.getFrom().getType() == LPConstants.LPUserType.Assistant) {
                     Linkify.addLinks(textViewHolder.textView, Linkify.WEB_URLS | Linkify.EMAIL_ADDRESSES);
-//                    textViewHolder.textView.setAutoLinkMask(Linkify.WEB_URLS | Linkify.EMAIL_ADDRESSES);
                 } else {
                     textViewHolder.textView.setAutoLinkMask(0);
                 }
@@ -233,6 +248,7 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
                     });
                 }
             }
+            holder.itemView.setBackgroundResource(backgroundRes);
         }
 
         @Override

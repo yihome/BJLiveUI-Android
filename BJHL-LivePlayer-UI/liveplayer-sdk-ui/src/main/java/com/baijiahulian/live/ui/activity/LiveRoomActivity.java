@@ -126,6 +126,7 @@ import rx.functions.Action1;
 
 import static android.R.attr.path;
 import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
+import static com.bjhl.hubble.sdk.HubbleStatisticsSDK.getContext;
 
 public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRouterListener {
     private FrameLayout flBackground;
@@ -1629,6 +1630,36 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
         getLiveRoom().quitRoom();
         clearStaticCallback();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (exitListener != null) {
+            super.onBackPressed();
+        } else {
+            new MaterialDialog.Builder(this)
+                    .title(getString(R.string.live_exit_hint_title))
+                    .content(getString(R.string.live_exit_hint_content))
+                    .contentColor(ContextCompat.getColor(getContext(), R.color.live_text_color_light))
+                    .positiveColor(ContextCompat.getColor(getContext(), R.color.live_blue))
+                    .positiveText(getString(R.string.live_exit_hint_confirm))
+                    .negativeColor(ContextCompat.getColor(getContext(), R.color.live_text_color))
+                    .negativeText(getString(R.string.live_cancel))
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
+                            finish();
+                        }
+                    })
+                    .onNegative(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
+                            materialDialog.dismiss();
+                        }
+                    })
+                    .build()
+                    .show();
+        }
     }
 
     //初始化时检测屏幕方向，以此设置聊天页面是否可隐藏
