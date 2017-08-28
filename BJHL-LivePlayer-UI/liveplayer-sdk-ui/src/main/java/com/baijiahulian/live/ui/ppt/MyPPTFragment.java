@@ -4,6 +4,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.View;
 
+import com.baijiahulian.livecore.context.LiveRoom;
 import com.baijiahulian.livecore.ppt.LPPPTFragment;
 import com.baijiahulian.livecore.ppt.whiteboard.LPWhiteBoardView;
 
@@ -17,6 +18,16 @@ public class MyPPTFragment extends LPPPTFragment implements PPTContract.View {
     public void init(Bundle savedInstanceState) {
         super.init(savedInstanceState);
         showPPTPageView();
+    }
+
+    public static MyPPTFragment newInstance(LiveRoom liveRoom) {
+
+        Bundle args = new Bundle();
+
+        MyPPTFragment fragment = new MyPPTFragment();
+        fragment.setLiveRoom(liveRoom);
+        fragment.setArguments(args);
+        return fragment;
     }
 
     private PPTContract.Presenter presenter;
@@ -38,12 +49,12 @@ public class MyPPTFragment extends LPPPTFragment implements PPTContract.View {
             }
         });
 
-        if(presenter.getBackgroundContainer().getChildAt(0) == getView()){
-            mWhiteBoardView.setZOrderMediaOverlay(false);
-        }else{
-            mWhiteBoardView.setZOrderMediaOverlay(true);
-            presenter.notifyPPTResumeInSpeakers();
-        }
+//        if (presenter.getBackgroundContainer().getChildAt(0) == getView()) {
+//            mWhiteBoardView.setZOrderMediaOverlay(false);
+//        } else {
+//            mWhiteBoardView.setZOrderMediaOverlay(true);
+//            presenter.notifyPPTResumeInSpeakers();
+//        }
 
 //        super.setOnDoubleTapListener(new LPWhiteBoardView.OnDoubleTapListener() {
 //            @Override
@@ -59,7 +70,7 @@ public class MyPPTFragment extends LPPPTFragment implements PPTContract.View {
         });
     }
 
-    public LPWhiteBoardView getLPWhiteBoardView(){
+    public LPWhiteBoardView getLPWhiteBoardView() {
         return mWhiteBoardView;
     }
 

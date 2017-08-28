@@ -1201,8 +1201,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         globalPresenter.setRouter(this);
         globalPresenter.subscribe();
 
-        lppptFragment = new MyPPTFragment();
-        lppptFragment.setLiveRoom(getLiveRoom());
+        lppptFragment = MyPPTFragment.newInstance(liveRoom);
         bindVP(lppptFragment, new PPTPresenter(lppptFragment));
         addFragment(R.id.activity_live_room_background_container, lppptFragment);
         subscriptionOfEmptyBoard = lppptFragment.getObservableOfEmptyBoard().subscribe(new LPErrorPrintSubscriber<Boolean>() {

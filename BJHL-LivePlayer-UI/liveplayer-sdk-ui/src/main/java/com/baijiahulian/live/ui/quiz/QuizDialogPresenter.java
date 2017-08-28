@@ -1,10 +1,6 @@
 package com.baijiahulian.live.ui.quiz;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
-import com.baijiahulian.livecore.models.LPJsonModel;
-import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
-
-import rx.Subscription;
 
 /**
  * Created by wangkangfei on 17/5/31.
@@ -45,7 +41,7 @@ public class QuizDialogPresenter implements QuizDialogContract.Presenter {
 
     @Override
     public void sendCommonRequest(String request) {
-        routerListener.getLiveRoom().getQuizVM().sendCommonRequest(request);
+        routerListener.getLiveRoom().sendJSCommonRoomRequest(request);
     }
 
     @Override

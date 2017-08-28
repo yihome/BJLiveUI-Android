@@ -79,6 +79,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
     }
 
     private boolean attachVideoOnResume = false;
+    private boolean attachAudioOnResume = false;
 
     @Override
     public void onResume() {
@@ -87,7 +88,15 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
             attachVideoOnResume = false;
             if (!presenter.getRecorder().isPublishing())
                 presenter.getRecorder().publish();
-            presenter.getRecorder().attachVideo();
+            if (!presenter.getRecorder().isVideoAttached())
+                presenter.getRecorder().attachVideo();
+        }
+        if (attachAudioOnResume) {
+            attachAudioOnResume = false;
+            if (!presenter.getRecorder().isPublishing())
+                presenter.getRecorder().publish();
+            if (!presenter.getRecorder().isAudioAttached())
+                presenter.getRecorder().attachAudio();
         }
     }
 
@@ -97,6 +106,10 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
         if (presenter.getRecorder().isVideoAttached()) {
             presenter.getRecorder().detachVideo();
             attachVideoOnResume = true;
+        }
+        if (presenter.getRecorder().isAudioAttached()) {
+            presenter.getRecorder().detachAudio();
+            attachAudioOnResume = true;
         }
     }
 
@@ -195,6 +208,8 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                 if (recorderView == null) {
                     recorderView = new RecorderView(getActivity());
                     presenter.getRecorder().setPreview(recorderView);
+                } else {
+                    container.removeView(recorderView);
                 }
                 container.addView(recorderView, position, lpItem);
 
@@ -279,8 +294,8 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
         if (presenter.getItemViewType(position) == VIEW_TYPE_RECORD) {
             if (presenter.getRecorder().isVideoAttached() && !presenter.isStopPublish()) {
                 presenter.getRecorder().detachVideo();
-                presenter.setIsStopPublish(false);
             }
+            presenter.setIsStopPublish(false);
         }
         presenter.changeBackgroundContainerSize(container.getChildCount() >= SHRINK_THRESHOLD);
         if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT
@@ -386,7 +401,8 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
             q.id(R.id.item_speak_speaker_name).text(model.getUser().getName() + getString(R.string.live_presenter_hint));
         else
             q.id(R.id.item_speak_speaker_name).text(model.getUser().getName());
-        q.id(R.id.item_speak_speaker_avatar).image(getActivity(), model.getUser().getAvatar());
+        String avatar = model.getUser().getAvatar().startsWith("//") ? "https:" + model.getUser().getAvatar() : model.getUser().getAvatar();
+        q.id(R.id.item_speak_speaker_avatar).image(getActivity(), avatar);
         q.id(R.id.item_speak_speaker_video_label).visibility(model.isVideoOn() ? View.VISIBLE : View.GONE);
         q.contentView().setOnClickListener(new View.OnClickListener() {
             @Override

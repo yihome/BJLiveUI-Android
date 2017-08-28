@@ -25,7 +25,7 @@ public class AliCloudImageUtil {
         if (url.endsWith(".jpg") || url.endsWith(".jpeg") || url.endsWith(".png") || url.endsWith(".webp")
                 || url.endsWith(".bmp") || url.endsWith(".gif")) {
             if (isFromAliCloud(url)) {
-                return url + "@200h_200w_1e_1l" + imageUrlSuffix();
+                return url + "@200h_200w_1e_1l_2o" + imageUrlSuffix();
             }
         }
         return url;
@@ -42,7 +42,7 @@ public class AliCloudImageUtil {
         if (url.endsWith(".jpg") || url.endsWith(".jpeg") || url.endsWith(".png") || url.endsWith(".webp")
                 || url.endsWith(".bmp") || url.endsWith(".gif")) {
             if (isFromAliCloud(url)) {
-                return url + "@" + px + "h_" + px + "w_1c_1e_1l" + imageUrlSuffix();
+                return url + "@" + px + "h_" + px + "w_1c_1e_1l_2o" + imageUrlSuffix();
             }
         }
         return url;
@@ -60,7 +60,7 @@ public class AliCloudImageUtil {
                 || url.endsWith(".bmp") || url.endsWith(".gif")) {
             if (isFromAliCloud(url)) {
                 return url + "@" + DisplayUtils.getScreenHeightPixels(context) + "h_" +
-                        DisplayUtils.getScreenWidthPixels(context) + "w_1e_1l" + imageUrlSuffix();
+                        DisplayUtils.getScreenWidthPixels(context) + "w_1e_1l_2o" + imageUrlSuffix();
             }
         }
         return url;
