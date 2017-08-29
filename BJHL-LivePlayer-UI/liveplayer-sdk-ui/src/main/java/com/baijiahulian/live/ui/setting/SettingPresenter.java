@@ -104,6 +104,10 @@ public class SettingPresenter implements SettingContract.Presenter {
             view.showForbidRaiseHandOff();
         }
 
+        if(liveRoom.getPartnerConfig().PPTAnimationDisable == 0){
+            view.hidePPTShownType();
+        }
+
         subscriptionOfForbidAllChat = liveRoom.getObservableOfForbidAllChatStatus().observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new LPErrorPrintSubscriber<Boolean>() {
                     @Override

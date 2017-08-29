@@ -318,6 +318,11 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
     }
 
     @Override
+    public void hidePPTShownType() {
+        $.id(R.id.dialog_setting_radio_ppt_container).gone();
+    }
+
+    @Override
     public void setPresenter(SettingContract.Presenter presenter) {
         super.setBasePresenter(presenter);
         this.presenter = presenter;
