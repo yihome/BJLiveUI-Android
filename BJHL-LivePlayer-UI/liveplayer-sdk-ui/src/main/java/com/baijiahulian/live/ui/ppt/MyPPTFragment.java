@@ -27,8 +27,8 @@ public class MyPPTFragment extends LPPPTFragment implements PPTContract.View {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onStart() {
+        super.onStart();
         super.setOnSingleTapListener(new LPWhiteBoardView.OnSingleTapListener() {
             @Override
             public void onSingleTap(LPWhiteBoardView whiteBoardView) {
@@ -45,12 +45,6 @@ public class MyPPTFragment extends LPPPTFragment implements PPTContract.View {
             presenter.notifyPPTResumeInSpeakers();
         }
 
-//        super.setOnDoubleTapListener(new LPWhiteBoardView.OnDoubleTapListener() {
-//            @Override
-//            public void onDoubleTap(LPWhiteBoardView whiteBoardView) {
-//                presenter.switchWithMaximum();
-//            }
-//        });
         mPageTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
