@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
@@ -76,10 +77,10 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
         scrollView = (HorizontalScrollView) $.id(R.id.fragment_speakers_scroll_view).view();
         lpItem = new ViewGroup.LayoutParams(DisplayUtils.dip2px(getActivity(), 100),
                 DisplayUtils.dip2px(getActivity(), 76));
-        scrollView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+        scrollView.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
             @Override
-            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                if (scrollX == scrollView.getChildAt(0).getMeasuredWidth() - scrollView.getMeasuredWidth()) {
+            public void onScrollChanged() {
+                if (scrollView.getScrollX() == scrollView.getChildAt(0).getMeasuredWidth() - scrollView.getMeasuredWidth()) {
                     if (speakerRequest.getVisibility() == View.VISIBLE) {
                         speakerRequest.setVisibility(View.GONE);
                     }
