@@ -192,6 +192,99 @@ public class VideoView extends FrameLayout {
         ivWaterMark.setLayoutParams(ivLp);
     }
 
+    /*可能以后会改回来
+    public void resizeWaterMark(final int videoHeight, final int videoWidth) {
+        if (ivWaterMark == null) return;
+        if (getMeasuredWidth() * getMeasuredHeight() <= 0) return;
+        int height = Math.min(waterMark.getHeight(), VideoView.this.getMeasuredHeight() / 9);
+        int width = Math.min(waterMark.getWidth(), VideoView.this.getMeasuredWidth() / 9);
+        FrameLayout.LayoutParams ivLp = (LayoutParams) ivWaterMark.getLayoutParams();
+        ivLp.width = width;
+        ivLp.height = height;
+        int viewHeight = VideoView.this.getMeasuredHeight();
+        float viewWidth = ((float) viewHeight / videoHeight * videoWidth);
+        switch (waterMarkPosition) {
+            case 1:
+                ivLp.leftMargin = (int) ((VideoView.this.getMeasuredWidth() - viewWidth) / 2 + 15);
+                ivLp.topMargin = 10;
+                ivLp.rightMargin = 0;
+                ivLp.bottomMargin = 0;
+                ivLp.gravity = GravityCompat.START | Gravity.TOP;
+                break;
+            case 2:
+                ivLp.leftMargin = 0;
+                ivLp.topMargin = 10;
+                ivLp.rightMargin = (int) (videoWidth + (VideoView.this.getMeasuredWidth() - viewWidth) / 2 + 15);
+                ivLp.bottomMargin = 0;
+                ivLp.gravity = GravityCompat.END | Gravity.TOP;
+                break;
+            case 3:
+                ivLp.leftMargin = 0;
+                ivLp.topMargin = 0;
+                ivLp.rightMargin = (int) (videoWidth + (VideoView.this.getMeasuredWidth() - viewWidth) / 2 + 15);
+                ivLp.bottomMargin = 10;
+                ivLp.gravity = GravityCompat.END | Gravity.BOTTOM;
+                break;
+            case 4:
+                ivLp.leftMargin = (int) ((VideoView.this.getMeasuredWidth() - viewWidth) / 2 + 15);
+                ivLp.topMargin = 0;
+                ivLp.rightMargin = 0;
+                ivLp.bottomMargin = 10;
+                ivLp.gravity = GravityCompat.START | Gravity.BOTTOM;
+                break;
+        }
+        ivWaterMark.setLayoutParams(ivLp);
+        this.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                int height = Math.min(waterMark.getHeight(), VideoView.this.getMeasuredHeight() / 9);
+                int width = Math.min(waterMark.getWidth(), VideoView.this.getMeasuredWidth() / 9);
+                FrameLayout.LayoutParams ivLp = (LayoutParams) ivWaterMark.getLayoutParams();
+                ivLp.width = width;
+                ivLp.height = height;
+                int viewVerticalHeight = VideoView.this.getMeasuredHeight();
+                float viewVerticalWidth = ((float) viewVerticalHeight / videoHeight * videoWidth);
+                int viewTransverseWidth = VideoView.this.getMeasuredWidth();
+                float viewTransverseHeight = ((float) viewTransverseWidth / videoWidth * videoHeight);
+                int transverseMargin = (int) ((VideoView.this.getMeasuredWidth() - viewVerticalWidth) / 2) <= 0 ? 0 : (int) ((VideoView.this.getMeasuredWidth() - viewVerticalWidth) / 2);
+                int verticalMargin = (int) ((VideoView.this.getMeasuredHeight() - viewTransverseHeight) / 2) <= 0 ? 0 : (int) ((VideoView.this.getMeasuredHeight() - viewTransverseHeight) / 2);
+                switch (waterMarkPosition) {
+                    case 1:
+                        ivLp.leftMargin = transverseMargin + 20;
+                        ivLp.topMargin = verticalMargin + 15;
+                        ivLp.rightMargin = 0;
+                        ivLp.bottomMargin = 0;
+                        ivLp.gravity = GravityCompat.START | Gravity.TOP;
+                        break;
+                    case 2:
+                        ivLp.leftMargin = 0;
+                        ivLp.topMargin = verticalMargin + 10;
+                        ivLp.rightMargin = transverseMargin + 15;
+                        ivLp.bottomMargin = 0;
+                        ivLp.gravity = GravityCompat.END | Gravity.TOP;
+                        break;
+                    case 3:
+                        ivLp.leftMargin = 0;
+                        ivLp.topMargin = 0;
+                        ivLp.rightMargin = transverseMargin + 15;
+                        ivLp.bottomMargin = verticalMargin + 10;
+                        ivLp.gravity = GravityCompat.END | Gravity.BOTTOM;
+                        break;
+                    case 4:
+                        ivLp.leftMargin = transverseMargin + 15;
+                        ivLp.topMargin = 0;
+                        ivLp.rightMargin = 0;
+                        ivLp.bottomMargin = verticalMargin + 10;
+                        ivLp.gravity = GravityCompat.START | Gravity.BOTTOM;
+                        break;
+                }
+                ivWaterMark.setLayoutParams(ivLp);
+
+            }
+        });
+    }*/
+
+
     public View getSurfaceView() {
         return surfaceView;
     }

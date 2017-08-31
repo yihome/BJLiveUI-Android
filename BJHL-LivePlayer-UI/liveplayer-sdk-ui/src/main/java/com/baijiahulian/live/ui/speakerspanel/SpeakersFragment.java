@@ -76,6 +76,17 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
         scrollView = (HorizontalScrollView) $.id(R.id.fragment_speakers_scroll_view).view();
         lpItem = new ViewGroup.LayoutParams(DisplayUtils.dip2px(getActivity(), 100),
                 DisplayUtils.dip2px(getActivity(), 76));
+        scrollView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                if (scrollX == scrollView.getChildAt(0).getMeasuredWidth() - scrollView.getMeasuredWidth()) {
+                    if (speakerRequest.getVisibility() == View.VISIBLE) {
+                        speakerRequest.setVisibility(View.GONE);
+                    }
+                }
+            }
+        });
+
     }
 
     private boolean attachVideoOnResume = false;
@@ -296,6 +307,9 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                 presenter.getRecorder().detachVideo();
             }
             presenter.setIsStopPublish(false);
+        }
+        if (speakerRequest.getVisibility() == View.VISIBLE) {
+            speakerRequest.setVisibility(View.GONE);
         }
         presenter.changeBackgroundContainerSize(container.getChildCount() >= SHRINK_THRESHOLD);
         if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT
