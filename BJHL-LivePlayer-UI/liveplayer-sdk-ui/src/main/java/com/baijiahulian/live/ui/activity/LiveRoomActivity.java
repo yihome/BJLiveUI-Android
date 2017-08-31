@@ -199,7 +199,11 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // 6.0+ 打开硬件加速
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+                    WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_live_room);
         initViews();
@@ -559,32 +563,32 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void showMessageTeacherOpenAudio() {
-        showMessage(getString(R.string.lp_override_role_teacher) + "打开了音频");
+        showMessage(getString(R.string.lp_override_role_teacher) + "打开了麦克风");
     }
 
     @Override
     public void showMessageTeacherOpenVideo() {
-        showMessage(getString(R.string.lp_override_role_teacher) + "打开了视频");
+        showMessage(getString(R.string.lp_override_role_teacher) + "打开了摄像头");
     }
 
     @Override
     public void showMessageTeacherOpenAV() {
-        showMessage(getString(R.string.lp_override_role_teacher) + "打开了音视频");
+        showMessage(getString(R.string.lp_override_role_teacher) + "打开了麦克风和摄像头");
     }
 
     @Override
     public void showMessageTeacherCloseAV() {
-        showMessage(getString(R.string.lp_override_role_teacher) + "关闭了音视频");
+        showMessage(getString(R.string.lp_override_role_teacher) + "关闭了麦克风和摄像头");
     }
 
     @Override
     public void showMessageTeacherCloseAudio() {
-        showMessage(getString(R.string.lp_override_role_teacher) + "关闭了音频");
+        showMessage(getString(R.string.lp_override_role_teacher) + "关闭了麦克风");
     }
 
     @Override
     public void showMessageTeacherCloseVideo() {
-        showMessage(getString(R.string.lp_override_role_teacher) + "关闭了视频");
+        showMessage(getString(R.string.lp_override_role_teacher) + "关闭了摄像头");
     }
 
     @Override

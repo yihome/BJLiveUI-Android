@@ -120,7 +120,7 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
         } else if (speakApplyStatus == RightMenuContract.STUDENT_SPEAK_APPLY_SPEAKING) {
             // 取消发言
             speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_NONE;
-            liveRoomRouterListener.setIsStopPublish(true);
+//            liveRoomRouterListener.setIsStopPublish(true);
             liveRoomRouterListener.disableSpeakerMode();
             liveRoomRouterListener.getLiveRoom().getSpeakQueueVM()
                     .closeOtherSpeak(liveRoomRouterListener.getLiveRoom().getCurrentUser().getUserId());

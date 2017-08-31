@@ -249,14 +249,12 @@ public class SettingPresenter implements SettingContract.Presenter {
     @Override
     public void setDefinitionLow() {
         recorder.setCaptureVideoDefinition(LPConstants.LPResolutionType.LOW);
-        recorder.openBeautyFilter();
         view.showDefinitionLow();
     }
 
     @Override
     public void setDefinitionHigh() {
         recorder.setCaptureVideoDefinition(LPConstants.LPResolutionType.HIGH);
-        recorder.closeBeautyFilter();
         view.showDefinitionHigh();
     }
 

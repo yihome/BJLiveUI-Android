@@ -4,6 +4,7 @@
 
     <application>
         <activity
+            android:hardwareAccelerated="false"
             android:name=".activity.LiveRoomActivity"
             android:configChanges="orientation|screenSize|layoutDirection"
             android:theme="@style/LiveAppTheme" />

@@ -1,12 +1,8 @@
 package com.baijiahulian.live.ui.rightbotmenu;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.support.v13.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.view.View;
 
 import com.baijiahulian.live.ui.R;
@@ -51,13 +47,7 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
                             showToast(getString(R.string.live_frequent_error));
                             return;
                         }
-//                        if (PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA)) {
-                            presenter.changeVideo();
-//                        } else {
-//                            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), Manifest.permission.CAMERA)) {
-//                                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, 1);
-//                            }
-//                        }
+                        presenter.changeVideo();
                     }
                 });
 
@@ -71,10 +61,7 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
                             showToast(getString(R.string.live_frequent_error));
                             return;
                         }
-//                        if (PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.RECORD_AUDIO)) {
-                            presenter.changeAudio();
-//                        } else {
-//                        }
+                        presenter.changeAudio();
                     }
                 });
 
@@ -108,10 +95,13 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
 
     @Override
     public void showVideoStatus(boolean isOn) {
-        if (isOn)
+        if (isOn) {
             $.id(R.id.fragment_right_bottom_video).image(R.drawable.live_ic_stopvideo_on);
-        else
+            showToast(getString(R.string.live_camera_on));
+        } else {
             $.id(R.id.fragment_right_bottom_video).image(R.drawable.live_ic_stopvideo);
+            showToast(getString(R.string.live_camera_off));
+        }
     }
 
     @Override

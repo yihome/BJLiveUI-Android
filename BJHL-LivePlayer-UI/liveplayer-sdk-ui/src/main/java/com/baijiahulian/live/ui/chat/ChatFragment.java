@@ -77,8 +77,6 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
         recyclerView = (RecyclerView) $.id(R.id.fragment_chat_recycler).view();
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setAdapter(adapter);
-
-
     }
 
     @Override
@@ -125,7 +123,6 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
     public void unClearScreen() {
         recyclerView.setVisibility(View.VISIBLE);
     }
-
 
     @Override
     public void setPresenter(ChatContract.Presenter presenter) {
@@ -176,7 +173,7 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
             if (message.getFrom().getType() == LPConstants.LPUserType.Teacher) {
                 color = ContextCompat.getColor(getContext(), R.color.live_blue);
             } else {
-                color = ContextCompat.getColor(getContext(), R.color.secondary_text);
+                color = ContextCompat.getColor(getContext(), R.color.live_text_color_light);
             }
 
             String name = message.getFrom().getName() + "：";
