@@ -1367,7 +1367,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void notifyPageCurrent(int position) {
-        lppptFragment.updatePage(position);
+        lppptFragment.updatePage(position, true);
     }
 
     @Override

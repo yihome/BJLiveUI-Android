@@ -34,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 
 import rx.Observable;
 import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
 
 import static com.baijiahulian.live.ui.speakerspanel.SpeakersContract.PPT_TAG;
 import static com.baijiahulian.live.ui.speakerspanel.SpeakersContract.RECORD_TAG;
@@ -96,13 +97,6 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
     @Override
     public void onResume() {
         super.onResume();
-        if (attachVideoOnResume) {
-            attachVideoOnResume = false;
-            if (!presenter.getRecorder().isPublishing())
-                presenter.getRecorder().publish();
-            if (!presenter.getRecorder().isVideoAttached())
-                presenter.getRecorder().attachVideo();
-        }
         if (attachAudioOnResume) {
             attachAudioOnResume = false;
             if (!presenter.getRecorder().isPublishing())
@@ -110,6 +104,19 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
             if (!presenter.getRecorder().isAudioAttached())
                 presenter.getRecorder().attachAudio();
         }
+        Observable.timer(300, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<Long>() {
+                    @Override
+                    public void call(Long aLong) {
+                        if (attachVideoOnResume) {
+                            attachVideoOnResume = false;
+                            if (!presenter.getRecorder().isPublishing())
+                                presenter.getRecorder().publish();
+                            if (!presenter.getRecorder().isVideoAttached())
+                                presenter.getRecorder().attachVideo();
+                        }
+                    }
+                });
     }
 
     @Override
