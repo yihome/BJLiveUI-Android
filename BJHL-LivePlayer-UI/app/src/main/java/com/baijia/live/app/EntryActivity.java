@@ -51,7 +51,7 @@ public class EntryActivity extends AppCompatActivity {
                 SharedPreferences.Editor editor = sp.edit();
                 editor.putString("code", code);
                 editor.apply();
-
+                LiveSDKWithUI.disableSpeakQueuePlaceholder();
                 LiveSDKWithUI.enterRoom(EntryActivity.this, code, name, null);
 
             }

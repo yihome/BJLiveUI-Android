@@ -79,6 +79,10 @@ public class LiveSDKWithUI {
         LiveRoomActivity.setShouldShowTechSupport(shouldShowTechSupport);
     }
 
+    public static void disableSpeakQueuePlaceholder(){
+        LiveRoomActivity.disableSpeakQueuePlaceholder();
+    }
+
     public interface LPRoomResumeListener {
         void onResume(Context context, LPRoomChangeRoomListener listener);
     }

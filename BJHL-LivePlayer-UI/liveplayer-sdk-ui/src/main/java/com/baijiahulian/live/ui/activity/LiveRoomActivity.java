@@ -1225,7 +1225,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         addFragment(R.id.activity_live_room_cloud_record, cloudRecordFragment);
 
         speakersFragment = new SpeakersFragment();
-        speakerPresenter = new SpeakerPresenter(speakersFragment);
+        speakerPresenter = new SpeakerPresenter(speakersFragment, disableSpeakQueuePlaceholder);
         bindVP(speakersFragment, speakerPresenter);
         addFragment(R.id.activity_live_room_speakers_container, speakersFragment);
 
@@ -1786,6 +1786,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     private static boolean shouldShowTechSupport = true;
 
+    private static boolean disableSpeakQueuePlaceholder = false;
+
     private void clearStaticCallback() {
         shareListener = null;
         exitListener = null;
@@ -1817,4 +1819,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         shouldShowTechSupport = shouldShow;
     }
 
+    public static void disableSpeakQueuePlaceholder() {
+        disableSpeakQueuePlaceholder = true;
+    }
 }

@@ -1,7 +1,6 @@
 package com.baijiahulian.live.ui.ppt;
 
 import android.content.res.Configuration;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 
@@ -27,8 +26,9 @@ public class MyPPTFragment extends LPPPTFragment implements PPTContract.View {
 
         MyPPTFragment fragment = new MyPPTFragment();
         fragment.setLiveRoom(liveRoom);
-        boolean sdkValid = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
-        fragment.setAnimPPTEnable(liveRoom.getPartnerConfig().PPTAnimationDisable == 0 && sdkValid);
+//        boolean sdkValid = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
+//        fragment.setAnimPPTEnable(liveRoom.getPartnerConfig().PPTAnimationDisable == 0 && sdkValid);
+        fragment.setAnimPPTEnable(false);
         fragment.setArguments(args);
         return fragment;
     }

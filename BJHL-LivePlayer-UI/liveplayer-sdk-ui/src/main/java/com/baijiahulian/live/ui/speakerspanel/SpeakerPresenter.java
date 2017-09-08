@@ -49,6 +49,7 @@ import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 
 public class SpeakerPresenter implements SpeakersContract.Presenter {
 
+    private final boolean disableSpeakQueuePlaceholder;
     private LiveRoomRouterListener routerListener;
     private SpeakersContract.View view;
     private LPSubscribeObjectWithLastValue<String> fullScreenKVO;
@@ -72,8 +73,9 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
             subscriptionOfUserOut, subscriptionOfPresenterChange, subscriptionOfShareDesktopAndPlayMedia,
             subscriptionOfVideoSizeChange, subscriptionOfUserIn;
 
-    public SpeakerPresenter(SpeakersContract.View view) {
+    public SpeakerPresenter(SpeakersContract.View view, boolean disableSpeakQueuePlaceholder) {
         this.view = view;
+        this.disableSpeakQueuePlaceholder = disableSpeakQueuePlaceholder;
         fullScreenKVO = new LPSubscribeObjectWithLastValue<>(PPT_TAG);
     }
 
@@ -83,6 +85,8 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
     }
 
     private void initView() {
+        if (disableSpeakQueuePlaceholder)
+            view.disableSpeakQueuePlaceholder();
         displayList = new ArrayList<>();
         if (!fullScreenKVO.getParameter().equals(PPT_TAG)) {
             displayList.add(PPT_TAG);

@@ -58,6 +58,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
     private TextView speakerRequest;
     private HorizontalScrollView scrollView;
     private static final int SHRINK_THRESHOLD = 3;
+    private boolean disableSpeakQueuePlaceholder;
 
     @Override
     public int getLayoutId() {
@@ -396,6 +397,12 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
 //        }
     }
 
+    @Override
+    public void disableSpeakQueuePlaceholder() {
+        disableSpeakQueuePlaceholder = true;
+        $.id(R.id.fragment_speakers_scroll_view).backgroundDrawable(null);
+    }
+
     private View generateApplyView(final IUserModel model) {
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.item_speak_apply, container, false);
         QueryPlus q = QueryPlus.with(view);
@@ -575,6 +582,10 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
     }
 
     public void setBackGroundVisible(boolean visible) {
+        if(disableSpeakQueuePlaceholder){
+            $.id(R.id.fragment_speakers_scroll_view).backgroundDrawable(null);
+            return;
+        }
         if (visible) {
             if (container.getChildCount() == 0)
                 return;

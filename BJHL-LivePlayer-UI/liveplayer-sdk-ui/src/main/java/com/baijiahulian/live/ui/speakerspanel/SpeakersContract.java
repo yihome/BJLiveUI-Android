@@ -41,6 +41,8 @@ interface SpeakersContract {
         void notifyPresenterVideoSizeChange(int position, int height, int width);
 
         void notifyFullScreenPresenterStatusChange(int position, boolean b);
+
+        void disableSpeakQueuePlaceholder();
     }
 
     interface Presenter extends BasePresenter {
