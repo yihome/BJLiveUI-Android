@@ -68,7 +68,7 @@ LiveSDKWithUI.enterRoom(context, roomId, sign, model, listener);
 ```
 Sign原则上由后端计算返给前端，[计算规则](http://dev.baijiayun.com/default/wiki/detail/4#h3)
 
-###直播间分享功能
+### 直播间分享功能
 分享功能可以启用也可以不启用，不启用时直播间内不会显示分享图标，反之则会显示。
 ```java
 LiveSDKWithUI.setShareListener(new LiveSDKWithUI.LPShareListener() {
@@ -92,7 +92,7 @@ LiveSDKWithUI.setShareListener(new LiveSDKWithUI.LPShareListener() {
   }
 });
 ```
-###单点登录
+### 单点登录
 直播间支持单点登录功能，如果使用同一个user_number进入直播，后进直播间的会踢掉先进的直播间的，此时会有回调
 ```java
 LiveSDKWithUI.setEnterRoomConflictListener(new LiveSDKWithUI.RoomEnterConflictListener() {
@@ -103,8 +103,8 @@ LiveSDKWithUI.setEnterRoomConflictListener(new LiveSDKWithUI.RoomEnterConflictLi
   }
 });
 ```
-###离开直播间二次确认
-用户在直播间内点击关闭按钮或者点击返回时，会有回调，因为重新进入直播间成本较高，此时可以友好的提示退出的二次确认
+### 离开直播间二次确认
+用户在直播间内点击关闭按钮或者点击返回时，会有回调，此时可以友好的提示退出的二次确认
 ```java
  LiveSDKWithUI.setRoomExitListener(new LiveSDKWithUI.LPRoomExitListener() {
    @Override
@@ -118,5 +118,5 @@ LiveSDKWithUI.setEnterRoomConflictListener(new LiveSDKWithUI.RoomEnterConflictLi
 
 ## SDK体验
 下图为老师上课视角，包含有PPT展示，老师自己的视频，学生的视频，在线人员列表、PPT管理等按钮
-![picture](http://imgs.genshuixue.com/0baijiatools/32fc8da1adbb260d1d44031c57130ffa/teacher_verti.png@480h_270w_1e_1c)
+![picture](http://imgs.genshuixue.com/0baijiatools/32fc8da1adbb260d1d44031c57130ffa/teacher_verti.png@480h_270w_1e_1c "capture竖版")
 
