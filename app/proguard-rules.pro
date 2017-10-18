@@ -29,6 +29,7 @@
 -dontwarn com.bjhl.**
 -keep public class com.baijiahulian.**{*;}
 -keep public class com.bjhl.**{*;}
+-keep class com.baijia.**{*;}
 
 #RxJava混淆规则
 -dontwarn sun.misc.**
@@ -42,5 +43,3 @@
 -keepclassmembers class rx.internal.util.unsafe.BaseLinkedQueueConsumerNodeRef {
     rx.internal.util.atomic.LinkedQueueNode consumerNode;
 }
-
-

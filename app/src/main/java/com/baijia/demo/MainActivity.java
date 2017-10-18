@@ -134,7 +134,6 @@ public class MainActivity extends AppCompatActivity {
                 */
             }
         });
-
         LiveSDKWithUI.setRoomExitListener(new LiveSDKWithUI.LPRoomExitListener() {
             @Override
             public void onRoomExit(Context context, final LiveSDKWithUI.LPRoomExitCallback lpRoomExitCallback) {
@@ -161,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
                                 lpRoomExitCallback.cancel();
                             }
                         }).show();
-                */
+                        */
             }
         });
     }
