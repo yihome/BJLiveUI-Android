@@ -13,7 +13,6 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
-import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -23,6 +22,7 @@ import com.baijiahulian.live.ui.base.BaseFragment;
 import com.baijiahulian.live.ui.utils.DisplayUtils;
 import com.baijiahulian.live.ui.utils.QueryPlus;
 import com.baijiahulian.live.ui.utils.RxUtils;
+import com.baijiahulian.live.ui.viewsupport.BJTouchHorizontalScrollView;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
 import com.baijiahulian.livecore.ppt.whiteboard.LPWhiteBoardView;
@@ -49,14 +49,14 @@ import static com.baijiahulian.live.ui.speakerspanel.SpeakersContract.VIEW_TYPE_
  * Created by Shubo on 2017/6/5.
  */
 
-public class SpeakersFragment extends BaseFragment implements SpeakersContract.View {
+public class SpeakersFragment extends BaseFragment implements SpeakersContract.View, BJTouchHorizontalScrollView.PPTModeCheckListener {
 
     private SpeakersContract.Presenter presenter;
     private LinearLayout container;
     private RecorderView recorderView;
     private ViewGroup.LayoutParams lpItem;
     private TextView speakerRequest;
-    private HorizontalScrollView scrollView;
+    private BJTouchHorizontalScrollView scrollView;
     private static final int SHRINK_THRESHOLD = 3;
     private boolean disableSpeakQueuePlaceholder;
 
@@ -76,7 +76,8 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
         super.init(savedInstanceState);
         container = (LinearLayout) $.id(R.id.fragment_speakers_container).view();
         speakerRequest = (TextView) $.id(R.id.fragment_speakers_new_request_toast).view();
-        scrollView = (HorizontalScrollView) $.id(R.id.fragment_speakers_scroll_view).view();
+        scrollView = (BJTouchHorizontalScrollView) $.id(R.id.fragment_speakers_scroll_view).view();
+        scrollView.setListener(this);
         lpItem = new ViewGroup.LayoutParams(DisplayUtils.dip2px(getActivity(), 100),
                 DisplayUtils.dip2px(getActivity(), 76));
         scrollView.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
@@ -90,6 +91,13 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
             }
         });
 
+    }
+
+    @Override
+    public boolean isPPTDrawing() {
+        if (presenter == null)
+            return false;
+        return presenter.getPPTFragment() != null && presenter.getPPTFragment().isEditable();
     }
 
     private boolean attachVideoOnResume = false;
@@ -558,7 +566,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
         if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
             setBackGroundVisible(true);
         } else {
-            if (container.getChildCount() > 3) {
+            if (container.getChildCount() >= 3) {
                 setBackGroundVisible(true);
             } else {
                 setBackGroundVisible(false);
@@ -582,7 +590,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
     }
 
     public void setBackGroundVisible(boolean visible) {
-        if(disableSpeakQueuePlaceholder){
+        if (disableSpeakQueuePlaceholder) {
             $.id(R.id.fragment_speakers_scroll_view).backgroundDrawable(null);
             return;
         }

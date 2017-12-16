@@ -15,15 +15,16 @@ public class LoadingPresenter implements LoadingContract.Presenter {
     private LPLaunchListener launchListener;
     private LiveRoomRouterListener routerListener;
     private LoadingContract.View view;
-    private String code, name, sign;
+    private String code, name, sign, avatar;
     private long roomId;
     private IUserModel userModel;
     private boolean isJoinCode;
 
-    public LoadingPresenter(LoadingContract.View view, String code, String name) {
+    public LoadingPresenter(LoadingContract.View view, String code, String name, String avatar) {
         this.view = view;
         this.code = code;
         this.name = name;
+        this.avatar = avatar;
         isJoinCode = true;
         initListener();
     }
@@ -79,6 +80,11 @@ public class LoadingPresenter implements LoadingContract.Presenter {
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public String getAvatar() {
+        return avatar;
     }
 
     @Override

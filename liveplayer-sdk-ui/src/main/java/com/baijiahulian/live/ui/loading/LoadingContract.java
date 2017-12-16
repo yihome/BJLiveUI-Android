@@ -27,6 +27,8 @@ interface LoadingContract {
 
         String getName();
 
+        String getAvatar();
+
         String getSign();
 
         IUserModel getUser();

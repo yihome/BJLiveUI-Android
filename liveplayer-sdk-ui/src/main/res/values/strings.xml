@@ -125,6 +125,8 @@
     <string name="live_force_speak_tip_audio">老师开启了你的麦克风，现在可以发言了</string>
     <string name="live_force_speak_tip_video">老师开启了你的摄像头，现在可以发言了</string>
     <string name="live_invite_speak_tip">老师邀请你上麦发言</string>
+    <string name="live_media_speak_apply_timeout">老师未同意发言，请稍后再试</string>
+    <string name="live_room_switch">正在切换教室，请等候…</string>
 
 </resources>
 

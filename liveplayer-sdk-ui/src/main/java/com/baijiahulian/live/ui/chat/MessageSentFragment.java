@@ -101,7 +101,8 @@ public class MessageSentFragment extends BaseDialogFragment implements MessageSe
                 });
             }
         });
-        if (presenter.isTeacherOrAssistant()) {
+
+        if (presenter.canSendPicture()) {
             $.id(R.id.dialog_message_send_pic).visible();
         } else {
             $.id(R.id.dialog_message_send_pic).gone();
@@ -119,7 +120,6 @@ public class MessageSentFragment extends BaseDialogFragment implements MessageSe
     @Override
     public void onStart() {
         super.onStart();
-//        getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
     }
 
 

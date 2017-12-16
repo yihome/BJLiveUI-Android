@@ -3,6 +3,7 @@ package com.baijiahulian.live.ui.chat;
 import android.text.TextUtils;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
+import com.baijiahulian.livecore.context.LPConstants;
 
 import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 
@@ -51,8 +52,10 @@ public class MessageSendPresenter implements MessageSendContract.Presenter {
     }
 
     @Override
-    public boolean isTeacherOrAssistant() {
-        return routerListener.isTeacherOrAssistant();
+    public boolean canSendPicture() {
+        // 大班课只有老师和助教能发图片，一对一、小班课都能发
+        return routerListener.getLiveRoom().getRoomType() != LPConstants.LPRoomType.Multi
+                || routerListener.isTeacherOrAssistant();
     }
 
     @Override

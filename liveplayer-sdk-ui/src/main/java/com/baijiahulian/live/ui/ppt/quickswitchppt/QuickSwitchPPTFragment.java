@@ -78,7 +78,8 @@ public class QuickSwitchPPTFragment extends BaseDialogFragment implements Switch
 
     @Override
     public void setIndex() {
-        ((RecyclerView) $.id(R.id.dialog_switch_ppt_rv).view()).smoothScrollToPosition(currentIndex);
+
+        ((RecyclerView) $.id(R.id.dialog_switch_ppt_rv).view()).scrollToPosition(currentIndex);
     }
 
     @Override
@@ -88,7 +89,7 @@ public class QuickSwitchPPTFragment extends BaseDialogFragment implements Switch
         if (isStudent) {
             quickDocList.addAll(docModelList.subList(0, maxIndex + 1));
         }
-        ((RecyclerView) $.id(R.id.dialog_switch_ppt_rv).view()).smoothScrollToPosition(maxIndex);
+        ((RecyclerView) $.id(R.id.dialog_switch_ppt_rv).view()).scrollToPosition(maxIndex);
         adapter.notifyDataSetChanged();
     }
 

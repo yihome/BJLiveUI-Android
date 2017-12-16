@@ -29,7 +29,8 @@
 -dontwarn com.bjhl.**
 -keep public class com.baijiahulian.**{*;}
 -keep public class com.bjhl.**{*;}
--keep class com.baijia.**{*;}
+-keep public class com.baijia.**{*;}
+-keep public class com.baijiayun.**{*;}
 
 #RxJava混淆规则
 -dontwarn sun.misc.**

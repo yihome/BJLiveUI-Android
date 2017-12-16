@@ -50,12 +50,13 @@ public class LPShareDialog extends BaseDialogFragment {
 
     @Override
     protected int getLayoutId() {
-        return R.layout.dialog_share;
+        return R.layout.dialog_share_room;
     }
 
     @Override
     protected void init(Bundle savedInstanceState, Bundle arguments) {
-        super.hideBackground().contentBackgroundColor(ContextCompat.getColor(getContext(), R.color.live_transparent));        shareChannels = (ArrayList) arguments.getSerializable(SHARE_CHANNELS);
+        super.hideBackground().contentBackgroundColor(ContextCompat.getColor(getContext(), R.color.live_transparent));
+        shareChannels = (ArrayList) arguments.getSerializable(SHARE_CHANNELS);
         recyclerView = (RecyclerView) contentView.findViewById(R.id.lp_dialog_share_recycler);
         int GRID_SPAN_COUNT = 3;
 

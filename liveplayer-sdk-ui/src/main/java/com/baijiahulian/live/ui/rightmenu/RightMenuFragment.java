@@ -65,9 +65,9 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
     }
 
     @Override
-    public void showSpeakApplyCountDown(int countDownTime) {
+    public void showSpeakApplyCountDown(int countDownTime, int total) {
         $.id(R.id.fragment_right_hand_countdown).visible();
-        ((CountdownCircleView) $.id(R.id.fragment_right_hand_countdown).view()).setRatio(countDownTime / 30000.0f);
+        ((CountdownCircleView) $.id(R.id.fragment_right_hand_countdown).view()).setRatio(countDownTime / (float) total);
         $.id(R.id.fragment_right_hand_countdown).view().invalidate();
     }
 
@@ -180,6 +180,11 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
     @Override
     public void hideUserList() {
         $.id(R.id.fragment_right_online_user).gone();
+    }
+
+    @Override
+    public void showHandUpTimeout() {
+        showToast(getString(R.string.live_media_speak_apply_timeout));
     }
 
     @Override

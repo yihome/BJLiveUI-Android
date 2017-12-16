@@ -27,6 +27,6 @@ interface MessageSendContract {
 
         void chooseEmoji();
 
-        boolean isTeacherOrAssistant();
+        boolean canSendPicture();
     }
 }

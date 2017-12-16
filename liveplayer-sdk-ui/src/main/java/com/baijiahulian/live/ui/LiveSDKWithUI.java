@@ -9,6 +9,7 @@ import android.text.TextUtils;
 import com.baijiahulian.live.ui.activity.LiveRoomActivity;
 import com.baijiahulian.live.ui.utils.LPShareModel;
 import com.baijiahulian.livecore.context.LPConstants;
+import com.baijiahulian.livecore.context.LiveRoom;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
 
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ public class LiveSDKWithUI {
 
     /**
      * 通过参加码进入房间
+     *
      * @param context
      * @param code     参加码
      * @param name     昵称
@@ -29,6 +31,20 @@ public class LiveSDKWithUI {
      */
     public static void enterRoom(@NonNull Context context, @NonNull String code, @NonNull String name,
                                  @NonNull LiveSDKEnterRoomListener listener) {
+        enterRoom(context, code, name, null, listener);
+    }
+
+    /**
+     * 通过参加码进入房间
+     *
+     * @param context
+     * @param code     参加码
+     * @param name     昵称
+     * @param avatar
+     * @param listener 出错回调
+     */
+    public static void enterRoom(@NonNull Context context, @NonNull String code, @NonNull String name,
+                                 @Nullable String avatar, @NonNull LiveSDKEnterRoomListener listener) {
         if (TextUtils.isEmpty(name)) {
             listener.onError("name is empty");
             return;
@@ -41,11 +57,13 @@ public class LiveSDKWithUI {
         Intent intent = new Intent(context, LiveRoomActivity.class);
         intent.putExtra("name", name);
         intent.putExtra("code", code);
+        if (!TextUtils.isEmpty(avatar)) {
+            intent.putExtra("avatar", avatar);
+        }
         context.startActivity(intent);
     }
 
     /**
-     *
      * @param context
      * @param roomId   房间号
      * @param sign     签名
@@ -94,8 +112,19 @@ public class LiveSDKWithUI {
         LiveRoomActivity.setShouldShowTechSupport(shouldShowTechSupport);
     }
 
-    public static void disableSpeakQueuePlaceholder(){
+    public static void disableSpeakQueuePlaceholder() {
         LiveRoomActivity.disableSpeakQueuePlaceholder();
+    }
+
+    /**
+     * 跑马灯字段
+     */
+    public static void setLiveRoomMarqueeTape(String str){
+        LiveRoomActivity.setLiveRoomMarqueeTape(str);
+    }
+
+    public static void setLiveRoomMarqueeTape(String str, int interval){
+        LiveRoomActivity.setLiveRoomMarqueeTape(str, interval);
     }
 
     public interface LPRoomResumeListener {

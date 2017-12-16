@@ -135,25 +135,21 @@ public class ChatPresenter implements ChatContract.Presenter {
             @Override
             public void onFailure(HttpException e) {
                 model.setStatus(UploadingImageModel.STATUS_UPLOAD_FAILED);
-//                view.notifyItemChange(getCount() - imageMessageUploadingQueue.size());
                 view.notifyDataChanged();
             }
 
             @Override
             public void onResponse(BJResponse bjResponse) {
-                LPShortResult shortResult = null;
+                LPShortResult shortResult;
                 try {
                     shortResult = LPJsonUtils.parseString(bjResponse.getResponse().body().string(), LPShortResult.class);
                     LPUploadDocModel uploadModel = LPJsonUtils.parseJsonObject((JsonObject) shortResult.data, LPUploadDocModel.class);
                     String imageContent = LPChatMessageParser.toImageMessage(uploadModel.url);
                     routerListener.getLiveRoom().getChatVM().sendImageMessage(imageContent, uploadModel.width, uploadModel.height);
                     imageMessageUploadingQueue.poll();
-//                    view.notifyItemChange(getCount() - imageMessageUploadingQueue.size());
-//                    view.notifyDataChanged();
                     continueUploadQueue();
                 } catch (IOException e) {
                     model.setStatus(UploadingImageModel.STATUS_UPLOAD_FAILED);
-//                    view.notifyItemChange(getCount() - imageMessageUploadingQueue.size());
                     view.notifyDataChanged();
                     e.printStackTrace();
                 }

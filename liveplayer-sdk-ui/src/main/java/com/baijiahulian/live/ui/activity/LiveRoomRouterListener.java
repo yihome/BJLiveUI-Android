@@ -186,4 +186,6 @@ public interface LiveRoomRouterListener {
     void showDebugBtn();
 
     void enableStudentSpeakMode();
+
+    void showClassSwitch();
 }

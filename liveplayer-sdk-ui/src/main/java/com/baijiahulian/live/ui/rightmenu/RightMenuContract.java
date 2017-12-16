@@ -19,7 +19,7 @@ public interface RightMenuContract {
 
         void showDrawingStatus(boolean isEnable);
 
-        void showSpeakApplyCountDown(int countDownTime);
+        void showSpeakApplyCountDown(int countDownTime, int total);
 
         void showSpeakApplyAgreed();
 
@@ -54,6 +54,8 @@ public interface RightMenuContract {
         void showForceSpeak();
 
         void hideUserList();
+
+        void showHandUpTimeout();
 
     }
 

@@ -16,6 +16,7 @@ import com.baijiahulian.livecore.models.responsedebug.LPResRoomDebugModel;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 import com.baijiahulian.livecore.utils.LPRxUtils;
 
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import rx.Subscription;
@@ -35,7 +36,7 @@ public class GlobalPresenter implements BasePresenter {
     private Subscription subscriptionOfClassStart, subscriptionOfClassEnd, subscriptionOfForbidAllStatus,
             subscriptionOfTeacherMedia, subscriptionOfUserIn, subscriptionOfUserOut, subscriptionOfQuizStart,
             subscriptionOfQuizRes, subscriptionOfQuizEnd, subscriptionOfQuizSolution, subscriptionOfDebug,
-            subscriptionOfAnnouncement;
+            subscriptionOfAnnouncement, subscriptionOfClassSwitch;
 
     private boolean isVideoManipulated = false;
 
@@ -69,6 +70,19 @@ public class GlobalPresenter implements BasePresenter {
                         teacherAudioOn = false;
                     }
                 });
+
+        // 大小班教室切换
+        subscriptionOfClassSwitch = routerListener.getLiveRoom().getObservableOfClassSwitch()
+                .delay(new Random().nextInt(2) + 1, TimeUnit.SECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<Void>() {
+                    @Override
+                    public void call(Void aVoid) {
+                        routerListener.showClassSwitch();
+//                        routerListener.doReEnterRoom();
+                    }
+                });
+
         subscriptionOfForbidAllStatus = routerListener.getLiveRoom().getObservableOfForbidAllChatStatus()
                 .observeOn(AndroidSchedulers.mainThread())
 //                .skip(1) // 排除进教室第一次回调

@@ -93,6 +93,7 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
 
     //是否显示关闭按钮
     public void setCloseBtnStatus(boolean forceJoin) {
+        if(presenter == null) return;
         if (!forceJoin) {
             editable(true);
             editText(getString(R.string.live_quiz_close));
@@ -178,12 +179,6 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
                     setCloseBtnStatus(forceJoin);
                 }
                 isLoadFailed = false;
-//                view.evaluateJavascript(str, new ValueCallback<String>() {
-//                    @Override
-//                    public void onReceiveValue(String value) {
-//
-//                    }
-//                });
 
                 callJsInQueue();
             }
