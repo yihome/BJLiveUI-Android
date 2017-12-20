@@ -93,7 +93,7 @@ public class AliCloudImageUtil {
     private static boolean isFromAliCloud(String picUrl) {
         LPBJUrl url = LPBJUrl.parse(picUrl);
         String host = url.getHost();
-        return host.endsWith(".genshuixue.com") || host.endsWith(".gsxservice.com");
+        return host.endsWith(".baijiashilian.com") || host.endsWith(".baijiayun.com") || host.endsWith(".genshuixue.com") || host.endsWith(".gsxservice.com");
     }
 
     private static String imageUrlSuffix() {

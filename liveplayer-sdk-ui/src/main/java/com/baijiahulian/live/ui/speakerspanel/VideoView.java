@@ -65,7 +65,7 @@ public class VideoView extends FrameLayout {
         this.addView(surfaceView);
         //名字
         tvName = new TextView(getContext());
-        LayoutParams tvLp = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        FrameLayout.LayoutParams tvLp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         tvLp.gravity = Gravity.BOTTOM;
         tvName.setGravity(Gravity.CENTER);
         tvName.setTextColor(color);
@@ -85,7 +85,7 @@ public class VideoView extends FrameLayout {
             waterMark = bitmap;
             int height = Math.min(waterMark.getHeight(), VideoView.this.getMeasuredHeight() / 9);
             int width = Math.min(waterMark.getWidth(), VideoView.this.getMeasuredWidth() / 9);
-            LayoutParams ivLp = new LayoutParams(width, height);
+            FrameLayout.LayoutParams ivLp = new FrameLayout.LayoutParams(width, height);
             switch (waterMarkPosition) {
                 case 1:
                     ivLp.gravity = GravityCompat.START | Gravity.TOP;
@@ -198,7 +198,7 @@ public class VideoView extends FrameLayout {
         if (getMeasuredWidth() * getMeasuredHeight() <= 0) return;
         int height = Math.min(waterMark.getHeight(), VideoView.this.getMeasuredHeight() / 9);
         int width = Math.min(waterMark.getWidth(), VideoView.this.getMeasuredWidth() / 9);
-        LayoutParams ivLp = (LayoutParams) ivWaterMark.getLayoutParams();
+        FrameLayout.LayoutParams ivLp = (LayoutParams) ivWaterMark.getLayoutParams();
         ivLp.width = width;
         ivLp.height = height;
         int viewHeight = VideoView.this.getMeasuredHeight();
@@ -239,7 +239,7 @@ public class VideoView extends FrameLayout {
             public void onGlobalLayout() {
                 int height = Math.min(waterMark.getHeight(), VideoView.this.getMeasuredHeight() / 9);
                 int width = Math.min(waterMark.getWidth(), VideoView.this.getMeasuredWidth() / 9);
-                LayoutParams ivLp = (LayoutParams) ivWaterMark.getLayoutParams();
+                FrameLayout.LayoutParams ivLp = (LayoutParams) ivWaterMark.getLayoutParams();
                 ivLp.width = width;
                 ivLp.height = height;
                 int viewVerticalHeight = VideoView.this.getMeasuredHeight();

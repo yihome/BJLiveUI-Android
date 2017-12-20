@@ -17,6 +17,7 @@ import com.baijiahulian.livecore.utils.LPLogger;
 import com.google.gson.JsonObject;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import rx.Subscription;
@@ -51,9 +52,9 @@ public class ChatPresenter implements ChatContract.Presenter {
         view.notifyDataChanged();
         subscriptionOfDataChange = routerListener.getLiveRoom().getChatVM().getObservableOfNotifyDataChange()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<Void>() {
+                .subscribe(new LPErrorPrintSubscriber<List<IMessageModel>>() {
                     @Override
-                    public void call(Void aVoid) {
+                    public void call(List<IMessageModel> iMessageModels) {
                         view.notifyDataChanged();
                     }
                 });

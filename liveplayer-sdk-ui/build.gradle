@@ -29,8 +29,8 @@ dependencies {
 
     compile 'com.afollestad.material-dialogs:commons:0.9.4.4'
 
-    compile 'com.baijia.live:liveplayer-sdk-core:1.2.3'
-    compile 'com.baijia.live:liveplayer-sdk-core-ppt:1.2.0'
+    compile 'com.baijia.live:liveplayer-sdk-core:1.2.4'
+    compile 'com.baijia.live:liveplayer-sdk-core-ppt:1.2.4'
 }
 android {
     lintOptions {

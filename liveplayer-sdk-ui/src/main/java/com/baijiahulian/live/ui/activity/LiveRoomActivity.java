@@ -1838,21 +1838,21 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
             AudioManager mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+            mAudioManager.adjustStreamVolume(AudioManager.STREAM_VOICE_CALL, AudioManager.ADJUST_RAISE,
+                    AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_SHOW_UI);
             int current = mAudioManager.getStreamVolume(AudioManager.STREAM_VOICE_CALL);
             if (current >= 1) {
                 liveRoom.getPlayer().unMute();
             }
-            mAudioManager.adjustStreamVolume(AudioManager.STREAM_VOICE_CALL, AudioManager.ADJUST_RAISE,
-                    AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_SHOW_UI);
             return true;
         } else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
             AudioManager mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+            mAudioManager.adjustStreamVolume(AudioManager.STREAM_VOICE_CALL, AudioManager.ADJUST_LOWER,
+                    AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_SHOW_UI);
             int current = mAudioManager.getStreamVolume(AudioManager.STREAM_VOICE_CALL);
             if (current <= 1) {
                 liveRoom.getPlayer().mute();
             }
-            mAudioManager.adjustStreamVolume(AudioManager.STREAM_VOICE_CALL, AudioManager.ADJUST_LOWER,
-                    AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_SHOW_UI);
             return true;
         } else {
             return super.onKeyDown(keyCode, event);
