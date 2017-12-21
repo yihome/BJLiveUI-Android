@@ -13,7 +13,6 @@ import android.widget.TextView;
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseDialogFragment;
 import com.baijiahulian.live.ui.utils.AliCloudImageUtil;
-import com.baijiahulian.live.ui.utils.CircleAvatarTransformation;
 import com.baijiahulian.live.ui.utils.LinearLayoutWrapManager;
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
@@ -144,7 +143,7 @@ public class OnlineUserDialogFragment extends BaseDialogFragment implements Onli
                 }
                 String avatar = userModel.getAvatar().startsWith("//") ? "https:" + userModel.getAvatar() : userModel.getAvatar();
                 Picasso.with(getActivity()).load(AliCloudImageUtil.getRoundedAvatarUrl(avatar, 64))
-                        .transform(new CircleAvatarTransformation()).into(userViewHolder.avatar);
+                        .into(userViewHolder.avatar);
             } else if (holder instanceof LoadingViewHolder) {
                 LoadingViewHolder loadingViewHolder = (LoadingViewHolder) holder;
                 loadingViewHolder.progressBar.setIndeterminate(true);
