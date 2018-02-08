@@ -1,5 +1,7 @@
 # BJLiveUI-Android CHANGELOG
 
+open source
+
 1.0.0 based on core-1.0.0 & ppt-1.0.0
 ==============
 - 支持动态PPT

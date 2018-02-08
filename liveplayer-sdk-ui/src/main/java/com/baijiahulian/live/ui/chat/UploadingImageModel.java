@@ -4,6 +4,7 @@ import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.models.LPDataModel;
 import com.baijiahulian.livecore.models.imodels.IMessageModel;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
+import com.google.gson.annotations.SerializedName;
 
 import java.util.Date;
 
@@ -19,6 +20,11 @@ class UploadingImageModel extends LPDataModel implements IMessageModel {
     private String filePath;
 
     private IUserModel self;
+
+    private String to;
+
+    @SerializedName("to_user")
+    public IUserModel toUser;
 
     private int status = STATUS_UPLOADING;
 
@@ -43,6 +49,16 @@ class UploadingImageModel extends LPDataModel implements IMessageModel {
     @Override
     public IUserModel getFrom() {
         return self;
+    }
+
+    @Override
+    public String getTo() {
+        return to;
+    }
+
+    @Override
+    public IUserModel getToUser() {
+        return toUser;
     }
 
     @Override
@@ -83,5 +99,10 @@ class UploadingImageModel extends LPDataModel implements IMessageModel {
     @Override
     public Date getTimestamp() {
         return null;
+    }
+
+    @Override
+    public boolean isPrivateChat() {
+        return !(to == null || "-1".equals(to));
     }
 }
