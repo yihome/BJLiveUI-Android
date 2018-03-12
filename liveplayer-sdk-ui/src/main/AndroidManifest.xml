@@ -6,7 +6,9 @@
         <activity
             android:name=".activity.LiveRoomActivity"
             android:configChanges="orientation|screenSize|layoutDirection"
-            android:theme="@style/LiveAppTheme" />
+            android:hardwareAccelerated="false"
+            android:theme="@style/LiveAppTheme"
+            android:windowSoftInputMode="adjustPan" />
     </application>
 
 </manifest>

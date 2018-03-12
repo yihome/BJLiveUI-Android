@@ -13,6 +13,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.SpannableString;
 import android.text.Spanned;
+import android.text.TextPaint;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.util.Linkify;
 import android.view.LayoutInflater;
@@ -30,6 +33,7 @@ import com.baijiahulian.live.ui.utils.DisplayUtils;
 import com.baijiahulian.live.ui.utils.LinearLayoutWrapManager;
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.models.imodels.IMessageModel;
+import com.baijiahulian.livecore.models.imodels.IUserModel;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -51,6 +55,7 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
     private int backgroundRes;
     @ColorInt
     private int textColor;
+//    private ImageSpan privateChatImageSpan;
 
     @Override
     public int getLayoutId() {
@@ -69,6 +74,7 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
             backgroundRes = R.drawable.live_item_chat_bg;
             textColor = ContextCompat.getColor(getContext(), R.color.primary_text);
         }
+//        privateChatImageSpan = new CenterImageSpan(getContext(), R.drawable.ic_live_private_chat, ImageSpan.ALIGN_BASELINE);
 
         adapter = new MessageAdapter();
         mLayoutManager = new LinearLayoutWrapManager(getContext());
@@ -77,6 +83,14 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
         recyclerView = (RecyclerView) $.id(R.id.fragment_chat_recycler).view();
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setAdapter(adapter);
+
+        $.id(R.id.fragment_chat_private_end_btn).clicked(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (presenter != null)
+                    presenter.endPrivateChat();
+            }
+        });
     }
 
     @Override
@@ -99,6 +113,18 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
     public void notifyItemInserted(int position) {
         adapter.notifyItemInserted(position);
         recyclerView.smoothScrollToPosition(adapter.getItemCount());
+    }
+
+    @Override
+    public void showHavingPrivateChat(IUserModel privateChatUser) {
+        if (!presenter.isLiveCanWhisper()) return;
+        $.id(R.id.fragment_chat_private_status_container).visible();
+        $.id(R.id.fragment_chat_private_user).text(getString(R.string.live_room_private_chat_with_name, privateChatUser.getName()));
+    }
+
+    @Override
+    public void showNoPrivateChat() {
+        $.id(R.id.fragment_chat_private_status_container).gone();
     }
 
     @Override
@@ -169,20 +195,90 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
         @Override
         public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
             IMessageModel message = presenter.getMessage(position);
-            int color;
-            if (message.getFrom().getType() == LPConstants.LPUserType.Teacher) {
-                color = ContextCompat.getColor(getContext(), R.color.live_blue);
-            } else {
-                color = ContextCompat.getColor(getContext(), R.color.live_text_color_light);
-            }
+            SpannableString spanText;
+            if (presenter.isPrivateChatMode()) {
+                //私聊模式
+                int color;
+                if (message.getFrom().getType() == LPConstants.LPUserType.Teacher) {
+                    color = ContextCompat.getColor(getContext(), R.color.live_blue);
+                } else {
+                    color = ContextCompat.getColor(getContext(), R.color.live_text_color_light);
+                }
+                String name = "";
+                if (message.getFrom().getUserId().equals(presenter.getCurrentUser().getUserId())) {
+                    color = ContextCompat.getColor(getContext(), R.color.live_yellow);
+                    name = "我：";
+                } else {
+                    name = message.getFrom().getName() + "：";
+                }
+                spanText = new SpannableString(name);
+                spanText.setSpan(new ForegroundColorSpan(color), 0, name.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
 
-            String name = message.getFrom().getName() + "：";
-            SpannableString spanText = new SpannableString(name);
-            spanText.setSpan(new ForegroundColorSpan(color), 0, name.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+            } else {
+                if (message.isPrivateChat()) {
+                    // 群聊模式 私聊item
+                    if (!presenter.isLiveCanWhisper()) return;
+                    boolean isFromMe = message.getFrom().getUserId().equals(presenter.getCurrentUser().getUserId());
+                    boolean isToMe = message.getTo().equals(presenter.getCurrentUser().getUserId());
+                    String toName = message.getToUser() == null ? message.getTo() : message.getToUser().getName();
+                    String name = (isFromMe ? "我" : message.getFrom().getName()) + " 私聊 " + (isToMe ? "我" : toName) + ": ";
+                    spanText = new SpannableString(name);
+
+                    if (isFromMe) {
+                        spanText.setSpan(new ForegroundColorSpan(ContextCompat.getColor(getContext(), R.color.live_yellow)), 0, 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                    } else if (message.getFrom().getType() == LPConstants.LPUserType.Teacher || message.getFrom().getType() == LPConstants.LPUserType.Assistant) {
+                        spanText.setSpan(new ForegroundColorSpan(ContextCompat.getColor(getContext(), R.color.live_blue)), 0, message.getFrom().getName().length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                        spanText.setSpan(new NameClickSpan(presenter, message.getFrom()), 0, message.getFrom().getName().length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                    } else {
+                        spanText.setSpan(new ForegroundColorSpan(ContextCompat.getColor(getContext(), R.color.live_text_color_light)), 0, message.getFrom().getName().length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                        if (presenter.getCurrentUser().getType() == LPConstants.LPUserType.Teacher || presenter.getCurrentUser().getType() == LPConstants.LPUserType.Assistant)
+                            spanText.setSpan(new NameClickSpan(presenter, message.getFrom()), 0, message.getFrom().getName().length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                    }
+                    if (isToMe) {
+                        int start = name.lastIndexOf("我");
+                        spanText.setSpan(new ForegroundColorSpan(ContextCompat.getColor(getContext(), R.color.live_yellow)), start, start + 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                    } else if (message.getToUser() != null && (message.getToUser().getType() == LPConstants.LPUserType.Teacher || message.getToUser().getType() == LPConstants.LPUserType.Assistant)) {
+                        int start = name.lastIndexOf(toName);
+                        spanText.setSpan(new ForegroundColorSpan(ContextCompat.getColor(getContext(), R.color.live_blue)), start, start + toName.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                        spanText.setSpan(new NameClickSpan(presenter, message.getToUser()), start, start + toName.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                    } else {
+                        int start = name.lastIndexOf(toName);
+                        spanText.setSpan(new ForegroundColorSpan(ContextCompat.getColor(getContext(), R.color.live_text_color_light)), start, start + toName.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                        if (message.getToUser() != null && (presenter.getCurrentUser().getType() == LPConstants.LPUserType.Teacher || presenter.getCurrentUser().getType() == LPConstants.LPUserType.Assistant))
+                            spanText.setSpan(new NameClickSpan(presenter, message.getToUser()), start, start + toName.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                    }
+                } else {
+                    // 群聊模式 群聊item
+                    int color;
+                    if (message.getFrom().getType() == LPConstants.LPUserType.Teacher || message.getFrom().getType() == LPConstants.LPUserType.Assistant) {
+                        color = ContextCompat.getColor(getContext(), R.color.live_blue);
+                    } else {
+                        color = ContextCompat.getColor(getContext(), R.color.live_text_color_light);
+                    }
+                    String name = "";
+                    if (message.getFrom().getUserId().equals(presenter.getCurrentUser().getUserId())) {
+                        color = ContextCompat.getColor(getContext(), R.color.live_yellow);
+                        name = "我：";
+                    } else {
+                        name = message.getFrom().getName() + "：";
+                    }
+                    spanText = new SpannableString(name);
+                    spanText.setSpan(new ForegroundColorSpan(color), 0, name.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                    if (!message.getFrom().getUserId().equals(presenter.getCurrentUser().getUserId()) && presenter.isLiveCanWhisper()) {
+                        if (presenter.getCurrentUser().getType() == LPConstants.LPUserType.Student) {
+                            if (message.getFrom().getType() == LPConstants.LPUserType.Teacher || message.getFrom().getType() == LPConstants.LPUserType.Assistant)
+                                spanText.setSpan(new NameClickSpan(presenter, message.getFrom()), 0, name.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                        } else if (presenter.getCurrentUser().getType() == LPConstants.LPUserType.Teacher || presenter.getCurrentUser().getType() == LPConstants.LPUserType.Assistant) {
+                            spanText.setSpan(new NameClickSpan(presenter, message.getFrom()), 0, name.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                        }
+                    }
+                }
+            }
 
             if (holder instanceof TextViewHolder) {
                 TextViewHolder textViewHolder = (TextViewHolder) holder;
                 textViewHolder.textView.setText(spanText);
+                textViewHolder.textView.setMovementMethod(LinkMovementMethod.getInstance());
                 textViewHolder.textView.setTextColor(textColor);
                 textViewHolder.textView.append(message.getContent());
                 if (message.getFrom().getType() == LPConstants.LPUserType.Teacher ||
@@ -194,6 +290,8 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
             } else if (holder instanceof EmojiViewHolder) {
                 EmojiViewHolder emojiViewHolder = (EmojiViewHolder) holder;
                 emojiViewHolder.tvName.setText(spanText);
+                emojiViewHolder.tvName.setMovementMethod(LinkMovementMethod.getInstance());
+                emojiViewHolder.tvName.setTextColor(textColor);
                 Picasso.with(getContext()).load(message.getUrl())
                         .placeholder(R.drawable.live_ic_emoji_holder)
                         .error(R.drawable.live_ic_emoji_holder)
@@ -203,13 +301,15 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
                 ImageViewHolder imageViewHolder = (ImageViewHolder) holder;
                 imageViewHolder.ivImg.setOnClickListener(null);
                 imageViewHolder.tvName.setText(spanText);
+                imageViewHolder.tvName.setMovementMethod(LinkMovementMethod.getInstance());
+                imageViewHolder.tvName.setTextColor(textColor);
                 if (message instanceof UploadingImageModel) {
                     BitmapFactory.Options options = new BitmapFactory.Options();
                     options.inJustDecodeBounds = true;
                     BitmapFactory.decodeFile(message.getUrl(), options);
                     int[] size = {options.outWidth, options.outHeight};
                     ChatImageUtil.calculateImageSize(size, DisplayUtils.dip2px(getContext(), 100), DisplayUtils.dip2px(getContext(), 50));
-                    Picasso.with(getContext()).load(new File(message.getUrl()))
+                    Picasso.with(getContext()).load(new File(AliCloudImageUtil.getScaledUrl(message.getUrl(), AliCloudImageUtil.SCALED_MFIT, size[0], size[1])))
                             .resize(size[0], size[1])
                             .placeholder(failedColorDrawable)
                             .error(failedColorDrawable)
@@ -231,7 +331,7 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
                     imageViewHolder.tvMask.setVisibility(View.GONE);
                     imageViewHolder.tvExclamation.setVisibility(View.GONE);
                     ImageTarget target = new ImageTarget(getContext(), imageViewHolder.ivImg);
-                    Picasso.with(getContext()).load(AliCloudImageUtil.getRectScaledUrl(getContext(), message.getUrl(), 100))
+                    Picasso.with(getContext()).load(AliCloudImageUtil.getScaledUrl(message.getUrl(), AliCloudImageUtil.SCALED_MFIT, 300, 300))
                             .placeholder(failedColorDrawable)
                             .error(failedColorDrawable)
                             .into(target);
@@ -321,6 +421,28 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
         @Override
         public void onPrepareLoad(Drawable placeHolderDrawable) {
             imageView.setImageDrawable(placeHolderDrawable);
+        }
+    }
+
+    private static class NameClickSpan extends ClickableSpan {
+        private IUserModel userModel;
+        private WeakReference<ChatContract.Presenter> wrPresenter;
+
+        NameClickSpan(ChatContract.Presenter presenter, IUserModel userModel) {
+            this.userModel = userModel;
+            this.wrPresenter = new WeakReference<ChatContract.Presenter>(presenter);
+        }
+
+        @Override
+        public void onClick(View widget) {
+            ChatContract.Presenter presenter = wrPresenter.get();
+            if (presenter != null) {
+                presenter.showPrivateChat(userModel);
+            }
+        }
+
+        @Override
+        public void updateDrawState(TextPaint ds) {
         }
     }
 }

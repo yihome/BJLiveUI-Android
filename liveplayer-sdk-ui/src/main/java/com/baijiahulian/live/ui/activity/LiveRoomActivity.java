@@ -18,11 +18,11 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.PersistableBundle;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -106,6 +106,7 @@ import com.baijiahulian.livecore.context.LiveRoom;
 import com.baijiahulian.livecore.context.OnLiveRoomListener;
 import com.baijiahulian.livecore.launch.LPLaunchListener;
 import com.baijiahulian.livecore.listener.OnPhoneRollCallListener;
+import com.baijiahulian.livecore.models.LPCheckRecordStatusModel;
 import com.baijiahulian.livecore.models.LPJsonModel;
 import com.baijiahulian.livecore.models.LPKVModel;
 import com.baijiahulian.livecore.models.imodels.ILoginConflictModel;
@@ -171,13 +172,14 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private RollCallDialogPresenter rollCallDialogPresenter;
     private QuizDialogFragment quizFragment;
     private QuizDialogPresenter quizPresenter;
+    private MessageSendPresenter messageSendPresenter;
     private OrientationEventListener orientationEventListener; //处理屏幕旋转时本地视频的方向
     private int oldRotation;
 
     private Subscription subscriptionOfLoginConflict, subscriptionOfStreamInfo, subscriptionOfOnlineUserDebug,
             subscriptionOfMarquee;
 
-    private boolean isClearScreen;//是否已经清屏，作用于视频采集和远程视频ui的调整
+    private boolean isClearScreen; //是否已经清屏，作用于视频采集和远程视频ui的调整
     private String code, name, avatar;
     private boolean isBackgroundContainerShrink = false; //缩小背景框
 
@@ -187,7 +189,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private static int liveHorseLampInterval = 60; // 跑马灯时间间隔
     private IUserModel enterUser;
     private ViewGroup.LayoutParams lpBackground;
-    private Subscription subscriptionOfEmptyBoard;
     private boolean mobileNetworkDialogShown = false;
     private MaterialDialog speakInviteDlg;  //取消用
     //debug
@@ -196,12 +197,14 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private int aecMode = 0, aecmMode = 0, audioSource = 0, delay;
     private boolean isCommunication = true;
     private TextView tvStreamInfo;
-    //    private List<IUserModel> userModels;
     private List<IMediaModel> userMediaModels;
+    private Subscription subscriptionOfIsCloudRecordAllowed;
+    private int minVolume;
+    private IUserModel privateChatUser;
 
     @Override
-    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-        super.onSaveInstanceState(outState, outPersistentState);
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
         outState.putString("code", code);
         outState.putString("name", name);
         outState.putString("avatar", avatar);
@@ -212,14 +215,31 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // 6.0+ 打开硬件加速
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { // 5.0+ 打开硬件加速
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
                     WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_live_room);
+//        View anchor = findViewById(R.id.activity_live_room_center_anchor);
+//        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) anchor.getLayoutParams();
+//        lp.topMargin = DisplayUtils.getScreenWidthPixels(this) * 3 / 4;
+//        anchor.setLayoutParams(lp);
         initViews();
+
+        // x86平台的机器不让进教室
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (Build.SUPPORTED_ABIS[0].contains("x86")) {
+                showMessage(getString(R.string.live_room_x86_not_supported));
+                super.finish();
+            }
+        } else {
+            if (Build.CPU_ABI.contains("x86")) {
+                showMessage(getString(R.string.live_room_x86_not_supported));
+                super.finish();
+            }
+        }
 
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             onConfigurationChanged(getResources().getConfiguration());
@@ -276,6 +296,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     }
 
     private void initViews() {
+
         lpBackground = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         flBackground = (FrameLayout) findViewById(R.id.activity_live_room_background_container);
         flTop = (FrameLayout) findViewById(R.id.activity_live_room_top);
@@ -325,6 +346,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
             });
         }
     }
+
 
     @Override
     protected void onPause() {
@@ -1000,6 +1022,20 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     }
 
     @Override
+    public void onPrivateChatUserChange(IUserModel iUserModel) {
+        this.privateChatUser = iUserModel;
+        if (messageSendPresenter != null)
+            messageSendPresenter.onPrivateChatUserChange();
+        if(chatPresenter != null)
+            chatPresenter.onPrivateChatUserChange();
+    }
+
+    @Override
+    public IUserModel getPrivateChatUser() {
+        return privateChatUser;
+    }
+
+    @Override
     public void setFullScreenView(View view) {
         setZOrderMediaOverlayFalse(view);
         flBackground.addView(view, lpBackground);
@@ -1225,9 +1261,16 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     public void navigateToMain() {
 
         AudioManager mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        int current = mAudioManager.getStreamVolume(AudioManager.STREAM_VOICE_CALL);
-        if (current <= 1) {
-            liveRoom.getPlayer().mute();
+        int current;
+        if (mAudioManager != null) {
+            int currentVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_VOICE_CALL);
+            mAudioManager.setStreamVolume(AudioManager.STREAM_VOICE_CALL, -1, 0);
+            minVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_VOICE_CALL);
+            mAudioManager.setStreamVolume(AudioManager.STREAM_VOICE_CALL, currentVolume, 0);
+            current = mAudioManager.getStreamVolume(AudioManager.STREAM_VOICE_CALL);
+            if (current <= minVolume) {
+                liveRoom.getPlayer().mute();
+            }
         }
 
         globalPresenter = new GlobalPresenter();
@@ -1237,12 +1280,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         lppptFragment = MyPPTFragment.newInstance(liveRoom);
         bindVP(lppptFragment, new PPTPresenter(lppptFragment));
         addFragment(R.id.activity_live_room_background_container, lppptFragment);
-        subscriptionOfEmptyBoard = lppptFragment.getObservableOfEmptyBoard().subscribe(new LPErrorPrintSubscriber<Boolean>() {
-            @Override
-            public void call(Boolean aBoolean) {
-                speakerPresenter.notifyEmptyPPTStatus(aBoolean);
-            }
-        });
 
         topBarFragment = new TopBarFragment();
         bindVP(topBarFragment, new TopBarPresenter(topBarFragment));
@@ -1324,7 +1361,17 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                             attachLocalAudio();
                             attachLocalVideo();
                             if (liveRoom.getAutoStartCloudRecordStatus() == 1) {
-                                liveRoom.requestCloudRecord(true);
+                                subscriptionOfIsCloudRecordAllowed = liveRoom.requestIsCloudRecordAllowed()
+                                        .subscribe(new LPErrorPrintSubscriber<LPCheckRecordStatusModel>() {
+                                            @Override
+                                            public void call(LPCheckRecordStatusModel lpCheckRecordStatusModel) {
+                                                if (lpCheckRecordStatusModel.recordStatus == 1) {
+                                                    liveRoom.requestCloudRecord(true);
+                                                } else {
+                                                    showMessage(lpCheckRecordStatusModel.reason);
+                                                }
+                                            }
+                                        });
                             }
                         } else if (liveRoom.getCurrentUser().getType() == LPConstants.LPUserType.Student) {
                             enableStudentSpeakMode();
@@ -1423,12 +1470,18 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         dlChat.openDrawer(Gravity.START);
     }
 
+    private MessageSentFragment messageSentFragment;
+
     @Override
     public void navigateToMessageInput() {
-        MessageSentFragment fragment = MessageSentFragment.newInstance();
-        MessageSendPresenter presenter = new MessageSendPresenter(fragment);
-        bindVP(fragment, presenter);
-        showDialogFragment(fragment);
+        if (messageSentFragment == null)
+            messageSentFragment = MessageSentFragment.newInstance();
+        if (messageSendPresenter == null)
+            messageSendPresenter = new MessageSendPresenter(messageSentFragment);
+        if (messageSentFragment.isAdded()) return;
+        messageSendPresenter.setView(messageSentFragment);
+        bindVP(messageSentFragment, messageSendPresenter);
+        showDialogFragment(messageSentFragment);
     }
 
     @Override
@@ -1499,6 +1552,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         bindVP(userListFragment, userPresenter);
         showDialogFragment(userListFragment);
     }
+
 
     @Override
     public void navigateToPPTWareHouse() {
@@ -1643,6 +1697,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
     public void forbidScreenRotateItself() {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_USER);
@@ -1688,6 +1743,10 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         }
     }
 
+    public View getBackGroundView(){
+        return flBackground.getChildAt(0);
+    }
+
     private void setZOrderMediaOverlayFalse(View view) {
         if (view instanceof SurfaceView) {
             ((SurfaceView) view).setZOrderMediaOverlay(false);
@@ -1717,9 +1776,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         }
         RxUtils.unSubscribe(subscriptionOfMarquee);
         RxUtils.unSubscribe(subscriptionOfLoginConflict);
-        RxUtils.unSubscribe(subscriptionOfEmptyBoard);
         RxUtils.unSubscribe(subscriptionOfStreamInfo);
         RxUtils.unSubscribe(subscriptionOfOnlineUserDebug);
+        RxUtils.unSubscribe(subscriptionOfIsCloudRecordAllowed);
 
         orientationEventListener = null;
 
@@ -1835,22 +1894,53 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     }
 
     @Override
+    public boolean isPrivateChat() {
+        return privateChatUser != null;
+    }
+
+    @Override
+    public void showNoSpeakers() {
+        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) dlChat.getLayoutParams();
+        if (lp.getRules()[RelativeLayout.BELOW] == R.id.activity_live_room_center_anchor) {
+            return;
+        }
+        flSpeakers.setVisibility(View.GONE);
+        lp.addRule(RelativeLayout.BELOW, 0);
+        lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_center_anchor);
+        dlChat.setLayoutParams(lp);
+    }
+
+    @Override
+    public void showHavingSpeakers() {
+        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) dlChat.getLayoutParams();
+        if (lp.getRules()[RelativeLayout.BELOW] == R.id.activity_live_room_speakers_container) {
+            return;
+        }
+        flSpeakers.setVisibility(View.VISIBLE);
+        lp.addRule(RelativeLayout.BELOW, 0);
+        lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_speakers_container);
+        dlChat.setLayoutParams(lp);
+    }
+
+    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
             AudioManager mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+            if (mAudioManager == null) return true;
             mAudioManager.adjustStreamVolume(AudioManager.STREAM_VOICE_CALL, AudioManager.ADJUST_RAISE,
                     AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_SHOW_UI);
             int current = mAudioManager.getStreamVolume(AudioManager.STREAM_VOICE_CALL);
-            if (current >= 1) {
+            if (current > minVolume) {
                 liveRoom.getPlayer().unMute();
             }
             return true;
         } else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
             AudioManager mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+            if (mAudioManager == null) return true;
             mAudioManager.adjustStreamVolume(AudioManager.STREAM_VOICE_CALL, AudioManager.ADJUST_LOWER,
                     AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_SHOW_UI);
             int current = mAudioManager.getStreamVolume(AudioManager.STREAM_VOICE_CALL);
-            if (current <= 1) {
+            if (current <= minVolume) {
                 liveRoom.getPlayer().mute();
             }
             return true;

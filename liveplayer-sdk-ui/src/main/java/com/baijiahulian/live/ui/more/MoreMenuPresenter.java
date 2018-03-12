@@ -52,6 +52,7 @@ public class MoreMenuPresenter implements MoreMenuContract.Presenter {
     @Override
     public void unSubscribe() {
         RxUtils.unSubscribe(subscriptionOfCloudRecord);
+        RxUtils.unSubscribe(subscriptionOfIsCloudRecordAllowed);
     }
 
     @Override

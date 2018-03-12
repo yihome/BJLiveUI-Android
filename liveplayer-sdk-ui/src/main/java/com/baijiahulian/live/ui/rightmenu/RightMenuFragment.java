@@ -88,6 +88,23 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
     }
 
     @Override
+    public void showSpeakClosedByServer() {
+        showToast(getString(R.string.live_media_speak_closed_by_server));
+        $.id(R.id.fragment_right_speak_apply).image(R.drawable.live_ic_handup);
+        $.id(R.id.fragment_right_pen).gone();
+        $.id(R.id.fragment_right_hand_countdown).invisible();
+    }
+
+    @Override
+    public void showForceSpeakDenyByServer() {
+        showToast(getString(R.string.live_force_speak_closed_by_server));
+//        $.id(R.id.fragment_right_speak_apply).image(R.drawable.live_ic_handup);
+//        $.id(R.id.fragment_right_pen).gone();
+        $.id(R.id.fragment_right_hand_countdown).invisible();
+    }
+
+
+    @Override
     public void showSpeakApplyDisagreed() {
         $.id(R.id.fragment_right_speak_apply).enable(true);
         showToast(getString(R.string.live_media_speak_apply_disagree));

@@ -15,6 +15,7 @@ import com.baijiahulian.livecore.models.imodels.IMediaControlModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.models.imodels.IUserInModel;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
+import com.baijiahulian.livecore.models.roomresponse.LPResRoomDocAllModel;
 import com.baijiahulian.livecore.utils.LPBackPressureBufferedSubscriber;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 import com.baijiahulian.livecore.utils.LPLogger;
@@ -25,9 +26,11 @@ import com.baijiahulian.livecore.wrapper.LPRecorder;
 import java.util.ArrayList;
 import java.util.List;
 
+import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
+import rx.functions.Func2;
 
 import static com.baijiahulian.live.ui.speakerspanel.SpeakersContract.PPT_TAG;
 import static com.baijiahulian.live.ui.speakerspanel.SpeakersContract.RECORD_TAG;
@@ -55,7 +58,6 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
     private LPSubscribeObjectWithLastValue<String> fullScreenKVO;
     private static final int MAX_VIDEO_COUNT = 6;
     private boolean autoPlayPresenterVideo = true;
-    private boolean isEmptyPPT = false;
 
     // 显示视频或发言用户的分段列表 item为相应的tag或者userId;
     private List<String> displayList;
@@ -71,7 +73,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
     private Subscription subscriptionOfMediaNew, subscriptionOfMediaChange, subscriptionOfMediaClose,
             subscriptionSpeakApply, subscriptionSpeakResponse, subscriptionOfActiveUser, subscriptionOfFullScreen,
             subscriptionOfUserOut, subscriptionOfPresenterChange, subscriptionOfShareDesktopAndPlayMedia,
-            subscriptionOfVideoSizeChange, subscriptionOfUserIn;
+            subscriptionOfVideoSizeChange, subscriptionOfUserIn, subscriptionOfAutoFullScreenTeacher;
 
     public SpeakerPresenter(SpeakersContract.View view, boolean disableSpeakQueuePlaceholder) {
         this.view = view;
@@ -188,7 +190,8 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                                     displayList.add(_displayApplySection - 1, iMediaModel.getUser().getUserId());
                                     view.notifyItemInserted(_displayApplySection - 1);
                                 }
-                            }else{
+                            } else {
+                                if(iMediaModel.skipRelease() != 1)
                                 routerListener.getLiveRoom().getPlayer().replay(iMediaModel.getUser().getUserId());
                             }
                             printSections();
@@ -199,7 +202,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                             return;
                         }
                         if (position < _displayRecordSection) {
-                            view.notifyItemChanged(position);
+                                view.notifyItemChanged(position);
                             printSections();
                             return;
                         }
@@ -215,8 +218,9 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                                 displayList.add(_displayApplySection - 1, item);
                                 _displaySpeakerSection--;
                                 view.notifyItemInserted(_displayApplySection - 1);
-                            }else{ // 重播
-                                view.notifyItemChanged(position);
+                            } else { // 重播
+                                if (iMediaModel.skipRelease() != 1)
+                                    view.notifyItemChanged(position);
                             }
                         } else if (position < _displayApplySection) { // 视频未打开用户
                             view.notifyItemChanged(position);
@@ -421,6 +425,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                     }
                 });
 
+        // 主讲人退出教室
         subscriptionOfUserOut = routerListener.getLiveRoom()
                 .getObservableOfUserOut()
                 .observeOn(AndroidSchedulers.mainThread())
@@ -487,6 +492,43 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                         }
                     }
                 });
+
+        subscriptionOfAutoFullScreenTeacher = Observable
+                .zip(routerListener.getLiveRoom().getSpeakQueueVM().getObservableOfActiveUsers(),
+                        routerListener.getLiveRoom().getDocListVM().getObservableOfDocAll(), new Func2<List<IMediaModel>, LPResRoomDocAllModel, Boolean>() {
+                            @Override
+                            public Boolean call(List<IMediaModel> iMediaModels, LPResRoomDocAllModel lpResRoomDocAllModel) {
+                                boolean needFullScreenTeacherVideo = false;
+                                for (IMediaModel mediaModel : iMediaModels) {
+                                    if (mediaModel.getUser().getType() == LPConstants.LPUserType.Teacher &&
+                                            mediaModel.isVideoOn()) {
+                                        needFullScreenTeacherVideo = true;
+                                    }
+                                }
+                                return lpResRoomDocAllModel.docList.size() == 1 && needFullScreenTeacherVideo;
+                            }
+                        })
+                .filter(new Func1<Boolean, Boolean>() {
+                    @Override
+                    public Boolean call(Boolean aBoolean) {
+                        return aBoolean;
+                    }
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new LPErrorPrintSubscriber<Boolean>() {
+                    @Override
+                    public void call(Boolean aBoolean) {
+                        String teacherId = routerListener.getLiveRoom().getTeacherUser().getUserId();
+                        if (displayList.indexOf(teacherId) >= _displayPresenterSection
+                                && displayList.indexOf(teacherId) < _displaySpeakerSection
+                                && !fullScreenKVO.getParameter().equals(teacherId)
+                                && getSpeakModel(teacherId) != null
+                                && getSpeakModel(teacherId).isVideoOn()) {
+                            fullScreenKVO.setParameter(teacherId);
+                        }
+                    }
+                });
+
 
         subscriptionOfFullScreen = fullScreenKVO.newObservableOfParameterChanged()
                 .onBackpressureBuffer()
@@ -618,6 +660,7 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
         RxUtils.unSubscribe(subscriptionOfPresenterChange);
         RxUtils.unSubscribe(subscriptionOfVideoSizeChange);
         RxUtils.unSubscribe(subscriptionOfShareDesktopAndPlayMedia);
+        RxUtils.unSubscribe(subscriptionOfAutoFullScreenTeacher);
     }
 
     @Override
@@ -894,6 +937,16 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
         return routerListener.getRoomType() == LPConstants.LPRoomType.Multi;
     }
 
+    @Override
+    public void notifyNoSpeakers() {
+        routerListener.showNoSpeakers();
+    }
+
+    @Override
+    public void notifyHavingSpeakers() {
+        routerListener.showHavingSpeakers();
+    }
+
     private boolean isStopPublish = false;
 
     public void detachVideo() {
@@ -911,30 +964,6 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
             _displayApplySection--;
         }
         printSections();
-    }
-
-    public void notifyEmptyPPTStatus(Boolean isEmpty) {
-//        if (isEmptyPPT == isEmpty) return;
-//        isEmptyPPT = isEmpty;
-//        if (isEmptyPPT) {
-//            if (displayList.indexOf(PPT_TAG) >= 0) {
-//                _displayPresenterSection--;
-//                _displayRecordSection--;
-//                _displayVideoSection--;
-//                _displaySpeakerSection--;
-//                _displayApplySection--;
-//                view.removeViewAt(displayList.indexOf(PPT_TAG));
-//            }
-//        } else {
-//            if (!PPT_TAG.equals(fullScreenKVO.getParameter())) {
-//                _displayPresenterSection++;
-//                _displayRecordSection++;
-//                _displayVideoSection++;
-//                _displaySpeakerSection++;
-//                _displayApplySection++;
-//                view.notifyViewAdded(getPPTFragment().getView(), 0);
-//            }
-//        }
     }
 
     private void printSections() {

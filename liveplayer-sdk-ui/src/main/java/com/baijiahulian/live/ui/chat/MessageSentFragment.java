@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.baijiahulian.common.cropperv2.BJCommonImageCropHelper;
 import com.baijiahulian.common.cropperv2.ThemeConfig;
@@ -21,6 +22,7 @@ import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseDialogFragment;
 import com.baijiahulian.live.ui.chat.emoji.EmojiFragment;
 import com.baijiahulian.live.ui.chat.emoji.EmojiSelectCallBack;
+import com.baijiahulian.live.ui.chat.privatechat.ChatUsersDialogFragment;
 import com.baijiahulian.live.ui.utils.QueryPlus;
 import com.baijiahulian.livecore.models.imodels.IExpressionModel;
 
@@ -38,13 +40,10 @@ public class MessageSentFragment extends BaseDialogFragment implements MessageSe
     private QueryPlus $;
     private MessageTextWatcher textWatcher;
     private EmojiFragment emojiFragment;
+    private ChatUsersDialogFragment chatUsersDialogFragment;
 
     public static MessageSentFragment newInstance() {
-        Bundle args = new Bundle();
-
-        MessageSentFragment fragment = new MessageSentFragment();
-        fragment.setArguments(args);
-        return fragment;
+        return new MessageSentFragment();
     }
 
     @Override
@@ -66,21 +65,71 @@ public class MessageSentFragment extends BaseDialogFragment implements MessageSe
         $ = QueryPlus.with(contentView);
         textWatcher = new MessageTextWatcher();
         ((EditText) $.id(R.id.dialog_message_send_et).view()).addTextChangedListener(textWatcher);
+
+        if (presenter.isLiveCanWhisper()) {
+            showPrivateChatChange();
+        } else {
+            $.id(R.id.dialog_private_chat_btn_container).gone();
+            $.id(R.id.dialog_interval_line).gone();
+        }
+
         $.id(R.id.dialog_message_send_et).view().postDelayed(new Runnable() {
             @Override
             public void run() {
+                if (getActivity() == null) return;
                 InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(INPUT_METHOD_SERVICE);
+                if (imm == null) return;
                 imm.showSoftInput($.id(R.id.dialog_message_send_et).view(), InputMethodManager.SHOW_IMPLICIT);
             }
         }, 100);
+
+        $.id(R.id.dialog_message_send_et).clicked(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (chatUsersDialogFragment != null) {
+                    $.id(R.id.dialog_private_chat_users).gone();
+                    FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+                    transaction.remove(chatUsersDialogFragment);
+                    if (Build.VERSION.SDK_INT >= 24) {
+                        transaction.commitNowAllowingStateLoss();
+                    } else {
+                        transaction.commitAllowingStateLoss();
+                    }
+                    chatUsersDialogFragment = null;
+//                        imm.showSoftInput($.id(R.id.dialog_message_send_et).view(), InputMethodManager.SHOW_IMPLICIT);
+                } else if (emojiFragment != null) {
+                    $.id(R.id.dialog_message_send_emoji).gone();
+                    FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+                    transaction.remove(emojiFragment);
+                    if (Build.VERSION.SDK_INT >= 24) {
+                        transaction.commitNowAllowingStateLoss();
+                    } else {
+                        transaction.commitAllowingStateLoss();
+                    }
+                    emojiFragment = null;
+                }
+
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(INPUT_METHOD_SERVICE);
+                if (!imm.isActive()) {
+                    imm.showSoftInput($.id(R.id.dialog_message_send_et).view(), InputMethodManager.SHOW_IMPLICIT);
+                }
+            }
+        });
+
         $.id(R.id.dialog_message_send_btn).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                presenter.sendMessage(((EditText) $.id(R.id.dialog_message_send_et).view())
-                        .getEditableText().toString());
+                if (presenter.isPrivateChat()) {
+                    presenter.sendMessageToUser(((EditText) $.id(R.id.dialog_message_send_et).view())
+                            .getEditableText().toString());
+                } else {
+                    presenter.sendMessage(((EditText) $.id(R.id.dialog_message_send_et).view())
+                            .getEditableText().toString());
+                }
                 dismissAllowingStateLoss();
             }
         });
+
         $.id(R.id.dialog_message_send_pic).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -114,6 +163,14 @@ public class MessageSentFragment extends BaseDialogFragment implements MessageSe
                 presenter.chooseEmoji();
             }
         });
+
+        $.id(R.id.dialog_private_chat_btn_container).clicked(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                presenter.choosePrivateChatUser();
+            }
+        });
+
         $.id(R.id.dialog_message_send_btn).enable(false);
     }
 
@@ -127,6 +184,20 @@ public class MessageSentFragment extends BaseDialogFragment implements MessageSe
     public void setPresenter(MessageSendContract.Presenter presenter) {
         super.setBasePresenter(presenter);
         this.presenter = presenter;
+    }
+
+    @Override
+    public void showPrivateChatChange() {
+        if(!presenter.isLiveCanWhisper()) return;
+        if (presenter.isPrivateChat()) {
+            ((EditText) $.id(R.id.dialog_message_send_et).view()).setHint("私聊" + presenter.getPrivateChatUser().getName());
+            ($.id(R.id.dialog_private_chat_btn).view()).setSelected(true);
+            ((TextView) $.id(R.id.dialog_private_chat_btn).view()).setTextColor(getResources().getColor(R.color.live_blue));
+        } else {
+            ((EditText) $.id(R.id.dialog_message_send_et).view()).setHint("输入聊天内容");
+            ($.id(R.id.dialog_private_chat_btn).view()).setSelected(false);
+            ((TextView) $.id(R.id.dialog_private_chat_btn).view()).setTextColor(getResources().getColor(R.color.live_text_color_mid_light));
+        }
     }
 
     @Override
@@ -144,32 +215,38 @@ public class MessageSentFragment extends BaseDialogFragment implements MessageSe
     }
 
     @Override
-    public void showEmojiPanel() {
-        if (emojiFragment == null) {
-            // hide keyborad
-            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+    public void showPrivateChatUserPanel() {
+        if (!presenter.isLiveCanWhisper()) return;
+        if (chatUsersDialogFragment == null && emojiFragment == null) {
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(INPUT_METHOD_SERVICE);
             if (imm.isActive()) {//isOpen若返回true，则表示输入法打开
                 imm.hideSoftInputFromWindow($.id(R.id.dialog_message_send_et).view().getWindowToken(), 0);
             }
+
             contentView.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    $.id(R.id.dialog_message_send_emoji).visible();
-                    emojiFragment = EmojiFragment.newInstance();
-                    emojiFragment.setCallBack(new EmojiSelectCallBack() {
-                        @Override
-                        public void onEmojiSelected(IExpressionModel emoji) {
-                            presenter.sendEmoji("[" + emoji.getKey() + "]");
-                        }
-                    });
+                    $.id(R.id.dialog_private_chat_users).visible();
+                    chatUsersDialogFragment = new ChatUsersDialogFragment();
+                    if (presenter.isPrivateChat()) {
+                        chatUsersDialogFragment.initPrivateChatLabel(presenter.getPrivateChatUser());
+                    }
                     FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
-                    transaction.add(R.id.dialog_message_send_emoji, emojiFragment);
-                    transaction.commitAllowingStateLoss();
+                    transaction.add(R.id.dialog_private_chat_users, chatUsersDialogFragment);
+                    if (Build.VERSION.SDK_INT >= 24) {
+                        transaction.commitNowAllowingStateLoss();
+                    } else {
+                        transaction.commitAllowingStateLoss();
+                    }
                 }
             }, 100);
-        } else {
-            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.showSoftInput($.id(R.id.dialog_message_send_et).view(), InputMethodManager.SHOW_IMPLICIT);
+
+
+        } else if (emojiFragment != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(INPUT_METHOD_SERVICE);
+            if (imm.isActive()) {//isOpen若返回true，则表示输入法打开
+                imm.hideSoftInputFromWindow($.id(R.id.dialog_message_send_et).view().getWindowToken(), 0);
+            }
 
             $.id(R.id.dialog_message_send_emoji).gone();
             FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
@@ -180,6 +257,114 @@ public class MessageSentFragment extends BaseDialogFragment implements MessageSe
                 transaction.commitAllowingStateLoss();
             }
             emojiFragment = null;
+
+            $.id(R.id.dialog_private_chat_users).visible();
+            chatUsersDialogFragment = new ChatUsersDialogFragment();
+            if (presenter.isPrivateChat()) {
+                chatUsersDialogFragment.initPrivateChatLabel(presenter.getPrivateChatUser());
+            }
+            FragmentTransaction _transaction = getChildFragmentManager().beginTransaction();
+            _transaction.add(R.id.dialog_private_chat_users, chatUsersDialogFragment);
+            if (Build.VERSION.SDK_INT >= 24) {
+                _transaction.commitNowAllowingStateLoss();
+            } else {
+                _transaction.commitAllowingStateLoss();
+            }
+
+        } else {
+
+            $.id(R.id.dialog_private_chat_users).gone();
+            FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+            transaction.remove(chatUsersDialogFragment);
+            if (Build.VERSION.SDK_INT >= 24) {
+                transaction.commitNowAllowingStateLoss();
+            } else {
+                transaction.commitAllowingStateLoss();
+            }
+            chatUsersDialogFragment = null;
+
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (!imm.isActive())
+                imm.showSoftInput($.id(R.id.dialog_message_send_et).view(), InputMethodManager.SHOW_IMPLICIT);
+        }
+    }
+
+    @Override
+    public void showEmojiPanel() {
+        if (emojiFragment == null && chatUsersDialogFragment == null) {
+            // hide keyborad
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm.isActive()) {//isOpen若返回true，则表示输入法打开
+                imm.hideSoftInputFromWindow($.id(R.id.dialog_message_send_et).view().getWindowToken(), 0);
+            }
+
+            contentView.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    $.id(R.id.dialog_message_send_emoji).visible();
+                    emojiFragment = EmojiFragment.newInstance();
+                    emojiFragment.setCallBack(new EmojiSelectCallBack() {
+                        @Override
+                        public void onEmojiSelected(IExpressionModel emoji) {
+                            if (presenter.isPrivateChat()) {
+                                presenter.sendMessageToUser("[" + emoji.getKey() + "]");
+                            } else {
+                                presenter.sendEmoji("[" + emoji.getKey() + "]");
+                            }
+                        }
+                    });
+                    FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+                    transaction.add(R.id.dialog_message_send_emoji, emojiFragment);
+                    transaction.commitAllowingStateLoss();
+                }
+            }, 100);
+
+        } else if (chatUsersDialogFragment != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(INPUT_METHOD_SERVICE);
+            if (imm.isActive()) {//isOpen若返回true，则表示输入法打开
+                imm.hideSoftInputFromWindow($.id(R.id.dialog_message_send_et).view().getWindowToken(), 0);
+            }
+
+            $.id(R.id.dialog_private_chat_users).gone();
+            FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+            transaction.remove(chatUsersDialogFragment);
+            if (Build.VERSION.SDK_INT >= 24) {
+                transaction.commitNowAllowingStateLoss();
+            } else {
+                transaction.commitAllowingStateLoss();
+            }
+            chatUsersDialogFragment = null;
+
+            $.id(R.id.dialog_message_send_emoji).visible();
+            emojiFragment = EmojiFragment.newInstance();
+            emojiFragment.setCallBack(new EmojiSelectCallBack() {
+                @Override
+                public void onEmojiSelected(IExpressionModel emoji) {
+                    if (presenter.isPrivateChat()) {
+                        presenter.sendMessageToUser("[" + emoji.getKey() + "]");
+                    } else {
+                        presenter.sendEmoji("[" + emoji.getKey() + "]");
+                    }
+                }
+            });
+            FragmentTransaction _transaction = getChildFragmentManager().beginTransaction();
+            _transaction.add(R.id.dialog_message_send_emoji, emojiFragment);
+            _transaction.commitAllowingStateLoss();
+
+        } else {
+
+            $.id(R.id.dialog_message_send_emoji).gone();
+            FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+            transaction.remove(emojiFragment);
+            if (Build.VERSION.SDK_INT >= 24) {
+                transaction.commitNowAllowingStateLoss();
+            } else {
+                transaction.commitAllowingStateLoss();
+            }
+            emojiFragment = null;
+
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.showSoftInput($.id(R.id.dialog_message_send_et).view(), InputMethodManager.SHOW_IMPLICIT);
         }
     }
 

@@ -147,21 +147,22 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
         if (presenter.getItemViewType(position) == VIEW_TYPE_SPEAKER) {
             container.removeViewAt(position);
             container.addView(generateSpeakView(presenter.getSpeakModel(position)), position);
-
-//            if (presenter.getSpeakModel(position).isVideoOn()) {
-//                presenter.playVideo(presenter.getSpeakModel(position).getUser().getUserId());
-//            }
         } else if (presenter.getItemViewType(position) == VIEW_TYPE_PRESENTER) {
             IMediaModel model = presenter.getSpeakModel(position);
-            container.removeViewAt(position);
             if (model == null) return;
+
+            if (model.skipRelease() == 1 && model.isVideoOn() && container.getChildAt(position) instanceof VideoView) {
+                // 处理黑帧重播问题
+                return;
+            }
+            container.removeViewAt(position);
             if (model.isVideoOn() && presenter.isAutoPlay()) {
                 VideoView videoView;
                 if (presenter.getWaterMark() != null) {
                     videoView = new VideoView(getActivity(), model.getUser().getName() + getString(R.string.live_presenter_hint),
-                            presenter.getWaterMark().url, presenter.getWaterMark().pos);
+                            presenter.getWaterMark().url, presenter.getWaterMark().pos, presenter.getPlayer().getVideoViewByUserId(model.getUser().getUserId()));
                 } else {
-                    videoView = new VideoView(getActivity(), model.getUser().getName());
+                    videoView = new VideoView(getActivity(), model.getUser().getName() + getString(R.string.live_presenter_hint), presenter.getPlayer().getVideoViewByUserId(model.getUser().getUserId()));
                 }
                 container.addView(videoView, position, lpItem);
 
@@ -174,17 +175,21 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                         return true;
                     }
                 });
-                presenter.getPlayer().playAVClose(presenter.getItem(position));
+//                presenter.getPlayer().playAVClose(presenter.getItem(position));
                 presenter.getPlayer().playVideo(presenter.getItem(position), videoView.getSurfaceView());
             } else {
-                presenter.getPlayer().playAVClose(presenter.getItem(position));
+//                presenter.getPlayer().playAVClose(presenter.getItem(position));
                 presenter.getPlayer().playAudio(presenter.getItem(position));
                 container.addView(generateSpeakView(presenter.getSpeakModel(position)), position);
             }
         } else if (presenter.getItemViewType(position) == VIEW_TYPE_VIDEO_PLAY) {
             container.removeViewAt(position);
             IMediaModel model = presenter.getSpeakModel(position);
-            VideoView videoView = new VideoView(getActivity(), model.getUser().getName());
+            if (model.skipRelease() == 1 && model.isVideoOn() && container.getChildAt(position) instanceof VideoView) {
+                // 处理黑帧重播问题
+                return;
+            }
+            VideoView videoView = new VideoView(getActivity(), model.getUser().getName(), presenter.getPlayer().getVideoViewByUserId(model.getUser().getUserId()));
             container.addView(videoView, position, lpItem);
             final GestureDetector gestureDetector = new GestureDetector(getActivity(), new ClickGestureDetector(model.getUser().getUserId()));
             videoView.setOnTouchListener(new View.OnTouchListener() {
@@ -194,8 +199,11 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                     return true;
                 }
             });
-            presenter.getPlayer().playAVClose(presenter.getItem(position));
+//            presenter.getPlayer().playAVClose(presenter.getItem(position));
             presenter.getPlayer().playVideo(presenter.getItem(position), videoView.getSurfaceView());
+        }
+        if (container.getChildCount() > 0) {
+            presenter.notifyHavingSpeakers();
         }
     }
 
@@ -211,10 +219,10 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                 if (presenterSpeakModel.isVideoOn()) {
                     VideoView videoView;
                     if (presenter.getWaterMark() == null) {
-                        videoView = new VideoView(getActivity(), presenterSpeakModel.getUser().getName());
+                        videoView = new VideoView(getActivity(), presenterSpeakModel.getUser().getName() + getString(R.string.live_presenter_hint), presenter.getPlayer().getVideoViewByUserId(presenterSpeakModel.getUser().getUserId()));
                     } else {
                         videoView = new VideoView(getActivity(), presenterSpeakModel.getUser().getName() + getString(R.string.live_presenter_hint),
-                                presenter.getWaterMark().url, presenter.getWaterMark().pos);
+                                presenter.getWaterMark().url, presenter.getWaterMark().pos, presenter.getPlayer().getVideoViewByUserId(presenterSpeakModel.getUser().getUserId()));
                     }
                     container.addView(videoView, position, lpItem);
 
@@ -226,7 +234,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                             return true;
                         }
                     });
-                    presenter.getPlayer().playAVClose(presenter.getItem(position));
+//                    presenter.getPlayer().playAVClose(presenter.getItem(position));
                     presenter.getPlayer().playVideo(presenter.getItem(position), videoView.getSurfaceView());
                 } else {
                     container.addView(generateSpeakView(presenter.getSpeakModel(position)), position);
@@ -257,7 +265,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                 break;
             case VIEW_TYPE_VIDEO_PLAY:
                 IMediaModel model = presenter.getSpeakModel(position);
-                VideoView videoView = new VideoView(getActivity(), model.getUser().getName());
+                VideoView videoView = new VideoView(getActivity(), model.getUser().getName(), presenter.getPlayer().getVideoViewByUserId(model.getUser().getUserId()));
                 container.addView(videoView, position, lpItem);
                 final GestureDetector gestureDetector = new GestureDetector(getActivity(), new ClickGestureDetector(model.getUser().getUserId()));
                 videoView.setOnTouchListener(new View.OnTouchListener() {
@@ -268,7 +276,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                     }
                 });
 
-                presenter.getPlayer().playAVClose(presenter.getItem(position));
+//                presenter.getPlayer().playAVClose(presenter.getItem(position));
                 presenter.getPlayer().playVideo(presenter.getItem(position), videoView.getSurfaceView());
                 break;
             case VIEW_TYPE_SPEAKER:
@@ -306,6 +314,9 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                 && container.getChildCount() > 0) {
             setBackGroundVisible(true);
         }
+        if (container.getChildCount() > 0) {
+            presenter.notifyHavingSpeakers();
+        }
     }
 
     private Animation createAnimation() {
@@ -332,6 +343,9 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
         if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT
                 && container.getChildCount() == 0) {
             setBackGroundVisible(false);
+        }
+        if (container.getChildCount() == 0) {
+            presenter.notifyNoSpeakers();
         }
     }
 

@@ -99,5 +99,9 @@ interface SpeakersContract {
         void setIsStopPublish(boolean b);
 
         boolean isMultiClass();
+
+        void notifyNoSpeakers();
+
+        void notifyHavingSpeakers();
     }
 }

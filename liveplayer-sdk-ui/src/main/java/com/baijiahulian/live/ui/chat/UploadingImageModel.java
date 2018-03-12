@@ -28,9 +28,13 @@ class UploadingImageModel extends LPDataModel implements IMessageModel {
 
     private int status = STATUS_UPLOADING;
 
-    UploadingImageModel(String filePath, IUserModel self) {
+    UploadingImageModel(String filePath, IUserModel self, IUserModel toUser) {
         this.filePath = filePath;
         this.self = self;
+        this.toUser = toUser;
+        if(toUser != null){
+            to = toUser.getUserId();
+        }
     }
 
     public int getStatus() {

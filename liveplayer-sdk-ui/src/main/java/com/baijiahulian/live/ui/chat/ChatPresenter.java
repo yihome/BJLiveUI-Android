@@ -9,6 +9,7 @@ import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.models.LPShortResult;
 import com.baijiahulian.livecore.models.LPUploadDocModel;
 import com.baijiahulian.livecore.models.imodels.IMessageModel;
+import com.baijiahulian.livecore.models.imodels.IUserModel;
 import com.baijiahulian.livecore.utils.LPBackPressureBufferedSubscriber;
 import com.baijiahulian.livecore.utils.LPChatMessageParser;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
@@ -17,11 +18,15 @@ import com.baijiahulian.livecore.utils.LPLogger;
 import com.google.gson.JsonObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.functions.Func1;
 
 import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 
@@ -35,9 +40,11 @@ public class ChatPresenter implements ChatContract.Presenter {
     private ChatContract.View view;
     private Subscription subscriptionOfDataChange, subscriptionOfMessageReceived;
     private LinkedBlockingQueue<UploadingImageModel> imageMessageUploadingQueue;
+    private ConcurrentHashMap<String, List<IMessageModel>> privateChatMessagePool;
 
     public ChatPresenter(ChatContract.View view) {
         this.view = view;
+        privateChatMessagePool = new ConcurrentHashMap<>();
         imageMessageUploadingQueue = new LinkedBlockingQueue<>();
     }
 
@@ -60,6 +67,33 @@ public class ChatPresenter implements ChatContract.Presenter {
                 });
         subscriptionOfMessageReceived = routerListener.getLiveRoom().getChatVM().getObservableOfReceiveMessage()
                 .onBackpressureBuffer()
+                .doOnNext(new Action1<IMessageModel>() {
+                    @Override
+                    public void call(IMessageModel iMessageModel) {
+                        if (iMessageModel.isPrivateChat() && iMessageModel.getToUser() != null) {
+                            String userNumber = iMessageModel.getFrom().getNumber().equals(routerListener.getLiveRoom().getCurrentUser().getNumber()) ?
+                                    iMessageModel.getToUser().getNumber() : iMessageModel.getFrom().getNumber();
+                            List<IMessageModel> messageList = privateChatMessagePool.get(userNumber);
+                            if (messageList == null) {
+                                messageList = new ArrayList<>();
+                                privateChatMessagePool.put(userNumber, messageList);
+                            }
+                            messageList.add(iMessageModel);
+                        }
+                    }
+                })
+                .filter(new Func1<IMessageModel, Boolean>() {
+                    @Override
+                    public Boolean call(IMessageModel iMessageModel) {
+                        if (routerListener.isPrivateChat()) return true;
+                        if ("-1".equals(iMessageModel.getTo())) return false;
+                        if (iMessageModel.getToUser() == null) return false;
+                        IUserModel currentPrivateChatUser = routerListener.getPrivateChatUser();
+                        if(currentPrivateChatUser == null) return true;
+                        return iMessageModel.getToUser().getNumber().equals(currentPrivateChatUser.getNumber())
+                                || iMessageModel.getFrom().getNumber().equals(currentPrivateChatUser.getName());
+                    }
+                })
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new LPBackPressureBufferedSubscriber<IMessageModel>() {
                     @Override
@@ -82,17 +116,32 @@ public class ChatPresenter implements ChatContract.Presenter {
     @Override
     public int getCount() {
         checkNotNull(routerListener);
-        return routerListener.getLiveRoom().getChatVM().getMessageCount() + imageMessageUploadingQueue.size();
+        if (routerListener.isPrivateChat()) {
+            List list = privateChatMessagePool.get(routerListener.getPrivateChatUser().getNumber());
+            return list == null ? 0 : list.size() + imageMessageUploadingQueue.size();
+        } else {
+            return routerListener.getLiveRoom().getChatVM().getMessageCount() + imageMessageUploadingQueue.size();
+        }
     }
 
     @Override
     public IMessageModel getMessage(int position) {
         checkNotNull(routerListener);
-        int messageCount = routerListener.getLiveRoom().getChatVM().getMessageCount();
-        if (position < messageCount) {
-            return routerListener.getLiveRoom().getChatVM().getMessage(position);
+        if (routerListener.isPrivateChat()) {
+            List<IMessageModel> list = privateChatMessagePool.get(routerListener.getPrivateChatUser().getNumber());
+            int messageCount = list == null ? 0 : list.size();
+            if (position < messageCount) {
+                return list.get(position);
+            } else {
+                return (IMessageModel) imageMessageUploadingQueue.toArray()[position - messageCount];
+            }
         } else {
-            return (IMessageModel) imageMessageUploadingQueue.toArray()[position - messageCount];
+            int messageCount = routerListener.getLiveRoom().getChatVM().getMessageCount();
+            if (position < messageCount) {
+                return routerListener.getLiveRoom().getChatVM().getMessage(position);
+            } else {
+                return (IMessageModel) imageMessageUploadingQueue.toArray()[position - messageCount];
+            }
         }
     }
 
@@ -108,6 +157,44 @@ public class ChatPresenter implements ChatContract.Presenter {
     }
 
     @Override
+    public void endPrivateChat() {
+        routerListener.onPrivateChatUserChange(null);
+        view.notifyDataChanged();
+    }
+
+    @Override
+    public IUserModel getCurrentUser() {
+        return routerListener.getLiveRoom().getCurrentUser();
+    }
+
+    @Override
+    public boolean isPrivateChatMode() {
+        return routerListener.isPrivateChat();
+    }
+
+    @Override
+    public void showPrivateChat(IUserModel userModel) {
+        routerListener.onPrivateChatUserChange(userModel);
+        routerListener.navigateToMessageInput();
+    }
+
+    @Override
+    public boolean isLiveCanWhisper() {
+        return routerListener.getLiveRoom().getChatVM().isLiveCanWhisper();
+    }
+
+    public void onPrivateChatUserChange() {
+        checkNotNull(routerListener);
+        checkNotNull(view);
+        if (routerListener.isPrivateChat()) {
+            view.showHavingPrivateChat(routerListener.getPrivateChatUser());
+        } else {
+            view.showNoPrivateChat();
+        }
+        view.notifyDataChanged();
+    }
+
+    @Override
     public void destroy() {
         view = null;
         routerListener = null;
@@ -117,7 +204,7 @@ public class ChatPresenter implements ChatContract.Presenter {
 
     // add Uploading Image to queue
     public void sendImageMessage(String path) {
-        UploadingImageModel model = new UploadingImageModel(path, routerListener.getLiveRoom().getCurrentUser());
+        UploadingImageModel model = new UploadingImageModel(path, routerListener.getLiveRoom().getCurrentUser(), routerListener.getPrivateChatUser());
         imageMessageUploadingQueue.offer(model);
         continueUploadQueue();
     }
@@ -146,7 +233,7 @@ public class ChatPresenter implements ChatContract.Presenter {
                     shortResult = LPJsonUtils.parseString(bjResponse.getResponse().body().string(), LPShortResult.class);
                     LPUploadDocModel uploadModel = LPJsonUtils.parseJsonObject((JsonObject) shortResult.data, LPUploadDocModel.class);
                     String imageContent = LPChatMessageParser.toImageMessage(uploadModel.url);
-                    routerListener.getLiveRoom().getChatVM().sendImageMessage(imageContent, uploadModel.width, uploadModel.height);
+                    routerListener.getLiveRoom().getChatVM().sendImageMessageToUser(model.getToUser(), imageContent, uploadModel.width, uploadModel.height);
                     imageMessageUploadingQueue.poll();
                     continueUploadQueue();
                 } catch (IOException e) {

@@ -9,6 +9,7 @@
     <color name="icons">#FFFFFF</color>
     <color name="divider">#BDBDBD</color>
     <color name="live_color_bg">#DDDDDE</color>
+    <color name="live_private_chat_bg">#F3F4F5</color>>
 
     <color name="live_text_color">#3D3D3E</color>
     <color name="live_text_color_mid_light">#6D6D6E</color>

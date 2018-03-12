@@ -183,6 +183,7 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
         RxUtils.unSubscribe(subscriptionOfCamera);
         RxUtils.unSubscribe(subscriptionOfMic);
         RxUtils.unSubscribe(subscriptionOfVolume);
+        RxUtils.unSubscribe(subscriptionOfClassStart);
     }
 
     @Override

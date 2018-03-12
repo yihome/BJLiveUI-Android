@@ -55,6 +55,7 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
     private boolean forceJoin;
     private boolean isUrlLoaded;
     private boolean isLoadFailed = false; //url load失败了也会调到onPageFinished
+    private boolean isDestroyed = false;
     private static final String[] baseUrl = {
             "https://test-api.baijiayun.com/m/quiz/student",
             "https://beta-api.baijiayun.com/m/quiz/student",
@@ -173,6 +174,7 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
+                if(isDestroyed) return;
                 isUrlLoaded = true;
                 $.id(R.id.pb_web_view_quiz).gone();
                 if (!isLoadFailed) {
@@ -340,6 +342,7 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
     @Override
     public void onDestroy() {
         super.onDestroy();
+        isDestroyed = true;
         if (signalList != null) {
             signalList.clear();
         }

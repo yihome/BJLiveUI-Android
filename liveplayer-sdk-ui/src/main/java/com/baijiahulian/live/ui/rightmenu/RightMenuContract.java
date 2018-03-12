@@ -17,6 +17,10 @@ public interface RightMenuContract {
 
         void showSpeakClosedByTeacher();
 
+        void showSpeakClosedByServer();
+
+        void showForceSpeakDenyByServer();
+
         void showDrawingStatus(boolean isEnable);
 
         void showSpeakApplyCountDown(int countDownTime, int total);

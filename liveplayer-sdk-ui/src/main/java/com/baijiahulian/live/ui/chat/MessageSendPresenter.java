@@ -4,6 +4,7 @@ import android.text.TextUtils;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 import com.baijiahulian.livecore.context.LPConstants;
+import com.baijiahulian.livecore.models.imodels.IUserModel;
 
 import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 
@@ -17,6 +18,10 @@ public class MessageSendPresenter implements MessageSendContract.Presenter {
     private LiveRoomRouterListener routerListener;
 
     public MessageSendPresenter(MessageSendContract.View view) {
+        this.view = view;
+    }
+
+    public void setView(MessageSendContract.View view) {
         this.view = view;
     }
 
@@ -47,8 +52,53 @@ public class MessageSendPresenter implements MessageSendContract.Presenter {
     }
 
     @Override
+    public void sendMessageToUser(String message) {
+        checkNotNull(routerListener);
+        if (!TextUtils.isEmpty(message)) {
+            if (message.startsWith("/dev")) {
+                routerListener.showDebugBtn();
+                return;
+            }
+        }
+        IUserModel toUser = routerListener.getPrivateChatUser();
+        routerListener.getLiveRoom().getChatVM().sendMessageToUser(toUser, message);
+        view.showMessageSuccess();
+    }
+
+
+
+    @Override
+    public void sendEmojiToUser(String emoji) {
+        checkNotNull(routerListener);
+        IUserModel toUser = routerListener.getPrivateChatUser();
+        routerListener.getLiveRoom().getChatVM().sendEmojiMessageToUser(toUser, emoji);
+        view.showMessageSuccess();
+    }
+
+
+    @Override
     public void chooseEmoji() {
         view.showEmojiPanel();
+    }
+
+
+    public void choosePrivateChatUser() {
+        view.showPrivateChatUserPanel();
+    }
+
+    @Override
+    public IUserModel getPrivateChatUser() {
+        return routerListener.getPrivateChatUser();
+    }
+
+    @Override
+    public boolean isPrivateChat() {
+        return routerListener.isPrivateChat();
+    }
+
+    @Override
+    public boolean isLiveCanWhisper() {
+        return routerListener.getLiveRoom().getChatVM().isLiveCanWhisper();
     }
 
     @Override
@@ -65,7 +115,6 @@ public class MessageSendPresenter implements MessageSendContract.Presenter {
 
     @Override
     public void subscribe() {
-
     }
 
     @Override
@@ -77,5 +126,12 @@ public class MessageSendPresenter implements MessageSendContract.Presenter {
     public void destroy() {
         routerListener = null;
         view = null;
+    }
+
+
+    public void onPrivateChatUserChange() {
+        if (view != null) {
+            view.showPrivateChatChange();
+        }
     }
 }

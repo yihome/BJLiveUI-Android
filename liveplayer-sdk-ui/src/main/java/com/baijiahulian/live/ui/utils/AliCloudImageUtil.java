@@ -1,9 +1,12 @@
 package com.baijiahulian.live.ui.utils;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.baijiahulian.livecore.utils.DisplayUtils;
 import com.baijiahulian.livecore.utils.LPBJUrl;
+
+import java.util.HashMap;
 
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
@@ -20,15 +23,50 @@ public class AliCloudImageUtil {
      * @param url
      * @return
      */
-    public static String getScaledUrl(String url) {
-        url = url.split("@")[0];
-        if (url.endsWith(".jpg") || url.endsWith(".jpeg") || url.endsWith(".png") || url.endsWith(".webp")
-                || url.endsWith(".bmp") || url.endsWith(".gif")) {
-            if (isFromAliCloud(url)) {
-                return url + "@200h_200w_1e_1l_2o" + imageUrlSuffix();
+    public static final String SCALED_MFIT = "m_mfit";
+    public static final String SCALED_LFIT = "m_lfit";
+    public static final String SCALED_FILL = "m_fill";
+    public static final String SCALED_FIXED = "m_fixed";
+
+    private static String _getScaledUrl(String url, String model, int width, int height) {
+        String urlSplit = url.split("\\?")[0];
+        if (urlSplit.endsWith(".jpg") || urlSplit.endsWith(".jpeg") || urlSplit.endsWith(".png") || urlSplit.endsWith(".webp")
+                || urlSplit.endsWith(".bmp") || urlSplit.endsWith(".gif")) {
+            if (!url.contains("?")) {
+                url += "?x-oss-process=image/resize," + model + ",h_" + String.valueOf(height) + ",w_" + String.valueOf(width) + "/format" + imageUrlSuffix();
+                return url;
+            }
+            if (url.contains("x-oss-process")) {
+                HashMap<String, String> hashMap = (LPBJUrl.parse(url)).getParameters();
+                return url.replace(hashMap.get("x-oss-process"), "image/resize," + model + ",h_" + String.valueOf(height) + ",w_" + String.valueOf(width)
+                        + "/format" + imageUrlSuffix());
+            } else {
+                StringBuilder stringBuilder = new StringBuilder(url);
+                stringBuilder.insert(url.indexOf("?") + 1, "x-oss-process=image/resize," + model + ",h_" + String.valueOf(height) + ",w_" + String.valueOf(width)
+                        + "/format" + imageUrlSuffix() + "&");
+                return stringBuilder.toString();
             }
         }
         return url;
+    }
+
+    public static String getScaledUrl(String url, String model, int width, int height) {
+        switch (model) {
+            case SCALED_MFIT:
+                return _getScaledUrl(url, SCALED_MFIT, width, height);
+
+            case SCALED_LFIT:
+                return _getScaledUrl(url, SCALED_LFIT, width, height);
+
+            case SCALED_FILL:
+                return _getScaledUrl(url, SCALED_FILL, width, height);
+
+            case SCALED_FIXED:
+                return _getScaledUrl(url, SCALED_FIXED, width, height);
+
+            default:
+                return url;
+        }
     }
 
     /**
@@ -39,10 +77,20 @@ public class AliCloudImageUtil {
      */
     public static String getRectScaledUrl(Context context, String url, int dp) {
         int px = DisplayUtils.dip2px(context, dp);
-        if (url.endsWith(".jpg") || url.endsWith(".jpeg") || url.endsWith(".png") || url.endsWith(".webp")
-                || url.endsWith(".bmp") || url.endsWith(".gif")) {
-            if (isFromAliCloud(url)) {
-                return url + "@" + px + "h_" + px + "w_1c_1e_1l_2o" + imageUrlSuffix();
+        String urlSplit = url.split("\\?")[0];
+        if (urlSplit.endsWith(".jpg") || urlSplit.endsWith(".jpeg") || urlSplit.endsWith(".png") || urlSplit.endsWith(".webp")
+                || urlSplit.endsWith(".bmp") || urlSplit.endsWith(".gif")) {
+            if (!url.contains("?")) {
+                url += "?x-oss-process=image/crop,w_" + px + ",h_" + px + "/format" + imageUrlSuffix();
+                return url;
+            }
+            if (url.contains("x-oss-process")) {
+                HashMap<String, String> hashMap = (LPBJUrl.parse(url)).getParameters();
+                return url.replace(hashMap.get("x-oss-process"), "image/crop,w_" + px + ",h_" + px + "/format" + imageUrlSuffix());
+            } else {
+                StringBuilder stringBuilder = new StringBuilder(url);
+                stringBuilder.insert(url.indexOf("?") + 1, "x-oss-process=image/crop,w_" + px + ",h_" + px + "/format" + imageUrlSuffix() + "&");
+                return stringBuilder.toString();
             }
         }
         return url;
@@ -56,11 +104,23 @@ public class AliCloudImageUtil {
      * @return
      */
     public static String getScreenScaledUrl(Context context, String url) {
-        if (url.endsWith(".jpg") || url.endsWith(".jpeg") || url.endsWith(".png") || url.endsWith(".webp")
-                || url.endsWith(".bmp") || url.endsWith(".gif")) {
-            if (isFromAliCloud(url)) {
-                return url + "@" + DisplayUtils.getScreenHeightPixels(context) + "h_" +
-                        DisplayUtils.getScreenWidthPixels(context) + "w_1e_1l_2o" + imageUrlSuffix();
+        String urlSplit = url.split("\\?")[0];
+        if (urlSplit.endsWith(".jpg") || urlSplit.endsWith(".jpeg") || urlSplit.endsWith(".png") || urlSplit.endsWith(".webp")
+                || urlSplit.endsWith(".bmp") || urlSplit.endsWith(".gif")) {
+            if (!url.contains("?")) {
+                url += "?x-oss-process=image/crop," + "w_" + DisplayUtils.getScreenWidthPixels(context) + ",h_" + DisplayUtils.getScreenHeightPixels(context) +
+                        "/format" + imageUrlSuffix();
+                return url;
+            }
+            if (url.contains("x-oss-process")) {
+                HashMap<String, String> hashMap = (LPBJUrl.parse(url)).getParameters();
+                return url.replace(hashMap.get("x-oss-process"), "image/crop," + "w_" + DisplayUtils.getScreenWidthPixels(context) + ",h_" + DisplayUtils.getScreenHeightPixels(context) +
+                        "/format" + imageUrlSuffix());
+            } else {
+                StringBuilder stringBuilder = new StringBuilder(url);
+                stringBuilder.insert(url.indexOf("?") + 1, "x-oss-process=image/crop," + "w_" + DisplayUtils.getScreenWidthPixels(context) + ",h_" + DisplayUtils.getScreenHeightPixels(context) +
+                        "/format" + imageUrlSuffix() + "&");
+                return stringBuilder.toString();
             }
         }
         return url;
@@ -74,33 +134,32 @@ public class AliCloudImageUtil {
      * @return
      */
     public static String getRoundedAvatarUrl(String url, int radius) {
-        String imageUrl = url;
-        if (url.contains("@")) {
-            imageUrl = url.substring(0, url.indexOf("@"));
-        }
-        if (isFromAliCloud(imageUrl))
-            return imageUrl + "@" + 2 * radius + "w_" + 2 * radius + "h_1e_1c_" + radius + "-" + "1ci" + imageUrlSuffix();
-        else
-            return imageUrl;
-    }
+        String urlSplit = url.split("\\?")[0];
+        if (urlSplit.endsWith(".jpg") || urlSplit.endsWith(".jpeg") || urlSplit.endsWith(".png") || urlSplit.endsWith(".webp")
+                || urlSplit.endsWith(".bmp") || urlSplit.endsWith(".gif")) {
+            if (!url.contains("?")) {
+                url += "?x-oss-process=image/circle,r_" + String.valueOf(radius) + "/format" + imageUrlSuffix();
+                return url;
+            }
+            if (url.contains("x-oss-process")) {
+                HashMap<String, String> hashMap = (LPBJUrl.parse(url)).getParameters();
+//                Log.e("debugRound1: ", url.replace(hashMap.get("x-oss-process"), "image/circle,r_" + String.valueOf(radius) + "/format" + imageUrlSuffix()));
+                return url.replace(hashMap.get("x-oss-process"), "image/circle,r_" + String.valueOf(radius) + "/format" + imageUrlSuffix());
+            } else {
+                StringBuilder stringBuilder = new StringBuilder(url);
+                stringBuilder.insert(url.indexOf("?") + 1, "x-oss-process=image/circle,r_" + String.valueOf(radius) + "/format" + imageUrlSuffix() + "&");
 
-    /**
-     * 判断是否是满足是阿里云的图片
-     *
-     * @param picUrl
-     * @return
-     */
-    private static boolean isFromAliCloud(String picUrl) {
-        LPBJUrl url = LPBJUrl.parse(picUrl);
-        String host = url.getHost();
-        return host.endsWith(".baijiashilian.com") || host.endsWith(".baijiayun.com") || host.endsWith(".genshuixue.com") || host.endsWith(".gsxservice.com");
+                return stringBuilder.toString();
+            }
+        }
+        return url;
     }
 
     private static String imageUrlSuffix() {
         if (SDK_INT >= ICE_CREAM_SANDWICH) {
-            return ".webp";
+            return ",webp";
         } else {
-            return ".png";
+            return ",png";
         }
     }
 }

@@ -27,6 +27,9 @@
 #百家云混淆规则
 -dontwarn com.baijiahulian.**
 -dontwarn com.bjhl.**
+-dontwarn com.baijia.**
+-dontwarn com.baijiayun.**
+
 -keep public class com.baijiahulian.**{*;}
 -keep public class com.bjhl.**{*;}
 -keep public class com.baijia.**{*;}
@@ -44,3 +47,13 @@
 -keepclassmembers class rx.internal.util.unsafe.BaseLinkedQueueConsumerNodeRef {
     rx.internal.util.atomic.LinkedQueueNode consumerNode;
 }
+
+-dontwarn com.squareup.picasso.**
+-dontwarn com.github.pwittchen.**
+
+# okhttp3
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-dontwarn javax.annotation.**
+-dontwarn org.conscrypt.**
+-keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase

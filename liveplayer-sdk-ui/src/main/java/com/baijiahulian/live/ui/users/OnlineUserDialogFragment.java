@@ -28,6 +28,7 @@ public class OnlineUserDialogFragment extends BaseDialogFragment implements Onli
     private RecyclerView recyclerView;
     private OnlineUserAdapter adapter;
 
+
     public static OnlineUserDialogFragment newInstance() {
         OnlineUserDialogFragment instance = new OnlineUserDialogFragment();
         return instance;
@@ -78,7 +79,7 @@ public class OnlineUserDialogFragment extends BaseDialogFragment implements Onli
     }
 
     private static class OnlineUserViewHolder extends RecyclerView.ViewHolder {
-        TextView name, teacherTag;
+        TextView name, teacherTag, assistantTag;
         ImageView avatar;
 
         OnlineUserViewHolder(View itemView) {
@@ -86,6 +87,7 @@ public class OnlineUserDialogFragment extends BaseDialogFragment implements Onli
             name = (TextView) itemView.findViewById(R.id.item_online_user_name);
             avatar = (ImageView) itemView.findViewById(R.id.item_online_user_avatar);
             teacherTag = (TextView) itemView.findViewById(R.id.item_online_user_teacher_tag);
+            assistantTag = (TextView) itemView.findViewById(R.id.item_online_user_assist_tag);
         }
     }
 
@@ -141,9 +143,13 @@ public class OnlineUserDialogFragment extends BaseDialogFragment implements Onli
                 } else {
                     userViewHolder.teacherTag.setVisibility(View.GONE);
                 }
+                if (userModel.getType() == LPConstants.LPUserType.Assistant) {
+                    userViewHolder.assistantTag.setVisibility(View.VISIBLE);
+                } else {
+                    userViewHolder.assistantTag.setVisibility(View.GONE);
+                }
                 String avatar = userModel.getAvatar().startsWith("//") ? "https:" + userModel.getAvatar() : userModel.getAvatar();
-                Picasso.with(getActivity()).load(AliCloudImageUtil.getRoundedAvatarUrl(avatar, 64))
-                        .into(userViewHolder.avatar);
+                Picasso.with(getActivity()).load(AliCloudImageUtil.getRoundedAvatarUrl(avatar, 64)).into(userViewHolder.avatar);
             } else if (holder instanceof LoadingViewHolder) {
                 LoadingViewHolder loadingViewHolder = (LoadingViewHolder) holder;
                 loadingViewHolder.progressBar.setIndeterminate(true);

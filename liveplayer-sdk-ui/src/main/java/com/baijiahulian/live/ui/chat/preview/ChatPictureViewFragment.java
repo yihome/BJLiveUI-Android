@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseDialogFragment;
 import com.baijiahulian.live.ui.utils.AliCloudImageUtil;
+import com.baijiahulian.live.ui.utils.DisplayUtils;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -53,7 +54,7 @@ public class ChatPictureViewFragment extends BaseDialogFragment implements ChatP
         tvLoading = (TextView) contentView.findViewById(R.id.lp_dialog_big_picture_loading_label);
 //        btnSave = (Button) view.findViewById(R.id.lp_dialog_big_picture_save);
         Picasso.with(getContext())
-                .load(AliCloudImageUtil.getScreenScaledUrl(getContext(), url))
+                .load(AliCloudImageUtil.getScaledUrl(url, AliCloudImageUtil.SCALED_MFIT, DisplayUtils.getScreenWidthPixels(getContext()), DisplayUtils.getScreenHeightPixels(getContext())))
                 .memoryPolicy(NO_CACHE, NO_STORE)
                 .into(imageView, new Callback() {
                     @Override

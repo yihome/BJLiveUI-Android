@@ -79,13 +79,11 @@ public class GlobalPresenter implements BasePresenter {
                     @Override
                     public void call(Void aVoid) {
                         routerListener.showClassSwitch();
-//                        routerListener.doReEnterRoom();
                     }
                 });
 
         subscriptionOfForbidAllStatus = routerListener.getLiveRoom().getObservableOfForbidAllChatStatus()
                 .observeOn(AndroidSchedulers.mainThread())
-//                .skip(1) // 排除进教室第一次回调
                 .subscribe(new LPErrorPrintSubscriber<Boolean>() {
                     @Override
                     public void call(Boolean aBoolean) {
@@ -260,7 +258,7 @@ public class GlobalPresenter implements BasePresenter {
                         }
                     });
         }
-        if(!routerListener.isTeacherOrAssistant()){
+        if (!routerListener.isTeacherOrAssistant()) {
             // 公告变了
             observeAnnouncementChange();
             routerListener.getLiveRoom().requestAnnouncement();
@@ -268,7 +266,7 @@ public class GlobalPresenter implements BasePresenter {
     }
 
     public void observeAnnouncementChange() {
-        if(routerListener.isCurrentUserTeacher()) return;
+        if (routerListener.isCurrentUserTeacher()) return;
         subscriptionOfAnnouncement = routerListener.getLiveRoom().getObservableOfAnnouncementChange()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new LPErrorPrintSubscriber<IAnnouncementModel>() {
@@ -313,6 +311,7 @@ public class GlobalPresenter implements BasePresenter {
         RxUtils.unSubscribe(subscriptionOfQuizSolution);
         RxUtils.unSubscribe(subscriptionOfDebug);
         RxUtils.unSubscribe(subscriptionOfAnnouncement);
+        RxUtils.unSubscribe(subscriptionOfClassSwitch);
     }
 
     @Override

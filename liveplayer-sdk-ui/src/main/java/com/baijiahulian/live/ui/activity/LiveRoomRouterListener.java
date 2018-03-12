@@ -10,6 +10,7 @@ import com.baijiahulian.livecore.listener.OnPhoneRollCallListener;
 import com.baijiahulian.livecore.models.LPJsonModel;
 import com.baijiahulian.livecore.models.imodels.IMediaControlModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
+import com.baijiahulian.livecore.models.imodels.IUserModel;
 
 /**
  * Created by Shubo on 2017/2/15.
@@ -188,4 +189,14 @@ public interface LiveRoomRouterListener {
     void enableStudentSpeakMode();
 
     void showClassSwitch();
+
+    void onPrivateChatUserChange(IUserModel iUserModel);
+
+    IUserModel getPrivateChatUser();
+
+    boolean isPrivateChat();
+
+    void showNoSpeakers();
+
+    void showHavingSpeakers();
 }

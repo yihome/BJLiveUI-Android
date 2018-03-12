@@ -5,6 +5,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 
+import com.baijiahulian.live.ui.activity.LiveRoomActivity;
 import com.baijiahulian.livecore.context.LiveRoom;
 import com.baijiahulian.livecore.ppt.LPPPTFragment;
 import com.baijiahulian.livecore.ppt.whiteboard.LPWhiteBoardView;
@@ -29,6 +30,8 @@ public class MyPPTFragment extends LPPPTFragment implements PPTContract.View {
         fragment.setLiveRoom(liveRoom);
         boolean sdkValid = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
         fragment.setAnimPPTEnable(liveRoom.getPartnerConfig().PPTAnimationDisable == 0 && sdkValid);
+//        fragment.setAnimPPTEnable(false);
+
         fragment.setArguments(args);
         return fragment;
     }
@@ -64,6 +67,12 @@ public class MyPPTFragment extends LPPPTFragment implements PPTContract.View {
                 presenter.showQuickSwitchPPTView(currentPageIndex, maxIndex);
             }
         });
+
+        if (getContext() instanceof LiveRoomActivity && !isAnimPPTEnable) {
+            if (((LiveRoomActivity) getContext()).getBackGroundView() != getView()) {
+                mWhiteBoardView.setZOrderMediaOverlay(true);
+            }
+        }
     }
 
     public LPWhiteBoardView getLPWhiteBoardView() {

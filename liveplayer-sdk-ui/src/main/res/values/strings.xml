@@ -11,6 +11,8 @@
     <string name="live_close_video">关闭视频</string>
     <string name="live_agree">同意</string>
     <string name="live_teacher">老师</string>
+    <string name="private_chat">私聊</string>
+    <string name="live_assistent">助教</string>
     <string name="live_disagree">拒绝</string>
     <string name="live_publish">发布</string>
     <string name="live_edit">编辑</string>
@@ -24,7 +26,7 @@
     <string name="live_overspread">铺满</string>
     <string name="live_setting_ppt">课件展示：</string>
     <string name="live_setting_definition">画质设置：</string>
-    <string name="live_setting_definition_low">流畅</string>
+    <string name="live_setting_definition_low">标清</string>
     <string name="live_setting_definition_high">高清</string>
     <string name="live_setting_link_type">线路选择：</string>
     <string name="live_setting_link_type_up1">发送1</string>
@@ -43,6 +45,8 @@
     <string name="live_media_speak_apply_agree">老师同意了您的发言请求</string>
     <string name="live_media_speak_apply_disagree">老师拒绝了您的发言请求</string>
     <string name="live_media_speak_closed_by_teacher">老师结束了您的发言</string>
+    <string name="live_media_speak_closed_by_server">服务器拒绝申请发言，音视频并发已达上限</string>
+    <string name="live_force_speak_closed_by_server">服务器拒绝强制发言，音视频并发已达上限</string>
     <string name="live_announcement">公告</string>
     <string name="live_cloud_record">录课</string>
     <string name="live_cloud_recording">录课中</string>
@@ -127,6 +131,10 @@
     <string name="live_invite_speak_tip">老师邀请你上麦发言</string>
     <string name="live_media_speak_apply_timeout">老师未同意发言，请稍后再试</string>
     <string name="live_room_switch">正在切换教室，请等候…</string>
+    <string name="live_room_x86_not_supported">暂不支持x86平台的设备</string>
+    <string name="live_room_private_chat_with_name">正在和 %1$s 私聊中…</string>
+    <string name="live_no_online_chat">没有可以私聊的同学哦</string>
+    <string name="live_cancel_private_chat">取消私聊</string>
 
 </resources>
 
