@@ -1234,6 +1234,10 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         removeFragment(chatFragment);
         removeFragment(speakersFragment);
 
+        if(messageSentFragment != null && messageSentFragment.isAdded()){
+            removeFragment(messageSentFragment);
+        }
+
         if (loadingFragment != null && loadingFragment.isAdded())
             removeFragment(loadingFragment);
 
