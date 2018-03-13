@@ -135,6 +135,7 @@
     <string name="live_room_private_chat_with_name">正在和 %1$s 私聊中…</string>
     <string name="live_no_online_chat">没有可以私聊的同学哦</string>
     <string name="live_cancel_private_chat">取消私聊</string>
+    <string name="live_room_teacher_absent">老师不在教室</string>
 
 </resources>
 

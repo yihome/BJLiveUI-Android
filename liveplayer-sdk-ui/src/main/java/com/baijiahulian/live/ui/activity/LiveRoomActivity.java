@@ -201,6 +201,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private Subscription subscriptionOfIsCloudRecordAllowed;
     private int minVolume;
     private IUserModel privateChatUser;
+    private Subscription subscriptionOfTeacherAbsent;
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -1026,7 +1027,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         this.privateChatUser = iUserModel;
         if (messageSendPresenter != null)
             messageSendPresenter.onPrivateChatUserChange();
-        if(chatPresenter != null)
+        if (chatPresenter != null)
             chatPresenter.onPrivateChatUserChange();
     }
 
@@ -1234,7 +1235,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         removeFragment(chatFragment);
         removeFragment(speakersFragment);
 
-        if(messageSentFragment != null && messageSentFragment.isAdded()){
+        if (messageSentFragment != null && messageSentFragment.isAdded()) {
             removeFragment(messageSentFragment);
         }
 
@@ -1276,6 +1277,16 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                 liveRoom.getPlayer().mute();
             }
         }
+
+        subscriptionOfTeacherAbsent = liveRoom.getSpeakQueueVM().getObservableOfActiveUsers().subscribe(new LPErrorPrintSubscriber<List<IMediaModel>>() {
+            @Override
+            public void call(List<IMediaModel> iMediaModels) {
+                if (!isTeacherOrAssistant() && liveRoom.getTeacherUser() == null) {
+                    showMessage(getString(R.string.live_room_teacher_absent));
+                }
+                unsubscribe();
+            }
+        });
 
         globalPresenter = new GlobalPresenter();
         globalPresenter.setRouter(this);
@@ -1380,8 +1391,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                         } else if (liveRoom.getCurrentUser().getType() == LPConstants.LPUserType.Student) {
                             enableStudentSpeakMode();
                         }
-                        if (!isTeacherOrAssistant() && liveRoom.getTeacherUser() == null)
-                            showMessage("老师不在教室");
                     }
                 });
 
@@ -1747,7 +1756,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         }
     }
 
-    public View getBackGroundView(){
+    public View getBackGroundView() {
         return flBackground.getChildAt(0);
     }
 
@@ -1783,6 +1792,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         RxUtils.unSubscribe(subscriptionOfStreamInfo);
         RxUtils.unSubscribe(subscriptionOfOnlineUserDebug);
         RxUtils.unSubscribe(subscriptionOfIsCloudRecordAllowed);
+        RxUtils.unSubscribe(subscriptionOfTeacherAbsent);
 
         orientationEventListener = null;
 
