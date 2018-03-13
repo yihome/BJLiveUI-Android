@@ -256,7 +256,7 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
                         color = ContextCompat.getColor(getContext(), R.color.live_text_color_light);
                     }
                     String name = "";
-                    if (message.getFrom().getUserId().equals(presenter.getCurrentUser().getUserId())) {
+                    if (message.getFrom().getNumber().equals(presenter.getCurrentUser().getNumber())) {
                         color = ContextCompat.getColor(getContext(), R.color.live_yellow);
                         name = "我：";
                     } else {
