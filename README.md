@@ -26,18 +26,18 @@ maven { url 'https://raw.github.com/baijia/maven/master/' }
 ```
 对于部分国内用户，如果github被墙或者访问比较慢，可以使用我们国内的镜像仓库
 ```groovy
-maven { url 'http://live-cdn.baijiayun.com/android-sdk/' }
+maven { url 'http://git.baijiashilian.com/open-android/maven/raw/master/' }
 ```
 * 在build.gradle中添加依赖
 ```groovy
 dependencies {
-	compile 'com.baijia.live:liveplayer-sdk-ui:1.0.0'
+	implementation 'com.baijia.live:liveplayer-sdk-ui:1.3.0'
 }
 ```
 ### 源码依赖
 ```groovy
 dependencies {
-	compile project(':liveplayer-sdk-ui')
+	api project(':liveplayer-sdk-ui')
 }
 ```
 
