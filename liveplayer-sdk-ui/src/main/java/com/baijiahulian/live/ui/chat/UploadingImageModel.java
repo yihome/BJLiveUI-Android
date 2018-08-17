@@ -106,6 +106,11 @@ class UploadingImageModel extends LPDataModel implements IMessageModel {
     }
 
     @Override
+    public Date getTime() {
+        return null;
+    }
+
+    @Override
     public boolean isPrivateChat() {
         return !(to == null || "-1".equals(to));
     }

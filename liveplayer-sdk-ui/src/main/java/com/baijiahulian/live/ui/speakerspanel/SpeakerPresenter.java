@@ -144,6 +144,13 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                             return; // 兼容iOS下课发media_publish
                         if (routerListener.getLiveRoom().getPresenterUser() != null
                                 && iMediaModel.getUser().getUserId().equals(routerListener.getLiveRoom().getPresenterUser().getUserId())) {
+                            if(iMediaModel.getUser().getUserId().equals(fullScreenKVO.getParameter()) && iMediaModel.isVideoOn()){
+                                VideoView videoView = view.getVideoView(iMediaModel);
+                                routerListener.removeFullScreenView();
+                                routerListener.setFullScreenView(videoView);
+                                routerListener.getLiveRoom().getPlayer().playVideo(iMediaModel.getUser().getUserId(), videoView.getSurfaceView());
+                                return;
+                            }
                             if (_displayPresenterSection < displayList.size() &&
                                     displayList.get(_displayPresenterSection).equals(iMediaModel.getUser().getUserId())) {
                                 view.notifyItemChanged(_displayPresenterSection);
@@ -487,7 +494,8 @@ public class SpeakerPresenter implements SpeakersContract.Presenter {
                                 && displayList.indexOf(teacherId) < _displaySpeakerSection
                                 && !fullScreenKVO.getParameter().equals(teacherId)
                                 && getSpeakModel(teacherId) != null
-                                && getSpeakModel(teacherId).isVideoOn()) {
+//                                && getSpeakModel(teacherId).isVideoOn()
+                                ) {
                             fullScreenKVO.setParameter(teacherId);
                         }
                     }

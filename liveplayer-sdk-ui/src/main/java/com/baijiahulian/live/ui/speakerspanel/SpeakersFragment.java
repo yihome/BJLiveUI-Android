@@ -425,6 +425,18 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
         $.id(R.id.fragment_speakers_scroll_view).backgroundDrawable(null);
     }
 
+    @Override
+    public VideoView getVideoView(IMediaModel iMediaModel) {
+        VideoView videoView;
+        if (presenter.getWaterMark() == null) {
+            videoView = new VideoView(getActivity(), iMediaModel.getUser().getName() + getString(R.string.live_presenter_hint), presenter.getPlayer().getVideoViewByUserId(iMediaModel.getUser().getUserId()));
+        } else {
+            videoView = new VideoView(getActivity(), iMediaModel.getUser().getName() + getString(R.string.live_presenter_hint),
+                    presenter.getWaterMark().url, presenter.getWaterMark().pos, presenter.getPlayer().getVideoViewByUserId(iMediaModel.getUser().getUserId()));
+        }
+        return videoView;
+    }
+
     private View generateApplyView(final IUserModel model) {
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.item_speak_apply, container, false);
         QueryPlus q = QueryPlus.with(view);

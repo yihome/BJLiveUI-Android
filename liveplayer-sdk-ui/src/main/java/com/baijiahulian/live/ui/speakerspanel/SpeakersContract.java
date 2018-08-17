@@ -43,6 +43,8 @@ interface SpeakersContract {
         void notifyFullScreenPresenterStatusChange(int position, boolean b);
 
         void disableSpeakQueuePlaceholder();
+
+        VideoView getVideoView(IMediaModel iMediaModel);
     }
 
     interface Presenter extends BasePresenter {

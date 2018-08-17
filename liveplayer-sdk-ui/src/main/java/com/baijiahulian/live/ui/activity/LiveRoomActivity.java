@@ -963,7 +963,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     public void enableStudentSpeakMode() {
         // 一对一、小班课上课学生自动举手上麦
         if (liveRoom.getCurrentUser().getType() == LPConstants.LPUserType.Student) {
-            if (liveRoom.getRoomType() == LPConstants.LPRoomType.Signal ||
+            if (liveRoom.getRoomType() == LPConstants.LPRoomType.Single ||
                     liveRoom.getRoomType() == LPConstants.LPRoomType.SmallGroup) {
                 if (liveRoom.isClassStarted()) {
                     liveRoom.getRecorder().publish();

@@ -9,7 +9,6 @@ import android.text.TextUtils;
 import com.baijiahulian.live.ui.activity.LiveRoomActivity;
 import com.baijiahulian.live.ui.utils.LPShareModel;
 import com.baijiahulian.livecore.context.LPConstants;
-import com.baijiahulian.livecore.context.LiveRoom;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
 
 import java.util.ArrayList;
@@ -194,6 +193,11 @@ public class LiveSDKWithUI {
         @Override
         public String getAvatar() {
             return userAvatar;
+        }
+
+        @Override
+        public int getGroup() {
+            return 0;
         }
 
         @Override
