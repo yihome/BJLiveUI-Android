@@ -27,12 +27,12 @@ dependencies {
 
     compile 'de.hdodenhof:circleimageview:2.2.0'
 
-    compile 'com.baijia.common:common-image-crop:1.2.7' // image crop
+    compile 'com.baijia.common:common-image-crop:1.2.9' // image crop
 
     compile 'com.afollestad.material-dialogs:commons:0.9.4.4'
 
-    compile 'com.baijia.live:liveplayer-sdk-core:1.4.0'
-    compile 'com.baijia.live:liveplayer-sdk-core-ppt:1.4.1'
+    compile 'com.baijia.live:liveplayer-sdk-core:1.4.3'
+    compile 'com.baijia.live:liveplayer-sdk-core-ppt:1.4.3'
 }
 android {
     lintOptions {
