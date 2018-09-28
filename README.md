@@ -5,7 +5,7 @@ BJLiveUI-Android
 - [官方文档](http://dev.baijiayun.com/default/wiki/index)
 - **[github链接](https://github.com/baijia/BJLiveCore-Android)**
 - Product: 云端直播、云端课堂、U-Training
-- platform: API 14~25  [BeautyVideoFilter(美颜功能) 18+]
+- platform: API 14+  [BeautyVideoFilter(美颜功能) 18+]
 - cpu: ARM, ARMv7a, ARM64v8a
 - IDE: **[Android Studio](https://developer.android.com/studio/index.html)** Recommend
 - **[Change Log](https://github.com/baijia/BJLiveUI-Android/blob/master/CHANGELOG.md)**
@@ -31,7 +31,7 @@ maven { url 'http://git.baijiashilian.com/open-android/maven/raw/master/' }
 * 在build.gradle中添加依赖
 ```groovy
 dependencies {
-	implementation 'com.baijia.live:liveplayer-sdk-ui:1.3.0'
+	implementation 'com.baijia.live:liveplayer-sdk-ui:1.4.6'
 }
 ```
 ### 源码依赖
