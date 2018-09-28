@@ -1,8 +1,11 @@
 package com.baijiahulian.live.ui.speakerspanel;
 
+import android.view.View;
+
 import com.baijiahulian.live.ui.base.BasePresenter;
 import com.baijiahulian.live.ui.base.BaseView;
-import com.baijiahulian.live.ui.ppt.MyPPTFragment;
+import com.baijiahulian.live.ui.ppt.MyPPTView;
+import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.launch.LPEnterRoomNative;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
@@ -26,11 +29,13 @@ interface SpeakersContract {
     String RECORD_TAG = "RECORD";
 
     interface View extends BaseView<Presenter> {
-        void notifyItemChanged(int position);
+        void notifyItemChanged(int position, IMediaModel iMediaModel);
 
-        void notifyItemInserted(int position);
+        void notifyItemInserted(int position, android.view.View addView);
 
-        void notifyItemDeleted(int position);
+        android.view.View notifyItemDeleted(int position);
+
+        void deletedViewAt(int position);
 
         android.view.View removeViewAt(int position);
 
@@ -44,7 +49,13 @@ interface SpeakersContract {
 
         void disableSpeakQueuePlaceholder();
 
-        VideoView getVideoView(IMediaModel iMediaModel);
+        android.view.View getChildAt(int position);
+
+        void showOptionDialog();
+
+        void stopLoadingAnimation(int position);
+
+        void showToast(String s);
     }
 
     interface Presenter extends BasePresenter {
@@ -74,15 +85,19 @@ interface SpeakersContract {
 
         void closeVideo(String tag);
 
+        void switchVideoDefinition(String userId, LPConstants.VideoDefinition definition);
+
         void closeSpeaking(String userId);
 
         boolean isTeacherOrAssistant();
+
+        boolean isCurrentTeacher();
 
         void changeBackgroundContainerSize(boolean isShrink);
 
         void setFullScreenTag(String tag);
 
-        MyPPTFragment getPPTFragment();
+        MyPPTView getPPTFragment();
 
         boolean isFullScreen(String tag);
 
@@ -105,5 +120,19 @@ interface SpeakersContract {
         void notifyNoSpeakers();
 
         void notifyHavingSpeakers();
+
+        void setPPTToFullScreen();
+
+        IUserModel getPresenter();
+
+        void requestPresenterChange(String userId, boolean isSet);
+
+        boolean isHasDrawingAuth(String userNumber);
+
+        void requestStudentDrawingAuth(String userId, boolean isAddAuth);
+
+        boolean isEnableGrantDrawing();
+
+        boolean isEnableSwitchPresenter();
     }
 }

@@ -15,7 +15,7 @@ public interface RightMenuContract {
 
     interface View extends BaseView<Presenter> {
 
-        void showSpeakClosedByTeacher();
+        void showSpeakClosedByTeacher(boolean isSmallGroup);
 
         void showSpeakClosedByServer();
 
@@ -25,7 +25,7 @@ public interface RightMenuContract {
 
         void showSpeakApplyCountDown(int countDownTime, int total);
 
-        void showSpeakApplyAgreed();
+        void showSpeakApplyAgreed(boolean isEnableDrawing);
 
         void showSpeakApplyDisagreed();
 
@@ -53,11 +53,13 @@ public interface RightMenuContract {
 
         void showWaitingTeacherAgree();
 
-        void showAutoSpeak();
+        void showAutoSpeak(boolean isDrawingEnable);
 
-        void showForceSpeak();
+        void showForceSpeak(boolean isDrawingEnable);
 
         void hideUserList();
+
+        void hideSpeakApply();
 
         void showHandUpTimeout();
 
@@ -72,8 +74,8 @@ public interface RightMenuContract {
 
         void speakApply();
 
-        void changePPTDrawBtnStatus(boolean shouldShow);
-
         void onSpeakInvite(int confirm);
+
+        boolean isWaitingRecordOpen();
     }
 }

@@ -8,6 +8,7 @@ import com.baijiahulian.live.ui.utils.RxUtils;
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.context.LPError;
 import com.baijiahulian.livecore.listener.OnPhoneRollCallListener;
+import com.baijiahulian.livecore.models.LPAnswerSheetModel;
 import com.baijiahulian.livecore.models.LPJsonModel;
 import com.baijiahulian.livecore.models.imodels.IAnnouncementModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
@@ -36,7 +37,7 @@ public class GlobalPresenter implements BasePresenter {
     private Subscription subscriptionOfClassStart, subscriptionOfClassEnd, subscriptionOfForbidAllStatus,
             subscriptionOfTeacherMedia, subscriptionOfUserIn, subscriptionOfUserOut, subscriptionOfQuizStart,
             subscriptionOfQuizRes, subscriptionOfQuizEnd, subscriptionOfQuizSolution, subscriptionOfDebug,
-            subscriptionOfAnnouncement, subscriptionOfClassSwitch;
+            subscriptionOfAnnouncement, subscriptionOfClassSwitch, subscriptionOfAnswerStart, subscriptionOfAnswerEnd;
 
     private boolean isVideoManipulated = false;
 
@@ -257,6 +258,27 @@ public class GlobalPresenter implements BasePresenter {
                             }
                         }
                     });
+
+            subscriptionOfAnswerStart = routerListener.getLiveRoom().getObservableOfAnswerSheetStart()
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new LPErrorPrintSubscriber<LPAnswerSheetModel>() {
+                        @Override
+                        public void call(LPAnswerSheetModel lpAnswerSheetModel) {
+                            if (!routerListener.isTeacherOrAssistant())
+                                routerListener.answerStart(lpAnswerSheetModel);
+
+                        }
+                    });
+
+            subscriptionOfAnswerEnd = routerListener.getLiveRoom().getObservableOfAnswerSheetEnd()
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new LPErrorPrintSubscriber<Boolean>() {
+                        @Override
+                        public void call(Boolean aBoolean) {
+                            if (!routerListener.isTeacherOrAssistant())
+                                routerListener.answerEnd(aBoolean);
+                        }
+                    });
         }
         if (!routerListener.isTeacherOrAssistant()) {
             // 公告变了
@@ -312,6 +334,8 @@ public class GlobalPresenter implements BasePresenter {
         RxUtils.unSubscribe(subscriptionOfDebug);
         RxUtils.unSubscribe(subscriptionOfAnnouncement);
         RxUtils.unSubscribe(subscriptionOfClassSwitch);
+        RxUtils.unSubscribe(subscriptionOfAnswerStart);
+        RxUtils.unSubscribe(subscriptionOfAnswerEnd);
     }
 
     @Override

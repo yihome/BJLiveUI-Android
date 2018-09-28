@@ -196,7 +196,7 @@ public class ChatUsersDialogFragment extends BaseFragment implements ChatUsersCo
                     userViewHolder.assistantTag.setVisibility(View.GONE);
                 }
                 String avatar = userModel.getAvatar().startsWith("//") ? "https:" + userModel.getAvatar() : userModel.getAvatar();
-                Picasso.with(getActivity()).load(AliCloudImageUtil.getRoundedAvatarUrl(avatar, 64)).into(userViewHolder.avatar);
+                Picasso.with(getContext()).load(AliCloudImageUtil.getRoundedAvatarUrl(avatar, 64)).into(userViewHolder.avatar);
                 userViewHolder.privateChatUser.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -215,5 +215,14 @@ public class ChatUsersDialogFragment extends BaseFragment implements ChatUsersCo
         public int getItemCount() {
             return presenter.getCount();
         }
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        presenter = null;
+        if (recyclerView != null)
+            recyclerView.setAdapter(null);
+        recyclerView = null;
     }
 }

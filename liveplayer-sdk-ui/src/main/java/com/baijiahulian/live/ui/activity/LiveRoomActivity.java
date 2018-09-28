@@ -28,6 +28,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.OrientationEventListener;
@@ -39,6 +40,7 @@ import android.view.WindowManager;
 import android.view.animation.LinearInterpolator;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -51,8 +53,11 @@ import com.baijiahulian.live.ui.LiveSDKWithUI;
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.announcement.AnnouncementFragment;
 import com.baijiahulian.live.ui.announcement.AnnouncementPresenter;
+import com.baijiahulian.live.ui.answersheet.QuestionToolFragment;
+import com.baijiahulian.live.ui.answersheet.QuestionToolPresenter;
 import com.baijiahulian.live.ui.base.BasePresenter;
 import com.baijiahulian.live.ui.base.BaseView;
+import com.baijiahulian.live.ui.base.DragFragment;
 import com.baijiahulian.live.ui.chat.ChatFragment;
 import com.baijiahulian.live.ui.chat.ChatPresenter;
 import com.baijiahulian.live.ui.chat.MessageSendPresenter;
@@ -70,7 +75,7 @@ import com.baijiahulian.live.ui.loading.LoadingFragment;
 import com.baijiahulian.live.ui.loading.LoadingPresenter;
 import com.baijiahulian.live.ui.more.MoreMenuDialogFragment;
 import com.baijiahulian.live.ui.more.MoreMenuPresenter;
-import com.baijiahulian.live.ui.ppt.MyPPTFragment;
+import com.baijiahulian.live.ui.ppt.MyPPTView;
 import com.baijiahulian.live.ui.ppt.PPTPresenter;
 import com.baijiahulian.live.ui.ppt.quickswitchppt.QuickSwitchPPTFragment;
 import com.baijiahulian.live.ui.ppt.quickswitchppt.SwitchPPTFragmentPresenter;
@@ -106,6 +111,7 @@ import com.baijiahulian.livecore.context.LiveRoom;
 import com.baijiahulian.livecore.context.OnLiveRoomListener;
 import com.baijiahulian.livecore.launch.LPLaunchListener;
 import com.baijiahulian.livecore.listener.OnPhoneRollCallListener;
+import com.baijiahulian.livecore.models.LPAnswerSheetModel;
 import com.baijiahulian.livecore.models.LPCheckRecordStatusModel;
 import com.baijiahulian.livecore.models.LPJsonModel;
 import com.baijiahulian.livecore.models.LPKVModel;
@@ -116,7 +122,6 @@ import com.baijiahulian.livecore.models.imodels.IUserModel;
 import com.baijiahulian.livecore.models.roomresponse.LPResRoomMediaControlModel;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 import com.baijiahulian.livecore.utils.LPLogger;
-import com.baijiahulian.livecore.wrapper.exception.NotInitializedException;
 import com.baijiahulian.livecore.wrapper.model.LPAVMediaModel;
 
 import java.io.File;
@@ -139,7 +144,7 @@ import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 
 public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRouterListener {
     private RelativeLayout rlContainer;
-    private FrameLayout flBackground;
+    private RelativeLayout flBackground;
     private FrameLayout flTop;
     private FrameLayout flLeft;
     private FrameLayout flLoading;
@@ -150,16 +155,18 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private FrameLayout flRight;
     private FrameLayout flSpeakers;
     private FrameLayout flCloudRecord;
+    private DragFragment flQuestionTool;
     private LiveRoom liveRoom;
     private LoadingFragment loadingFragment;
     private TopBarFragment topBarFragment;
     private CloudRecordFragment cloudRecordFragment;
-    private MyPPTFragment lppptFragment;
+    private MyPPTView lppptView;
     private ChatFragment chatFragment;
     private ChatPresenter chatPresenter;
     private RightBottomMenuFragment rightBottomMenuFragment;
     private LeftMenuFragment leftMenuFragment;
     private RightMenuFragment rightMenuFragment;
+    private QuestionToolFragment questionToolFragment;
     private WindowManager windowManager;
     private SpeakersFragment speakersFragment;
     private SpeakerPresenter speakerPresenter;
@@ -173,6 +180,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private QuizDialogFragment quizFragment;
     private QuizDialogPresenter quizPresenter;
     private MessageSendPresenter messageSendPresenter;
+    private AnnouncementFragment announcementFragment;
     private OrientationEventListener orientationEventListener; //处理屏幕旋转时本地视频的方向
     private int oldRotation;
 
@@ -188,7 +196,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private static String liveHorseLamp; // 跑马灯
     private static int liveHorseLampInterval = 60; // 跑马灯时间间隔
     private IUserModel enterUser;
-    private ViewGroup.LayoutParams lpBackground;
+    private RelativeLayout.LayoutParams lpBackground;
     private boolean mobileNetworkDialogShown = false;
     private MaterialDialog speakInviteDlg;  //取消用
     //debug
@@ -197,6 +205,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private int aecMode = 0, aecmMode = 0, audioSource = 0, delay;
     private boolean isCommunication = true;
     private TextView tvStreamInfo;
+    private LinearLayout messageReminderContainer;
     private List<IMediaModel> userMediaModels;
     private Subscription subscriptionOfIsCloudRecordAllowed;
     private int minVolume;
@@ -281,14 +290,14 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         orientationEventListener = new OrientationEventListener(this, SensorManager.SENSOR_DELAY_FASTEST) {
             @Override
             public void onOrientationChanged(int orientation) {
-                int newRotation = windowManager.getDefaultDisplay().getRotation();
-                if (newRotation != oldRotation) {
-                    oldRotation = newRotation;
-                    try {
+                try {
+                    int newRotation = windowManager.getDefaultDisplay().getRotation();
+                    if (newRotation != oldRotation) {
+                        oldRotation = newRotation;
                         if (liveRoom.getRecorder().isVideoAttached())
                             liveRoom.getRecorder().invalidVideo();
-                    } catch (NotInitializedException ignored) {
                     }
+                } catch (Exception ignored) {
                 }
             }
         };
@@ -296,10 +305,18 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         checkScreenOrientationInit();
     }
 
+    private boolean isDlchatOpen = false;
+
     private void initViews() {
 
-        lpBackground = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        flBackground = (FrameLayout) findViewById(R.id.activity_live_room_background_container);
+        lpBackground = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        flBackground = (RelativeLayout) findViewById(R.id.activity_live_room_background_container);
+        DisplayMetrics displayMetrics = new DisplayMetrics();// 强制设置白版高度
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int displayWidth = displayMetrics.widthPixels;
+        ViewGroup.LayoutParams params = flBackground.getLayoutParams();
+        params.height = displayWidth * 3 / 4;
+        flBackground.setLayoutParams(params);
         flTop = (FrameLayout) findViewById(R.id.activity_live_room_top);
         flLeft = (FrameLayout) findViewById(R.id.activity_live_room_bottom_left);
         flLoading = (FrameLayout) findViewById(R.id.activity_live_room_loading);
@@ -311,7 +328,36 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         flSpeakers = (FrameLayout) findViewById(R.id.activity_live_room_speakers_container);
         flCloudRecord = (FrameLayout) findViewById(R.id.activity_live_room_cloud_record);
         rlContainer = (RelativeLayout) findViewById(R.id.activity_live_room_container);
+        flQuestionTool = (DragFragment) findViewById(R.id.activity_dialog_question_tool);
 //        dlChat.setVisibility(View.GONE);
+
+        dlChat.addDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                isDlchatOpen = true;
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                isDlchatOpen = false;
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+                if (isDlchatOpen && newState == 0) {
+                    dlChat.setTag(true);
+                    dlChat.isDrawerOpen(dlChat);
+
+                } else if (!isDlchatOpen && newState == 0) {
+                    dlChat.setTag(false);
+                    dlChat.isDrawerOpen(dlChat);
+                }
+            }
+        });
     }
 
     @Override
@@ -324,7 +370,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                 @Override
                 public void changeRoom(String code, String nickName) {
                     //重新进入教室
-                    removeFragment(lppptFragment);
+                    flBackground.removeAllViews();
                     removeFragment(topBarFragment);
                     removeFragment(cloudRecordFragment);
                     removeFragment(leftMenuFragment);
@@ -362,16 +408,40 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                     WindowManager.LayoutParams.FLAG_FULLSCREEN);
             dlChat.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+            if (flQuestionTool.getVisibility() == View.VISIBLE) {
+                flQuestionTool.configurationChanged();
+                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+                flQuestionTool.setLayoutParams(layoutParams);
+            }
+            if (flSpeakers.getVisibility() == View.GONE) {
+                RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) dlChat.getLayoutParams();
+                lp.addRule(RelativeLayout.BELOW, 0);
+                lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_center_anchor);
+                dlChat.setLayoutParams(lp);
+            }
         } else {
+            if (flQuestionTool.getVisibility() == View.VISIBLE) {
+                flQuestionTool.configurationChanged();
+                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+                flQuestionTool.setLayoutParams(layoutParams);
+            }
             if (isClearScreen)
                 unClearScreen();
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
             dlChat.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN);
+            if (flSpeakers.getVisibility() == View.GONE) {
+                RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) dlChat.getLayoutParams();
+                lp.addRule(RelativeLayout.BELOW, 0);
+                lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_background_container);
+                dlChat.setLayoutParams(lp);
+            }
         }
+        onCloudRecordConfigurationChanged(newConfig);
         onBackgroundContainerConfigurationChanged(newConfig);
         onSpeakersContainerConfigurationChanged(newConfig);
         onPPTLeftMenuConfigurationChanged(newConfig);
-        onCloudRecordConfigurationChanged(newConfig);
     }
 
     private void onCloudRecordConfigurationChanged(Configuration newConfig) {
@@ -392,9 +462,11 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
             flCloudRecord.setVisibility(View.GONE);
             lp.addRule(RelativeLayout.BELOW, 0);
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            if (liveRoom.getCloudRecordStatus())
+            if (liveRoom.getCloudRecordStatus() && liveRoom.isTeacherOrAssistant())
                 flCloudRecord.setVisibility(View.VISIBLE);
-            lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_center_anchor);
+            else
+                flCloudRecord.setVisibility(View.GONE);
+            lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_background_container);
         }
         flSpeakers.setLayoutParams(lp);
     }
@@ -402,11 +474,14 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     private void onBackgroundContainerConfigurationChanged(Configuration newConfig) {
         RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) flBackground.getLayoutParams();
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            lp.addRule(RelativeLayout.ABOVE, 0); // lp.removeRule()
+            lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
             if (isBackgroundContainerShrink)
                 lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_speakers_container);
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            lp.addRule(RelativeLayout.ABOVE, R.id.activity_live_room_center_anchor);
+            DisplayMetrics displayMetrics = new DisplayMetrics();// 强制设置白版高度
+            getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+            int displayWidth = displayMetrics.widthPixels;
+            lp.height = displayWidth * 3 / 4;
             if (isBackgroundContainerShrink)
                 lp.addRule(RelativeLayout.BELOW, 0);
         }
@@ -415,7 +490,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     private void onPPTLeftMenuConfigurationChanged(Configuration newConfig) {
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            if (lppptFragment != null && lppptFragment.isEditable()) {
+            if (lppptView != null && lppptView.isEditable()) {
                 flLeft.setVisibility(View.GONE);
                 dlChat.setVisibility(View.GONE);
                 flRightBottom.setVisibility(View.INVISIBLE);
@@ -462,21 +537,25 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                         showMessage(error.getMessage());
                         break;
                     case LPError.CODE_ERROR_NETWORK_MOBILE:
-                        if (!mobileNetworkDialogShown) {
+                        if (!mobileNetworkDialogShown && isForeground) {
                             mobileNetworkDialogShown = true;
-                            new MaterialDialog.Builder(LiveRoomActivity.this)
-                                    .content(getString(R.string.live_mobile_network_hint))
-                                    .positiveText(getString(R.string.live_mobile_network_confirm))
-                                    .positiveColor(ContextCompat.getColor(LiveRoomActivity.this, R.color.live_blue))
-                                    .onPositive(new MaterialDialog.SingleButtonCallback() {
-                                        @Override
-                                        public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
-                                            materialDialog.dismiss();
-                                        }
-                                    })
-                                    .canceledOnTouchOutside(true)
-                                    .build()
-                                    .show();
+                            try {
+                                new MaterialDialog.Builder(LiveRoomActivity.this)
+                                        .content(getString(R.string.live_mobile_network_hint))
+                                        .positiveText(getString(R.string.live_mobile_network_confirm))
+                                        .positiveColor(ContextCompat.getColor(LiveRoomActivity.this, R.color.live_blue))
+                                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                                            @Override
+                                            public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
+                                                materialDialog.dismiss();
+                                            }
+                                        })
+                                        .canceledOnTouchOutside(true)
+                                        .build()
+                                        .show();
+                            } catch (WindowManager.BadTokenException e) {
+                                e.printStackTrace();
+                            }
                         } else {
                             showMessage(getString(R.string.live_mobile_network_hint_less));
                         }
@@ -557,7 +636,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public boolean canStudentDraw() {
-        return isTeacherOrAssistant() || lppptFragment.isCurrentMaxPage();
+        return isTeacherOrAssistant() || lppptView.isCurrentMaxPage();
     }
 
     @Override
@@ -665,21 +744,25 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
             speakersFragment.setBackGroundVisible(false);
         }
         flBackground.setLayoutParams(lp);
+        if (lppptView != null) {
+            lppptView.onSizeChange();
+        }
     }
 
     @Override
     public View removeFullScreenView() {
         View view = flBackground.getChildAt(0);
-        if (view == lppptFragment.getView()) {
-            lppptFragment.onStop();
-        }
+
+        if (view == lppptView && lppptView != null && lppptView.isEditable() && rightMenuPresenter != null)
+            rightMenuPresenter.changeDrawing();
+
         flBackground.removeView(view);
-        setZOrderMediaOverlayTrue(view);
+//        setZOrderMediaOverlayTrue(view);
         return view;
     }
 
     @Override
-    public FrameLayout getBackgroundContainer() {
+    public RelativeLayout getBackgroundContainer() {
         return flBackground;
     }
 
@@ -748,28 +831,31 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
             }
             return;
         }
-        speakInviteDlg = new MaterialDialog.Builder(this)
-                .content(R.string.live_invite_speak_tip)
-                .positiveText(getString(R.string.live_agree))
-                .negativeText(getString(R.string.live_disagree))
-                .positiveColor(ContextCompat.getColor(LiveRoomActivity.this, R.color.live_blue))
-                .negativeColor(ContextCompat.getColor(LiveRoomActivity.this, R.color.live_blue))
-                .onPositive(new MaterialDialog.SingleButtonCallback() {
-                    @Override
-                    public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
-                        rightMenuPresenter.onSpeakInvite(1);
-                        materialDialog.dismiss();
-                    }
-                })
-                .onNegative(new MaterialDialog.SingleButtonCallback() {
-                    @Override
-                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                        rightMenuPresenter.onSpeakInvite(0);
-                        dialog.dismiss();
-                    }
-                })
-                .canceledOnTouchOutside(true)
-                .build();
+        try {
+            speakInviteDlg = new MaterialDialog.Builder(this)
+                    .content(R.string.live_invite_speak_tip)
+                    .positiveText(getString(R.string.live_agree))
+                    .negativeText(getString(R.string.live_disagree))
+                    .positiveColor(ContextCompat.getColor(LiveRoomActivity.this, R.color.live_blue))
+                    .negativeColor(ContextCompat.getColor(LiveRoomActivity.this, R.color.live_blue))
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
+                            rightMenuPresenter.onSpeakInvite(1);
+                            materialDialog.dismiss();
+                        }
+                    })
+                    .onNegative(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            rightMenuPresenter.onSpeakInvite(0);
+                            dialog.dismiss();
+                        }
+                    })
+                    .canceledOnTouchOutside(true)
+                    .build();
+        }catch (Exception ignore){
+        }
         speakInviteDlg.show();
     }
 
@@ -977,7 +1063,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                                     }
                                 });
                     }
-                    rightMenuFragment.showAutoSpeak();
+                    rightMenuFragment.showAutoSpeak(getLiveRoom().getPartnerConfig().liveDisableGrantStudentBrush == 1);
                 }
             }
         }
@@ -989,7 +1075,9 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         if (errorFragment != null && errorFragment.isAdded()) {
             removeFragment(errorFragment);
         }
-        removeFragment(lppptFragment);
+
+        flBackground.removeAllViews();
+        flPPTLeft.setVisibility(View.GONE);
         removeFragment(topBarFragment);
         removeFragment(cloudRecordFragment);
         removeFragment(leftMenuFragment);
@@ -1001,6 +1089,10 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
         if (loadingFragment != null && loadingFragment.isAdded())
             removeFragment(loadingFragment);
+
+        if (announcementFragment != null &&  announcementFragment.isAdded()){
+            removeFragment(announcementFragment);
+        }
 
         flBackground.removeAllViews();
         getSupportFragmentManager().executePendingTransactions();
@@ -1038,19 +1130,26 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void setFullScreenView(View view) {
-        setZOrderMediaOverlayFalse(view);
-        flBackground.addView(view, lpBackground);
-        if (view == lppptFragment.getView()) {
-            lppptFragment.onStart();
+        if (view == null) return;
+        if (flBackground.getChildCount() > 0)
+            flBackground.removeAllViews();
+        if (view instanceof VideoView)
+            ((SurfaceView)((VideoView) view).getSurfaceView()).setZOrderMediaOverlay(false);
+        if (view instanceof RecorderView)
+            ((RecorderView)(view)).setZOrderMediaOverlay(false);
+        flBackground.addView(view, new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+        if (view == lppptView) {
+            lppptView.onStart();
         } else if (view instanceof RecorderView) {
             liveRoom.getRecorder().invalidVideo();
         }
     }
 
     @Override
-    public MyPPTFragment getPPTFragment() {
-        checkNotNull(lppptFragment);
-        return lppptFragment;
+    public MyPPTView getPPTView() {
+        checkNotNull(lppptView);
+        return lppptView;
     }
 
     public void showRollCallDlg(int time, OnPhoneRollCallListener.RollCall rollCallListener) {
@@ -1187,16 +1286,16 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case REQUEST_CODE_PERMISSION_CAMERA:
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     speakerPresenter.attachVideo();
-                } else {
+                } else if (grantResults.length > 0) {
                     showSystemSettingDialog(REQUEST_CODE_PERMISSION_CAMERA);
                 }
                 break;
             case REQUEST_CODE_PERMISSION_MIC:
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     liveRoom.getRecorder().attachAudio();
-                } else {
+                } else if (grantResults.length > 0) {
                     showSystemSettingDialog(REQUEST_CODE_PERMISSION_MIC);
                 }
                 break;
@@ -1225,7 +1324,8 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         if (errorFragment != null && errorFragment.isAdded()) {
             removeFragment(errorFragment);
         }
-        removeFragment(lppptFragment);
+        if (lppptView != null)
+            lppptView.removeAllViews();
         removeFragment(topBarFragment);
         removeFragment(cloudRecordFragment);
         removeFragment(leftMenuFragment);
@@ -1235,12 +1335,25 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         removeFragment(chatFragment);
         removeFragment(speakersFragment);
 
+//        if (announcementFragment != null && announcementFragment.isAdded())
+//            removeFragment(announcementFragment);
+
         if (messageSentFragment != null && messageSentFragment.isAdded()) {
             removeFragment(messageSentFragment);
         }
 
         if (loadingFragment != null && loadingFragment.isAdded())
             removeFragment(loadingFragment);
+
+        if (announcementFragment != null && announcementFragment.isAdded()) {
+            removeFragment(announcementFragment);
+            announcementFragment = null;
+        }
+
+        if (questionToolFragment != null && questionToolFragment.isAdded()) {
+            removeFragment(questionToolFragment);
+            questionToolFragment = null;
+        }
 
         flBackground.removeAllViews();
         getSupportFragmentManager().executePendingTransactions();
@@ -1264,7 +1377,6 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void navigateToMain() {
-
         AudioManager mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         int current;
         if (mAudioManager != null) {
@@ -1277,14 +1389,13 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                 liveRoom.getPlayer().mute();
             }
         }
-
         subscriptionOfTeacherAbsent = liveRoom.getSpeakQueueVM().getObservableOfActiveUsers().subscribe(new LPErrorPrintSubscriber<List<IMediaModel>>() {
             @Override
             public void call(List<IMediaModel> iMediaModels) {
                 if (!isTeacherOrAssistant() && liveRoom.getTeacherUser() == null) {
                     showMessage(getString(R.string.live_room_teacher_absent));
                 }
-                unsubscribe();
+                RxUtils.unSubscribe(subscriptionOfTeacherAbsent);
             }
         });
 
@@ -1292,9 +1403,17 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         globalPresenter.setRouter(this);
         globalPresenter.subscribe();
 
-        lppptFragment = MyPPTFragment.newInstance(liveRoom);
-        bindVP(lppptFragment, new PPTPresenter(lppptFragment));
-        addFragment(R.id.activity_live_room_background_container, lppptFragment);
+
+        lppptView = new MyPPTView(this);
+
+        boolean sdkValid = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
+        lppptView.attachLiveRoom(liveRoom);
+//        lppptView.setAnimPPTEnable(false);
+//        lppptView.setFlingEnable(false);
+
+        bindVP(lppptView, new PPTPresenter(lppptView));
+        flBackground.addView(lppptView, new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        lppptView.onStart();
 
         topBarFragment = new TopBarFragment();
         bindVP(topBarFragment, new TopBarPresenter(topBarFragment));
@@ -1458,7 +1577,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void clearScreen() {
-        chatFragment.clearScreen();
+        dlChat.setVisibility(View.INVISIBLE);
         isClearScreen = true;
         rightBottomMenuFragment.clearScreen();
         hideFragment(topBarFragment);
@@ -1471,7 +1590,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void unClearScreen() {
-        chatFragment.unClearScreen();
+        dlChat.setVisibility(View.VISIBLE);
         isClearScreen = false;
         rightBottomMenuFragment.unClearScreen();
         showFragment(topBarFragment);
@@ -1499,7 +1618,7 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void navigateToQuickSwitchPPT(int currentIndex, int maxIndex) {
-        if (lppptFragment != null && lppptFragment.isEditable() && rightMenuPresenter != null)
+        if (lppptView != null && lppptView.isEditable() && rightMenuPresenter != null)
             rightMenuPresenter.changeDrawing();
         QuickSwitchPPTFragment quickSwitchPPTFragment = QuickSwitchPPTFragment.newInstance();
         Bundle args = new Bundle();
@@ -1520,26 +1639,27 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public void notifyPageCurrent(int position) {
-        lppptFragment.updatePage(position, true);
+        lppptView.updatePage(position, true);
     }
 
     @Override
-    public void navigateToPPTDrawing() {
-        checkNotNull(lppptFragment);
-        lppptFragment.changePPTCanvasMode();
+    public void navigateToPPTDrawing(boolean isAllowDrawing) {
+        checkNotNull(lppptView);
+        lppptView.setPPTCanvasMode(isAllowDrawing);
 
         int currentOrientation = getResources().getConfiguration().orientation;
-        if (lppptFragment.isEditable()) {
-            flTop.setVisibility(View.GONE);
+        if (lppptView.isEditable()) {
+//            flTop.setVisibility(View.GONE);
             if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
                 checkNotNull(leftMenuFragment);
                 flLeft.setVisibility(View.GONE);
                 dlChat.setVisibility(View.GONE);
                 flRightBottom.setVisibility(View.INVISIBLE);
             }
+            speakerPresenter.setPPTToFullScreen();
             flPPTLeft.setVisibility(View.VISIBLE);
         } else {
-            flTop.setVisibility(View.VISIBLE);
+//            flTop.setVisibility(View.VISIBLE);
             flLeft.setVisibility(View.VISIBLE);
             dlChat.setVisibility(View.VISIBLE);
             flRightBottom.setVisibility(View.VISIBLE);
@@ -1550,12 +1670,12 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public LPConstants.LPPPTShowWay getPPTShowType() {
-        return lppptFragment.getPPTShowWay();
+        return lppptView.getPPTShowWay();
     }
 
     @Override
     public void setPPTShowType(LPConstants.LPPPTShowWay type) {
-        lppptFragment.setPPTShowWay(type);
+        lppptView.setPPTShowWay(type);
     }
 
     @Override
@@ -1619,10 +1739,11 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     @Override
     public void navigateToAnnouncement() {
         globalPresenter.unObserveAnnouncementChange();
-        AnnouncementFragment fragment = AnnouncementFragment.newInstance();
-        AnnouncementPresenter presenter = new AnnouncementPresenter(fragment, globalPresenter);
-        bindVP(fragment, presenter);
-        showDialogFragment(fragment);
+        if (announcementFragment != null && announcementFragment.isAdded()) return;
+        announcementFragment = AnnouncementFragment.newInstance();
+        AnnouncementPresenter presenter = new AnnouncementPresenter(announcementFragment, globalPresenter);
+        bindVP(announcementFragment, presenter);
+        showDialogFragment(announcementFragment);
     }
 
     /**
@@ -1654,8 +1775,12 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
 
     @Override
     public boolean isTeacherOrAssistant() {
-        return getLiveRoom().getCurrentUser().getType() == LPConstants.LPUserType.Teacher ||
-                getLiveRoom().getCurrentUser().getType() == LPConstants.LPUserType.Assistant;
+        return liveRoom.isTeacherOrAssistant() ;
+    }
+
+    @Override
+    public boolean isGroupTeacherOrAssistant() {
+        return liveRoom.isGroupTeacherOrAssistant();
     }
 
     @Override
@@ -1669,13 +1794,13 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     }
 
     public boolean isPPTMax() {
-        return flBackground.getChildAt(0) == lppptFragment.getView();
+        return flBackground.getChildAt(0) == lppptView;
     }
 
     @Override
     public void clearPPTAllShapes() {
-        checkNotNull(lppptFragment);
-        lppptFragment.eraseAllShape();
+        checkNotNull(lppptView);
+        lppptView.eraseAllShapes();
     }
 
     @Override
@@ -1746,29 +1871,20 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
         removeFragment(errorFragment);
     }
 
-    private void setZOrderMediaOverlayTrue(View view) {
-        if (view instanceof SurfaceView) {
-            ((SurfaceView) view).setZOrderMediaOverlay(true);
-        } else if (view instanceof ViewGroup) {
-            for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
-                setZOrderMediaOverlayTrue(((ViewGroup) view).getChildAt(i));
-            }
-        }
-    }
+//    private void setZOrderMediaOverlayTrue(View view) {
+//        if (view instanceof SurfaceView) {
+//            ((SurfaceView) view).setZOrderMediaOverlay(true);
+//        } else if (view instanceof ViewGroup) {
+//            for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
+//                setZOrderMediaOverlayTrue(((ViewGroup) view).getChildAt(i));
+//            }
+//        }
+//    }
 
     public View getBackGroundView() {
         return flBackground.getChildAt(0);
     }
 
-    private void setZOrderMediaOverlayFalse(View view) {
-        if (view instanceof SurfaceView) {
-            ((SurfaceView) view).setZOrderMediaOverlay(false);
-        } else if (view instanceof ViewGroup) {
-            for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
-                setZOrderMediaOverlayFalse(((ViewGroup) view).getChildAt(i));
-            }
-        }
-    }
 
     private <V extends BaseView, P extends BasePresenter> void bindVP(V view, P presenter) {
         presenter.setRouter(this);
@@ -1913,14 +2029,35 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     }
 
     @Override
+    public void changeNewChatMessageReminder(boolean isNeedShow, int newMessageNumber) {
+        if (messageReminderContainer == null)
+            messageReminderContainer = (LinearLayout) findViewById(R.id.activity_live_room_new_message_reminder_container);
+        if (!isNeedShow || newMessageNumber == 0) {
+            messageReminderContainer.setVisibility(View.GONE);
+            return;
+        }
+        messageReminderContainer.setGravity(Gravity.BOTTOM);
+        messageReminderContainer.bringToFront();
+        ((TextView) findViewById(R.id.activity_live_room_new_message_reminder)).setText(getString(R.string.live_room_new_chat_message, newMessageNumber));
+        messageReminderContainer.setVisibility(View.VISIBLE);
+        messageReminderContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (chatFragment != null && chatFragment.isAdded())
+                    chatFragment.scrollToBottom();
+            }
+        });
+    }
+
+    @Override
     public void showNoSpeakers() {
         RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) dlChat.getLayoutParams();
-        if (lp.getRules()[RelativeLayout.BELOW] == R.id.activity_live_room_center_anchor) {
+        if (lp.getRules()[RelativeLayout.BELOW] == R.id.activity_live_room_background_container) {
             return;
         }
         flSpeakers.setVisibility(View.GONE);
         lp.addRule(RelativeLayout.BELOW, 0);
-        lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_center_anchor);
+        lp.addRule(RelativeLayout.BELOW, R.id.activity_live_room_background_container);
         dlChat.setLayoutParams(lp);
     }
 
@@ -1937,6 +2074,81 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
     }
 
     @Override
+    public boolean isPPTInSpeakersList() {
+        return speakerPresenter != null && speakerPresenter.isPPTInSpeakersList();
+    }
+
+    @Override
+    public void showOptionDialog() {
+        if (speakerPresenter != null)
+            speakerPresenter.showOptionDialog();
+    }
+
+    @Override
+    public void showPPTLoadErrorDialog(final int errorCode, String description) {
+        try {
+            new MaterialDialog.Builder(this)
+                    .title(getString(R.string.live_room_ppt_load_error, errorCode))
+                    .content(getString(R.string.live_room_ppt_switch))
+                    .contentColor(ContextCompat.getColor(LiveRoomActivity.this, R.color.live_text_color))
+                    .positiveColor(ContextCompat.getColor(LiveRoomActivity.this, R.color.live_blue))
+                    .positiveText(getString(R.string.live_room_ppt_switch_confirm))
+                    .negativeColor(ContextCompat.getColor(LiveRoomActivity.this, R.color.live_text_color))
+                    .negativeText(getString(R.string.live_cancel))
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
+                            lppptView.setAnimPPTEnable(false);
+                        }
+                    })
+                    .onNegative(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
+                            materialDialog.dismiss();
+                        }
+                    })
+                    .build()
+                    .show();
+        } catch (Exception ignore) {
+        }
+    }
+
+    @Override
+    public boolean enableAnimPPTView(boolean b) {
+        if (lppptView != null)
+            return lppptView.setAnimPPTEnable(b);
+        return false;
+    }
+
+    public void answerStart(LPAnswerSheetModel model) {
+//        QuestionToolPresenter questionToolPresenter = new QuestionToolPresenter();
+//        questionToolPresenter.setRouter(this);
+//        questionToolPresenter.setLpQuestionToolModel(model);
+//        questionToolFragment = new QuestionToolFragment();
+//        questionToolPresenter.setView(questionToolFragment);
+//        bindVP(questionToolFragment, questionToolPresenter);
+////        flQuestionTool.setVisibility(View.VISIBLE);
+////        flQuestionTool.setVisibility(View.GONE);
+//        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+//        layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+//        flQuestionTool.setLayoutParams(layoutParams);
+//        addFragment(R.id.activity_dialog_question_tool, questionToolFragment);
+//
+////        showFragment(questionToolFragment);
+    }
+
+    @Override
+    public void answerEnd(boolean ended) {
+//        if (questionToolFragment != null && questionToolFragment.isAdded()) {
+//            removeFragment(questionToolFragment);
+////            if (ended)
+////                Toast.makeText(this, "答题时间已到", Toast.LENGTH_SHORT).show();
+////            flQuestionTool.setVisibility(View.GONE);
+//            questionToolFragment = null;
+//        }
+    }
+
+    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
             AudioManager mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
@@ -1945,7 +2157,11 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                     AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_SHOW_UI);
             int current = mAudioManager.getStreamVolume(AudioManager.STREAM_VOICE_CALL);
             if (current > minVolume) {
-                liveRoom.getPlayer().unMute();
+                try {
+                    liveRoom.getPlayer().unMute();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
             return true;
         } else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
@@ -1955,7 +2171,11 @@ public class LiveRoomActivity extends LiveRoomBaseActivity implements LiveRoomRo
                     AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_SHOW_UI);
             int current = mAudioManager.getStreamVolume(AudioManager.STREAM_VOICE_CALL);
             if (current <= minVolume) {
-                liveRoom.getPlayer().mute();
+                try {
+                    liveRoom.getPlayer().mute();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
             return true;
         } else {

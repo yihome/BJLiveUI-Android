@@ -7,10 +7,12 @@
     <string name="live_speaker_dialog">发言用户</string>
     <string name="live_video_on">视频中</string>
     <string name="live_close_speaking">结束发言</string>
+    <string name="live_switch_definitions">切换清晰度</string>
     <string name="live_open_video">打开视频</string>
     <string name="live_close_video">关闭视频</string>
     <string name="live_agree">同意</string>
     <string name="live_teacher">老师</string>
+    <string name="live_presenter">主讲</string>
     <string name="private_chat">私聊</string>
     <string name="live_assistent">助教</string>
     <string name="live_disagree">拒绝</string>
@@ -22,6 +24,10 @@
     <string name="live_beauty_filter">美颜</string>
     <string name="live_setting">设置</string>
     <string name="live_full_screen">全屏</string>
+    <string name="live_set_to_presenter">设为主讲</string>
+    <string name="live_unset_presenter">收回主讲</string>
+    <string name="live_set_auth_drawing">授权画笔</string>
+    <string name="live_unset_auth_drawing">取消画笔</string>
     <string name="live_send_message">发送</string>
     <string name="live_overspread">铺满</string>
     <string name="live_setting_ppt">课件展示：</string>
@@ -36,11 +42,16 @@
     <string name="live_setting_camera_switch">摄像头切换：</string>
     <string name="live_setting_camera_switch_front">前</string>
     <string name="live_setting_camera_switch_back">后</string>
+    <string name="live_setting_ppt_view_type_anim">动态</string>
+    <string name="live_setting_ppt_view_type_switch">PPT类型：</string>
+    <string name="live_setting_ppt_view_type_static">静态</string>
     <string name="live_setting_camera_forbid_all">全体禁言</string>
     <string name="live_setting_camera_forbid_raise_hand">禁止举手</string>
+    <string name="live_setting_camera_forbid_all_audio">全体静音</string>
     <string name="live_media_visitor_fail">游客不能举手发言</string>
     <string name="live_media_speak_applying">举手中</string>
     <string name="live_media_student_fail">请先举手发言，并等待老师同意</string>
+    <string name="live_media_group_fail">分组内禁止发言</string>
     <string name="live_loading_more">正在加载…</string>
     <string name="live_media_speak_apply_agree">老师同意了您的发言请求</string>
     <string name="live_media_speak_apply_disagree">老师拒绝了您的发言请求</string>
@@ -71,7 +82,6 @@
     <string name="live_recorder_camera_switch_off">关闭摄像头</string>
     <string name="live_ppt_manage">管理课件</string>
     <string name="live_hand_up_error">课程未开始，还不能举手</string>
-    <string name="live_hand_up_forbid">老师禁止了举手</string>
     <string name="live_ppt_title">PPT</string>
     <string name="live_forbid_raise_hand">禁止举手</string>
     <string name="live_forbid_send_message">老师已禁止了发言</string>
@@ -84,6 +94,8 @@
     <string name="live_frequent_error_line">请勿频繁切换线路</string>
     <string name="live_frequent_error_camera">请勿频繁切换前后摄像头</string>
     <string name="live_frequent_error_resolution">请勿频繁切换清晰度</string>
+    <string name="live_frequent_error_switch_camera">请勿频繁开关摄像头</string>>
+    <string name="live_frequent_error_switch_ppt">请勿频繁切换PPT类型</string>>
     <string name="live_retry">刷新重试</string>
     <string name="live_retry_suggestion">可添加技术支持 QQ %1$s 获得帮助</string>
     <string name="live_image_save">保存图片</string>
@@ -122,6 +134,9 @@
     <string name="live_mobile_network_confirm">知道了</string>
     <string name="live_switch_link_type_error">该房间不能切换链路类型</string>
     <string name="live_presenter_hint">(主讲)</string>
+    <string name="live_teacher_hint">(老师)</string>
+    <string name="live_student_no_auth_drawing">老师取消了你的画笔权限</string>
+    <string name="live_student_auth_drawing">老师开启了你的画笔权限</string>
     <string name="live_no_camera_permission">摄像头权限获取失败，请前往系统设置中允许访问摄像头</string>
     <string name="live_no_mic_permission">麦克风权限获取失败，请前往系统设置中允许访问麦克风</string>
     <string name="live_i_got_it">知道了</string>
@@ -133,9 +148,16 @@
     <string name="live_room_switch">正在切换教室，请等候…</string>
     <string name="live_room_x86_not_supported">暂不支持x86平台的设备</string>
     <string name="live_room_private_chat_with_name">正在和 %1$s 私聊中…</string>
+    <string name="live_room_new_chat_message">%1$d 条新消息</string>
     <string name="live_no_online_chat">没有可以私聊的同学哦</string>
     <string name="live_cancel_private_chat">取消私聊</string>
     <string name="live_room_teacher_absent">老师不在教室</string>
+    <string name="live_room_question_tool_rightAnswer">正确答案</string>
+    <string name="live_room_question_tool_countDown">答题倒计时</string>
+    <string name="live_room_question_tool_submit">提交答题</string>
+    <string name="live_room_ppt_load_error">动态PPT加载出错,错误码：%1$d</string>
+    <string name="live_room_ppt_switch_confirm">确定切换</string>
+    <string name="live_room_ppt_switch">是否切换到静态PPT?</string>>
 
 </resources>
 

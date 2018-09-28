@@ -104,8 +104,8 @@ public class MessageSendPresenter implements MessageSendContract.Presenter {
     @Override
     public boolean canSendPicture() {
         // 大班课只有老师和助教能发图片，一对一、小班课都能发
-        return routerListener.getLiveRoom().getRoomType() != LPConstants.LPRoomType.Multi
-                || routerListener.isTeacherOrAssistant();
+        return (routerListener.getLiveRoom().getRoomType() != LPConstants.LPRoomType.Multi
+                || routerListener.isTeacherOrAssistant() || routerListener.isGroupTeacherOrAssistant());
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.baijiahulian.live.ui.setting;
 
 import com.baijiahulian.live.ui.base.BasePresenter;
 import com.baijiahulian.live.ui.base.BaseView;
+import com.baijiahulian.livecore.context.LPConstants;
 
 /**
  * Created by Shubo on 2017/3/2.
@@ -42,9 +43,15 @@ interface SettingContract {
 
         void showStudentFail();
 
+        void showSmallGroupFail();
+
         void showCameraFront();
 
         void showCameraBack();
+
+        void showPPTViewTypeAnim();
+
+        void showPPTViewTypeStatic();
 
         void showCameraSwitchStatus(boolean whetherShow);
 
@@ -58,9 +65,15 @@ interface SettingContract {
 
         void showForbidRaiseHandOff();
 
+        void showForbidAllAudioOn();
+
+        void showForbidAllAudioOff();
+
         void showSwitchLinkTypeError();
 
         void hidePPTShownType();
+
+        void showSwitchPPTFail();
     }
 
     interface Presenter extends BasePresenter {
@@ -69,6 +82,10 @@ interface SettingContract {
         void changeCamera();
 
         void changeBeautyFilter();
+
+        void setPPTViewAnim();
+
+        void setPPTViewStatic();
 
         void setPPTFullScreen();
 
@@ -93,5 +110,9 @@ interface SettingContract {
         boolean isTeacherOrAssistant();
 
         void switchForbidRaiseHand();
+
+        void switchForbidAllAudio();
+
+        boolean isSmallGroup();
     }
 }

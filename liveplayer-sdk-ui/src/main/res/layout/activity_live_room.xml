@@ -8,11 +8,10 @@
     android:fitsSystemWindows="true">
 
     <!--切换的时候切换容器-->
-    <FrameLayout
+    <RelativeLayout
         android:id="@+id/activity_live_room_background_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/activity_live_room_center_anchor"
         android:background="@color/live_white" />
 
     <FrameLayout
@@ -35,7 +34,7 @@
         android:id="@+id/activity_live_room_speakers_container"
         android:layout_width="match_parent"
         android:layout_height="76dp"
-        android:layout_below="@+id/activity_live_room_center_anchor"
+        android:layout_below="@+id/activity_live_room_background_container"
         android:visibility="gone" />
 
     <com.baijiahulian.live.ui.viewsupport.AutoExitDrawerLayout
@@ -43,7 +42,7 @@
         android:layout_width="268dp"
         android:layout_height="match_parent"
         android:layout_above="@+id/activity_live_room_bottom_left"
-        android:layout_below="@+id/activity_live_room_center_anchor"
+        android:layout_below="@+id/activity_live_room_background_container"
         android:layout_marginBottom="@dimen/activity_live_room_margin"
         android:layout_marginTop="@dimen/activity_live_room_margin">
 
@@ -53,7 +52,38 @@
             android:layout_height="match_parent"
             android:layout_gravity="start"
             android:visibility="visible" />
+
     </com.baijiahulian.live.ui.viewsupport.AutoExitDrawerLayout>
+
+    <LinearLayout
+        android:id="@+id/activity_live_room_new_message_reminder_container"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:background="@drawable/live_item_chat_msg_reminder"
+        android:layout_marginLeft="@dimen/activity_live_room_margin"
+        android:alpha="0.8"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:gravity="center"
+        android:layout_above="@+id/activity_live_room_bottom_left">
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="10dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:src="@drawable/ic_arrow_moremsg"
+            />
+        <TextView
+            android:id="@+id/activity_live_room_new_message_reminder"
+            android:paddingLeft="3dp"
+            android:paddingRight="10dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:textColor="@color/live_white" />
+    </LinearLayout>
 
     <FrameLayout
         android:id="@+id/activity_live_room_top"
@@ -110,5 +140,13 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true" />
+
+    <com.baijiahulian.live.ui.base.DragFragment
+        android:id="@+id/activity_dialog_question_tool"
+        android:layout_centerInParent="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:visibility="gone"/>
 
 </RelativeLayout>

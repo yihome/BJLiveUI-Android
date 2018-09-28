@@ -26,5 +26,7 @@ public interface OnlineUserContract {
         void loadMore();
 
         boolean isLoading();
+
+        String getPresenter();
     }
 }

@@ -14,6 +14,8 @@ import com.baijiahulian.live.ui.base.BaseDialogFragment;
 
 public abstract class LiveRoomBaseActivity extends AppCompatActivity {
 
+    protected boolean isForeground = true;// 判断Activity是否处于前台
+    private BaseDialogFragment tempDialogFragment;
     @Override
     protected void onCreate(Bundle bundle) {
         if (bundle != null) {
@@ -126,6 +128,10 @@ public abstract class LiveRoomBaseActivity extends AppCompatActivity {
     }
 
     protected void showDialogFragment(final BaseDialogFragment dialogFragment) {
+        if(!isForeground){
+            tempDialogFragment = dialogFragment;
+            return;
+        }
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         dialogFragment.show(ft, dialogFragment.getClass().getSimpleName() + dialogFragment.hashCode());
         getSupportFragmentManager().executePendingTransactions();
@@ -142,4 +148,19 @@ public abstract class LiveRoomBaseActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        isForeground = false;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        isForeground = true;
+        if (tempDialogFragment != null){
+            showDialogFragment(tempDialogFragment);
+            tempDialogFragment = null;
+        }
+    }
 }

@@ -1,6 +1,5 @@
 package com.baijiahulian.live.ui.rightmenu;
 
-import android.util.Log;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 import com.baijiahulian.live.ui.utils.RxUtils;
@@ -10,14 +9,12 @@ import com.baijiahulian.livecore.models.LPSpeakInviteModel;
 import com.baijiahulian.livecore.models.imodels.IMediaControlModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
-import com.baijiahulian.livecore.wrapper.LPPlayer;
 
 import java.util.concurrent.TimeUnit;
 
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
 
 import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 
@@ -31,9 +28,11 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
     private RightMenuContract.View view;
     private LPConstants.LPUserType currentUserType;
     private Subscription subscriptionOfMediaControl, subscriptionOfMediaPublishDeny, subscriptionOfSpeakApplyDeny, subscriptionOfClassEnd, subscriptionOfSpeakApplyResponse,
-            subscriptionOfSpeakInvite, subscriptionOfClassStart, subscriptionOfUserOut;
+            subscriptionOfSpeakInvite, subscriptionOfClassStart, subscriptionOfStudentDrawingAuth;
     private int speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_NONE;
     private boolean isDrawing = false;
+    private boolean isGetDrawingAuth = false;
+    private boolean isWaitingRecordOpen = false;
 
     public RightMenuPresenter(RightMenuContract.View view) {
         this.view = view;
@@ -54,8 +53,8 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
             view.showCantDrawCauseClassNotStart();
             return;
         }
-        liveRoomRouterListener.navigateToPPTDrawing();
         isDrawing = !isDrawing;
+        liveRoomRouterListener.navigateToPPTDrawing(isDrawing);
         view.showDrawingStatus(isDrawing);
     }
 
@@ -116,34 +115,23 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
             view.showSpeakApplyCanceled();
         } else if (speakApplyStatus == RightMenuContract.STUDENT_SPEAK_APPLY_SPEAKING) {
             // 取消发言
-            speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_NONE;
-            liveRoomRouterListener.disableSpeakerMode();
-            liveRoomRouterListener.getLiveRoom().getSpeakQueueVM()
-                    .closeOtherSpeak(liveRoomRouterListener.getLiveRoom().getCurrentUser().getUserId());
-            view.showSpeakApplyCanceled();
-            if (isDrawing) {
-                // 如果画笔打开 关闭画笔模式
-                changeDrawing();
-            }
+            cancelStudentSpeaking();
         }
     }
 
-    @Override
-    public void changePPTDrawBtnStatus(boolean shouldShow) {
-        if (shouldShow) {
-            //老师或者助教或者已同意发言的学生可以使用ppt
-            if (currentUserType == LPConstants.LPUserType.Teacher
-                    || currentUserType == LPConstants.LPUserType.Assistant
-                    || speakApplyStatus == RightMenuContract.STUDENT_SPEAK_APPLY_SPEAKING) {
-                view.showPPTDrawBtn();
-            }
-        } else {
-            view.hidePPTDrawBtn();
+    private void cancelStudentSpeaking(){
+        speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_NONE;
+        liveRoomRouterListener.disableSpeakerMode();
+        view.showSpeakApplyCanceled();
+        if (isDrawing) {
+            // 如果画笔打开 关闭画笔模式
+            changeDrawing();
         }
     }
 
     @Override
     public void onSpeakInvite(int confirm) {
+        if (liveRoomRouterListener.getLiveRoom().getGroupId() != 0) return;
         liveRoomRouterListener.getLiveRoom().sendSpeakInvite(confirm);
         if (confirm == 1) {
             //接受
@@ -152,6 +140,7 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
             if (!liveRoomRouterListener.getLiveRoom().getRecorder().isAudioAttached())
                 liveRoomRouterListener.attachLocalAudio();
             if (liveRoomRouterListener.getLiveRoom().getAutoOpenCameraStatus()) {
+                isWaitingRecordOpen = true;
                 Observable.timer(1, TimeUnit.SECONDS).observeOn(AndroidSchedulers.mainThread())
 //                        .filter(new Func1<Long, Boolean>() {
 //                            @Override
@@ -164,17 +153,27 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                             public void call(Long aLong) {
                                 if (!liveRoomRouterListener.getLiveRoom().getRecorder().isVideoAttached())
                                     liveRoomRouterListener.attachLocalVideo();
+                                isWaitingRecordOpen = false;
                             }
                         });
             }
-            view.showForceSpeak();
+            view.showForceSpeak(isEnableDrawing());
             liveRoomRouterListener.enableSpeakerMode();
         }
     }
 
     @Override
+    public boolean isWaitingRecordOpen() {
+        return isWaitingRecordOpen;
+    }
+
+    @Override
     public void setRouter(LiveRoomRouterListener liveRoomRouterListener) {
         this.liveRoomRouterListener = liveRoomRouterListener;
+    }
+
+    private boolean isEnableDrawing(){
+        return isGetDrawingAuth || liveRoomRouterListener.getLiveRoom().getPartnerConfig().liveDisableGrantStudentBrush == 1;
     }
 
     @Override
@@ -188,6 +187,9 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
             view.showStudentRightMenu();
             if (liveRoomRouterListener.getLiveRoom().getPartnerConfig().liveHideUserList == 1) {
                 view.hideUserList();
+            }
+            if (liveRoomRouterListener.getLiveRoom().getGroupId() != 0){
+                view.hideSpeakApply();
             }
         }
 
@@ -213,7 +215,7 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
 //                            liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().cancelSpeakApply();
 
                             if (liveRoomRouterListener.getLiveRoom().getRoomType() != LPConstants.LPRoomType.Multi)
-                                view.showAutoSpeak();
+                                view.showAutoSpeak(isEnableDrawing());
                         }
                     });
             subscriptionOfSpeakApplyDeny = liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getObservableOfSpeakApplyDeny()
@@ -252,21 +254,32 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                                 } else {
                                     speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_SPEAKING;
                                     liveRoomRouterListener.enableSpeakerMode();
-                                    view.showForceSpeak();
+                                    view.showForceSpeak(isEnableDrawing());
                                     liveRoomRouterListener.showForceSpeakDlg(iMediaControlModel);
                                 }
                             } else {
                                 // 结束发言模式
                                 speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_NONE;
-                                liveRoomRouterListener.disableSpeakerMode();
-                                if (isDrawing) {
-                                    // 如果画笔打开 关闭画笔模式
-                                    changeDrawing();
+                                if (liveRoomRouterListener.getLiveRoom().getRoomType() == LPConstants.LPRoomType.Multi) {
+                                    liveRoomRouterListener.disableSpeakerMode();
+                                    if (isDrawing) {
+                                        // 如果画笔打开 关闭画笔模式
+                                        changeDrawing();
+                                    }
+                                } else {
+                                    liveRoomRouterListener.detachLocalVideo();
+                                    if (liveRoomRouterListener.getLiveRoom().getRecorder().isPublishing())
+                                        liveRoomRouterListener.getLiveRoom().getRecorder().stopPublishing();
                                 }
+
                                 if (!iMediaControlModel.getSenderUserId().equals(liveRoomRouterListener.getLiveRoom().getCurrentUser().getUserId())) {
                                     // 不是自己结束发言的
-                                    view.showSpeakClosedByTeacher();
+                                    view.showSpeakClosedByTeacher(liveRoomRouterListener.getLiveRoom().getRoomType() == LPConstants.LPRoomType.SmallGroup);
                                 }
+                            }
+                            if (!iMediaControlModel.isAudioOn() && !iMediaControlModel.isVideoOn()
+                                    && liveRoomRouterListener.getLiveRoom().getRoomType() == LPConstants.LPRoomType.Multi ){
+                                cancelStudentSpeaking();
                             }
                         }
                     });
@@ -285,15 +298,17 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                                 liveRoomRouterListener.getLiveRoom().getRecorder().publish();
 //                                liveRoomRouterListener.getLiveRoom().getRecorder().attachVideo();
                                 liveRoomRouterListener.attachLocalAudio();
-                                view.showSpeakApplyAgreed();
+                                view.showSpeakApplyAgreed(isEnableDrawing());
                                 speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_SPEAKING;
                                 liveRoomRouterListener.enableSpeakerMode();
                                 if (liveRoomRouterListener.getLiveRoom().getAutoOpenCameraStatus()) {
+                                    isWaitingRecordOpen = true;
                                     Observable.timer(1, TimeUnit.SECONDS).observeOn(AndroidSchedulers.mainThread())
                                             .subscribe(new LPErrorPrintSubscriber<Long>() {
                                                 @Override
                                                 public void call(Long aLong) {
                                                         liveRoomRouterListener.attachLocalVideo();
+                                                        isWaitingRecordOpen = false;
                                                 }
                                             });
                                 }
@@ -306,6 +321,28 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                             }
                         }
                     });
+
+            subscriptionOfStudentDrawingAuth = liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getPublishSubjectOfStudentDrawingAuth()
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new LPErrorPrintSubscriber<Boolean>() {
+                        @Override
+                        public void call(Boolean aBoolean) {
+                            if (aBoolean){
+                                if (isGetDrawingAuth) return;
+                                view.showPPTDrawBtn();
+                                isGetDrawingAuth = true;
+                            } else{
+                                if (!isGetDrawingAuth) return;
+                                view.hidePPTDrawBtn();
+                                isGetDrawingAuth = false;
+                                liveRoomRouterListener.navigateToPPTDrawing(false);
+                                isDrawing = false;
+                                view.showDrawingStatus(false);
+                            }
+                        }
+                    });
+
+
         } else if (liveRoomRouterListener.getLiveRoom().getCurrentUser().getType() == LPConstants.LPUserType.Assistant) {
             // 助教
             subscriptionOfMediaPublishDeny = liveRoomRouterListener.getLiveRoom().getSpeakQueueVM()
@@ -325,7 +362,7 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                             }
 
                             if (liveRoomRouterListener.getLiveRoom().getRoomType() != LPConstants.LPRoomType.Multi)
-                                view.showAutoSpeak();
+                                view.showAutoSpeak(isEnableDrawing());
                         }
                     });
             subscriptionOfSpeakApplyDeny = liveRoomRouterListener.getLiveRoom().getSpeakQueueVM().getObservableOfSpeakApplyDeny()
@@ -353,6 +390,7 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                             }
                         }
                     });
+
         }
 
         subscriptionOfClassEnd = liveRoomRouterListener.getLiveRoom().getObservableOfClassEnd()
@@ -369,14 +407,15 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                             // 取消发言
                             speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_NONE;
                             liveRoomRouterListener.disableSpeakerMode();
-                            liveRoomRouterListener.getLiveRoom().getSpeakQueueVM()
-                                    .closeOtherSpeak(liveRoomRouterListener.getLiveRoom().getCurrentUser().getUserId());
                             view.showSpeakApplyCanceled();
                             if (isDrawing) {
                                 // 如果画笔打开 关闭画笔模式
-                                changeDrawing();
+                                liveRoomRouterListener.navigateToPPTDrawing(false);
+                                isDrawing = !isDrawing;
+                                view.showDrawingStatus(isDrawing);
                             }
                         }
+                        isGetDrawingAuth = false;
                     }
                 });
 
@@ -394,7 +433,7 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
 
         if (liveRoomRouterListener.getLiveRoom().getCurrentUser().getType() == LPConstants.LPUserType.Student &&
                 liveRoomRouterListener.getLiveRoom().getRoomType() != LPConstants.LPRoomType.Multi) {
-            view.showAutoSpeak();
+            view.showAutoSpeak(isEnableDrawing());
             speakApplyStatus = RightMenuContract.STUDENT_SPEAK_APPLY_SPEAKING;
         }
 
@@ -409,6 +448,8 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
                         }
                     }
                 });
+
+//        liveRoomRouterListener.getLiveRoom().getGroupId()
     }
 
     @Override
@@ -420,6 +461,7 @@ public class RightMenuPresenter implements RightMenuContract.Presenter {
         RxUtils.unSubscribe(subscriptionOfClassStart);
         RxUtils.unSubscribe(subscriptionOfSpeakApplyDeny);
         RxUtils.unSubscribe(subscriptionOfMediaPublishDeny);
+        RxUtils.unSubscribe(subscriptionOfStudentDrawingAuth);
     }
 
     @Override

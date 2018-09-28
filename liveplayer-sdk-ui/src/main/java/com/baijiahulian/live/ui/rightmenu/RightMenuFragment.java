@@ -5,11 +5,14 @@ import android.view.View;
 
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseFragment;
+import com.baijiahulian.live.ui.utils.RxUtils;
 import com.baijiahulian.live.ui.viewsupport.CountdownCircleView;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 
 import java.util.concurrent.TimeUnit;
 
+import rx.Observable;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 
 /**
@@ -46,7 +49,13 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
                 .subscribe(new LPErrorPrintSubscriber<Void>() {
                     @Override
                     public void call(Void aVoid) {
-                        presenter.speakApply();
+//                        Toast.makeText(getContext(), ((LiveRoomActivity)getActivity()).getLiveRoom().getGroupId() + "", Toast.LENGTH_SHORT).show();
+                        if (!clickableCheck()) {
+                            showToast(getString(R.string.live_frequent_error));
+                            return;
+                        }
+                        if (!presenter.isWaitingRecordOpen())
+                            presenter.speakApply();
                     }
                 });
     }
@@ -72,18 +81,20 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
     }
 
     @Override
-    public void showSpeakApplyAgreed() {
+    public void showSpeakApplyAgreed(boolean isEnableDrawing) {
         showToast(getString(R.string.live_media_speak_apply_agree));
         $.id(R.id.fragment_right_speak_apply).image(R.drawable.live_ic_handup_on);
-        $.id(R.id.fragment_right_pen).visible();
+        if (isEnableDrawing)
+            $.id(R.id.fragment_right_pen).visible();
         $.id(R.id.fragment_right_hand_countdown).invisible();
     }
 
     @Override
-    public void showSpeakClosedByTeacher() {
+    public void showSpeakClosedByTeacher(boolean isSmallGroup) {
         showToast(getString(R.string.live_media_speak_closed_by_teacher));
         $.id(R.id.fragment_right_speak_apply).image(R.drawable.live_ic_handup);
-        $.id(R.id.fragment_right_pen).gone();
+        if (!isSmallGroup)
+            $.id(R.id.fragment_right_pen).gone();
         $.id(R.id.fragment_right_hand_countdown).invisible();
     }
 
@@ -148,11 +159,13 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
 
     @Override
     public void hidePPTDrawBtn() {
+        showToast(getString(R.string.live_student_no_auth_drawing));
         $.id(R.id.fragment_right_pen).gone();
     }
 
     @Override
     public void showPPTDrawBtn() {
+        showToast(getString(R.string.live_student_auth_drawing));
         $.id(R.id.fragment_right_pen).visible();
     }
 
@@ -163,7 +176,7 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
 
     @Override
     public void showHandUpForbid() {
-        showToast(getString(R.string.live_hand_up_forbid));
+        showToast(getString(R.string.live_forbid_send_message));
     }
 
     @Override
@@ -182,21 +195,28 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
     }
 
     @Override
-    public void showAutoSpeak() {
-        $.id(R.id.fragment_right_pen).visible();
+    public void showAutoSpeak(boolean isDrawingEnable) {
+        if (isDrawingEnable)
+            $.id(R.id.fragment_right_pen).visible();
         $.id(R.id.fragment_right_speak_apply).gone();
     }
 
     @Override
-    public void showForceSpeak() {
+    public void showForceSpeak(boolean isDrawingEnable) {
         $.id(R.id.fragment_right_speak_apply).image(R.drawable.live_ic_handup_on);
-        $.id(R.id.fragment_right_pen).visible();
+        if (isDrawingEnable)
+            $.id(R.id.fragment_right_pen).visible();
         $.id(R.id.fragment_right_hand_countdown).invisible();
     }
 
     @Override
     public void hideUserList() {
         $.id(R.id.fragment_right_online_user).gone();
+    }
+
+    @Override
+    public void hideSpeakApply() {
+        $.id(R.id.fragment_right_speak_apply).gone();
     }
 
     @Override
@@ -208,5 +228,26 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
     public void setPresenter(RightMenuContract.Presenter presenter) {
         super.setBasePresenter(presenter);
         this.presenter = presenter;
+    }
+
+    private Subscription subscriptionOfClickable;
+
+    private boolean clickableCheck() {
+        if (subscriptionOfClickable != null && !subscriptionOfClickable.isUnsubscribed()) {
+            return false;
+        }
+        subscriptionOfClickable = Observable.timer(1, TimeUnit.SECONDS).subscribe(new LPErrorPrintSubscriber<Long>() {
+            @Override
+            public void call(Long aLong) {
+                RxUtils.unSubscribe(subscriptionOfClickable);
+            }
+        });
+        return true;
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        presenter = null;
     }
 }

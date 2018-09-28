@@ -38,7 +38,7 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
         super.init(savedInstanceState);
 
         subscriptionOfVideoClick = $.id(R.id.fragment_right_bottom_video).clicked()
-                .throttleFirst(1, TimeUnit.SECONDS)
+                .throttleFirst(2, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new LPErrorPrintSubscriber<Void>() {
                     @Override
@@ -52,7 +52,7 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
                 });
 
         subscriptionOfAudioClick = $.id(R.id.fragment_right_bottom_audio).clicked()
-                .throttleFirst(1, TimeUnit.SECONDS)
+                .throttleFirst(2, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new LPErrorPrintSubscriber<Void>() {
                     @Override
@@ -119,12 +119,14 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
     public void enableSpeakerMode() {
         $.id(R.id.fragment_right_bottom_video).visible();
         $.id(R.id.fragment_right_bottom_audio).visible();
+        presenter.notifySpeakerStatus(true);
     }
 
     @Override
     public void disableSpeakerMode() {
         $.id(R.id.fragment_right_bottom_video).gone();
         $.id(R.id.fragment_right_bottom_audio).gone();
+        presenter.notifySpeakerStatus(false);
     }
 
     @Override
@@ -144,6 +146,7 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
 
     @Override
     public void unClearScreen() {
+        if ($ == null) return;
         if ($.id(R.id.fragment_right_bottom_video).view().getVisibility() == View.INVISIBLE)
             $.id(R.id.fragment_right_bottom_video).visible();
         if ($.id(R.id.fragment_right_bottom_audio).view().getVisibility() == View.INVISIBLE)

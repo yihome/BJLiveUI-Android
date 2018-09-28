@@ -49,7 +49,8 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
         $.id(R.id.dialog_setting_camera).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                presenter.changeCamera();
+                if (checkClickable(getString(R.string.live_frequent_error_switch_camera)))
+                    presenter.changeCamera();
             }
         });
         $.id(R.id.dialog_setting_beauty_filter).clicked(new View.OnClickListener() {
@@ -81,6 +82,20 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
                     presenter.setDefinitionLow();
             }
         });
+        $.id(R.id.dialog_setting_ppt_view_type_anim).clicked(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (checkClickable(getString(R.string.live_frequent_error_switch_ppt)))
+                    presenter.setPPTViewAnim();
+            }
+        });
+        $.id(R.id.dialog_setting_ppt_view_type_static).clicked(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (checkClickable(getString(R.string.live_frequent_error_switch_ppt)))
+                    presenter.setPPTViewStatic();
+            }
+        });
         $.id(R.id.dialog_setting_radio_definition_high).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -88,6 +103,7 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
                     presenter.setDefinitionHigh();
             }
         });
+
         $.id(R.id.dialog_setting_radio_link_up_1).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -147,13 +163,27 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
             }
         });
 
+        $.id(R.id.dialog_setting_forbid_all_audio).clicked(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                presenter.switchForbidAllAudio();
+            }
+        });
+
 
         if (presenter.isTeacherOrAssistant()) {
             $.id(R.id.dialog_setting_forbid_all_speak_container).visible();
             $.id(R.id.dialog_setting_forbid_raise_hand_container).visible();
+            //只有小班才有静音功能.
+            if (presenter.isSmallGroup()) {
+                $.id(R.id.dialog_setting_forbid_all_audio_container).visible();
+            } else {
+                $.id(R.id.dialog_setting_forbid_all_audio_container).gone();
+            }
         } else {
             $.id(R.id.dialog_setting_forbid_all_speak_container).gone();
             $.id(R.id.dialog_setting_forbid_raise_hand_container).gone();
+            $.id(R.id.dialog_setting_forbid_all_audio_container).gone();
         }
 
     }
@@ -263,6 +293,11 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
     }
 
     @Override
+    public void showSmallGroupFail() {
+        showToast(getString(R.string.live_media_group_fail));
+    }
+
+    @Override
     public void showCameraFront() {
         $.id(R.id.dialog_setting_radio_camera_front).enable(false);
         $.id(R.id.dialog_setting_radio_camera_back).enable(true);
@@ -276,6 +311,22 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
         $.id(R.id.dialog_setting_radio_camera_back).enable(false);
         ((Button) $.id(R.id.dialog_setting_radio_camera_front).view()).setTextColor(ContextCompat.getColor(getContext(), R.color.live_text_color));
         ((Button) $.id(R.id.dialog_setting_radio_camera_back).view()).setTextColor(ContextCompat.getColor(getContext(), R.color.live_white));
+    }
+
+    @Override
+    public void showPPTViewTypeAnim() {
+        $.id(R.id.dialog_setting_ppt_view_type_anim).enable(false);
+        $.id(R.id.dialog_setting_ppt_view_type_static).enable(true);
+        ((Button) $.id(R.id.dialog_setting_ppt_view_type_anim).view()).setTextColor(ContextCompat.getColor(getContext(), R.color.live_white));
+        ((Button) $.id(R.id.dialog_setting_ppt_view_type_static).view()).setTextColor(ContextCompat.getColor(getContext(), R.color.live_text_color));
+    }
+
+    @Override
+    public void showPPTViewTypeStatic() {
+        $.id(R.id.dialog_setting_ppt_view_type_anim).enable(true);
+        $.id(R.id.dialog_setting_ppt_view_type_static).enable(false);
+        ((Button) $.id(R.id.dialog_setting_ppt_view_type_anim).view()).setTextColor(ContextCompat.getColor(getContext(), R.color.live_text_color));
+        ((Button) $.id(R.id.dialog_setting_ppt_view_type_static).view()).setTextColor(ContextCompat.getColor(getContext(), R.color.live_white));
     }
 
     @Override
@@ -313,6 +364,16 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
     }
 
     @Override
+    public void showForbidAllAudioOn() {
+        $.id(R.id.dialog_setting_forbid_all_audio).image(R.drawable.ic_on_switch);
+    }
+
+    @Override
+    public void showForbidAllAudioOff() {
+        $.id(R.id.dialog_setting_forbid_all_audio).image(R.drawable.ic_off_switch);
+    }
+
+    @Override
     public void showSwitchLinkTypeError() {
         showToast(getString(R.string.live_switch_link_type_error));
     }
@@ -320,6 +381,11 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
     @Override
     public void hidePPTShownType() {
         $.id(R.id.dialog_setting_radio_ppt_container).gone();
+    }
+
+    @Override
+    public void showSwitchPPTFail() {
+        showToast("老师上传的PPT都是静态的哦");
     }
 
     @Override

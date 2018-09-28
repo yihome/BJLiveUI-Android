@@ -72,6 +72,7 @@ public abstract class BaseDialogFragment extends DialogFragment {
             @Override
             public void onShow(DialogInterface dialog) {
                 //Clear the not focusable flag from the window
+                if (getDialog() == null) return;
                 getDialog().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
                 //Update the WindowManager with the new attributes (no nicer way I know of to do this)..
                 WindowManager wm = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
@@ -148,6 +149,31 @@ public abstract class BaseDialogFragment extends DialogFragment {
         return this;
     }
 
+    public void setTitleTextColor(int color){
+        ((TextView)$.id(R.id.dialog_base_title).view()).setTextColor(getResources().getColor(color));
+    }
+
+    public void setTitleHeight(int height){
+        ViewGroup.LayoutParams layoutParams = ($.id(R.id.dialog_base_title_container).view()).getLayoutParams();
+        layoutParams.height = height;
+        ($.id(R.id.dialog_base_title_container).view()).setLayoutParams(layoutParams);
+    }
+
+    public void showCross(){
+        $.id(R.id.dialog_base_edit).visibility(View.GONE);
+        $.id(R.id.dialog_cross).visibility(View.VISIBLE);
+        $.id(R.id.dialog_cross).clicked(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dismissAllowingStateLoss();
+            }
+        });
+    }
+
+    public void setTitleBarColor(int color){
+        $.id(dialog_base_title_container).view().setBackgroundColor(getResources().getColor(color));
+    }
+
     public BaseDialogFragment editable(boolean editable) {
         $.id(R.id.dialog_base_edit).visibility(editable ? View.VISIBLE : View.GONE);
         $.id(R.id.dialog_base_edit).clicked(new View.OnClickListener() {
@@ -162,6 +188,7 @@ public abstract class BaseDialogFragment extends DialogFragment {
         });
         return this;
     }
+
 
     public BaseDialogFragment editText(String text) {
         $.id(R.id.dialog_base_edit).text(text);
@@ -221,5 +248,9 @@ public abstract class BaseDialogFragment extends DialogFragment {
             basePresenter = null;
         }
         $ = null;
+    }
+
+    public boolean isQueryPlusNull(){
+        return $ == null;
     }
 }

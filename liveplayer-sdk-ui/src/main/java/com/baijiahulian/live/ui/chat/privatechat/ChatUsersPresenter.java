@@ -12,19 +12,19 @@ import java.util.List;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
 
 /**
  * Created by yangjingming on 2018/1/16.
  */
 
-public class ChatUsersPresenter implements ChatUsersContract.Presenter{
+public class ChatUsersPresenter implements ChatUsersContract.Presenter {
 
     private ChatUsersContract.View view;
     private LiveRoomRouterListener routerListener;
     private Subscription subscriptionOfUserCountChange, subscriptionOfUserDataChange;
     private boolean isLoading = false;
     private List<IUserModel> iChatUserModels;
+
     public ChatUsersPresenter(ChatUsersContract.View view) {
         this.view = view;
     }
@@ -56,7 +56,7 @@ public class ChatUsersPresenter implements ChatUsersContract.Presenter{
                         onChatUsersChanged();
                         if (isLoading)
                             isLoading = false;
-                        if (!isPrivateChatUserAvailable()){
+                        if (!isPrivateChatUserAvailable()) {
                             routerListener.onPrivateChatUserChange(null);
                             view.showPrivateChatLabel(null);
                         }
@@ -80,24 +80,24 @@ public class ChatUsersPresenter implements ChatUsersContract.Presenter{
 
 
     private void onChatUsersChanged() {
-        if (routerListener.isTeacherOrAssistant()) {
+        if (routerListener.isTeacherOrAssistant() || routerListener.isGroupTeacherOrAssistant()) {
             iChatUserModels = new ArrayList<>();
             int size = routerListener.getLiveRoom().getOnlineUserVM().getUserCount();
             for (int i = 0; i < size; i++) {
                 IUserModel iUserModel = routerListener.getLiveRoom().getOnlineUserVM().getUser(i);
-                if (routerListener.getLiveRoom().getCurrentUser() != iUserModel)
+                if (!iUserModel.getUserId().equals(routerListener.getLiveRoom().getCurrentUser().getUserId()))
                     iChatUserModels.add(iUserModel);
             }
-        } else {
+        }else {
             iChatUserModels = new ArrayList<>();
             int size = routerListener.getLiveRoom().getOnlineUserVM().getUserCount();
             if (routerListener.getLiveRoom().getTeacherUser() != null)
                 iChatUserModels.add(routerListener.getLiveRoom().getTeacherUser());
             for (int i = 0; i < size; i++) {
                 IUserModel userModel = routerListener.getLiveRoom().getOnlineUserVM().getUser(i);
-                if (userModel.getType().equals(LPConstants.LPUserType.Assistant)) {
+                if (userModel.getUserId().equals(routerListener.getLiveRoom().getCurrentUser().getUserId())) continue;
+                if (userModel.getType().equals(LPConstants.LPUserType.Assistant) ) {
                     iChatUserModels.add(userModel);
-                    break;
                 }
             }
         }
@@ -109,12 +109,12 @@ public class ChatUsersPresenter implements ChatUsersContract.Presenter{
     }
 
 
-    private boolean isPrivateChatUserAvailable(){
+    private boolean isPrivateChatUserAvailable() {
         return iChatUserModels.contains(routerListener.getPrivateChatUser());
     }
 
     @Override
-    public void chooseOneToChat(String chatName, boolean isEnter){
+    public void chooseOneToChat(String chatName, boolean isEnter) {
         view.showPrivateChatLabel(chatName);
     }
 
@@ -132,7 +132,7 @@ public class ChatUsersPresenter implements ChatUsersContract.Presenter{
     @Override
     public int getCount() {
         int count = iChatUserModels.size();
-        return isLoading ? count + 1: count;
+        return isLoading ? count + 1 : count;
     }
 
     @Override

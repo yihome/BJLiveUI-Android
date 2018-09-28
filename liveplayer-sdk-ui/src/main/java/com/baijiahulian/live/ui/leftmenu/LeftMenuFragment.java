@@ -89,4 +89,10 @@ public class LeftMenuFragment extends BaseFragment implements LeftMenuContract.V
 //            $.id(R.id.fragment_left_menu_clear_screen).visible();
 //        }
     }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        presenter = null;
+    }
 }

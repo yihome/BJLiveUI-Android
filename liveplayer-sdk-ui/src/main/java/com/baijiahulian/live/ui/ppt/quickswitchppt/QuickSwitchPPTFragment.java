@@ -104,7 +104,7 @@ public class QuickSwitchPPTFragment extends BaseDialogFragment implements Switch
         this.docModelList.clear();
         this.docModelList.addAll(docModelList);
         if (isStudent) {
-            if (maxIndex > docModelList.size())
+            if (maxIndex >= docModelList.size())
                 quickDocList.addAll(docModelList);
             else{
                 quickDocList.addAll(docModelList.subList(0, maxIndex + 1));
@@ -124,7 +124,7 @@ public class QuickSwitchPPTFragment extends BaseDialogFragment implements Switch
 
         @Override
         public void onBindViewHolder(final SwitchHolder holder, int position) {
-            Picasso.with(getActivity()).load(AliCloudImageUtil.getScaledUrl(quickDocList.get(position).url, AliCloudImageUtil.SCALED_MFIT, 200, 200)).into(holder.PPTView);
+            Picasso.with(getContext()).load(AliCloudImageUtil.getScaledUrl(quickDocList.get(position).url, AliCloudImageUtil.SCALED_MFIT, 200, 200)).into(holder.PPTView);
             if (position == 0) {
                 holder.PPTOrder.setText("白板");
             } else {

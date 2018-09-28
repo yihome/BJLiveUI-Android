@@ -5,6 +5,7 @@ import com.baijiahulian.live.ui.utils.RxUtils;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
 import com.baijiahulian.livecore.utils.LPBackPressureBufferedSubscriber;
 import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
+import com.baijiahulian.livecore.wrapper.exception.NotInitializedException;
 
 import java.util.List;
 
@@ -19,8 +20,8 @@ public class OnlineUserPresenter implements OnlineUserContract.Presenter {
 
     private OnlineUserContract.View view;
     private LiveRoomRouterListener routerListener;
-    private Subscription subscriptionOfUserCountChange, subscriptionOfUserDataChange;
-    private boolean isLoading = false;
+    private Subscription  subscriptionOfUserCountChange, subscriptionOfUserDataChange;
+    private volatile boolean isLoading = false;
 
     public OnlineUserPresenter(OnlineUserContract.View view) {
         this.view = view;
@@ -54,6 +55,7 @@ public class OnlineUserPresenter implements OnlineUserContract.Presenter {
                         if (isLoading)
                             isLoading = false;
                         view.notifyDataChanged();
+//                        view.notifyUserCountChange(routerListener.getLiveRoom().getOnlineUserVM().getUserCount());
                     }
                 });
         view.notifyUserCountChange(routerListener.getLiveRoom().getOnlineUserVM().getUserCount());
@@ -73,7 +75,12 @@ public class OnlineUserPresenter implements OnlineUserContract.Presenter {
 
     @Override
     public int getCount() {
-        int count = routerListener.getLiveRoom().getOnlineUserVM().getUserCount();
+        int count;
+        try {
+            count = routerListener.getLiveRoom().getOnlineUserVM().getUserCount();
+        } catch (Exception e) {
+            count = 1;
+        }
         return isLoading ? count + 1: count;
     }
 
@@ -99,5 +106,10 @@ public class OnlineUserPresenter implements OnlineUserContract.Presenter {
     @Override
     public boolean isLoading() {
         return isLoading;
+    }
+
+    @Override
+    public String getPresenter() {
+        return routerListener.getLiveRoom().getSpeakQueueVM().getPresenter();
     }
 }

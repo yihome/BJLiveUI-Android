@@ -1,6 +1,7 @@
 package com.baijiahulian.live.ui.ppt;
 
 import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 
 import com.baijiahulian.live.ui.base.BasePresenter;
 import com.baijiahulian.live.ui.base.BaseView;
@@ -22,8 +23,14 @@ interface PPTContract {
 
         void updateQuickSwitchPPTView(int maxIndex);
 
-        FrameLayout getBackgroundContainer();
+        RelativeLayout getBackgroundContainer();
 
         void notifyPPTResumeInSpeakers();
+
+        boolean isPPTInSpeakerList();
+
+        void showOptionDialog();
+
+        void showPPTLoadError(int errorCode, String description);
     }
 }

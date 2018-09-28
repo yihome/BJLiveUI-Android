@@ -248,7 +248,7 @@ public class PPTManageFragment extends BaseDialogFragment implements PPTManageCo
                 docViewHolder.checkBox.setChecked(presenter.isItemSelected(position));
                 int res = getDrawableResByFileExt(presenter.getItem(position).getFileExt());
                 if (res == 0) { // pic
-                    String url = AliCloudImageUtil.getRectScaledUrl(getContext(), ((DocumentModel) presenter.getItem(position)).pageInfoModel.url, 24);
+                    String url = AliCloudImageUtil.getScaledUrl(((DocumentModel) presenter.getItem(position)).pageInfoModel.url, AliCloudImageUtil.SCALED_FILL, 50, 50);
                     Picasso.with(getContext()).load(url).into(docViewHolder.ivIcon);
                 } else {
                     Picasso.with(getContext()).load(res).into(docViewHolder.ivIcon);

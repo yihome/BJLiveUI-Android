@@ -1,21 +1,28 @@
 package com.baijiahulian.live.ui.users;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseDialogFragment;
 import com.baijiahulian.live.ui.utils.AliCloudImageUtil;
+import com.baijiahulian.live.ui.utils.DisplayUtils;
 import com.baijiahulian.live.ui.utils.LinearLayoutWrapManager;
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
+import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Picasso;
 
 /**
@@ -79,7 +86,7 @@ public class OnlineUserDialogFragment extends BaseDialogFragment implements Onli
     }
 
     private static class OnlineUserViewHolder extends RecyclerView.ViewHolder {
-        TextView name, teacherTag, assistantTag;
+        TextView name, teacherTag, assistantTag, presenterTag;
         ImageView avatar;
 
         OnlineUserViewHolder(View itemView) {
@@ -88,6 +95,7 @@ public class OnlineUserDialogFragment extends BaseDialogFragment implements Onli
             avatar = (ImageView) itemView.findViewById(R.id.item_online_user_avatar);
             teacherTag = (TextView) itemView.findViewById(R.id.item_online_user_teacher_tag);
             assistantTag = (TextView) itemView.findViewById(R.id.item_online_user_assist_tag);
+            presenterTag = (TextView) itemView.findViewById(R.id.item_online_user_presenter_tag);
         }
     }
 
@@ -102,9 +110,10 @@ public class OnlineUserDialogFragment extends BaseDialogFragment implements Onli
         OnlineUserAdapter() {
             recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
-                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                    super.onScrolled(recyclerView, dx, dy);
-                    final LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                public void onScrolled(RecyclerView recyclerView1, int dx, int dy) {
+                    super.onScrolled(recyclerView1, dx, dy);
+                    if (recyclerView == null) return;
+                    final LinearLayoutWrapManager linearLayoutManager = (LinearLayoutWrapManager) recyclerView1.getLayoutManager();
                     totalItemCount = linearLayoutManager.getItemCount();
                     lastVisibleItem = linearLayoutManager.findLastVisibleItemPosition();
 
@@ -133,10 +142,10 @@ public class OnlineUserDialogFragment extends BaseDialogFragment implements Onli
         }
 
         @Override
-        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
             if (holder instanceof OnlineUserViewHolder) {
                 IUserModel userModel = presenter.getUser(position);
-                OnlineUserViewHolder userViewHolder = (OnlineUserViewHolder) holder;
+                final OnlineUserViewHolder userViewHolder = (OnlineUserViewHolder) holder;
                 userViewHolder.name.setText(userModel.getName());
                 if (userModel.getType() == LPConstants.LPUserType.Teacher) {
                     userViewHolder.teacherTag.setVisibility(View.VISIBLE);
@@ -148,8 +157,14 @@ public class OnlineUserDialogFragment extends BaseDialogFragment implements Onli
                 } else {
                     userViewHolder.assistantTag.setVisibility(View.GONE);
                 }
+                if (userModel.getType() == LPConstants.LPUserType.Assistant &&
+                        userModel.getUserId() != null && userModel.getUserId().equals(presenter.getPresenter()))
+                    userViewHolder.presenterTag.setVisibility(View.VISIBLE);
+                else
+                    userViewHolder.presenterTag.setVisibility(View.GONE);
                 String avatar = userModel.getAvatar().startsWith("//") ? "https:" + userModel.getAvatar() : userModel.getAvatar();
-                Picasso.with(getActivity()).load(AliCloudImageUtil.getRoundedAvatarUrl(avatar, 64)).into(userViewHolder.avatar);
+                if(!TextUtils.isEmpty(avatar))
+                    Picasso.with(getContext()).load(AliCloudImageUtil.getRoundedAvatarUrl(avatar, 64)).into(userViewHolder.avatar);
             } else if (holder instanceof LoadingViewHolder) {
                 LoadingViewHolder loadingViewHolder = (LoadingViewHolder) holder;
                 loadingViewHolder.progressBar.setIndeterminate(true);
@@ -161,4 +176,15 @@ public class OnlineUserDialogFragment extends BaseDialogFragment implements Onli
             return presenter.getCount();
         }
     }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        if (recyclerView != null){
+            recyclerView.setAdapter(null);
+            recyclerView = null;
+        }
+        presenter = null;
+    }
+
 }

@@ -46,5 +46,9 @@ interface ChatContract {
 
         boolean isLiveCanWhisper();
 
+        void changeNewMessageReminder(boolean isNeedShow);
+
+        boolean needScrollToBottom();
+
     }
 }

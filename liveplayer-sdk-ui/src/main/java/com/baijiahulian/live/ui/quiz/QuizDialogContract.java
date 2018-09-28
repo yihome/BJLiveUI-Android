@@ -35,5 +35,7 @@ public interface QuizDialogContract {
         String getRoomToken();
 
         void dismissDlg();
+
+        boolean checkRouterNull();
     }
 }

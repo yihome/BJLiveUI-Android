@@ -1,13 +1,14 @@
 package com.baijiahulian.live.ui.activity;
 
-import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 
-import com.baijiahulian.live.ui.ppt.MyPPTFragment;
+import com.baijiahulian.live.ui.ppt.MyPPTView;
 import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.context.LPError;
 import com.baijiahulian.livecore.context.LiveRoom;
 import com.baijiahulian.livecore.listener.OnPhoneRollCallListener;
 import com.baijiahulian.livecore.models.LPJsonModel;
+import com.baijiahulian.livecore.models.LPAnswerSheetModel;
 import com.baijiahulian.livecore.models.imodels.IMediaControlModel;
 import com.baijiahulian.livecore.models.imodels.IMediaModel;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
@@ -36,7 +37,7 @@ public interface LiveRoomRouterListener {
 
     void notifyPageCurrent(int position);
 
-    void navigateToPPTDrawing();
+    void navigateToPPTDrawing(boolean isAllowDrawing);
 
     LPConstants.LPPPTShowWay getPPTShowType();
 
@@ -63,6 +64,8 @@ public interface LiveRoomRouterListener {
     void navigateToSetting();
 
     boolean isTeacherOrAssistant();
+
+    boolean isGroupTeacherOrAssistant();
 
     void attachLocalVideo();
 
@@ -141,11 +144,11 @@ public interface LiveRoomRouterListener {
 
     android.view.View removeFullScreenView();
 
-    FrameLayout getBackgroundContainer();
+    RelativeLayout getBackgroundContainer();
 
     void setFullScreenView(android.view.View view);
 
-    MyPPTFragment getPPTFragment();
+    MyPPTView getPPTView();
 
     void showRollCallDlg(int time, OnPhoneRollCallListener.RollCall rollCallListener);
 
@@ -196,7 +199,21 @@ public interface LiveRoomRouterListener {
 
     boolean isPrivateChat();
 
+    void changeNewChatMessageReminder(boolean isNeedShow, int newMessageNumber);
+
     void showNoSpeakers();
 
     void showHavingSpeakers();
+
+    boolean isPPTInSpeakersList();
+
+    void showOptionDialog();
+
+    void showPPTLoadErrorDialog(int errorCode, String description);
+
+    boolean enableAnimPPTView(boolean b);
+
+    void answerStart(LPAnswerSheetModel model);
+
+    void answerEnd(boolean ended);
 }

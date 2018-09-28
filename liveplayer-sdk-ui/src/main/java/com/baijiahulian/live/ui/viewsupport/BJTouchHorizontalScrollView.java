@@ -1,6 +1,7 @@
 package com.baijiahulian.live.ui.viewsupport;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
@@ -38,6 +39,8 @@ public class BJTouchHorizontalScrollView extends HorizontalScrollView {
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT || (listener != null && !listener.isPPTDrawing()))
+            return super.onTouchEvent(ev);
         return !(listener != null && listener.isPPTDrawing()) && super.onTouchEvent(ev);
     }
 

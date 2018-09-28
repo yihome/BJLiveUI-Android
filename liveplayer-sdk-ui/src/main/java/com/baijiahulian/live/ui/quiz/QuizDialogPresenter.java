@@ -5,7 +5,6 @@ import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 /**
  * Created by wangkangfei on 17/5/31.
  */
-
 public class QuizDialogPresenter implements QuizDialogContract.Presenter {
     private QuizDialogContract.View view;
     private LiveRoomRouterListener routerListener;
@@ -57,5 +56,10 @@ public class QuizDialogPresenter implements QuizDialogContract.Presenter {
     @Override
     public void dismissDlg() {
         routerListener.dismissQuizDlg();
+    }
+
+    @Override
+    public boolean checkRouterNull() {
+        return routerListener == null;
     }
 }

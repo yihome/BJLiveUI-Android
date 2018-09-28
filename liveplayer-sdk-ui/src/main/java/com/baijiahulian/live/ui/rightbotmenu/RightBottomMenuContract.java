@@ -46,5 +46,7 @@ interface RightBottomMenuContract {
         void getSysRotationSetting();
 
         void setSysRotationSetting();
+
+        void notifySpeakerStatus(boolean isSpeak);
     }
 }

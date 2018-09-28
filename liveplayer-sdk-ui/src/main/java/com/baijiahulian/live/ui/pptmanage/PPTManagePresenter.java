@@ -220,7 +220,7 @@ public class PPTManagePresenter implements PPTManageContract.Presenter {
 
     private synchronized void continueQueue() {
         DocumentUploadingModel model = uploadingQueue.peek();
-        if (model == null) return;
+        if (model == null || routerListener == null) return;
         if (model.status == DocumentUploadingModel.UPLOADED) {
             model.status = DocumentUploadingModel.WAIT_SIGNAL;
             routerListener.getLiveRoom().getDocListVM().addPictureDocument(String.valueOf(model.uploadModel.fileId)
@@ -231,7 +231,7 @@ public class PPTManagePresenter implements PPTManageContract.Presenter {
     @Override
     public void selectItem(int position) {
         deleteDocIds.add(addedDocuments.get(position).id);
-        if (deleteDocIds.size() > 0) view.showRemoveBtnEnable();
+        if (deleteDocIds.size() > 0 ) view.showRemoveBtnEnable();
     }
 
     @Override

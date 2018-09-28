@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.text.Editable;
+import android.text.InputFilter;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.View;
@@ -65,6 +66,8 @@ public class MessageSentFragment extends BaseDialogFragment implements MessageSe
         $ = QueryPlus.with(contentView);
         textWatcher = new MessageTextWatcher();
         ((EditText) $.id(R.id.dialog_message_send_et).view()).addTextChangedListener(textWatcher);
+
+        ((EditText) $.id(R.id.dialog_message_send_et).view()).setFilters(new InputFilter[]{new InputFilter.LengthFilter(140)});
 
         if (presenter.isLiveCanWhisper()) {
             showPrivateChatChange();
@@ -226,6 +229,7 @@ public class MessageSentFragment extends BaseDialogFragment implements MessageSe
             contentView.postDelayed(new Runnable() {
                 @Override
                 public void run() {
+                    if ($ == null) return;
                     $.id(R.id.dialog_private_chat_users).visible();
                     chatUsersDialogFragment = new ChatUsersDialogFragment();
                     if (presenter.isPrivateChat()) {
@@ -301,6 +305,7 @@ public class MessageSentFragment extends BaseDialogFragment implements MessageSe
             contentView.postDelayed(new Runnable() {
                 @Override
                 public void run() {
+                    if ($ == null) return;
                     $.id(R.id.dialog_message_send_emoji).visible();
                     emojiFragment = EmojiFragment.newInstance();
                     emojiFragment.setCallBack(new EmojiSelectCallBack() {

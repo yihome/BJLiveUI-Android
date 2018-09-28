@@ -11,6 +11,9 @@ import android.view.Gravity;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -32,12 +35,16 @@ public class VideoView extends FrameLayout {
     private TextView tvName;
     private SurfaceView surfaceView;
     private ImageView ivWaterMark;
+    private ImageView loadingView;
+    private FrameLayout loadingLayout;
     private Bitmap waterMark;
     private WaterMarkTarget target;
 
     private String name;
     private String waterMarkUrl;
+    private TextView loadingText;
     private int waterMarkPosition = 1;
+    private boolean isLoading = true;
 
     @ColorInt
     int color = -1;
@@ -75,7 +82,7 @@ public class VideoView extends FrameLayout {
         this.addView(surfaceView);
         //名字
         tvName = new TextView(getContext());
-        LayoutParams tvLp = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        FrameLayout.LayoutParams tvLp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         tvLp.gravity = Gravity.BOTTOM;
         tvName.setGravity(Gravity.CENTER);
         tvName.setTextColor(color);
@@ -85,8 +92,50 @@ public class VideoView extends FrameLayout {
         tvName.setTextSize(13);
         tvName.setBackgroundResource(R.drawable.shape_remote_name_bg);
         tvName.setLayoutParams(tvLp);
+        tvName.setVisibility(GONE);
         this.addView(tvName);
+
+        loadingText = new TextView(getContext());
+        loadingText.setLines(1);
+        loadingText.setText("与对方连接中...");
+        loadingText.setTextSize(13);
+        loadingText.setGravity(Gravity.CENTER);
+        loadingText.setTextColor(color);
+        FrameLayout.LayoutParams loadingTextLp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        loadingTextLp.setMargins(0, DisplayUtils.dip2px(getContext(), 50), 0, 0);
+        loadingTextLp.gravity = Gravity.BOTTOM;
+        this.addView(loadingText, loadingTextLp);
+
+        FrameLayout.LayoutParams loadingLp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        loadingView = new ImageView(getContext());
+        loadingLp.gravity = Gravity.CENTER;
+        loadingView.setAdjustViewBounds(true);
+        loadingView.setImageResource(R.drawable.ic_live_loading);
+        loadingLp.setMargins(DisplayUtils.dip2px(getContext(), 19), DisplayUtils.dip2px(getContext(), 20), DisplayUtils.dip2px(getContext(), 19), DisplayUtils.dip2px(getContext(), 25));
+        this.addView(loadingView, loadingLp);
+
+        if (isLoading)
+            startRotate();
     }
+
+    public void startRotate(){
+        Animation operatingAnim = AnimationUtils.loadAnimation(getContext(), R.anim.live_video_loading);
+        operatingAnim.setInterpolator(new LinearInterpolator());
+        loadingView.setVisibility(VISIBLE);
+        loadingView.startAnimation(operatingAnim);
+    }
+
+    public void stopRotate(){
+        if (!isLoading) return;
+        loadingText.setVisibility(GONE);
+        loadingView.setVisibility(GONE);
+        loadingView.clearAnimation();
+        isLoading = false;
+        tvName.setVisibility(VISIBLE);
+        if (ivWaterMark != null)
+            ivWaterMark.setVisibility(VISIBLE);
+    }
+
 
     private static class WaterMarkTarget implements Target {
 
@@ -103,7 +152,7 @@ public class VideoView extends FrameLayout {
             videoView.waterMark = bitmap;
             int height = Math.min(videoView.waterMark.getHeight(), videoView.getMeasuredHeight() / 9);
             int width = Math.min(videoView.waterMark.getWidth(), videoView.getMeasuredWidth() / 9);
-            LayoutParams ivLp = new LayoutParams(width, height);
+            FrameLayout.LayoutParams ivLp = new FrameLayout.LayoutParams(width, height);
             switch (videoView.waterMarkPosition) {
                 case 1:
                     ivLp.gravity = GravityCompat.START | Gravity.TOP;
@@ -137,12 +186,26 @@ public class VideoView extends FrameLayout {
     @Override
     protected void onSizeChanged(final int w, final int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
+        if (isLoading && oldh > 0 && h > oldh){
+            loadingView.setPadding(w / 4,h / 4, w / 4, h / 4);
+//
+            FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            loadingText.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL);
+            loadingText.setLayoutParams(layoutParams);
+
+            startRotate();
+        }else if (isLoading && h < oldh && oldh > 0){
+            loadingView.setImageResource(R.drawable.ic_live_loading);
+            loadingView.setPadding(0,0, 0, 0);
+            startRotate();
+        }
         if (TextUtils.isEmpty(waterMarkUrl)) {
             return;
         }
         if (target == null) {
             target = new WaterMarkTarget(this);
             ivWaterMark = new ImageView(getContext());
+            ivWaterMark.setVisibility(GONE);
             Picasso.with(getContext()).load(waterMarkUrl).into(target);
         } else {
             this.post(new Runnable() {
@@ -162,7 +225,7 @@ public class VideoView extends FrameLayout {
     }
 
     public void resizeWaterMark(int videoHeight, int videoWidth, int viewHeight, int viewWidth) {
-        if (ivWaterMark == null) return;
+        if (ivWaterMark == null || waterMark == null) return;
         if (videoHeight == 0 || videoWidth == 0) return;
         this.videoHeight = videoHeight;
         this.videoWidth = videoWidth;
@@ -228,5 +291,11 @@ public class VideoView extends FrameLayout {
         if (tvName != null) {
             tvName.setTextColor(color);
         }
+    }
+
+    public void setName(String name){
+        this.name = name;
+        if (tvName != null)
+            tvName.setText(name);
     }
 }

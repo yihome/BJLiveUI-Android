@@ -64,7 +64,11 @@ public class ChatPictureViewFragment extends BaseDialogFragment implements ChatP
 
                     @Override
                     public void onError() {
-                        tvLoading.setText(getString(R.string.live_image_loading_fail));
+                        try {
+                            if (getActivity() != null)
+                                tvLoading.setText(getString(R.string.live_image_loading_fail));
+                        } catch (IllegalStateException ignore) {
+                        }
                     }
                 });
         imageView.setOnClickListener(new View.OnClickListener() {
@@ -123,5 +127,11 @@ public class ChatPictureViewFragment extends BaseDialogFragment implements ChatP
     public void setPresenter(ChatPictureViewContract.Presenter presenter) {
         super.setBasePresenter(presenter);
         this.presenter = presenter;
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        presenter = null;
     }
 }

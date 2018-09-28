@@ -105,9 +105,9 @@ class UploadingImageModel extends LPDataModel implements IMessageModel {
         return null;
     }
 
-    @Override
+
     public Date getTime() {
-        return null;
+        return new Date();
     }
 
     @Override

@@ -53,6 +53,7 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
     private ColorDrawable failedColorDrawable;
     private int emojiSize;
     private int backgroundRes;
+    private int currentPosition;
     @ColorInt
     private int textColor;
 //    private ImageSpan privateChatImageSpan;
@@ -98,10 +99,21 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                boolean isNeedScroll = false;
+                if (needRemindNewMessageArrived()){
+                    presenter.changeNewMessageReminder(true);
+                }else
+                    isNeedScroll = true;
                 adapter.notifyDataSetChanged();
-                recyclerView.smoothScrollToPosition(adapter.getItemCount());
+                if (isNeedScroll)
+                    scrollToBottom();
             }
         });
+    }
+
+
+    private boolean needRemindNewMessageArrived(){
+        return currentPosition < presenter.getCount() - 2 && presenter.needScrollToBottom();
     }
 
     @Override
@@ -112,7 +124,7 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
     @Override
     public void notifyItemInserted(int position) {
         adapter.notifyItemInserted(position);
-        recyclerView.smoothScrollToPosition(adapter.getItemCount());
+//        recyclerView.smoothScrollToPosition(adapter.getItemCount());
     }
 
     @Override
@@ -120,6 +132,15 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
         if (!presenter.isLiveCanWhisper()) return;
         $.id(R.id.fragment_chat_private_status_container).visible();
         $.id(R.id.fragment_chat_private_user).text(getString(R.string.live_room_private_chat_with_name, privateChatUser.getName()));
+    }
+
+    public void scrollToBottom(){
+        if (recyclerView != null)
+        recyclerView.smoothScrollToPosition(adapter.getItemCount());
+    }
+
+    private void hideNewMessageReminder(){
+        presenter.changeNewMessageReminder(false);
     }
 
     @Override
@@ -194,6 +215,9 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
 
         @Override
         public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
+            currentPosition = position;
+            if (position == presenter.getCount() - 1)
+                hideNewMessageReminder();
             IMessageModel message = presenter.getMessage(position);
             SpannableString spanText;
             if (presenter.isPrivateChatMode()) {
@@ -414,7 +438,7 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
         }
 
         @Override
-        public void onBitmapFailed(Drawable errorDrawable) {
+        public void onBitmapFailed( Drawable errorDrawable) {
             imageView.setImageDrawable(errorDrawable);
         }
 
@@ -422,6 +446,16 @@ public class ChatFragment extends BaseFragment implements ChatContract.View {
         public void onPrepareLoad(Drawable placeHolderDrawable) {
             imageView.setImageDrawable(placeHolderDrawable);
         }
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        if (recyclerView != null){
+            recyclerView.setAdapter(null);
+            recyclerView = null;
+        }
+        presenter = null;
     }
 
     private static class NameClickSpan extends ClickableSpan {

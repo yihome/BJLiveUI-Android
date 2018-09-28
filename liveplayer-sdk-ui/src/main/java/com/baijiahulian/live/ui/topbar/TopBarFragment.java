@@ -44,7 +44,8 @@ public class TopBarFragment extends BaseFragment implements TopBarContract.View 
                         .onPositive(new MaterialDialog.SingleButtonCallback() {
                             @Override
                             public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
-                                getActivity().finish();
+                                if (getActivity() != null)
+                                    getActivity().finish();
                             }
                         })
                         .onNegative(new MaterialDialog.SingleButtonCallback() {
@@ -82,5 +83,6 @@ public class TopBarFragment extends BaseFragment implements TopBarContract.View 
     public void onDestroyView() {
         super.onDestroyView();
         $ = null;
+        presenter = null;
     }
 }

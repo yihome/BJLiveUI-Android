@@ -12,7 +12,6 @@ import com.baijiahulian.livecore.models.imodels.IMessageModel;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
 import com.baijiahulian.livecore.utils.LPBackPressureBufferedSubscriber;
 import com.baijiahulian.livecore.utils.LPChatMessageParser;
-import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 import com.baijiahulian.livecore.utils.LPJsonUtils;
 import com.baijiahulian.livecore.utils.LPLogger;
 import com.google.gson.JsonObject;
@@ -41,6 +40,7 @@ public class ChatPresenter implements ChatContract.Presenter {
     private Subscription subscriptionOfDataChange, subscriptionOfMessageReceived;
     private LinkedBlockingQueue<UploadingImageModel> imageMessageUploadingQueue;
     private ConcurrentHashMap<String, List<IMessageModel>> privateChatMessagePool;
+    private int receivedNewMessageNumber = 0;
 
     public ChatPresenter(ChatContract.View view) {
         this.view = view;
@@ -58,8 +58,9 @@ public class ChatPresenter implements ChatContract.Presenter {
         checkNotNull(routerListener);
         view.notifyDataChanged();
         subscriptionOfDataChange = routerListener.getLiveRoom().getChatVM().getObservableOfNotifyDataChange()
+                .onBackpressureBuffer(1000)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<List<IMessageModel>>() {
+                .subscribe(new LPBackPressureBufferedSubscriber<List<IMessageModel>>() {
                     @Override
                     public void call(List<IMessageModel> iMessageModels) {
                         view.notifyDataChanged();
@@ -70,6 +71,8 @@ public class ChatPresenter implements ChatContract.Presenter {
                 .doOnNext(new Action1<IMessageModel>() {
                     @Override
                     public void call(IMessageModel iMessageModel) {
+                        if (!iMessageModel.getFrom().getUserId().equals(routerListener.getLiveRoom().getCurrentUser().getUserId()))
+                            receivedNewMessageNumber++;
                         if (iMessageModel.isPrivateChat() && iMessageModel.getToUser() != null) {
                             String userNumber = iMessageModel.getFrom().getNumber().equals(routerListener.getLiveRoom().getCurrentUser().getNumber()) ?
                                     iMessageModel.getToUser().getNumber() : iMessageModel.getFrom().getNumber();
@@ -115,7 +118,6 @@ public class ChatPresenter implements ChatContract.Presenter {
 
     @Override
     public int getCount() {
-        checkNotNull(routerListener);
         if (routerListener.isPrivateChat()) {
             List list = privateChatMessagePool.get(routerListener.getPrivateChatUser().getNumber());
             return list == null ? 0 : list.size() + imageMessageUploadingQueue.size();
@@ -181,6 +183,21 @@ public class ChatPresenter implements ChatContract.Presenter {
     @Override
     public boolean isLiveCanWhisper() {
         return routerListener.getLiveRoom().getChatVM().isLiveCanWhisper();
+    }
+
+    @Override
+    public void changeNewMessageReminder(boolean isNeededShow){
+        if (isNeededShow && receivedNewMessageNumber > 0)
+            routerListener.changeNewChatMessageReminder(true, receivedNewMessageNumber);
+        else {
+            receivedNewMessageNumber = 0;
+            routerListener.changeNewChatMessageReminder(false, 0);
+        }
+    }
+
+    @Override
+    public boolean needScrollToBottom() {
+        return receivedNewMessageNumber > 0;
     }
 
     public void onPrivateChatUserChange() {

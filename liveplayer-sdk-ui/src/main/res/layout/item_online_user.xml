@@ -52,5 +52,19 @@
             android:textColor="@color/live_blue"
             android:visibility="gone"
             android:textSize="10sp" />
+
+        <TextView
+            android:id="@+id/item_online_user_presenter_tag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="2dp"
+            android:layout_toRightOf="@+id/item_online_user_assist_tag"
+            android:background="@drawable/live_teacher_tag"
+            android:padding="2dp"
+            android:text="@string/live_presenter"
+            android:textColor="@color/live_blue"
+            android:visibility="gone"
+            android:textSize="10sp" />
     </RelativeLayout>
 </LinearLayout>

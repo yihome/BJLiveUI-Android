@@ -27,6 +27,7 @@ import com.baijiahulian.live.ui.base.BaseDialogFragment;
 import com.baijiahulian.live.ui.utils.JsonObjectUtil;
 import com.baijiahulian.live.ui.utils.QueryPlus;
 import com.baijiahulian.livecore.LiveSDK;
+import com.baijiahulian.livecore.context.LPConstants;
 import com.baijiahulian.livecore.models.LPJsonModel;
 import com.baijiahulian.livecore.models.imodels.IUserModel;
 import com.baijiahulian.livecore.utils.LPLogger;
@@ -56,11 +57,6 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
     private boolean isUrlLoaded;
     private boolean isLoadFailed = false; //url load失败了也会调到onPageFinished
     private boolean isDestroyed = false;
-    private static final String[] baseUrl = {
-            "https://test-api.baijiayun.com/m/quiz/student",
-            "https://beta-api.baijiayun.com/m/quiz/student",
-            "https://api.baijiayun.com/m/quiz/student"
-    };
 
 //    private static final String str = "(function() {\n" +
 //            "    var bjlapp = this.bjlapp = this.bjlapp || {};\n" +
@@ -96,6 +92,7 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
     public void setCloseBtnStatus(boolean forceJoin) {
         if(presenter == null) return;
         if (!forceJoin) {
+            if (isQueryPlusNull()) return;
             editable(true);
             editText(getString(R.string.live_quiz_close));
             editClick(new View.OnClickListener() {
@@ -223,7 +220,8 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
         }
         String params = "?userNumber=" + currentUserInfo.getNumber() + "&userName=" + currentUserInfo.getName() + "&quizId=" + quizId
                 + "&roomId=" + roomId + "&token=" + roomToken + "&argType=" + argsType;
-        String url = baseUrl[LiveSDK.getDeployType().getType()] + params;
+        String host = LPConstants.HOSTS_WEB[LiveSDK.getDeployType().getType()];
+        String url = host.substring(0, host.lastIndexOf("appapi")).concat("m/quiz/student").concat(params);
         LPLogger.i(getClass().getSimpleName() + " : " + url);
         ((WebView) $.id(R.id.wv_quiz_main).view()).loadUrl(url);
     }
@@ -343,6 +341,7 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
     public void onDestroy() {
         super.onDestroy();
         isDestroyed = true;
+        presenter = null;
         if (signalList != null) {
             signalList.clear();
         }
@@ -353,6 +352,7 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
      ******************/
     @JavascriptInterface
     public void close() {
+        if (presenter.checkRouterNull()) return;
         presenter.dismissDlg();
     }
 

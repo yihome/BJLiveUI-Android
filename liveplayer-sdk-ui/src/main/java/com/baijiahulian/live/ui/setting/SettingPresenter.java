@@ -11,6 +11,7 @@ import com.baijiahulian.livecore.wrapper.LPRecorder;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 
 import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 
@@ -26,7 +27,7 @@ public class SettingPresenter implements SettingContract.Presenter {
     private LPPlayer player;
     private LiveRoom liveRoom;
     private Subscription subscriptionOfForbidAllChat, subscriptionOfMic, subscriptionOfCamera, subscriptionOfForbidRaiseHand,
-            subscriptionOfUpLinkType, subscriptionOfDownLinkType;
+            subscriptionOfForbidAllAudio, subscriptionOfUpLinkType, subscriptionOfDownLinkType;
 
     public SettingPresenter(SettingContract.View view) {
         this.view = view;
@@ -53,6 +54,11 @@ public class SettingPresenter implements SettingContract.Presenter {
             view.showDownLinkTCP();
         else
             view.showDownLinkUDP();
+
+        if (routerListener.getPPTView().isAnimPPTEnable())
+            view.showPPTViewTypeAnim();
+        else
+            view.showPPTViewTypeStatic();
 
         if (recorder.isAudioAttached())
             view.showMicOpen();
@@ -105,6 +111,12 @@ public class SettingPresenter implements SettingContract.Presenter {
             view.showForbidRaiseHandOff();
         }
 
+        if (liveRoom.getForbidAllAudioStatus()) {
+            view.showForbidAllAudioOn();
+        } else {
+            view.showForbidAllAudioOff();
+        }
+
         if (liveRoom.getPartnerConfig().PPTAnimationDisable == 0) {
             view.hidePPTShownType();
         }
@@ -141,6 +153,31 @@ public class SettingPresenter implements SettingContract.Presenter {
                         else view.showForbidRaiseHandOff();
                     }
                 });
+        subscriptionOfForbidAllAudio = liveRoom.getObservableOfForbidAllAudioStatus()
+                .subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean aBoolean) {
+                        if (liveRoom.isTeacherOrAssistant()) {
+                            //老师或助教，同步静音状态
+                            if (aBoolean) view.showForbidAllAudioOn();
+                            else view.showForbidAllAudioOff();
+                            return;
+                        }
+                        //学生
+                        if (aBoolean && recorder.isAudioAttached()) {
+                            //静音
+                            recorder.detachAudio();
+                            view.showMicClosed();
+                        } else if (!aBoolean) {
+                            //取消静音
+                            if (!recorder.isPublishing())
+                                recorder.publish();
+                            if (!recorder.isAudioAttached())
+                                recorder.attachAudio();
+                            view.showMicOpen();
+                        }
+                    }
+                });
         subscriptionOfDownLinkType = liveRoom.getPlayer().getObservableOfLinkType().observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new LPErrorPrintSubscriber<LPConstants.LPLinkType>() {
                     @Override
@@ -171,6 +208,7 @@ public class SettingPresenter implements SettingContract.Presenter {
         RxUtils.unSubscribe(subscriptionOfMic);
         RxUtils.unSubscribe(subscriptionOfCamera);
         RxUtils.unSubscribe(subscriptionOfForbidRaiseHand);
+        RxUtils.unSubscribe(subscriptionOfForbidAllAudio);
         RxUtils.unSubscribe(subscriptionOfUpLinkType);
         RxUtils.unSubscribe(subscriptionOfDownLinkType);
     }
@@ -188,6 +226,10 @@ public class SettingPresenter implements SettingContract.Presenter {
         switch (routerListener.getLiveRoom().getCurrentUser().getType()) {
             case Teacher:
             case Assistant:
+                if (routerListener.getLiveRoom().getGroupId() != 0) {
+                    view.showSmallGroupFail();
+                    return;
+                }
                 if (!recorder.isPublishing()) {
                     recorder.publish();
                 }
@@ -223,6 +265,10 @@ public class SettingPresenter implements SettingContract.Presenter {
         switch (routerListener.getLiveRoom().getCurrentUser().getType()) {
             case Teacher:
             case Assistant:
+                if (routerListener.getLiveRoom().getGroupId() != 0) {
+                    view.showSmallGroupFail();
+                    return;
+                }
                 if (!recorder.isPublishing()) {
                     recorder.publish();
                 }
@@ -258,6 +304,23 @@ public class SettingPresenter implements SettingContract.Presenter {
             recorder.openBeautyFilter();
             view.showBeautyFilterEnable();
         }
+    }
+
+    @Override
+    public void setPPTViewAnim() {
+        if (routerListener.enableAnimPPTView(true))
+            view.showPPTViewTypeAnim();
+        else
+            view.showSwitchPPTFail();
+    }
+
+    @Override
+    public void setPPTViewStatic() {
+        if (routerListener.enableAnimPPTView(false))
+            view.showPPTViewTypeStatic();
+        else
+            view.showSwitchPPTFail();
+
     }
 
     @Override
@@ -338,5 +401,15 @@ public class SettingPresenter implements SettingContract.Presenter {
     @Override
     public void switchForbidRaiseHand() {
         liveRoom.requestForbidRaiseHand(!liveRoom.getForbidRaiseHandStatus());
+    }
+
+    @Override
+    public void switchForbidAllAudio() {
+        liveRoom.requestForbidAllAudio(!liveRoom.getForbidAllAudioStatus());
+    }
+
+    @Override
+    public boolean isSmallGroup() {
+        return liveRoom.getRoomType()== LPConstants.LPRoomType.SmallGroup;
     }
 }

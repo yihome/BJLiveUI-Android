@@ -40,12 +40,12 @@ public class LeftMenuPresenter implements LeftMenuContract.Presenter {
 
     @Override
     public boolean isAllForbidden() {
-        return !routerListener.isTeacherOrAssistant() && routerListener.getLiveRoom().getForbidStatus();
+        return !routerListener.isTeacherOrAssistant() && !routerListener.isGroupTeacherOrAssistant() && routerListener.getLiveRoom().getForbidStatus();
     }
 
     @Override
     public boolean isForbiddenByTeacher() {
-        if (routerListener.isTeacherOrAssistant()) {
+        if (routerListener.isTeacherOrAssistant() || routerListener.isGroupTeacherOrAssistant()) {
             return false;
         }
         return isSelfForbidden;
