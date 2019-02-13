@@ -1,6 +1,6 @@
 package com.baijiahulian.live.ui.utils;
 
-import com.baijiahulian.livecore.models.LPDataModel;
+import com.baijiayun.livecore.models.LPDataModel;
 
 import java.io.Serializable;
 

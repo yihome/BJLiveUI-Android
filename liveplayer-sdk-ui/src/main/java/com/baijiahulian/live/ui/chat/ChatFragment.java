@@ -31,9 +31,9 @@ import com.baijiahulian.live.ui.utils.AliCloudImageUtil;
 import com.baijiahulian.live.ui.utils.ChatImageUtil;
 import com.baijiahulian.live.ui.utils.DisplayUtils;
 import com.baijiahulian.live.ui.utils.LinearLayoutWrapManager;
-import com.baijiahulian.livecore.context.LPConstants;
-import com.baijiahulian.livecore.models.imodels.IMessageModel;
-import com.baijiahulian.livecore.models.imodels.IUserModel;
+import com.baijiayun.livecore.context.LPConstants;
+import com.baijiayun.livecore.models.imodels.IMessageModel;
+import com.baijiayun.livecore.models.imodels.IUserModel;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 

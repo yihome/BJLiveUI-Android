@@ -17,7 +17,7 @@ import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseDialogFragment;
 import com.baijiahulian.live.ui.utils.AliCloudImageUtil;
 import com.baijiahulian.live.ui.utils.QueryPlus;
-import com.baijiahulian.livecore.viewmodels.impl.LPDocListViewModel;
+import com.baijiayun.livecore.viewmodels.impl.LPDocListViewModel;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;

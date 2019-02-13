@@ -2,6 +2,7 @@ package com.baijiahulian.live.ui.rightbotmenu;
 
 import com.baijiahulian.live.ui.base.BasePresenter;
 import com.baijiahulian.live.ui.base.BaseView;
+import com.baijiayun.livecore.context.LPConstants;
 
 /**
  * Created by Shubo on 2017/2/15.
@@ -21,7 +22,7 @@ interface RightBottomMenuContract {
 
         void unClearScreen();
 
-        void showVolume(int level);
+        void showVolume(LPConstants.VolumeLevel level);
 
         void showZoomIn();
 

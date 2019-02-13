@@ -1,14 +1,14 @@
 package com.baijiahulian.live.ui.rollcall;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
-import com.baijiahulian.livecore.listener.OnPhoneRollCallListener;
-import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
+import com.baijiayun.livecore.listener.OnPhoneRollCallListener;
 
 import java.util.concurrent.TimeUnit;
 
-import rx.Observable;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 
 /**
  * Created by wangkangfei on 17/5/31.
@@ -17,7 +17,7 @@ import rx.android.schedulers.AndroidSchedulers;
 public class RollCallDialogPresenter implements RollCallDialogContract.Presenter {
     private LiveRoomRouterListener routerListener;
     private RollCallDialogContract.View view;
-    private Subscription countDownSubscription;
+    private Disposable countDownSubscription;
     private int maxTime;
     private OnPhoneRollCallListener.RollCall rollCallListener;
 
@@ -33,6 +33,7 @@ public class RollCallDialogPresenter implements RollCallDialogContract.Presenter
     public void setRollCallInfo(int maxTime, OnPhoneRollCallListener.RollCall rollCallConfirmListener) {
         this.maxTime = maxTime;
         this.rollCallListener = rollCallConfirmListener;
+        subscribe();
     }
 
     @Override
@@ -40,9 +41,9 @@ public class RollCallDialogPresenter implements RollCallDialogContract.Presenter
         if (countDownSubscription == null) {
             countDownSubscription = Observable.interval(0, 1000, TimeUnit.MILLISECONDS)
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new LPErrorPrintSubscriber<Long>() {
+                    .subscribe(new Consumer<Long>() {
                         @Override
-                        public void call(Long aLong) {
+                        public void accept(Long aLong) {
                             int timePassed = aLong.intValue();
                             if (timePassed >= maxTime) {
                                 view.timerDown(0);
@@ -56,8 +57,8 @@ public class RollCallDialogPresenter implements RollCallDialogContract.Presenter
 
     @Override
     public void unSubscribe() {
-        if (countDownSubscription != null && !countDownSubscription.isUnsubscribed()) {
-            countDownSubscription.unsubscribe();
+        if (countDownSubscription != null && !countDownSubscription.isDisposed()) {
+            countDownSubscription.dispose();
             countDownSubscription = null;
         }
     }

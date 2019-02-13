@@ -26,7 +26,7 @@ import android.widget.Toast;
 
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.utils.QueryPlus;
-import com.baijiahulian.livecore.utils.DisplayUtils;
+import com.baijiayun.livecore.utils.DisplayUtils;
 
 import static com.baijiahulian.live.ui.R.id.dialog_base_title_container;
 import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;

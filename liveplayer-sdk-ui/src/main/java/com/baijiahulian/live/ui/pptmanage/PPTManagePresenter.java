@@ -5,14 +5,15 @@ import com.baijiahulian.common.networkv2.BJResponse;
 import com.baijiahulian.common.networkv2.HttpException;
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 import com.baijiahulian.live.ui.utils.RxUtils;
-import com.baijiahulian.livecore.models.LPDocumentModel;
-import com.baijiahulian.livecore.models.LPShortResult;
-import com.baijiahulian.livecore.models.LPUploadDocModel;
-import com.baijiahulian.livecore.utils.LPBackPressureBufferedSubscriber;
-import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
-import com.baijiahulian.livecore.utils.LPJsonUtils;
-import com.baijiahulian.livecore.utils.LPLogger;
+import com.baijiayun.livecore.models.LPDocumentModel;
+import com.baijiayun.livecore.models.LPShortResult;
+import com.baijiayun.livecore.models.LPUploadDocModel;
+import com.baijiayun.livecore.utils.LPJsonUtils;
+import com.baijiayun.livecore.utils.LPLogger;
 import com.google.gson.JsonObject;
+
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,11 +21,13 @@ import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import rx.Observable;
-import rx.Subscriber;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func2;
+import io.reactivex.Observable;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.BiFunction;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
 
 /**
  * 管理PPT文档 生命周期不与fragment绑定
@@ -40,7 +43,7 @@ public class PPTManagePresenter implements PPTManageContract.Presenter {
     private List<DocumentModel> addedDocuments;
     // 图片上传完成，从uploadingQueue中移除添加到waitDocAddQueue，为了保证添加顺序一个一个发docAdd并等待docAdd信令返回
     private LinkedBlockingQueue<DocumentUploadingModel> uploadingQueue;
-    private Subscription subscriptionOfDocAdd, subscriptionOfDocDel, subscriptionOfReconnect;
+    private Disposable subscriptionOfDocAdd, subscriptionOfDocDel, subscriptionOfReconnect;
 
     private List<String> deleteDocIds;
 
@@ -79,61 +82,50 @@ public class PPTManagePresenter implements PPTManageContract.Presenter {
         }
 
         subscriptionOfDocAdd = routerListener.getLiveRoom().getDocListVM().getObservableOfDocAdd()
-                .onBackpressureBuffer()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPBackPressureBufferedSubscriber<LPDocumentModel>() {
-                    @Override
-                    public void call(LPDocumentModel lpDocumentModel) {
-                        addedDocuments.add(new DocumentModel(lpDocumentModel));
-                        if (view != null)
-                            view.notifyItemChanged(addedDocuments.size() - 1);
-                        DocumentUploadingModel model = uploadingQueue.peek();
-                        // 如果是本地上传，等待DocAdd信令返回后再队列里移除
-                        if (model != null && model.status == DocumentUploadingModel.WAIT_SIGNAL
-                                && String.valueOf(model.uploadModel.fileId).equals(lpDocumentModel.number)) {
-                            // lpDocumentModel.number 既文档服务器分配的fileId
-                            uploadingQueue.poll();
-                            continueQueue();
-                        }
+                .subscribe(lpDocumentModel -> {
+                    addedDocuments.add(new DocumentModel(lpDocumentModel));
+                    if (view != null)
+                        view.notifyItemChanged(addedDocuments.size() - 1);
+                    DocumentUploadingModel model = uploadingQueue.peek();
+                    // 如果是本地上传，等待DocAdd信令返回后再队列里移除
+                    if (model != null && model.status == DocumentUploadingModel.WAIT_SIGNAL
+                            && String.valueOf(model.uploadModel.fileId).equals(lpDocumentModel.number)) {
+                        // lpDocumentModel.number 既文档服务器分配的fileId
+                        uploadingQueue.poll();
+                        continueQueue();
                     }
                 });
 
         subscriptionOfDocDel = routerListener.getLiveRoom().getDocListVM().getObservableOfDocDelete()
-                .onBackpressureBuffer()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPBackPressureBufferedSubscriber<String>() {
-                    @Override
-                    public void call(String s) {
-                        for (int i = 0; i < addedDocuments.size(); i++) {
-                            if (addedDocuments.get(i).id.equals(s)) {
-                                addedDocuments.remove(i);
-                                if (view != null) {
-                                    view.notifyItemRemoved(i);
-                                    if (addedDocuments.size() == 0) view.showPPTEmpty();
-                                }
-                                return;
+                .subscribe((Consumer<String>) s -> {
+                    for (int i = 0; i < addedDocuments.size(); i++) {
+                        if (addedDocuments.get(i).id.equals(s)) {
+                            addedDocuments.remove(i);
+                            if (view != null) {
+                                view.notifyItemRemoved(i);
+                                if (addedDocuments.size() == 0) view.showPPTEmpty();
                             }
+                            return;
                         }
                     }
                 });
 
         subscriptionOfReconnect = routerListener.getLiveRoom().getObservableOfReconnected()
-                .subscribe(new LPErrorPrintSubscriber<Void>() {
-                    @Override
-                    public void call(Void aVoid) {
-                        if (uploadingQueue.size() > 0) {
-                            startQueue();
-                            continueQueue();
-                        }
+                .subscribe(aVoid -> {
+                    if (uploadingQueue.size() > 0) {
+                        startQueue();
+                        continueQueue();
                     }
                 });
     }
 
     @Override
     public void unSubscribe() {
-        RxUtils.unSubscribe(subscriptionOfDocAdd);
-        RxUtils.unSubscribe(subscriptionOfDocDel);
-        RxUtils.unSubscribe(subscriptionOfReconnect);
+        RxUtils.dispose(subscriptionOfDocAdd);
+        RxUtils.dispose(subscriptionOfDocDel);
+        RxUtils.dispose(subscriptionOfReconnect);
     }
 
     @Override
@@ -247,22 +239,22 @@ public class PPTManagePresenter implements PPTManageContract.Presenter {
 
     @Override
     public void removeSelectedItems() {
-        Observable.from(deleteDocIds).zipWith(Observable.interval(50, TimeUnit.MILLISECONDS).onBackpressureDrop(),
-                new Func2<String, Long, String>() {
+        Observable.fromIterable(deleteDocIds)
+                .zipWith(Observable.interval(50, TimeUnit.MILLISECONDS),
+                        (s, aLong) -> s)
+                .subscribe(new Observer<String>() {
                     @Override
-                    public String call(String s, Long aLong) {
-                        return s;
-                    }
-                })
-                .subscribe(new Subscriber<String>() {
-                    @Override
-                    public void onCompleted() {
+                    public void onComplete() {
                         deleteDocIds.clear();
                     }
 
                     @Override
                     public void onError(Throwable e) {
                         e.printStackTrace();
+                    }
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
                     }
 
                     @Override

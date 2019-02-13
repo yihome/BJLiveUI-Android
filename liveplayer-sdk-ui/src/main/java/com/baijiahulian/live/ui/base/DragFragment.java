@@ -10,9 +10,8 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
-import com.baijiahulian.livecore.utils.DisplayUtils;
+import com.baijiayun.livecore.utils.DisplayUtils;
 
-import static com.baijiayun.hubble.sdk.HubbleStatisticsSDK.getContext;
 
 /**
  * Created by yangjingming on 2018/6/7.

@@ -2,8 +2,8 @@ package com.baijiahulian.live.ui.chat;
 
 import com.baijiahulian.live.ui.base.BasePresenter;
 import com.baijiahulian.live.ui.base.BaseView;
-import com.baijiahulian.livecore.models.imodels.IMessageModel;
-import com.baijiahulian.livecore.models.imodels.IUserModel;
+import com.baijiayun.livecore.models.imodels.IMessageModel;
+import com.baijiayun.livecore.models.imodels.IUserModel;
 
 /**
  * Created by Shubo on 2017/2/15.

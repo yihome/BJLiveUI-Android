@@ -2,13 +2,13 @@ package com.baijiahulian.live.ui.ppt.quickswitchppt;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 import com.baijiahulian.live.ui.utils.RxUtils;
-import com.baijiahulian.livecore.viewmodels.impl.LPDocListViewModel;
+import com.baijiayun.livecore.viewmodels.impl.LPDocListViewModel;
 
 import java.util.List;
 
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 
 /**
  * Created by szw on 17/7/5.
@@ -17,7 +17,7 @@ import rx.functions.Action1;
 public class SwitchPPTFragmentPresenter implements SwitchPPTContract.Presenter {
     private SwitchPPTContract.View view;
     private LiveRoomRouterListener listener;
-    private Subscription subscriptionOfDocListChange;
+    private Disposable subscriptionOfDocListChange;
 
     public SwitchPPTFragmentPresenter(SwitchPPTContract.View view) {
         this.view = view;
@@ -32,12 +32,7 @@ public class SwitchPPTFragmentPresenter implements SwitchPPTContract.Presenter {
     public void subscribe() {
         subscriptionOfDocListChange = listener.getLiveRoom().getDocListVM().getObservableOfDocListChanged()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<LPDocListViewModel.DocModel>>() {
-                    @Override
-                    public void call(List<LPDocListViewModel.DocModel> docModels) {
-                        view.docListChanged(docModels);
-                    }
-                });
+                .subscribe(docModels -> view.docListChanged(docModels));
         view.setType(!listener.isTeacherOrAssistant());
         view.docListChanged(listener.getLiveRoom().getDocListVM().getDocList());
         view.setIndex();
@@ -45,7 +40,7 @@ public class SwitchPPTFragmentPresenter implements SwitchPPTContract.Presenter {
 
     @Override
     public void unSubscribe() {
-        RxUtils.unSubscribe(subscriptionOfDocListChange);
+        RxUtils.dispose(subscriptionOfDocListChange);
     }
 
     @Override

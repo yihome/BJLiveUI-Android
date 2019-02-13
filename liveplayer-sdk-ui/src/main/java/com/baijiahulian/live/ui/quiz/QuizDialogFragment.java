@@ -26,11 +26,11 @@ import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseDialogFragment;
 import com.baijiahulian.live.ui.utils.JsonObjectUtil;
 import com.baijiahulian.live.ui.utils.QueryPlus;
-import com.baijiahulian.livecore.LiveSDK;
-import com.baijiahulian.livecore.context.LPConstants;
-import com.baijiahulian.livecore.models.LPJsonModel;
-import com.baijiahulian.livecore.models.imodels.IUserModel;
-import com.baijiahulian.livecore.utils.LPLogger;
+import com.baijiayun.livecore.LiveSDK;
+import com.baijiayun.livecore.context.LPConstants;
+import com.baijiayun.livecore.models.LPJsonModel;
+import com.baijiayun.livecore.models.imodels.IUserModel;
+import com.baijiayun.livecore.utils.LPLogger;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -113,6 +113,7 @@ public class QuizDialogFragment extends BaseDialogFragment implements QuizDialog
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
+                        if (presenter != null)
                         presenter.dismissDlg();
                     }
                 }).setNegativeButton(R.string.live_quiz_dialog_cancel, new DialogInterface.OnClickListener() {

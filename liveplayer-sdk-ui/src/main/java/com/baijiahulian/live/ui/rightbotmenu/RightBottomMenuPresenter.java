@@ -2,12 +2,12 @@ package com.baijiahulian.live.ui.rightbotmenu;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 import com.baijiahulian.live.ui.utils.RxUtils;
-import com.baijiahulian.livecore.context.LPConstants;
-import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
+import com.baijiayun.livecore.context.LPConstants;
 
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+
 
 /**
  * Created by Shubo on 2017/2/16.
@@ -19,9 +19,10 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
 
     private LiveRoomRouterListener liveRoomRouterListener;
 
-    private Subscription subscriptionOfCamera, subscriptionOfMic, subscriptionOfVolume, subscriptionOfClassStart, subscriptionOfForbidAllAudio;
+    private Disposable subscriptionOfCamera, subscriptionOfMic, subscriptionOfVolume, subscriptionOfClassStart, subscriptionOfForbidAllAudio;
 
     private boolean isSpeaking;//是否是发言状态
+
 
     public RightBottomMenuPresenter(RightBottomMenuContract.View view) {
         this.view = view;
@@ -129,28 +130,16 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
     public void subscribe() {
         subscriptionOfCamera = liveRoomRouterListener.getLiveRoom().getRecorder().getObservableOfCameraOn()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<Boolean>() {
-                    @Override
-                    public void call(Boolean aBoolean) {
-                        view.showVideoStatus(aBoolean);
-                    }
-                });
+                .subscribe(aBoolean -> view.showVideoStatus(aBoolean));
         subscriptionOfMic = liveRoomRouterListener.getLiveRoom().getRecorder().getObservableOfMicOn()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<Boolean>() {
-                    @Override
-                    public void call(Boolean aBoolean) {
-                        view.showAudioStatus(aBoolean);
-                    }
-                });
+                .subscribe(aBoolean -> view.showAudioStatus(aBoolean));
+
         subscriptionOfVolume = liveRoomRouterListener.getLiveRoom().getRecorder().getObservableOfVolume()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<Integer>() {
-                    @Override
-                    public void call(Integer integer) {
-                        if (liveRoomRouterListener.getLiveRoom().getRecorder().isAudioAttached())
-                            view.showVolume(integer);
-                    }
+                .subscribe(volumeLevel -> {
+                    if (liveRoomRouterListener.getLiveRoom().getRecorder() != null && liveRoomRouterListener.getLiveRoom().getRecorder().isAudioAttached())
+                        view.showVolume(volumeLevel);
                 });
         if (!liveRoomRouterListener.isTeacherOrAssistant()) {
             liveRoomRouterListener.disableSpeakerMode();
@@ -165,9 +154,9 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
         }
         subscriptionOfClassStart = liveRoomRouterListener.getLiveRoom().getObservableOfClassStart()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<Void>() {
+                .subscribe(new Consumer<Integer>() {
                     @Override
-                    public void call(Void aVoid) {
+                    public void accept(Integer aVoid) {
                         if ((liveRoomRouterListener.getLiveRoom().getCurrentUser().getType() == LPConstants.LPUserType.Student &&
                                 liveRoomRouterListener.getLiveRoom().getRoomType() != LPConstants.LPRoomType.Multi) || liveRoomRouterListener.isTeacherOrAssistant()) {
                             view.enableSpeakerMode();
@@ -177,29 +166,24 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
                     }
                 });
         subscriptionOfForbidAllAudio = liveRoomRouterListener.getLiveRoom().getObservableOfForbidAllAudioStatus()
-                .subscribe(new Action1<Boolean>() {
-                    @Override
-                    public void call(Boolean aBoolean) {
-                        if (liveRoomRouterListener.isTeacherOrAssistant())return;
-                        if (aBoolean) {
-                            //静音
-                            if (liveRoomRouterListener.getLiveRoom().getRecorder().isAudioAttached()) {
-                                liveRoomRouterListener.getLiveRoom().getRecorder().detachAudio();
-                                if (!liveRoomRouterListener.getLiveRoom().getRecorder().isVideoAttached()) {
-                                    liveRoomRouterListener.getLiveRoom().getRecorder().stopPublishing();
-                                }
-                            }
-                        } else {
-                            if (isSpeaking) {
-                                //发言状态，打开音频
-                                if (!liveRoomRouterListener.getLiveRoom().getRecorder().isPublishing()) {
-                                    liveRoomRouterListener.getLiveRoom().getRecorder().publish();
-                                }
-                                liveRoomRouterListener.attachLocalAudio();
-                            }
+                .subscribe(aBoolean -> {
+                    if (liveRoomRouterListener.isTeacherOrAssistant())return;
+                    if (aBoolean) {
+                        //静音
+                        if (liveRoomRouterListener.getLiveRoom().getRecorder().isAudioAttached()) {
+                            liveRoomRouterListener.getLiveRoom().getRecorder().detachAudio();
                         }
-
                     }
+//                        else {
+//                            if (isSpeaking) {
+//                                //发言状态，自动打开麦克风
+//                                if (!liveRoomRouterListener.getLiveRoom().getRecorder().isPublishing()) {
+//                                    liveRoomRouterListener.getLiveRoom().getRecorder().publish();
+//                                }
+//                                liveRoomRouterListener.attachLocalAudio();
+//                            }
+//                        }
+
                 });
         if (liveRoomRouterListener.getLiveRoom().getCurrentUser().getType() == LPConstants.LPUserType.Student &&
                 liveRoomRouterListener.getLiveRoom().getRoomType() != LPConstants.LPRoomType.Multi) {
@@ -217,11 +201,12 @@ public class RightBottomMenuPresenter implements RightBottomMenuContract.Present
 
     @Override
     public void unSubscribe() {
-        RxUtils.unSubscribe(subscriptionOfCamera);
-        RxUtils.unSubscribe(subscriptionOfMic);
-        RxUtils.unSubscribe(subscriptionOfVolume);
-        RxUtils.unSubscribe(subscriptionOfClassStart);
-        RxUtils.unSubscribe(subscriptionOfForbidAllAudio);
+        RxUtils.dispose(subscriptionOfCamera);
+        RxUtils.dispose(subscriptionOfMic);
+        RxUtils.dispose(subscriptionOfVolume);
+        RxUtils.dispose(subscriptionOfClassStart);
+        RxUtils.dispose(subscriptionOfForbidAllAudio);
+
     }
 
     @Override

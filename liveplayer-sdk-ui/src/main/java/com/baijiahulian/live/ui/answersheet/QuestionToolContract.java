@@ -2,7 +2,7 @@ package com.baijiahulian.live.ui.answersheet;
 
 import com.baijiahulian.live.ui.base.BasePresenter;
 import com.baijiahulian.live.ui.base.BaseView;
-import com.baijiahulian.livecore.models.LPAnswerSheetOptionModel;
+import com.baijiayun.livecore.models.LPAnswerSheetOptionModel;
 
 import java.util.List;
 

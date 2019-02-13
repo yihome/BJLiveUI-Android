@@ -30,6 +30,8 @@ public class QuizDialogPresenter implements QuizDialogContract.Presenter {
     @Override
     public void destroy() {
         view = null;
+        if (routerListener != null)
+            routerListener.dismissQuizDlg();
         routerListener = null;
     }
 

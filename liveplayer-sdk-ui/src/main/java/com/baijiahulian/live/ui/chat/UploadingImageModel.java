@@ -1,9 +1,9 @@
 package com.baijiahulian.live.ui.chat;
 
-import com.baijiahulian.livecore.context.LPConstants;
-import com.baijiahulian.livecore.models.LPDataModel;
-import com.baijiahulian.livecore.models.imodels.IMessageModel;
-import com.baijiahulian.livecore.models.imodels.IUserModel;
+import com.baijiayun.livecore.context.LPConstants;
+import com.baijiayun.livecore.models.LPDataModel;
+import com.baijiayun.livecore.models.imodels.IMessageModel;
+import com.baijiayun.livecore.models.imodels.IUserModel;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.Date;

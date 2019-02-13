@@ -5,24 +5,24 @@ import android.text.TextUtils;
 import com.baijiahulian.live.ui.base.BasePresenter;
 import com.baijiahulian.live.ui.utils.JsonObjectUtil;
 import com.baijiahulian.live.ui.utils.RxUtils;
-import com.baijiahulian.livecore.context.LPConstants;
-import com.baijiahulian.livecore.context.LPError;
-import com.baijiahulian.livecore.listener.OnPhoneRollCallListener;
-import com.baijiahulian.livecore.models.LPAnswerSheetModel;
-import com.baijiahulian.livecore.models.LPJsonModel;
-import com.baijiahulian.livecore.models.imodels.IAnnouncementModel;
-import com.baijiahulian.livecore.models.imodels.IMediaModel;
-import com.baijiahulian.livecore.models.imodels.IUserInModel;
-import com.baijiahulian.livecore.models.responsedebug.LPResRoomDebugModel;
-import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
-import com.baijiahulian.livecore.utils.LPRxUtils;
+import com.baijiayun.livecore.context.LPConstants;
+import com.baijiayun.livecore.context.LPError;
+import com.baijiayun.livecore.listener.OnPhoneRollCallListener;
+import com.baijiayun.livecore.models.LPAnswerSheetModel;
+import com.baijiayun.livecore.models.LPJsonModel;
+import com.baijiayun.livecore.models.imodels.IAnnouncementModel;
+import com.baijiayun.livecore.models.imodels.IMediaModel;
+import com.baijiayun.livecore.models.imodels.IUserInModel;
+import com.baijiayun.livecore.models.responsedebug.LPResRoomDebugModel;
+import com.baijiayun.livecore.utils.LPRxUtils;
 
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Predicate;
 
 /**
  * Created by Shubo on 2017/5/11.
@@ -34,7 +34,7 @@ public class GlobalPresenter implements BasePresenter {
 
     private boolean teacherVideoOn, teacherAudioOn;
 
-    private Subscription subscriptionOfClassStart, subscriptionOfClassEnd, subscriptionOfForbidAllStatus,
+    private Disposable subscriptionOfClassStart, subscriptionOfClassEnd, subscriptionOfForbidAllStatus,
             subscriptionOfTeacherMedia, subscriptionOfUserIn, subscriptionOfUserOut, subscriptionOfQuizStart,
             subscriptionOfQuizRes, subscriptionOfQuizEnd, subscriptionOfQuizSolution, subscriptionOfDebug,
             subscriptionOfAnnouncement, subscriptionOfClassSwitch, subscriptionOfAnswerStart, subscriptionOfAnswerEnd;
@@ -54,18 +54,18 @@ public class GlobalPresenter implements BasePresenter {
     public void subscribe() {
         subscriptionOfClassStart = routerListener.getLiveRoom().getObservableOfClassStart()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<Void>() {
+                .subscribe(new Consumer<Integer>() {
                     @Override
-                    public void call(Void aVoid) {
+                    public void accept(Integer integer) {
                         routerListener.showMessageClassStart();
                         routerListener.enableStudentSpeakMode();
                     }
                 });
         subscriptionOfClassEnd = routerListener.getLiveRoom().getObservableOfClassEnd()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<Void>() {
+                .subscribe(new Consumer<Integer>() {
                     @Override
-                    public void call(Void aVoid) {
+                    public void accept(Integer aVoid) {
                         routerListener.showMessageClassEnd();
                         teacherVideoOn = false;
                         teacherAudioOn = false;
@@ -76,18 +76,18 @@ public class GlobalPresenter implements BasePresenter {
         subscriptionOfClassSwitch = routerListener.getLiveRoom().getObservableOfClassSwitch()
                 .delay(new Random().nextInt(2) + 1, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<Void>() {
+                .subscribe(new Consumer<Integer>() {
                     @Override
-                    public void call(Void aVoid) {
+                    public void accept(Integer aVoid) {
                         routerListener.showClassSwitch();
                     }
                 });
 
         subscriptionOfForbidAllStatus = routerListener.getLiveRoom().getObservableOfForbidAllChatStatus()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<Boolean>() {
+                .subscribe(new Consumer<Boolean>() {
                     @Override
-                    public void call(Boolean aBoolean) {
+                    public void accept(Boolean aBoolean) {
                         if (counter == 0) {
                             isForbidChatChanged = aBoolean;
                             counter++;
@@ -102,20 +102,18 @@ public class GlobalPresenter implements BasePresenter {
         if (!routerListener.isCurrentUserTeacher()) {
 
             // 学生监听老师音视频状态
-            subscriptionOfTeacherMedia = routerListener.getLiveRoom().getSpeakQueueVM().getObservableOfMediaNew()
-                    .mergeWith(routerListener.getLiveRoom().getSpeakQueueVM().getObservableOfMediaChange())
-                    .mergeWith(routerListener.getLiveRoom().getSpeakQueueVM().getObservableOfMediaClose())
-                    .filter(new Func1<IMediaModel, Boolean>() {
+             subscriptionOfTeacherMedia = routerListener.getLiveRoom().getSpeakQueueVM().getObservableOfMediaPublish()
+                    .filter(new Predicate<IMediaModel>() {
                         @Override
-                        public Boolean call(IMediaModel iMediaModel) {
+                        public boolean test(IMediaModel iMediaModel) {
                             return !routerListener.isTeacherOrAssistant() && iMediaModel.getUser().getType() == LPConstants.LPUserType.Teacher;
                         }
                     })
                     .throttleLast(500, TimeUnit.MILLISECONDS)
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new LPErrorPrintSubscriber<IMediaModel>() {
+                    .subscribe(new Consumer<IMediaModel>() {
                         @Override
-                        public void call(IMediaModel iMediaModel) {
+                        public void accept(IMediaModel iMediaModel) {
                             if (!routerListener.getLiveRoom().isClassStarted()) {
                                 return;
                             }
@@ -142,20 +140,20 @@ public class GlobalPresenter implements BasePresenter {
                         }
                     });
 
-            subscriptionOfUserIn = routerListener.getLiveRoom().getObservableOfUserIn().observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new LPErrorPrintSubscriber<IUserInModel>() {
+             subscriptionOfUserIn = routerListener.getLiveRoom().getObservableOfUserIn().observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Consumer<IUserInModel>() {
                         @Override
-                        public void call(IUserInModel iUserInModel) {
+                        public void accept(IUserInModel iUserInModel) {
                             if (iUserInModel.getUser().getType() == LPConstants.LPUserType.Teacher) {
                                 routerListener.showMessageTeacherEnterRoom();
                             }
                         }
                     });
 
-            subscriptionOfUserOut = routerListener.getLiveRoom().getObservableOfUserOut().observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new LPErrorPrintSubscriber<String>() {
+             subscriptionOfUserOut = routerListener.getLiveRoom().getObservableOfUserOut().observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Consumer<String>() {
                         @Override
-                        public void call(String s) {
+                        public void accept(String s) {
                             if (TextUtils.isEmpty(s)) return;
                             if (routerListener.getLiveRoom().getTeacherUser() == null) return;
                             if (s.equals(routerListener.getLiveRoom().getTeacherUser().getUserId())) {
@@ -179,9 +177,9 @@ public class GlobalPresenter implements BasePresenter {
             //开始小测
             subscriptionOfQuizStart = routerListener.getLiveRoom().getQuizVM().getObservableOfQuizStart()
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new LPErrorPrintSubscriber<LPJsonModel>() {
+                    .subscribe(new Consumer<LPJsonModel>() {
                         @Override
-                        public void call(LPJsonModel jsonModel) {
+                        public void accept(LPJsonModel jsonModel) {
                             if (!routerListener.isTeacherOrAssistant()) {
                                 routerListener.onQuizStartArrived(jsonModel);
                             }
@@ -190,9 +188,9 @@ public class GlobalPresenter implements BasePresenter {
             //中途打开
             subscriptionOfQuizRes = routerListener.getLiveRoom().getQuizVM().getObservableOfQuizRes()
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new LPErrorPrintSubscriber<LPJsonModel>() {
+                    .subscribe(new Consumer<LPJsonModel>() {
                         @Override
-                        public void call(LPJsonModel jsonModel) {
+                        public void accept(LPJsonModel jsonModel) {
                             if (!routerListener.isTeacherOrAssistant()) {
                                 if (jsonModel != null && jsonModel.data != null) {
                                     String quizId = JsonObjectUtil.getAsString(jsonModel.data, "quiz_id");
@@ -220,9 +218,9 @@ public class GlobalPresenter implements BasePresenter {
             //结束，只转发h5
             subscriptionOfQuizEnd = routerListener.getLiveRoom().getQuizVM().getObservableOfQuizEnd()
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new LPErrorPrintSubscriber<LPJsonModel>() {
+                    .subscribe(new Consumer<LPJsonModel>() {
                         @Override
-                        public void call(LPJsonModel jsonModel) {
+                        public void accept(LPJsonModel jsonModel) {
                             if (!routerListener.isTeacherOrAssistant()) {
                                 routerListener.onQuizEndArrived(jsonModel);
                             }
@@ -232,9 +230,9 @@ public class GlobalPresenter implements BasePresenter {
             //发答案啦
             subscriptionOfQuizSolution = routerListener.getLiveRoom().getQuizVM().getObservableOfQuizSolution()
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new LPErrorPrintSubscriber<LPJsonModel>() {
+                    .subscribe(new Consumer<LPJsonModel>() {
                         @Override
-                        public void call(LPJsonModel jsonModel) {
+                        public void accept(LPJsonModel jsonModel) {
                             if (!routerListener.isTeacherOrAssistant()) {
                                 routerListener.onQuizSolutionArrived(jsonModel);
                             }
@@ -243,9 +241,9 @@ public class GlobalPresenter implements BasePresenter {
             //debug信息
             subscriptionOfDebug = routerListener.getLiveRoom().getObservableOfDebug()
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new LPErrorPrintSubscriber<LPResRoomDebugModel>() {
+                    .subscribe(new Consumer<LPResRoomDebugModel>() {
                         @Override
-                        public void call(LPResRoomDebugModel lpResRoomDebugModel) {
+                        public void accept(LPResRoomDebugModel lpResRoomDebugModel) {
                             if (lpResRoomDebugModel != null && lpResRoomDebugModel.data != null) {
                                 String commandType = "";
                                 if (JsonObjectUtil.isJsonNull(lpResRoomDebugModel.data, "command_type")) {
@@ -261,9 +259,9 @@ public class GlobalPresenter implements BasePresenter {
 
             subscriptionOfAnswerStart = routerListener.getLiveRoom().getObservableOfAnswerSheetStart()
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new LPErrorPrintSubscriber<LPAnswerSheetModel>() {
+                    .subscribe(new Consumer<LPAnswerSheetModel>() {
                         @Override
-                        public void call(LPAnswerSheetModel lpAnswerSheetModel) {
+                        public void accept(LPAnswerSheetModel lpAnswerSheetModel) {
                             if (!routerListener.isTeacherOrAssistant())
                                 routerListener.answerStart(lpAnswerSheetModel);
 
@@ -272,9 +270,9 @@ public class GlobalPresenter implements BasePresenter {
 
             subscriptionOfAnswerEnd = routerListener.getLiveRoom().getObservableOfAnswerSheetEnd()
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new LPErrorPrintSubscriber<Boolean>() {
+                    .subscribe(new Consumer<Boolean>() {
                         @Override
-                        public void call(Boolean aBoolean) {
+                        public void accept(Boolean aBoolean) {
                             if (!routerListener.isTeacherOrAssistant())
                                 routerListener.answerEnd(aBoolean);
                         }
@@ -289,11 +287,11 @@ public class GlobalPresenter implements BasePresenter {
 
     public void observeAnnouncementChange() {
         if (routerListener.isCurrentUserTeacher()) return;
-        subscriptionOfAnnouncement = routerListener.getLiveRoom().getObservableOfAnnouncementChange()
+         subscriptionOfAnnouncement = routerListener.getLiveRoom().getObservableOfAnnouncementChange()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<IAnnouncementModel>() {
+                .subscribe(new Consumer<IAnnouncementModel>() {
                     @Override
-                    public void call(IAnnouncementModel iAnnouncementModel) {
+                    public void accept(IAnnouncementModel iAnnouncementModel) {
                         if (!TextUtils.isEmpty(iAnnouncementModel.getLink()) ||
                                 !TextUtils.isEmpty(iAnnouncementModel.getContent())) {
                             routerListener.navigateToAnnouncement();
@@ -303,7 +301,7 @@ public class GlobalPresenter implements BasePresenter {
     }
 
     public void unObserveAnnouncementChange() {
-        LPRxUtils.unSubscribe(subscriptionOfAnnouncement);
+        LPRxUtils.dispose(subscriptionOfAnnouncement);
     }
 
     void setTeacherMedia(IMediaModel media) {
@@ -321,21 +319,21 @@ public class GlobalPresenter implements BasePresenter {
 
     @Override
     public void unSubscribe() {
-        RxUtils.unSubscribe(subscriptionOfClassStart);
-        RxUtils.unSubscribe(subscriptionOfClassEnd);
-        RxUtils.unSubscribe(subscriptionOfForbidAllStatus);
-        RxUtils.unSubscribe(subscriptionOfTeacherMedia);
-        RxUtils.unSubscribe(subscriptionOfUserIn);
-        RxUtils.unSubscribe(subscriptionOfUserOut);
-        RxUtils.unSubscribe(subscriptionOfQuizStart);
-        RxUtils.unSubscribe(subscriptionOfQuizRes);
-        RxUtils.unSubscribe(subscriptionOfQuizEnd);
-        RxUtils.unSubscribe(subscriptionOfQuizSolution);
-        RxUtils.unSubscribe(subscriptionOfDebug);
-        RxUtils.unSubscribe(subscriptionOfAnnouncement);
-        RxUtils.unSubscribe(subscriptionOfClassSwitch);
-        RxUtils.unSubscribe(subscriptionOfAnswerStart);
-        RxUtils.unSubscribe(subscriptionOfAnswerEnd);
+        RxUtils.dispose(subscriptionOfClassStart);
+        RxUtils.dispose(subscriptionOfClassEnd);
+        RxUtils.dispose(subscriptionOfForbidAllStatus);
+        RxUtils.dispose(subscriptionOfTeacherMedia);
+        RxUtils.dispose(subscriptionOfUserIn);
+        RxUtils.dispose(subscriptionOfUserOut);
+        RxUtils.dispose(subscriptionOfQuizStart);
+        RxUtils.dispose(subscriptionOfQuizRes);
+        RxUtils.dispose(subscriptionOfQuizEnd);
+        RxUtils.dispose(subscriptionOfQuizSolution);
+        RxUtils.dispose(subscriptionOfDebug);
+        RxUtils.dispose(subscriptionOfAnnouncement);
+        RxUtils.dispose(subscriptionOfClassSwitch);
+        RxUtils.dispose(subscriptionOfAnswerStart);
+        RxUtils.dispose(subscriptionOfAnswerEnd);
     }
 
     @Override

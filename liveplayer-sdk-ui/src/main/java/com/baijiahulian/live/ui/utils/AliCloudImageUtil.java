@@ -3,8 +3,8 @@ package com.baijiahulian.live.ui.utils;
 import android.content.Context;
 import android.util.Log;
 
-import com.baijiahulian.livecore.utils.DisplayUtils;
-import com.baijiahulian.livecore.utils.LPBJUrl;
+import com.baijiayun.livecore.utils.DisplayUtils;
+import com.baijiayun.livecore.utils.LPBJUrl;
 
 import java.util.HashMap;
 

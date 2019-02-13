@@ -2,11 +2,9 @@ package com.baijiahulian.live.ui.more;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 import com.baijiahulian.live.ui.utils.RxUtils;
-import com.baijiahulian.livecore.models.LPCheckRecordStatusModel;
-import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 
 /**
  * Created by Shubo on 2017/4/17.
@@ -16,7 +14,7 @@ public class MoreMenuPresenter implements MoreMenuContract.Presenter {
 
     private MoreMenuContract.View view;
     private LiveRoomRouterListener routerListener;
-    private Subscription subscriptionOfCloudRecord, subscriptionOfIsCloudRecordAllowed;
+    private Disposable subscriptionOfCloudRecord, subscriptionOfIsCloudRecordAllowed;
     private boolean recordStatus;
 
     public MoreMenuPresenter(MoreMenuContract.View view) {
@@ -32,15 +30,12 @@ public class MoreMenuPresenter implements MoreMenuContract.Presenter {
     public void subscribe() {
         subscriptionOfCloudRecord = routerListener.getLiveRoom().getObservableOfCloudRecordStatus()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<Boolean>() {
-                    @Override
-                    public void call(Boolean aBoolean) {
-                        recordStatus = aBoolean;
-                        if (aBoolean)
-                            view.showCloudRecordOn();
-                        else
-                            view.showCloudRecordOff();
-                    }
+                .subscribe(aBoolean -> {
+                    recordStatus = aBoolean;
+                    if (aBoolean)
+                        view.showCloudRecordOn();
+                    else
+                        view.showCloudRecordOff();
                 });
         recordStatus = routerListener.getLiveRoom().getCloudRecordStatus();
         if (recordStatus)
@@ -51,8 +46,8 @@ public class MoreMenuPresenter implements MoreMenuContract.Presenter {
 
     @Override
     public void unSubscribe() {
-        RxUtils.unSubscribe(subscriptionOfCloudRecord);
-        RxUtils.unSubscribe(subscriptionOfIsCloudRecordAllowed);
+        RxUtils.dispose(subscriptionOfCloudRecord);
+        RxUtils.dispose(subscriptionOfIsCloudRecordAllowed);
     }
 
     @Override
@@ -70,16 +65,13 @@ public class MoreMenuPresenter implements MoreMenuContract.Presenter {
     public void switchCloudRecord() {
         if (!recordStatus) {
             subscriptionOfIsCloudRecordAllowed = routerListener.getLiveRoom().requestIsCloudRecordAllowed()
-                    .subscribe(new LPErrorPrintSubscriber<LPCheckRecordStatusModel>() {
-                        @Override
-                        public void call(LPCheckRecordStatusModel lpCheckRecordStatusModel) {
-                            if (lpCheckRecordStatusModel.recordStatus == 1) {
-                                routerListener.navigateToCloudRecord(true);
-                                routerListener.getLiveRoom().requestCloudRecord(true);
-                            } else {
-                                if (view != null)
-                                    view.showCloudRecordNotAllowed(lpCheckRecordStatusModel.reason);
-                            }
+                    .subscribe(lpCheckRecordStatusModel -> {
+                        if (lpCheckRecordStatusModel.recordStatus == 1) {
+                            routerListener.navigateToCloudRecord(true);
+                            routerListener.getLiveRoom().requestCloudRecord(true);
+                        } else {
+                            if (view != null)
+                                view.showCloudRecordNotAllowed(lpCheckRecordStatusModel.reason);
                         }
                     });
         } else {

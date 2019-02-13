@@ -1,6 +1,6 @@
 package com.baijiahulian.live.ui.pptmanage;
 
-import com.baijiahulian.livecore.models.LPDocumentModel;
+import com.baijiayun.livecore.models.LPDocumentModel;
 
 /**
  * Created by Shubo on 2017/5/2.

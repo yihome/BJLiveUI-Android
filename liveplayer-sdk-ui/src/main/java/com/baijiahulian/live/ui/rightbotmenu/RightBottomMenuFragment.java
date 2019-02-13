@@ -9,13 +9,15 @@ import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseFragment;
 import com.baijiahulian.live.ui.utils.RotationObserver;
 import com.baijiahulian.live.ui.utils.RxUtils;
-import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
+import com.baijiayun.livecore.context.LPConstants;
 
 import java.util.concurrent.TimeUnit;
 
-import rx.Observable;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+
 
 /**
  * Created by Shubo on 2017/2/16.
@@ -25,7 +27,7 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
         RotationObserver.OnRotationSettingChangedListener {
 
     private RightBottomMenuContract.Presenter presenter;
-    private Subscription subscriptionOfVideoClick, subscriptionOfAudioClick, subscriptionOfZoomClick, subscriptionOfMoreClick;
+    private Disposable subscriptionOfVideoClick, subscriptionOfAudioClick, subscriptionOfZoomClick, subscriptionOfMoreClick;
     private RotationObserver rotationObserver;
 
     @Override
@@ -40,9 +42,9 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
         subscriptionOfVideoClick = $.id(R.id.fragment_right_bottom_video).clicked()
                 .throttleFirst(2, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<Void>() {
+                .subscribe(new Consumer<Integer>() {
                     @Override
-                    public void call(Void aVoid) {
+                    public void accept(Integer aVoid) {
                         if (!clickableCheck()) {
                             showToast(getString(R.string.live_frequent_error));
                             return;
@@ -54,9 +56,9 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
         subscriptionOfAudioClick = $.id(R.id.fragment_right_bottom_audio).clicked()
                 .throttleFirst(2, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<Void>() {
+                .subscribe(new Consumer<Integer>() {
                     @Override
-                    public void call(Void aVoid) {
+                    public void accept(Integer aVoid) {
                         if (!clickableCheck()) {
                             showToast(getString(R.string.live_frequent_error));
                             return;
@@ -68,9 +70,9 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
         subscriptionOfMoreClick = $.id(R.id.fragment_right_bottom_more).clicked()
                 .throttleFirst(1, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<Void>() {
+                .subscribe(new Consumer<Integer>() {
                     @Override
-                    public void call(Void aVoid) {
+                    public void accept(Integer aVoid) {
                         int location[] = new int[2];
                         $.id(R.id.fragment_right_bottom_more).view().getLocationInWindow(location);
                         presenter.more(location[0], location[1]);
@@ -81,9 +83,9 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
                 .clicked()
                 .throttleFirst(1, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<Void>() {
+                .subscribe(new Consumer<Integer>() {
                     @Override
-                    public void call(Void aVoid) {
+                    public void accept(Integer aVoid) {
                         presenter.changeZoom();
                     }
                 });
@@ -157,30 +159,24 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
     }
 
     @Override
-    public void showVolume(int level) {
+    public void showVolume(LPConstants.VolumeLevel level) {
         // level between [0,9]
         switch (level) {
-            case 0:
-                $.id(R.id.fragment_right_bottom_audio).image(R.drawable.live_ic_stopaudio_1);
-                break;
-            case 1:
-            case 2:
+//            case MUTE:
+//                $.id(R.id.fragment_right_bottom_audio).image(R.drawable.live_ic_stopaudio_1);
+            case NONE:
                 $.id(R.id.fragment_right_bottom_audio).image(R.drawable.live_ic_stopaudio_2);
                 break;
-            case 3:
-            case 4:
+            case LOW:
                 $.id(R.id.fragment_right_bottom_audio).image(R.drawable.live_ic_stopaudio_3);
                 break;
-            case 5:
-            case 6:
+            case MIDDLE:
                 $.id(R.id.fragment_right_bottom_audio).image(R.drawable.live_ic_stopaudio_4);
                 break;
-            case 7:
-            case 8:
+            case HIGH:
                 $.id(R.id.fragment_right_bottom_audio).image(R.drawable.live_ic_stopaudio_5);
-                break;
-            case 9:
-                $.id(R.id.fragment_right_bottom_audio).image(R.drawable.live_ic_stopaudio_6);
+//            case 9:
+//                $.id(R.id.fragment_right_bottom_audio).image(R.drawable.live_ic_stopaudio_6);
                 break;
             default:
                 break;
@@ -221,10 +217,10 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
     @Override
     public void onDestroy() {
         super.onDestroy();
-        RxUtils.unSubscribe(subscriptionOfAudioClick);
-        RxUtils.unSubscribe(subscriptionOfVideoClick);
-        RxUtils.unSubscribe(subscriptionOfMoreClick);
-        RxUtils.unSubscribe(subscriptionOfZoomClick);
+        RxUtils.dispose(subscriptionOfAudioClick);
+        RxUtils.dispose(subscriptionOfVideoClick);
+        RxUtils.dispose(subscriptionOfMoreClick);
+        RxUtils.dispose(subscriptionOfZoomClick);
         rotationObserver.stopObserver();
         presenter = null;
     }
@@ -235,16 +231,16 @@ public class RightBottomMenuFragment extends BaseFragment implements RightBottom
         presenter.setSysRotationSetting();
     }
 
-    private Subscription subscriptionOfClickable;
+    private Disposable subscriptionOfClickable;
 
     private boolean clickableCheck() {
-        if (subscriptionOfClickable != null && !subscriptionOfClickable.isUnsubscribed()) {
+        if (subscriptionOfClickable != null && !subscriptionOfClickable.isDisposed()) {
             return false;
         }
-        subscriptionOfClickable = Observable.timer(1, TimeUnit.SECONDS).subscribe(new LPErrorPrintSubscriber<Long>() {
+        subscriptionOfClickable = Observable.timer(1, TimeUnit.SECONDS).subscribe(new Consumer<Long>() {
             @Override
-            public void call(Long aLong) {
-                RxUtils.unSubscribe(subscriptionOfClickable);
+            public void accept(Long aLong) {
+                RxUtils.dispose(subscriptionOfClickable);
             }
         });
         return true;

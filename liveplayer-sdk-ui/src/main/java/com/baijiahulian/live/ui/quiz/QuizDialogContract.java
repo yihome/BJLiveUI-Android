@@ -2,8 +2,8 @@ package com.baijiahulian.live.ui.quiz;
 
 import com.baijiahulian.live.ui.base.BasePresenter;
 import com.baijiahulian.live.ui.base.BaseView;
-import com.baijiahulian.livecore.models.LPJsonModel;
-import com.baijiahulian.livecore.models.imodels.IUserModel;
+import com.baijiayun.livecore.models.LPJsonModel;
+import com.baijiayun.livecore.models.imodels.IUserModel;
 
 /**
  * Created by wangkangfei on 17/5/31.

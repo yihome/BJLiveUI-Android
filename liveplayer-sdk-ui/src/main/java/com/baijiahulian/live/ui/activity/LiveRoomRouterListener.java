@@ -3,15 +3,15 @@ package com.baijiahulian.live.ui.activity;
 import android.widget.RelativeLayout;
 
 import com.baijiahulian.live.ui.ppt.MyPPTView;
-import com.baijiahulian.livecore.context.LPConstants;
-import com.baijiahulian.livecore.context.LPError;
-import com.baijiahulian.livecore.context.LiveRoom;
-import com.baijiahulian.livecore.listener.OnPhoneRollCallListener;
-import com.baijiahulian.livecore.models.LPJsonModel;
-import com.baijiahulian.livecore.models.LPAnswerSheetModel;
-import com.baijiahulian.livecore.models.imodels.IMediaControlModel;
-import com.baijiahulian.livecore.models.imodels.IMediaModel;
-import com.baijiahulian.livecore.models.imodels.IUserModel;
+import com.baijiayun.livecore.context.LPConstants;
+import com.baijiayun.livecore.context.LPError;
+import com.baijiayun.livecore.context.LiveRoom;
+import com.baijiayun.livecore.listener.OnPhoneRollCallListener;
+import com.baijiayun.livecore.models.LPJsonModel;
+import com.baijiayun.livecore.models.LPAnswerSheetModel;
+import com.baijiayun.livecore.models.imodels.IMediaControlModel;
+import com.baijiayun.livecore.models.imodels.IMediaModel;
+import com.baijiayun.livecore.models.imodels.IUserModel;
 
 /**
  * Created by Shubo on 2017/2/15.
@@ -169,8 +169,6 @@ public interface LiveRoomRouterListener {
 
     void attachLocalAudio();
 
-    void resizeFullScreenWaterMark(int height, int width);
-
     void notifyPPTResumeInSpeakers();
 
     void setIsStopPublish(boolean b);
@@ -188,6 +186,8 @@ public interface LiveRoomRouterListener {
     void showStreamDebugPanel();
 
     void showDebugBtn();
+
+    void showCopyLogDebugPanel();
 
     void enableStudentSpeakMode();
 
@@ -216,4 +216,6 @@ public interface LiveRoomRouterListener {
     void answerStart(LPAnswerSheetModel model);
 
     void answerEnd(boolean ended);
+
+    void showAwardAnimation(String userName);
 }

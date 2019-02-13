@@ -1,9 +1,12 @@
 package com.baijiahulian.live.ui.leftmenu;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
-import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
+import com.baijiayun.livecore.utils.LPRxUtils;
 
-import rx.android.schedulers.AndroidSchedulers;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+
 
 /**
  * Created by Shubo on 2017/2/15.
@@ -15,6 +18,7 @@ public class LeftMenuPresenter implements LeftMenuContract.Presenter {
     private LeftMenuContract.View view;
     private boolean isScreenCleared = false;
     private boolean isSelfForbidden = false;
+    private Disposable disposableOfIsSelfChatForbid;
 
     public LeftMenuPresenter(LeftMenuContract.View view) {
         this.view = view;
@@ -62,20 +66,26 @@ public class LeftMenuPresenter implements LeftMenuContract.Presenter {
     }
 
     @Override
+    public void showCopyLogDebugPanel() {
+        routerListener.showCopyLogDebugPanel();
+    }
+
+    @Override
     public void setRouter(LiveRoomRouterListener liveRoomRouterListener) {
         routerListener = liveRoomRouterListener;
     }
 
     @Override
     public void subscribe() {
-        routerListener.getLiveRoom().getObservableOfIsSelfChatForbid()
+        disposableOfIsSelfChatForbid = routerListener.getLiveRoom().getObservableOfIsSelfChatForbid()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<Boolean>() {
+                .subscribe(new Consumer<Boolean>() {
                     @Override
-                    public void call(Boolean aBoolean) {
+                    public void accept(Boolean aBoolean) {
                         isSelfForbidden = aBoolean;
                     }
                 });
+
     }
 
     @Override
@@ -85,6 +95,7 @@ public class LeftMenuPresenter implements LeftMenuContract.Presenter {
 
     @Override
     public void destroy() {
+        LPRxUtils.dispose(disposableOfIsSelfChatForbid);
         routerListener = null;
         view = null;
     }

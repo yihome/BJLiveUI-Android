@@ -10,5 +10,4 @@
             android:theme="@style/LiveAppTheme"
             android:windowSoftInputMode="adjustPan" />
     </application>
-
 </manifest>

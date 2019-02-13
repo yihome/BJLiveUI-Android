@@ -1,6 +1,6 @@
 package com.baijiahulian.live.ui.chat.emoji;
 
-import com.baijiahulian.livecore.models.imodels.IExpressionModel;
+import com.baijiayun.livecore.models.imodels.IExpressionModel;
 
 /**
  * Created by Shubo on 2017/5/6.

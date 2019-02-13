@@ -7,9 +7,9 @@ import android.widget.ProgressBar;
 
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseFragment;
-import com.baijiahulian.livecore.LiveSDK;
-import com.baijiahulian.livecore.context.LPError;
-import com.baijiahulian.livecore.context.LiveRoom;
+import com.baijiayun.livecore.LiveSDK;
+import com.baijiayun.livecore.context.LPError;
+import com.baijiayun.livecore.context.LiveRoom;
 
 import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 
@@ -37,6 +37,7 @@ public class LoadingFragment extends BaseFragment implements LoadingContract.Vie
     public void init(Bundle savedInstanceState) {
         checkNotNull(presenter);
         progressBar = (ProgressBar) $.id(R.id.fragment_loading_pb).view();
+        $.id(R.id.fragment_loading_back).clicked(lis -> getActivity().finish());
         Bundle args = getArguments();
         if (args != null) {
             setTechSupportVisibility(args.getBoolean("show_tech_support", true));

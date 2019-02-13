@@ -3,6 +3,7 @@ package com.baijiahulian.live.ui.base;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +20,7 @@ import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 
 public abstract class BaseFragment extends Fragment {
 
+    private final String TAG = BaseFragment.class.getCanonicalName();
     protected View view;
     protected QueryPlus $;
     private BasePresenter basePresenter;
@@ -79,17 +81,19 @@ public abstract class BaseFragment extends Fragment {
 
     @Override
     public void onDestroy() {
+        Log.d(TAG, "onDestroy");
         super.onDestroy();
-    }
-
-    @Override
-    public void onDetach(){
-        super.onDetach();
         if (basePresenter != null) {
             basePresenter.unSubscribe();
             basePresenter.destroy();
             basePresenter = null;
         }
         $ = null;
+    }
+
+    @Override
+    public void onDetach(){
+        Log.d(TAG, "onDetach");
+        super.onDetach();
     }
 }

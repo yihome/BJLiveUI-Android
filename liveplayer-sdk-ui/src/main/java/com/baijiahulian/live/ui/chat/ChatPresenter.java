@@ -5,15 +5,14 @@ import com.baijiahulian.common.networkv2.BJResponse;
 import com.baijiahulian.common.networkv2.HttpException;
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 import com.baijiahulian.live.ui.utils.RxUtils;
-import com.baijiahulian.livecore.context.LPConstants;
-import com.baijiahulian.livecore.models.LPShortResult;
-import com.baijiahulian.livecore.models.LPUploadDocModel;
-import com.baijiahulian.livecore.models.imodels.IMessageModel;
-import com.baijiahulian.livecore.models.imodels.IUserModel;
-import com.baijiahulian.livecore.utils.LPBackPressureBufferedSubscriber;
-import com.baijiahulian.livecore.utils.LPChatMessageParser;
-import com.baijiahulian.livecore.utils.LPJsonUtils;
-import com.baijiahulian.livecore.utils.LPLogger;
+import com.baijiayun.livecore.context.LPConstants;
+import com.baijiayun.livecore.models.LPShortResult;
+import com.baijiayun.livecore.models.LPUploadDocModel;
+import com.baijiayun.livecore.models.imodels.IMessageModel;
+import com.baijiayun.livecore.models.imodels.IUserModel;
+import com.baijiayun.livecore.utils.LPChatMessageParser;
+import com.baijiayun.livecore.utils.LPJsonUtils;
+import com.baijiayun.livecore.utils.LPLogger;
 import com.google.gson.JsonObject;
 
 import java.io.IOException;
@@ -22,10 +21,9 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.functions.Func1;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 
 import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 
@@ -37,7 +35,7 @@ public class ChatPresenter implements ChatContract.Presenter {
 
     private LiveRoomRouterListener routerListener;
     private ChatContract.View view;
-    private Subscription subscriptionOfDataChange, subscriptionOfMessageReceived;
+    private Disposable subscriptionOfDataChange, subscriptionOfMessageReceived;
     private LinkedBlockingQueue<UploadingImageModel> imageMessageUploadingQueue;
     private ConcurrentHashMap<String, List<IMessageModel>> privateChatMessagePool;
     private int receivedNewMessageNumber = 0;
@@ -60,60 +58,51 @@ public class ChatPresenter implements ChatContract.Presenter {
         subscriptionOfDataChange = routerListener.getLiveRoom().getChatVM().getObservableOfNotifyDataChange()
                 .onBackpressureBuffer(1000)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPBackPressureBufferedSubscriber<List<IMessageModel>>() {
+                .subscribe(new Consumer<List<IMessageModel>>() {
                     @Override
-                    public void call(List<IMessageModel> iMessageModels) {
+                    public void accept(List<IMessageModel> iMessageModels) {
                         view.notifyDataChanged();
                     }
                 });
         subscriptionOfMessageReceived = routerListener.getLiveRoom().getChatVM().getObservableOfReceiveMessage()
                 .onBackpressureBuffer()
-                .doOnNext(new Action1<IMessageModel>() {
-                    @Override
-                    public void call(IMessageModel iMessageModel) {
-                        if (!iMessageModel.getFrom().getUserId().equals(routerListener.getLiveRoom().getCurrentUser().getUserId()))
-                            receivedNewMessageNumber++;
-                        if (iMessageModel.isPrivateChat() && iMessageModel.getToUser() != null) {
-                            String userNumber = iMessageModel.getFrom().getNumber().equals(routerListener.getLiveRoom().getCurrentUser().getNumber()) ?
-                                    iMessageModel.getToUser().getNumber() : iMessageModel.getFrom().getNumber();
-                            List<IMessageModel> messageList = privateChatMessagePool.get(userNumber);
-                            if (messageList == null) {
-                                messageList = new ArrayList<>();
-                                privateChatMessagePool.put(userNumber, messageList);
-                            }
-                            messageList.add(iMessageModel);
+                .doOnNext(iMessageModel -> {
+                    if (!iMessageModel.getFrom().getUserId().equals(routerListener.getLiveRoom().getCurrentUser().getUserId()))
+                        receivedNewMessageNumber++;
+                    if (iMessageModel.isPrivateChat() && iMessageModel.getToUser() != null) {
+                        String userNumber = iMessageModel.getFrom().getNumber().equals(routerListener.getLiveRoom().getCurrentUser().getNumber()) ?
+                                iMessageModel.getToUser().getNumber() : iMessageModel.getFrom().getNumber();
+                        List<IMessageModel> messageList = privateChatMessagePool.get(userNumber);
+                        if (messageList == null) {
+                            messageList = new ArrayList<>();
+                            privateChatMessagePool.put(userNumber, messageList);
                         }
+                        messageList.add(iMessageModel);
                     }
                 })
-                .filter(new Func1<IMessageModel, Boolean>() {
-                    @Override
-                    public Boolean call(IMessageModel iMessageModel) {
-                        if (routerListener.isPrivateChat()) return true;
-                        if ("-1".equals(iMessageModel.getTo())) return false;
-                        if (iMessageModel.getToUser() == null) return false;
-                        IUserModel currentPrivateChatUser = routerListener.getPrivateChatUser();
-                        if(currentPrivateChatUser == null) return true;
-                        return iMessageModel.getToUser().getNumber().equals(currentPrivateChatUser.getNumber())
-                                || iMessageModel.getFrom().getNumber().equals(currentPrivateChatUser.getName());
-                    }
+                .filter(iMessageModel -> {
+                    if (routerListener.isPrivateChat()) return true;
+                    if ("-1".equals(iMessageModel.getTo())) return false;
+                    if (iMessageModel.getToUser() == null) return false;
+                    IUserModel currentPrivateChatUser = routerListener.getPrivateChatUser();
+                    if(currentPrivateChatUser == null) return true;
+                    return iMessageModel.getToUser().getNumber().equals(currentPrivateChatUser.getNumber())
+                            || iMessageModel.getFrom().getNumber().equals(currentPrivateChatUser.getName());
                 })
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPBackPressureBufferedSubscriber<IMessageModel>() {
-                    @Override
-                    public void call(IMessageModel iMessageModel) {
-                        if (iMessageModel.getMessageType() == LPConstants.MessageType.Image
-                                && iMessageModel.getFrom().getUserId().equals(routerListener.getLiveRoom().getCurrentUser().getUserId())) {
-                            view.notifyItemChange(getCount() - imageMessageUploadingQueue.size() - 1);
-                        }
-                        view.notifyItemInserted(getCount() - 1);
+                .subscribe(iMessageModel -> {
+                    if (iMessageModel.getMessageType() == LPConstants.MessageType.Image
+                            && iMessageModel.getFrom().getUserId().equals(routerListener.getLiveRoom().getCurrentUser().getUserId())) {
+                        view.notifyItemChange(getCount() - imageMessageUploadingQueue.size() - 1);
                     }
+                    view.notifyItemInserted(getCount() - 1);
                 });
     }
 
     @Override
     public void unSubscribe() {
-        RxUtils.unSubscribe(subscriptionOfDataChange);
-        RxUtils.unSubscribe(subscriptionOfMessageReceived);
+        RxUtils.dispose(subscriptionOfDataChange);
+        RxUtils.dispose(subscriptionOfMessageReceived);
     }
 
     @Override
@@ -253,7 +242,7 @@ public class ChatPresenter implements ChatContract.Presenter {
                     routerListener.getLiveRoom().getChatVM().sendImageMessageToUser(model.getToUser(), imageContent, uploadModel.width, uploadModel.height);
                     imageMessageUploadingQueue.poll();
                     continueUploadQueue();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     model.setStatus(UploadingImageModel.STATUS_UPLOAD_FAILED);
                     view.notifyDataChanged();
                     e.printStackTrace();

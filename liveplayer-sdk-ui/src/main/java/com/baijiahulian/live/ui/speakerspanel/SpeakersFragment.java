@@ -1,18 +1,16 @@
 package com.baijiahulian.live.ui.speakerspanel;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
@@ -27,21 +25,24 @@ import com.baijiahulian.live.ui.utils.QueryPlus;
 import com.baijiahulian.live.ui.utils.RxUtils;
 import com.baijiahulian.live.ui.utils.VideoDefinitionUtil;
 import com.baijiahulian.live.ui.viewsupport.BJTouchHorizontalScrollView;
-import com.baijiahulian.livecore.context.LPConstants;
-import com.baijiahulian.livecore.models.imodels.IMediaModel;
-import com.baijiahulian.livecore.models.imodels.IUserModel;
-import com.baijiahulian.livecore.ppt.whiteboard.LPWhiteBoardView;
-import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
-import com.baijiayun.photoview.OnDoubleTapListener;
-import com.baijiayun.photoview.OnViewTapListener;
+
+import com.baijiayun.livecore.context.LPConstants;
+import com.baijiayun.livecore.models.imodels.IMediaModel;
+import com.baijiayun.livecore.models.imodels.IUserModel;
+import com.baijiayun.livecore.ppt.photoview.OnDoubleTapListener;
+import com.baijiayun.livecore.ppt.photoview.OnViewTapListener;
+
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import rx.Observable;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
+
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 
 import static com.baijiahulian.live.ui.speakerspanel.SpeakersContract.PPT_TAG;
 import static com.baijiahulian.live.ui.speakerspanel.SpeakersContract.RECORD_TAG;
@@ -67,6 +68,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
     private static final int SHRINK_THRESHOLD = 3;
     private boolean disableSpeakQueuePlaceholder;
     private boolean isClickByUser = false;
+    private CompositeDisposable timerList = new CompositeDisposable();
 
     @Override
     public int getLayoutId() {
@@ -88,13 +90,10 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
         scrollView.setListener(this);
         lpItem = new ViewGroup.LayoutParams(DisplayUtils.dip2px(getActivity(), 100),
                 DisplayUtils.dip2px(getActivity(), 76));
-        scrollView.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
-            @Override
-            public void onScrollChanged() {
-                if (scrollView.getScrollX() == scrollView.getChildAt(0).getMeasuredWidth() - scrollView.getMeasuredWidth()) {
-                    if (speakerRequest.getVisibility() == View.VISIBLE) {
-                        speakerRequest.setVisibility(View.GONE);
-                    }
+        scrollView.getViewTreeObserver().addOnScrollChangedListener(() -> {
+            if (scrollView.getScrollX() == scrollView.getChildAt(0).getMeasuredWidth() - scrollView.getMeasuredWidth()) {
+                if (speakerRequest.getVisibility() == View.VISIBLE) {
+                    speakerRequest.setVisibility(View.GONE);
                 }
             }
         });
@@ -121,10 +120,10 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
             if (!presenter.getRecorder().isAudioAttached())
                 presenter.getRecorder().attachAudio();
         }
-        Observable.timer(300, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<Long>() {
+        Disposable timer = Observable.timer(300, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<Long>() {
                     @Override
-                    public void call(Long aLong) {
+                    public void accept(Long aLong) {
                         if (attachVideoOnResume) {
                             attachVideoOnResume = false;
                             if (!presenter.getRecorder().isPublishing())
@@ -134,21 +133,23 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                         }
                     }
                 });
+        timerList.add(timer);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if (presenter.getRecorder().isVideoAttached()) {
+        if (presenter.getRecorder() != null && presenter.getRecorder().isVideoAttached()) {
             presenter.getRecorder().detachVideo();
             attachVideoOnResume = true;
         }
-        if (presenter.getRecorder().isAudioAttached()) {
+        if (presenter.getRecorder() != null && presenter.getRecorder().isAudioAttached()) {
             presenter.getRecorder().detachAudio();
             attachAudioOnResume = true;
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public void notifyItemChanged(int position, IMediaModel iMediaModel) {
         if (container == null) return;
@@ -156,7 +157,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
         if (viewType == VIEW_TYPE_SPEAKER) {
             container.removeViewAt(position);
             container.addView(generateSpeakView(presenter.getSpeakModel(position)), position);
-
+            presenter.getPlayer().playAudio(presenter.getItem(position));
         } else if (viewType == VIEW_TYPE_PRESENTER) {
             IMediaModel model;
             if (iMediaModel == null)
@@ -167,66 +168,61 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
             if (model == null) return;
             if (model.getUser() == null) return;
 
-//            if (model.skipRelease() == 1 && model.isVideoOn() && container.getChildAt(position) instanceof VideoView && !isClickByUser) {
-//                // 处理黑帧重播问题
-//                return;
-//            }
+            String userId = TextUtils.isEmpty(model.getMediaId()) ? model.getUser().getUserId() : model.getMediaId();
+
             isClickByUser = false;
-            container.removeViewAt(position);
+
             if (model.isVideoOn() && presenter.isAutoPlay()) {
+
                 VideoView videoView;
-                if (presenter.getWaterMark() != null) {
-                    videoView = new VideoView(getActivity(), model.getUser().getName() + (model.getUser().getType() ==  LPConstants.LPUserType.Teacher ? getString(R.string.live_teacher_hint) : getString(R.string.live_presenter_hint)),
-                            presenter.getWaterMark().url, presenter.getWaterMark().pos, presenter.getPlayer().getVideoViewByUserId(model.getUser().getUserId()));
-                } else {
-                    videoView = new VideoView(getActivity(), model.getUser().getName() + (model.getUser().getType() ==  LPConstants.LPUserType.Teacher ? getString(R.string.live_teacher_hint) : getString(R.string.live_presenter_hint)),
-                            presenter.getPlayer().getVideoViewByUserId(model.getUser().getUserId()));
-                }
+                videoView = new VideoView(getContext(), presenter.isNeedLoading(userId));
+                videoView.setName(appendName(model.getUser(), true));
+
+                container.removeViewAt(position);
                 container.addView(videoView, position, lpItem);
 
                 final GestureDetector gestureDetector = new GestureDetector(getActivity(),
-                        new ClickGestureDetector(model.getUser().getUserId()));
-                videoView.setOnTouchListener(new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View v, MotionEvent event) {
-                        gestureDetector.onTouchEvent(event);
-                        return true;
-                    }
+                        new ClickGestureDetector(userId));
+                videoView.setOnTouchListener((v, event) -> {
+                    gestureDetector.onTouchEvent(event);
+                    return true;
                 });
+
                 presenter.getPlayer().playAVClose(presenter.getItem(position));
-                presenter.getPlayer().playVideo(presenter.getItem(position), videoView.getSurfaceView());
+                presenter.getPlayer().playVideo(presenter.getItem(position), videoView.getLpVideoView());
+                updateAwardTv(videoView, model);
             } else {
 //                presenter.getPlayer().playAVClose(presenter.getItem(position));
                 if (model.isAudioOn())
                     presenter.getPlayer().playAudio(presenter.getItem(position));
                 if (model.getUser() == null) return;
+                container.removeViewAt(position);
                 container.addView(generateSpeakView(model), position);
             }
         } else if (viewType == VIEW_TYPE_VIDEO_PLAY) {
             IMediaModel model = presenter.getSpeakModel(position);
-//            if (model.skipRelease() == 1 && model.isVideoOn() && container.getChildAt(position) instanceof VideoView) {
-//                // 处理黑帧重播问题
-//                return;
-//            }
             container.removeViewAt(position);
-            VideoView videoView = new VideoView(getActivity(), model.getUser().getName(), presenter.getPlayer().getVideoViewByUserId(model.getUser().getUserId()));
+            VideoView videoView = new VideoView(getActivity(), presenter.isNeedLoading(model.getUser().getUserId()));
+            videoView.setName(appendName(model.getUser(), false));
+
             container.addView(videoView, position, lpItem);
+            updateAwardTv(videoView, model);
+            videoView.setAwardCount(presenter.getRewardCount(model.getUser().getNumber()));
+
             final GestureDetector gestureDetector = new GestureDetector(getActivity(), new ClickGestureDetector(model.getUser().getUserId()));
-            videoView.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    gestureDetector.onTouchEvent(event);
-                    return true;
-                }
+            videoView.setOnTouchListener((v, event) -> {
+                gestureDetector.onTouchEvent(event);
+                return true;
             });
-//            presenter.getPlayer().playAVClose(presenter.getItem(position));
-            presenter.getPlayer().playVideo(presenter.getItem(position), videoView.getSurfaceView());
+            presenter.getPlayer().playAVClose(presenter.getItem(position));
+            presenter.getPlayer().playVideo(presenter.getItem(position), videoView.getLpVideoView());
         }
         if (container.getChildCount() > 0) {
             presenter.notifyHavingSpeakers();
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public void notifyItemInserted(final int position, View addView) {
         if (container == null) return;
@@ -236,92 +232,103 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                 break;
             case VIEW_TYPE_PRESENTER:
                 IMediaModel presenterSpeakModel = presenter.getSpeakModel(position);
+
+                String userId;
+                if (!TextUtils.isEmpty(presenterSpeakModel.getMediaId())) {
+                    userId = presenterSpeakModel.getMediaId();
+                } else {
+                    userId = presenterSpeakModel.getUser().getUserId();
+                }
                 if (presenterSpeakModel.isVideoOn()) {
                     VideoView videoView;
-                    if (addView == null || !(addView instanceof VideoView)) {
-                        if (presenter.getWaterMark() == null) {
-                            videoView = new VideoView(getActivity(), presenterSpeakModel.getUser().getName() + (presenterSpeakModel.getUser().getType() == LPConstants.LPUserType.Teacher ? getString(R.string.live_teacher_hint) : getString(R.string.live_presenter_hint)), presenter.getPlayer().getVideoViewByUserId(presenterSpeakModel.getUser().getUserId()));
-                        } else {
-                            videoView = new VideoView(getActivity(), presenterSpeakModel.getUser().getName() + (presenterSpeakModel.getUser().getType() == LPConstants.LPUserType.Teacher ? getString(R.string.live_teacher_hint) : getString(R.string.live_presenter_hint)),
-                                    presenter.getWaterMark().url, presenter.getWaterMark().pos, presenter.getPlayer().getVideoViewByUserId(presenterSpeakModel.getUser().getUserId()));
-                        }
-                    }else {
+                    if (!(addView instanceof VideoView)) {
+                        videoView = new VideoView(getContext(), presenter.isNeedLoading(userId));
+                        videoView.setName(appendName(presenterSpeakModel.getUser(), true));
+                        // 拉流
+                        presenter.getPlayer().playVideo(presenter.getItem(position), videoView.getLpVideoView());
+                    } else {
                         videoView = (VideoView) addView;
-                        videoView.setName(presenterSpeakModel.getUser().getName() + (presenterSpeakModel.getUser().getType() == LPConstants.LPUserType.Teacher ? getString(R.string.live_teacher_hint) : getString(R.string.live_presenter_hint)));
+                        videoView.setName(appendName(presenterSpeakModel.getUser(), true));
                     }
+                    updateAwardTv(videoView, presenterSpeakModel);
                     container.addView(videoView, position, lpItem);
 
-                    final GestureDetector gestureDetector = new GestureDetector(getActivity(), new ClickGestureDetector(presenterSpeakModel.getUser().getUserId()));
-                    videoView.setOnTouchListener(new View.OnTouchListener() {
-                        @Override
-                        public boolean onTouch(View v, MotionEvent event) {
-                            gestureDetector.onTouchEvent(event);
-                            return true;
-                        }
+                    final GestureDetector gestureDetector = new GestureDetector(getActivity(), new ClickGestureDetector(userId));
+                    videoView.setOnTouchListener((v, event) -> {
+                        gestureDetector.onTouchEvent(event);
+                        return true;
                     });
-//                    presenter.getPlayer().playAVClose(presenter.getItem(position));
-                    presenter.getPlayer().playVideo(presenter.getItem(position), videoView.getSurfaceView());
+
                 } else {
-                    container.addView(generateSpeakView(presenter.getSpeakModel(position)), position);
+                    container.addView(generateSpeakView(presenterSpeakModel), position);
+                    if (presenterSpeakModel.isAudioOn()) // 新主讲打开音频
+                        presenter.getPlayer().playAudio(presenter.getItem(position));
                 }
                 break;
             case VIEW_TYPE_RECORD:
                 if (recorderView == null) {
                     recorderView = new RecorderView(getActivity());
-                    presenter.getRecorder().setPreview(recorderView);
+                    recorderView.setName(appendName(presenter.getCurrentUser(), false));
+                    presenter.getRecorder().setPreview(recorderView.getCameraView());
+                    recorderView.getCameraView().setZOrderMediaOverlay(true);
                 } else {
                     container.removeView(recorderView);
+                    presenter.getRecorder().setPreview(recorderView.getCameraView());
+                }
+                recorderView.setAwardCount(presenter.getRewardCount(presenter.getCurrentUser().getNumber()));
+                if (presenter.isTeacherOrAssistant()) {
+                    recorderView.setAwardTvVisibility(View.GONE);
                 }
                 container.addView(recorderView, position, lpItem);
 
                 final GestureDetector gestureDetector1 = new GestureDetector(getActivity(), new ClickGestureDetector(RECORD_TAG));
-                recorderView.setOnTouchListener(new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View v, MotionEvent event) {
-                        gestureDetector1.onTouchEvent(event);
-                        return true;
-                    }
+                recorderView.setOnTouchListener((v, event) -> {
+                    gestureDetector1.onTouchEvent(event);
+                    return true;
                 });
 
                 if (!presenter.getRecorder().isPublishing())
                     presenter.getRecorder().publish();
                 if (!presenter.getRecorder().isVideoAttached()) {
-                    Observable.timer(1, TimeUnit.SECONDS).observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(new LPErrorPrintSubscriber<Long>() {
+                    Disposable timer = Observable.timer(1, TimeUnit.SECONDS).observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(new Consumer<Long>() {
                                 @Override
-                                public void call(Long aLong) {
+                                public void accept(Long aLong) {
                                     presenter.getRecorder().attachVideo();
                                 }
                             });
+                    timerList.add(timer);
                 }
                 break;
             case VIEW_TYPE_VIDEO_PLAY:
                 IMediaModel model = presenter.getSpeakModel(position);
                 VideoView videoView;
-                if (addView == null || !(addView instanceof VideoView))
-                    videoView = new VideoView(getActivity(), model.getUser().getName(), presenter.getPlayer().getVideoViewByUserId(model.getUser().getUserId()));
-                else {
+                if (!(addView instanceof VideoView)) {
+                    videoView = new VideoView(getContext(), presenter.isNeedLoading(model.getUser().getUserId()));
+                    videoView.setName(appendName(model.getUser(), false));
+                    // 拉流
+                    presenter.getPlayer().playVideo(presenter.getItem(position), videoView.getLpVideoView());
+                } else {
                     videoView = (VideoView) addView;
-                    videoView.setName(model.getUser().getName());
+                    videoView.setName(appendName(model.getUser(), false));
                 }
+                updateAwardTv(videoView, model);
+                videoView.setAwardCount(presenter.getRewardCount(model.getUser().getNumber()));
+
                 container.addView(videoView, position, lpItem);
                 final GestureDetector gestureDetector = new GestureDetector(getActivity(), new ClickGestureDetector(model.getUser().getUserId()));
-                videoView.setOnTouchListener(new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View v, MotionEvent event) {
-                        gestureDetector.onTouchEvent(event);
-                        return true;
-                    }
+                videoView.setOnTouchListener((v, event) -> {
+                    gestureDetector.onTouchEvent(event);
+                    return true;
                 });
-
-//                presenter.getPlayer().playAVClose(presenter.getItem(position));
-                presenter.getPlayer().playVideo(presenter.getItem(position), videoView.getSurfaceView());
                 break;
             case VIEW_TYPE_SPEAKER:
                 IMediaModel speakerModel = presenter.getSpeakModel(position);
                 if (speakerModel == null || speakerModel.getUser() == null) return;
                 View view = generateSpeakView(speakerModel);
-                container.addView(view, position);
+                addView(view, position);
+                if (speakerModel.isAudioOn())
+                    presenter.getPlayer().playAudio(presenter.getItem(position));
 //                if (speakerModel.isVideoOn()) {
 //                    presenter.playVideo(speakerModel.getUser().getUserId());
 //                }
@@ -329,7 +336,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                 break;
             case VIEW_TYPE_APPLY:
                 View applyView = generateApplyView(presenter.getApplyModel(position));
-                container.addView(applyView, position);
+                addView(applyView, position);
                 final ViewGroup.LayoutParams params = applyView.getLayoutParams();
                 WindowManager wm = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
                 if ((position + 1) * params.width > wm.getDefaultDisplay().getWidth())
@@ -395,10 +402,86 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
         return removedView;
     }
 
+    private void addView(View view, int position) {
+        if (position > container.getChildCount())
+            container.addView(view);
+        else
+            container.addView(view, position);
+    }
+
     @Override
     public void deletedViewAt(int position) {
         if (container == null || container.getChildCount() <= position || position < 0) return;
         container.removeViewAt(position);
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @Override
+    public void updateView(int position, View videoView) {
+        if (container == null) return;
+        int viewType = presenter.getItemViewType(position);
+        if (viewType == VIEW_TYPE_PRESENTER) {
+            IMediaModel model;
+            model = presenter.getSpeakModel(position);
+            if (model == null) return;
+            if (model.getUser() == null) return;
+
+            isClickByUser = false;
+
+            if (model.isVideoOn() && presenter.isAutoPlay()) {
+                String userId = TextUtils.isEmpty(model.getMediaId()) ? model.getUser().getUserId() : model.getMediaId();
+
+                if (videoView == null || !(videoView instanceof VideoView))
+                    videoView = new VideoView(getContext(), presenter.isNeedLoading(userId));
+                ((VideoView) videoView).setName(appendName(model.getUser(), true));
+
+                container.removeViewAt(position);
+                container.addView(videoView, position, lpItem);
+
+                final GestureDetector gestureDetector = new GestureDetector(getActivity(),
+                        new ClickGestureDetector(userId));
+                videoView.setOnTouchListener((v, event) -> {
+                    gestureDetector.onTouchEvent(event);
+                    return true;
+                });
+
+                presenter.getPlayer().playAVClose(presenter.getItem(position));
+                presenter.getPlayer().playVideo(presenter.getItem(position), ((VideoView) videoView).getLpVideoView());
+                if (presenter.isUseWebRTC() && model.isAudioOn())
+                    presenter.getPlayer().playAudio(presenter.getItem(position));
+                updateAwardTv((VideoView) videoView, model);
+            } else {
+//                presenter.getPlayer().playAVClose(presenter.getItem(position));
+                if (model.isAudioOn())
+                    presenter.getPlayer().playAudio(presenter.getItem(position));
+                if (model.getUser() == null) return;
+                container.removeViewAt(position);
+                container.addView(generateSpeakView(model), position);
+            }
+        } else if (viewType == VIEW_TYPE_VIDEO_PLAY) {
+            IMediaModel model = presenter.getSpeakModel(position);
+
+            if (videoView == null || !(videoView instanceof VideoView))
+                videoView = new VideoView(getActivity(), presenter.isNeedLoading(model.getUser().getUserId()));
+            ((VideoView) videoView).setName(appendName(model.getUser(), false));
+
+            container.removeViewAt(position);
+            container.addView(videoView, position, lpItem);
+
+            final GestureDetector gestureDetector = new GestureDetector(getActivity(), new ClickGestureDetector(model.getUser().getUserId()));
+            videoView.setOnTouchListener((v, event) -> {
+                gestureDetector.onTouchEvent(event);
+                return true;
+            });
+            presenter.getPlayer().playAVClose(presenter.getItem(position));
+            presenter.getPlayer().playVideo(presenter.getItem(position), ((VideoView) videoView).getLpVideoView());
+            if (presenter.isUseWebRTC() && model.isAudioOn())
+                presenter.getPlayer().playAudio(presenter.getItem(position));
+            updateAwardTv((VideoView) videoView, model);
+        }
+        if (container.getChildCount() > 0) {
+            presenter.notifyHavingSpeakers();
+        }
     }
 
 
@@ -433,10 +516,21 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
     @Override
     public void notifyViewAdded(View view, int position) {
         if (view == null || view.getParent() != null) return;
-        if (view instanceof VideoView)
-            ((SurfaceView)((VideoView) view).getSurfaceView()).setZOrderMediaOverlay(true);
-        if (view instanceof RecorderView)
-            ((RecorderView)(view)).setZOrderMediaOverlay(true);
+        if (view instanceof VideoView) {
+            ((VideoView) view).getLpVideoView().setZOrderMediaOverlay(true);
+            ((VideoView) view).setAwardLayoutVisibility(View.VISIBLE);
+            IMediaModel model = presenter.getSpeakModel(position);
+            if (model.getUser() != null && (model.getUser().getType() == LPConstants.LPUserType.Teacher || model.getUser().getType() == LPConstants.LPUserType.Assistant)) {
+                ((VideoView) view).setAwardTvVisibility(View.GONE);
+            }
+        }
+        if (view instanceof RecorderView) {
+            ((RecorderView) (view)).setZOrderMediaOverlay(true);
+            ((RecorderView) view).setAwardLayoutVisibility(View.VISIBLE);
+            if (presenter.isTeacherOrAssistant()) {
+                ((RecorderView) view).setAwardTvVisibility(View.GONE);
+            }
+        }
         if (position > container.getChildCount())
             container.addView(view, lpItem);
         else
@@ -466,25 +560,6 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
         showToast(getString(R.string.live_speakers_max_video_exceed));
     }
 
-
-
-    @Override
-    public void notifyPresenterVideoSizeChange(int position, int height, int width) {
-        if (container == null) return;
-
-        if (container.getChildAt(position) instanceof VideoView) {
-            ((VideoView) container.getChildAt(position)).resizeWaterMark(height, width);
-        }
-    }
-
-    @Override
-    public void notifyFullScreenPresenterStatusChange(int position, boolean b) {
-//        View view = container.getChildAt(position);
-//        if (view instanceof VideoView) {
-//            ((VideoView) view).setIsPresenter(b);
-//        }
-    }
-
     @Override
     public void disableSpeakQueuePlaceholder() {
         disableSpeakQueuePlaceholder = true;
@@ -504,22 +579,23 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
 
     @Override
     public void stopLoadingAnimation(final int position) {
-        if (container == null || position >= container.getChildCount() ||  container.getChildCount() <= 0) return;
+        if (container == null || position >= container.getChildCount() || container.getChildCount() <= 0)
+            return;
         if (getActivity() == null) return;
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (position < 0){
-                    for (int i = 0; i < container.getChildCount(); i ++){
+                if (position < 0) {
+                    for (int i = 0; i < container.getChildCount(); i++) {
                         View view = container.getChildAt(i);
                         if (view instanceof VideoView)
-                            ((VideoView)view).stopRotate();
+                            ((VideoView) view).stopRotate();
                     }
                     return;
                 }
                 View view = container.getChildAt(position);
                 if (view instanceof VideoView)
-                    ((VideoView)view).stopRotate();
+                    ((VideoView) view).stopRotate();
             }
         });
     }
@@ -529,43 +605,40 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
         super.showToast(s);
     }
 
+    @Override
+    public void notifyAwardCountChange(int position, int awardCount) {
+        View view = container.getChildAt(position);
+        if (view instanceof VideoView) {
+            ((VideoView) view).setAwardCount(awardCount);
+        }
+        if (view instanceof RecorderView) {
+            ((RecorderView) view).setAwardCount(awardCount);
+        }
+    }
 
+    @SuppressLint("CheckResult")
     private View generateApplyView(final IUserModel model) {
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.item_speak_apply, container, false);
         QueryPlus q = QueryPlus.with(view);
         q.id(R.id.item_speak_apply_avatar).image(getActivity(), model.getAvatar());
         q.id(R.id.item_speak_apply_name).text(model.getName() + getContext().getString(R.string.live_media_speak_applying));
-        q.id(R.id.item_speak_apply_agree).clicked().subscribe(new LPErrorPrintSubscriber<Void>() {
-            @Override
-            public void call(Void aVoid) {
-                presenter.agreeSpeakApply(model.getUserId());
-            }
-        });
-        q.id(R.id.item_speak_apply_disagree).clicked().subscribe(new LPErrorPrintSubscriber<Void>() {
-            @Override
-            public void call(Void aVoid) {
-                presenter.disagreeSpeakApply(model.getUserId());
-            }
-        });
+        q.id(R.id.item_speak_apply_agree).clicked().subscribe(integer -> presenter.agreeSpeakApply(model.getUserId()));
+        q.id(R.id.item_speak_apply_disagree).clicked().subscribe(integer -> presenter.disagreeSpeakApply(model.getUserId()));
         return view;
     }
 
     private View generateSpeakView(final IMediaModel model) {
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.item_speak_speaker, container, false);
         QueryPlus q = QueryPlus.with(view);
-        if (presenter.getItemViewType(model.getUser().getUserId()) == VIEW_TYPE_PRESENTER)
-            q.id(R.id.item_speak_speaker_name).text(model.getUser().getName() + (model.getUser().getType() ==  LPConstants.LPUserType.Teacher ? getString(R.string.live_teacher_hint) : getString(R.string.live_presenter_hint)));
+        String userId = TextUtils.isEmpty(model.getMediaId()) ? model.getUser().getUserId() : model.getMediaId();
+        if (presenter.getItemViewType(userId) == VIEW_TYPE_PRESENTER)
+            q.id(R.id.item_speak_speaker_name).text(model.getUser().getName() + (model.getUser().getType() == LPConstants.LPUserType.Teacher ? getString(R.string.live_teacher_hint) : getString(R.string.live_presenter_hint)));
         else
             q.id(R.id.item_speak_speaker_name).text(model.getUser().getName());
         String avatar = model.getUser().getAvatar().startsWith("//") ? "https:" + model.getUser().getAvatar() : model.getUser().getAvatar();
         q.id(R.id.item_speak_speaker_avatar).image(getActivity(), avatar);
         q.id(R.id.item_speak_speaker_video_label).visibility(model.isVideoOn() ? View.VISIBLE : View.GONE);
-        q.contentView().setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showOptionDialog(model.getUser().getUserId());
-            }
-        });
+        q.contentView().setOnClickListener(v -> showOptionDialog(userId));
         return view;
     }
 
@@ -622,7 +695,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                 if (presenterModel == null || presenterModel.getUser() == null) return; // 主讲人音视频未开启
                 if (presenterModel.isVideoOn() && presenter.isAutoPlay()) {
                     options.add(getString(R.string.live_full_screen));
-                    if (presenter.isEnableSwitchPresenter() && presenter.isCurrentTeacher() && presenterModel.getUser().getType() == LPConstants.LPUserType.Assistant){
+                    if (presenter.isEnableSwitchPresenter() && presenter.isCurrentTeacher() && presenterModel.getUser().getType() == LPConstants.LPUserType.Assistant) {
                         options.add(getString(R.string.live_unset_presenter));
                     }
                     if (presenterModel.getVideoDefinitions().size() > 1)
@@ -632,7 +705,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                 } else if (presenterModel.isVideoOn() && !presenter.isAutoPlay()) {
                     options.add(getString(R.string.live_open_video));
                 } else if (presenterModel.isAudioOn()) {
-                    if (presenter.isEnableSwitchPresenter() && presenter.isCurrentTeacher() && presenterModel.getUser().getType() == LPConstants.LPUserType.Assistant){
+                    if (presenter.isEnableSwitchPresenter() && presenter.isCurrentTeacher() && presenterModel.getUser().getType() == LPConstants.LPUserType.Assistant) {
                         options.add(getString(R.string.live_unset_presenter));
                     }
                 }
@@ -653,18 +726,21 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                 options.add(getString(R.string.live_full_screen));
                 IMediaModel iMediaModel = presenter.getSpeakModel(tag);
                 if (iMediaModel == null || iMediaModel.getUser() == null) return;
-                if (presenter.isEnableSwitchPresenter() && presenter.isCurrentTeacher() &&  (iMediaModel.getUser().getType() == LPConstants.LPUserType.Teacher || iMediaModel.getUser().getType() == LPConstants.LPUserType.Assistant))
+                if (presenter.isEnableSwitchPresenter() && presenter.isCurrentTeacher() && (iMediaModel.getUser().getType() == LPConstants.LPUserType.Teacher || iMediaModel.getUser().getType() == LPConstants.LPUserType.Assistant))
                     options.add(getString(R.string.live_set_to_presenter));
-                if ( iMediaModel.getUser().getType() == LPConstants.LPUserType.Student
+                if (iMediaModel.getUser().getType() == LPConstants.LPUserType.Student
                         && presenter.isTeacherOrAssistant() && presenter.isEnableGrantDrawing()) {
                     if (presenter.isHasDrawingAuth(tag))
                         options.add(getString(R.string.live_unset_auth_drawing));
                     else
                         options.add(getString(R.string.live_set_auth_drawing));
                 }
-                if ( iMediaModel.getVideoDefinitions().size() > 1)
+                if (iMediaModel.getVideoDefinitions().size() > 1)
                     options.add(getString(R.string.live_switch_definitions));
-
+                if (presenter.isTeacherOrAssistant() && iMediaModel.getUser().getType() != LPConstants.LPUserType.Assistant
+                        && iMediaModel.getUser().getType() != LPConstants.LPUserType.Teacher) {
+                    options.add(getString(R.string.live_award));
+                }
                 options.add(getString(R.string.live_close_video));
                 if (presenter.isTeacherOrAssistant() && presenter.isMultiClass() && iMediaModel.getUser().getType() != LPConstants.LPUserType.Teacher)
                     options.add(getString(R.string.live_close_speaking));
@@ -676,7 +752,7 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                         options.add(getString(R.string.live_open_video));
                     if (presenter.isEnableSwitchPresenter() && presenter.isCurrentTeacher() && (model.getUser().getType() == LPConstants.LPUserType.Teacher || model.getUser().getType() == LPConstants.LPUserType.Assistant))
                         options.add(getString(R.string.live_set_to_presenter));
-                    if ( model.getUser().getType() == LPConstants.LPUserType.Student
+                    if (model.getUser().getType() == LPConstants.LPUserType.Student
                             && presenter.isTeacherOrAssistant() && presenter.isEnableGrantDrawing()) {
                         if (presenter.isHasDrawingAuth(tag))
                             options.add(getString(R.string.live_unset_auth_drawing));
@@ -710,16 +786,18 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
                         } else if (getString(R.string.live_recorder_pretty_filter_off).equals(charSequence.toString())
                                 || getString(R.string.live_recorder_pretty_filter_on).equals(charSequence.toString())) {
                             presenter.switchPrettyFilter();
-                        }else if(getString(R.string.live_switch_definitions).equals(charSequence.toString())){
+                        } else if (getString(R.string.live_switch_definitions).equals(charSequence.toString())) {
                             showVideoDefinitionSwitchDialog(tag);
-                        }else if (getString(R.string.live_set_to_presenter).equals(charSequence.toString())) {
+                        } else if (getString(R.string.live_set_to_presenter).equals(charSequence.toString())) {
                             presenter.requestPresenterChange(tag, true);
-                        }else if (getString(R.string.live_unset_presenter).equals(charSequence.toString())){
+                        } else if (getString(R.string.live_unset_presenter).equals(charSequence.toString())) {
                             presenter.requestPresenterChange(tag, false);
-                        }else if (getString(R.string.live_set_auth_drawing).equals(charSequence.toString())){
+                        } else if (getString(R.string.live_set_auth_drawing).equals(charSequence.toString())) {
                             presenter.requestStudentDrawingAuth(tag, true);
-                        }else if (getString(R.string.live_unset_auth_drawing).equals(charSequence.toString())){
+                        } else if (getString(R.string.live_unset_auth_drawing).equals(charSequence.toString())) {
                             presenter.requestStudentDrawingAuth(tag, false);
+                        } else if (getString(R.string.live_award).equals(charSequence.toString())) {
+                            presenter.requestAward(presenter.getSpeakModel(tag).getUser().getNumber());
                         }
                         materialDialog.dismiss();
                     }
@@ -729,12 +807,12 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
 
     private void showVideoDefinitionSwitchDialog(final String tag) {
         IMediaModel iMediaModel = presenter.getSpeakModel(tag);
-        if(iMediaModel == null || iMediaModel.getVideoDefinitions().size() <= 1) return;
+        if (iMediaModel == null || iMediaModel.getVideoDefinitions().size() <= 1) return;
         List<String> options = new ArrayList<>();
-        for(LPConstants.VideoDefinition definition : iMediaModel.getVideoDefinitions()){
+        for (LPConstants.VideoDefinition definition : iMediaModel.getVideoDefinitions()) {
             options.add(VideoDefinitionUtil.getVideoDefinitionLabelFromType(definition));
         }
-        if(getActivity() == null) return;
+        if (getActivity() == null) return;
         new MaterialDialog.Builder(getActivity())
                 .items(options)
                 .itemsCallback(new MaterialDialog.ListCallback() {
@@ -761,16 +839,16 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
         }
     }
 
-    private Subscription subscriptionOfClickable;
+    private Disposable subscriptionOfClickable;
 
     private boolean clickableCheck() {
-        if (subscriptionOfClickable != null && !subscriptionOfClickable.isUnsubscribed()) {
+        if (presenter == null || (subscriptionOfClickable != null && !subscriptionOfClickable.isDisposed())) {
             return false;
         }
-        subscriptionOfClickable = Observable.timer(1, TimeUnit.SECONDS).subscribe(new LPErrorPrintSubscriber<Long>() {
+        subscriptionOfClickable = Observable.timer(1, TimeUnit.SECONDS).subscribe(new Consumer<Long>() {
             @Override
-            public void call(Long aLong) {
-                RxUtils.unSubscribe(subscriptionOfClickable);
+            public void accept(Long aLong) {
+                RxUtils.dispose(subscriptionOfClickable);
             }
         });
         return true;
@@ -790,10 +868,29 @@ public class SpeakersFragment extends BaseFragment implements SpeakersContract.V
         }
     }
 
+    private String appendName(IUserModel userModel, boolean isPresenter) {
+        String name = userModel.getName();
+        if (userModel.getType() == LPConstants.LPUserType.Teacher) {
+            name += getString(R.string.live_teacher_hint);
+        }
+        if (isPresenter && userModel.getType() == LPConstants.LPUserType.Assistant) {
+            name += getString(R.string.live_presenter_hint);
+        }
+        return name;
+    }
 
     @Override
-    public void onDestroy(){
+    public void onDestroy() {
         super.onDestroy();
         presenter = null;
+        timerList.clear();
+    }
+
+    private void updateAwardTv(VideoView videoView, IMediaModel model) {
+        if (presenter.isTeacherOrAssistant() && model.getUser().getType() != LPConstants.LPUserType.Assistant && model.getUser().getType() != LPConstants.LPUserType.Teacher) {
+            videoView.setAwardTvVisibility(View.VISIBLE);
+        } else {
+            videoView.setAwardTvVisibility(View.GONE);
+        }
     }
 }

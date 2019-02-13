@@ -1,7 +1,7 @@
 package com.baijiahulian.live.ui.chat.emoji;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
-import com.baijiahulian.livecore.models.imodels.IExpressionModel;
+import com.baijiayun.livecore.models.imodels.IExpressionModel;
 
 import java.util.List;
 

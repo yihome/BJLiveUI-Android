@@ -2,15 +2,14 @@ package com.baijiahulian.live.ui.users;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 import com.baijiahulian.live.ui.utils.RxUtils;
-import com.baijiahulian.livecore.models.imodels.IUserModel;
-import com.baijiahulian.livecore.utils.LPBackPressureBufferedSubscriber;
-import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
-import com.baijiahulian.livecore.wrapper.exception.NotInitializedException;
+import com.baijiayun.livecore.models.imodels.IUserModel;
 
 import java.util.List;
 
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+
 
 /**
  * Created by Shubo on 2017/4/6.
@@ -20,7 +19,7 @@ public class OnlineUserPresenter implements OnlineUserContract.Presenter {
 
     private OnlineUserContract.View view;
     private LiveRoomRouterListener routerListener;
-    private Subscription  subscriptionOfUserCountChange, subscriptionOfUserDataChange;
+    private Disposable subscriptionOfUserCountChange, subscriptionOfUserDataChange;
     private volatile boolean isLoading = false;
 
     public OnlineUserPresenter(OnlineUserContract.View view) {
@@ -37,20 +36,19 @@ public class OnlineUserPresenter implements OnlineUserContract.Presenter {
         subscriptionOfUserCountChange = routerListener.getLiveRoom()
                 .getObservableOfUserNumberChange()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<Integer>() {
+                .subscribe(new Consumer<Integer>() {
                     @Override
-                    public void call(Integer integer) {
+                    public void accept(Integer integer) {
                         view.notifyUserCountChange(integer);
                     }
                 });
         subscriptionOfUserDataChange = routerListener.getLiveRoom()
                 .getOnlineUserVM()
                 .getObservableOfOnlineUser()
-                .onBackpressureBuffer()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPBackPressureBufferedSubscriber<List<IUserModel>>() {
+                .subscribe(new Consumer<List<IUserModel>>() {
                     @Override
-                    public void call(List<IUserModel> iUserModels) {
+                    public void accept(List<IUserModel> iUserModels) {
                         // iUserModels == null   no more data
                         if (isLoading)
                             isLoading = false;
@@ -63,8 +61,8 @@ public class OnlineUserPresenter implements OnlineUserContract.Presenter {
 
     @Override
     public void unSubscribe() {
-        RxUtils.unSubscribe(subscriptionOfUserCountChange);
-        RxUtils.unSubscribe(subscriptionOfUserDataChange);
+        RxUtils.dispose(subscriptionOfUserCountChange);
+        RxUtils.dispose(subscriptionOfUserDataChange);
     }
 
     @Override

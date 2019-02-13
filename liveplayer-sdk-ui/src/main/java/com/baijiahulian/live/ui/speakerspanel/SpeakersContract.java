@@ -5,12 +5,13 @@ import android.view.View;
 import com.baijiahulian.live.ui.base.BasePresenter;
 import com.baijiahulian.live.ui.base.BaseView;
 import com.baijiahulian.live.ui.ppt.MyPPTView;
-import com.baijiahulian.livecore.context.LPConstants;
-import com.baijiahulian.livecore.launch.LPEnterRoomNative;
-import com.baijiahulian.livecore.models.imodels.IMediaModel;
-import com.baijiahulian.livecore.models.imodels.IUserModel;
-import com.baijiahulian.livecore.wrapper.LPPlayer;
-import com.baijiahulian.livecore.wrapper.LPRecorder;
+import com.baijiayun.livecore.context.LPConstants;
+import com.baijiayun.livecore.context.LiveRoom;
+import com.baijiayun.livecore.models.imodels.IMediaModel;
+import com.baijiayun.livecore.models.imodels.IUserModel;
+import com.baijiayun.livecore.models.launch.LPEnterRoomNative;
+import com.baijiayun.livecore.wrapper.LPPlayer;
+import com.baijiayun.livecore.wrapper.LPRecorder;
 
 /**
  * Created by Shubo on 2017/6/5.
@@ -43,10 +44,6 @@ interface SpeakersContract {
 
         void showMaxVideoExceed();
 
-        void notifyPresenterVideoSizeChange(int position, int height, int width);
-
-        void notifyFullScreenPresenterStatusChange(int position, boolean b);
-
         void disableSpeakQueuePlaceholder();
 
         android.view.View getChildAt(int position);
@@ -56,6 +53,10 @@ interface SpeakersContract {
         void stopLoadingAnimation(int position);
 
         void showToast(String s);
+
+        void notifyAwardCountChange(int position, int awardCount);
+
+        void updateView(int position, android.view.View videoView);
     }
 
     interface Presenter extends BasePresenter {
@@ -134,5 +135,18 @@ interface SpeakersContract {
         boolean isEnableGrantDrawing();
 
         boolean isEnableSwitchPresenter();
+
+        LiveRoom getLiveRoom();
+
+        boolean isNeedLoading(String uid);
+
+        void requestAward(String userNumber);
+
+        int getRewardCount(String userNumber);
+
+        IUserModel getCurrentUser();
+
+        boolean isUseWebRTC();
+
     }
 }

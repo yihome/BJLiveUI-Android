@@ -3,15 +3,16 @@ package com.baijiahulian.live.ui.setting;
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 import com.baijiahulian.live.ui.rightmenu.RightMenuContract;
 import com.baijiahulian.live.ui.utils.RxUtils;
-import com.baijiahulian.livecore.context.LPConstants;
-import com.baijiahulian.livecore.context.LiveRoom;
-import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
-import com.baijiahulian.livecore.wrapper.LPPlayer;
-import com.baijiahulian.livecore.wrapper.LPRecorder;
+import com.baijiayun.livecore.context.LPConstants;
+import com.baijiayun.livecore.context.LiveRoom;
+import com.baijiayun.livecore.wrapper.LPPlayer;
+import com.baijiayun.livecore.wrapper.LPRecorder;
 
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import java.util.ArrayList;
+
 
 import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 
@@ -26,8 +27,9 @@ public class SettingPresenter implements SettingContract.Presenter {
     private LPRecorder recorder;
     private LPPlayer player;
     private LiveRoom liveRoom;
-    private Subscription subscriptionOfForbidAllChat, subscriptionOfMic, subscriptionOfCamera, subscriptionOfForbidRaiseHand,
-            subscriptionOfForbidAllAudio, subscriptionOfUpLinkType, subscriptionOfDownLinkType;
+    private Disposable subscriptionOfForbidAllChat, subscriptionOfMic, subscriptionOfCamera, subscriptionOfForbidRaiseHand,
+            subscriptionOfUpLinkType, subscriptionOfDownLinkType, subscriptionOfForbidAllAudio;
+    private ArrayList<String> tcpCdnTag;
 
     public SettingPresenter(SettingContract.View view) {
         this.view = view;
@@ -39,6 +41,7 @@ public class SettingPresenter implements SettingContract.Presenter {
         recorder = routerListener.getLiveRoom().getRecorder();
         player = routerListener.getLiveRoom().getPlayer();
         liveRoom = routerListener.getLiveRoom();
+//        liveRoom.getPartnerConfig().msConfig.get("")
     }
 
     @Override
@@ -122,41 +125,41 @@ public class SettingPresenter implements SettingContract.Presenter {
         }
 
         subscriptionOfForbidAllChat = liveRoom.getObservableOfForbidAllChatStatus().observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<Boolean>() {
+                .subscribe(new Consumer<Boolean>() {
                     @Override
-                    public void call(Boolean aBoolean) {
+                    public void accept(Boolean aBoolean) {
                         if (aBoolean) view.showForbidden();
                         else view.showNotForbidden();
                     }
                 });
         subscriptionOfMic = liveRoom.getRecorder().getObservableOfMicOn().observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<Boolean>() {
+                .subscribe(new Consumer<Boolean>() {
                     @Override
-                    public void call(Boolean aBoolean) {
+                    public void accept(Boolean aBoolean) {
                         if (aBoolean) view.showMicOpen();
                         else view.showMicClosed();
                     }
                 });
         subscriptionOfCamera = liveRoom.getRecorder().getObservableOfCameraOn().observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<Boolean>() {
+                .subscribe(new Consumer<Boolean>() {
                     @Override
-                    public void call(Boolean aBoolean) {
+                    public void accept(Boolean aBoolean) {
                         if (aBoolean) view.showCameraOpen();
                         else view.showCameraClosed();
                     }
                 });
         subscriptionOfForbidRaiseHand = liveRoom.getObservableOfForbidRaiseHand().observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<Boolean>() {
+                .subscribe(new Consumer<Boolean>() {
                     @Override
-                    public void call(Boolean aBoolean) {
+                    public void accept(Boolean aBoolean) {
                         if (aBoolean) view.showForbidRaiseHandOn();
                         else view.showForbidRaiseHandOff();
                     }
                 });
         subscriptionOfForbidAllAudio = liveRoom.getObservableOfForbidAllAudioStatus()
-                .subscribe(new Action1<Boolean>() {
+                .subscribe(new Consumer<Boolean>() {
                     @Override
-                    public void call(Boolean aBoolean) {
+                    public void accept(Boolean aBoolean) {
                         if (liveRoom.isTeacherOrAssistant()) {
                             //老师或助教，同步静音状态
                             if (aBoolean) view.showForbidAllAudioOn();
@@ -167,21 +170,21 @@ public class SettingPresenter implements SettingContract.Presenter {
                         if (aBoolean && recorder.isAudioAttached()) {
                             //静音
                             recorder.detachAudio();
-                            view.showMicClosed();
-                        } else if (!aBoolean) {
-                            //取消静音
-                            if (!recorder.isPublishing())
-                                recorder.publish();
-                            if (!recorder.isAudioAttached())
-                                recorder.attachAudio();
-                            view.showMicOpen();
                         }
+//                        else if (!aBoolean) {
+//                            //取消静音
+//                            if (!recorder.isPublishing())
+//                                recorder.publish();
+//                            if (!recorder.isAudioAttached())
+//                                recorder.attachAudio();
+//                            view.showMicOpen();
+//                        }
                     }
                 });
         subscriptionOfDownLinkType = liveRoom.getPlayer().getObservableOfLinkType().observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<LPConstants.LPLinkType>() {
+                .subscribe(new Consumer<LPConstants.LPLinkType>() {
                     @Override
-                    public void call(LPConstants.LPLinkType lpLinkType) {
+                    public void accept(LPConstants.LPLinkType lpLinkType) {
                         if (lpLinkType == LPConstants.LPLinkType.TCP) {
                             view.showDownLinkTCP();
                         } else {
@@ -190,9 +193,9 @@ public class SettingPresenter implements SettingContract.Presenter {
                     }
                 });
         subscriptionOfUpLinkType = liveRoom.getRecorder().getObservableOfLinkType().observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<LPConstants.LPLinkType>() {
+                .subscribe(new Consumer<LPConstants.LPLinkType>() {
                     @Override
-                    public void call(LPConstants.LPLinkType lpLinkType) {
+                    public void accept(LPConstants.LPLinkType lpLinkType) {
                         if (lpLinkType == LPConstants.LPLinkType.TCP) {
                             view.showUpLinkTCP();
                         } else {
@@ -200,17 +203,23 @@ public class SettingPresenter implements SettingContract.Presenter {
                         }
                     }
                 });
+
+        try {
+            tcpCdnTag = (ArrayList<String>) liveRoom.getPartnerConfig().msConfig.get("live_stream_cdn_list");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void unSubscribe() {
-        RxUtils.unSubscribe(subscriptionOfForbidAllChat);
-        RxUtils.unSubscribe(subscriptionOfMic);
-        RxUtils.unSubscribe(subscriptionOfCamera);
-        RxUtils.unSubscribe(subscriptionOfForbidRaiseHand);
-        RxUtils.unSubscribe(subscriptionOfForbidAllAudio);
-        RxUtils.unSubscribe(subscriptionOfUpLinkType);
-        RxUtils.unSubscribe(subscriptionOfDownLinkType);
+        RxUtils.dispose(subscriptionOfForbidAllChat);
+        RxUtils.dispose(subscriptionOfMic);
+        RxUtils.dispose(subscriptionOfCamera);
+        RxUtils.dispose(subscriptionOfForbidRaiseHand);
+        RxUtils.dispose(subscriptionOfUpLinkType);
+        RxUtils.dispose(subscriptionOfDownLinkType);
+        RxUtils.dispose(subscriptionOfForbidAllAudio);
     }
 
     @Override
@@ -219,6 +228,7 @@ public class SettingPresenter implements SettingContract.Presenter {
         recorder = null;
         player = null;
         view = null;
+        liveRoom = null;
     }
 
     @Override
@@ -351,7 +361,6 @@ public class SettingPresenter implements SettingContract.Presenter {
     public void setUpLinkTCP() {
         if (recorder.setLinkType(LPConstants.LPLinkType.TCP)) view.showUpLinkTCP();
         else view.showSwitchLinkTypeError();
-
     }
 
     @Override
@@ -409,7 +418,35 @@ public class SettingPresenter implements SettingContract.Presenter {
     }
 
     @Override
-    public boolean isSmallGroup() {
-        return liveRoom.getRoomType()== LPConstants.LPRoomType.SmallGroup;
+    public LPConstants.LPRoomType getRoomType() {
+        return liveRoom.getRoomType();
+    }
+
+    @Override
+    public int getCDNCount() {
+        return tcpCdnTag == null ? 0 : tcpCdnTag.size();
+    }
+
+    @Override
+    public void setUpCDNLink(int order) {
+        if(liveRoom.getRecorder().setTcpWithCdn(tcpCdnTag.get(order))){
+            view.showUpLinkTCP();
+        }else{
+            view.showSwitchLinkTypeError();
+        }
+    }
+
+    @Override
+    public void setDownCDNLink(int order) {
+        if(liveRoom.getPlayer().setLinkTypeTcpWithCdn(tcpCdnTag.get(order))){
+            view.showDownLinkTCP();
+        }else{
+            view.showSwitchLinkTypeError();
+        }
+    }
+
+    @Override
+    public boolean isUseWebRTC() {
+        return routerListener.getLiveRoom().isUseWebRTC();
     }
 }

@@ -12,7 +12,7 @@ import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseFragment;
 import com.baijiahulian.live.ui.utils.DisplayUtils;
 import com.baijiahulian.live.ui.utils.QueryPlus;
-import com.baijiahulian.livecore.models.LPAnswerSheetOptionModel;
+import com.baijiayun.livecore.models.LPAnswerSheetOptionModel;
 
 /**
  * Created by yangjingming on 2018/6/5.

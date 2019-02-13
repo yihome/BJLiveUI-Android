@@ -5,9 +5,8 @@ import android.content.res.Configuration;
 import android.support.annotation.NonNull;
 import android.view.View;
 
-import com.baijiayun.photoview.OnDoubleTapListener;
-import com.baijiayun.photoview.OnViewTapListener;
-import com.baijiayun.ppt.PPTView;
+import com.baijiayun.livecore.ppt.photoview.OnViewTapListener;
+import com.baijiayun.livecore.ppt.PPTView;
 
 /**
  * Created by Shubo on 2017/2/18.
@@ -66,9 +65,11 @@ public class MyPPTView extends PPTView implements PPTContract.View {
         presenter.updateQuickSwitchPPTView(maxIndex);
     }
 
+//    @Override
     public void onDestroy() {
-        super.onDestroy();
-        presenter.destroy();
+        super.destroy();
+        if (presenter != null)
+            presenter.destroy();
         presenter = null;
     }
 

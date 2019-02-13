@@ -3,8 +3,8 @@ package com.baijiahulian.live.ui.chat;
 import android.text.TextUtils;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
-import com.baijiahulian.livecore.context.LPConstants;
-import com.baijiahulian.livecore.models.imodels.IUserModel;
+import com.baijiayun.livecore.context.LPConstants;
+import com.baijiayun.livecore.models.imodels.IUserModel;
 
 import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
 

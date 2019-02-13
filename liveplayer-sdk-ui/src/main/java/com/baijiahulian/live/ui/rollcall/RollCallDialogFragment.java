@@ -64,12 +64,14 @@ public class RollCallDialogFragment extends BaseDialogFragment implements RollCa
 
     @Override
     public void timerDown(int time) {
+        if ($ != null)
         ((TextView) $.id(R.id.tv_roll_call_tip).view()).setText(getString(R.string.live_roll_call_count_down, String.valueOf(time)));
     }
 
     @Override
     public void timeOutSoDismiss() {
-        this.dismissAllowingStateLoss();
+        if (getFragmentManager() != null)
+            this.dismissAllowingStateLoss();
     }
 
 }

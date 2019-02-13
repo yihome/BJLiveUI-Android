@@ -1,5 +1,6 @@
 package com.baijiahulian.live.ui.rightmenu;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.View;
 
@@ -7,13 +8,14 @@ import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseFragment;
 import com.baijiahulian.live.ui.utils.RxUtils;
 import com.baijiahulian.live.ui.viewsupport.CountdownCircleView;
-import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
 
 import java.util.concurrent.TimeUnit;
 
-import rx.Observable;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+
 
 /**
  * Created by Shubo on 2017/2/15.
@@ -23,6 +25,7 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
 
     private RightMenuContract.Presenter presenter;
 
+    @SuppressLint("CheckResult")
     @Override
     protected void init(Bundle savedInstanceState) {
         super.init(savedInstanceState);
@@ -46,17 +49,13 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
         });
         $.id(R.id.fragment_right_speak_apply).clicked().throttleFirst(1, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<Void>() {
-                    @Override
-                    public void call(Void aVoid) {
-//                        Toast.makeText(getContext(), ((LiveRoomActivity)getActivity()).getLiveRoom().getGroupId() + "", Toast.LENGTH_SHORT).show();
-                        if (!clickableCheck()) {
-                            showToast(getString(R.string.live_frequent_error));
-                            return;
-                        }
-                        if (!presenter.isWaitingRecordOpen())
-                            presenter.speakApply();
+                .subscribe(integer -> {
+                    if (!clickableCheck()) {
+                        showToast(getString(R.string.live_frequent_error));
+                        return;
                     }
+                    if (!presenter.isWaitingRecordOpen())
+                        presenter.speakApply();
                 });
     }
 
@@ -230,16 +229,16 @@ public class RightMenuFragment extends BaseFragment implements RightMenuContract
         this.presenter = presenter;
     }
 
-    private Subscription subscriptionOfClickable;
+    private Disposable subscriptionOfClickable;
 
     private boolean clickableCheck() {
-        if (subscriptionOfClickable != null && !subscriptionOfClickable.isUnsubscribed()) {
+        if (subscriptionOfClickable != null && !subscriptionOfClickable.isDisposed()) {
             return false;
         }
-        subscriptionOfClickable = Observable.timer(1, TimeUnit.SECONDS).subscribe(new LPErrorPrintSubscriber<Long>() {
+        subscriptionOfClickable = Observable.timer(1, TimeUnit.SECONDS).subscribe(new Consumer<Long>() {
             @Override
-            public void call(Long aLong) {
-                RxUtils.unSubscribe(subscriptionOfClickable);
+            public void accept(Long aLong) {
+                RxUtils.dispose(subscriptionOfClickable);
             }
         });
         return true;

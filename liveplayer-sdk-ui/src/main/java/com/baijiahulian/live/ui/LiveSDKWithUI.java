@@ -8,10 +8,11 @@ import android.text.TextUtils;
 
 import com.baijiahulian.live.ui.activity.LiveRoomActivity;
 import com.baijiahulian.live.ui.utils.LPShareModel;
-import com.baijiahulian.livecore.context.LPConstants;
-import com.baijiahulian.livecore.models.imodels.IUserModel;
+import com.baijiayun.livecore.context.LPConstants;
+import com.baijiayun.livecore.models.imodels.IUserModel;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * 入口类
@@ -203,6 +204,11 @@ public class LiveSDKWithUI {
         @Override
         public LPConstants.LPEndType getEndType() {
             return LPConstants.LPEndType.Android;
+        }
+
+        @Override
+        public Map<String, Object> getWebRTCInfo() {
+            return null;
         }
     }
 }

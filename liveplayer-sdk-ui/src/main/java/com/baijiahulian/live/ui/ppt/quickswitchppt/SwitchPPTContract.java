@@ -2,7 +2,7 @@ package com.baijiahulian.live.ui.ppt.quickswitchppt;
 
 import com.baijiahulian.live.ui.base.BasePresenter;
 import com.baijiahulian.live.ui.base.BaseView;
-import com.baijiahulian.livecore.viewmodels.impl.LPDocListViewModel;
+import com.baijiayun.livecore.viewmodels.impl.LPDocListViewModel;
 
 import java.util.List;
 

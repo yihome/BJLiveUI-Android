@@ -1,6 +1,6 @@
 package com.baijiahulian.live.ui.pptmanage;
 
-import com.baijiahulian.livecore.models.LPUploadDocModel;
+import com.baijiayun.livecore.models.LPUploadDocModel;
 
 import java.io.File;
 

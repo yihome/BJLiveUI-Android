@@ -6,17 +6,21 @@ import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.Button;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.base.BaseDialogFragment;
 import com.baijiahulian.live.ui.utils.QueryPlus;
-import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
+import com.baijiayun.livecore.context.LPConstants;
+import com.baijiayun.livecore.utils.LPRxUtils;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import rx.Observable;
+import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
 
 /**
  * Created by Shubo on 2017/3/2.
@@ -26,6 +30,7 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
 
     private QueryPlus $;
     private SettingContract.Presenter presenter;
+    private Disposable disposable;
 
     public static SettingDialogFragment newInstance() {
         return new SettingDialogFragment();
@@ -58,6 +63,8 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
             public void onClick(View v) {
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2) {
                     showToast(getString(R.string.live_not_support_beauty_filter));
+                } else if (presenter.isUseWebRTC()) {
+                    showToast(getString(R.string.live_room_not_support_beautify));
                 } else {
                     presenter.changeBeautyFilter();
                 }
@@ -78,6 +85,10 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
         $.id(R.id.dialog_setting_radio_definition_low).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (presenter.isUseWebRTC()) {
+                    showToast("webRTC课程暂不支持切换清晰度");
+                    return;
+                }
                 if (checkClickable(getString(R.string.live_frequent_error_resolution)))
                     presenter.setDefinitionLow();
             }
@@ -99,6 +110,10 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
         $.id(R.id.dialog_setting_radio_definition_high).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (presenter.isUseWebRTC()) {
+                    showToast("webRTC课程暂不支持切换清晰度");
+                    return;
+                }
                 if (checkClickable(getString(R.string.live_frequent_error_resolution)))
                     presenter.setDefinitionHigh();
             }
@@ -107,8 +122,24 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
         $.id(R.id.dialog_setting_radio_link_up_1).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (checkClickable(getString(R.string.live_frequent_error_line)))
-                    presenter.setUpLinkTCP();
+                if (checkClickable(getString(R.string.live_frequent_error_line))) {
+                    if (presenter.getCDNCount() > 1) {
+                        ArrayList<String> options = new ArrayList<>();
+                        for (int i = 1; i <= presenter.getCDNCount(); i++) {
+                            options.add("线路" + i);
+                        }
+                        new MaterialDialog.Builder(getActivity())
+                                .items(options)
+                                .itemsCallback((dialog, itemView, position, text) -> {
+                                    presenter.setUpCDNLink(position);
+                                    dialog.dismiss();
+                                })
+                                .show();
+                    } else {
+                        presenter.setUpLinkTCP();
+                    }
+                }
+
             }
         });
         $.id(R.id.dialog_setting_radio_link_up_2).clicked(new View.OnClickListener() {
@@ -121,8 +152,23 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
         $.id(R.id.dialog_setting_radio_link_down_1).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (checkClickable(getString(R.string.live_frequent_error_line)))
-                    presenter.setDownLinkTCP();
+                if (checkClickable(getString(R.string.live_frequent_error_line))) {
+                    if (presenter.getCDNCount() > 1) {
+                        ArrayList<String> options = new ArrayList<>();
+                        for (int i = 1; i <= presenter.getCDNCount(); i++) {
+                            options.add("线路" + i);
+                        }
+                        new MaterialDialog.Builder(getActivity())
+                                .items(options)
+                                .itemsCallback((dialog, itemView, position, text) -> {
+                                    presenter.setDownCDNLink(position);
+                                    dialog.dismiss();
+                                })
+                                .show();
+                    }else{
+                        presenter.setDownLinkTCP();
+                    }
+                }
             }
         });
         $.id(R.id.dialog_setting_radio_link_down_2).clicked(new View.OnClickListener() {
@@ -172,12 +218,21 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
 
 
         if (presenter.isTeacherOrAssistant()) {
+            //只要是老师或助教，就显示全体禁言
             $.id(R.id.dialog_setting_forbid_all_speak_container).visible();
-            $.id(R.id.dialog_setting_forbid_raise_hand_container).visible();
             //只有小班才有静音功能.
-            if (presenter.isSmallGroup()) {
+            if (presenter.getRoomType() == LPConstants.LPRoomType.Multi) {
+                //大班课显示禁止举手，不显示全体静音
+                $.id(R.id.dialog_setting_forbid_raise_hand_container).visible();
+                $.id(R.id.dialog_setting_forbid_all_audio_container).gone();
+            } else if (presenter.getRoomType() == LPConstants.LPRoomType.SmallGroup
+                    || presenter.getRoomType() == LPConstants.LPRoomType.NewSmallGroup || presenter.getRoomType() == LPConstants.LPRoomType.DoubleTeachers) {
+                //小班课、新版小班课、双师，显示全体静音，不显示禁止举手
                 $.id(R.id.dialog_setting_forbid_all_audio_container).visible();
-            } else {
+                $.id(R.id.dialog_setting_forbid_raise_hand_container).gone();
+            } else if (presenter.getRoomType() == LPConstants.LPRoomType.Single) {
+                //一对一，禁止举手、全体静音都不显示
+                $.id(R.id.dialog_setting_forbid_raise_hand_container).gone();
                 $.id(R.id.dialog_setting_forbid_all_audio_container).gone();
             }
         } else {
@@ -403,12 +458,7 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
         final AtomicBoolean clickable = clickableWithKey.get(error);
         if (clickable.get()) {
             clickable.set(false);
-            Observable.timer(2, TimeUnit.SECONDS).subscribe(new LPErrorPrintSubscriber<Long>() {
-                @Override
-                public void call(Long aLong) {
-                    clickable.set(true);
-                }
-            });
+            disposable = Observable.timer(2, TimeUnit.SECONDS).subscribe(aLong -> clickable.set(true));
             return true;
         } else {
             showToast(error);
@@ -421,5 +471,6 @@ public class SettingDialogFragment extends BaseDialogFragment implements Setting
         super.onDestroy();
         presenter = null;
         $ = null;
+        LPRxUtils.dispose(disposable);
     }
 }

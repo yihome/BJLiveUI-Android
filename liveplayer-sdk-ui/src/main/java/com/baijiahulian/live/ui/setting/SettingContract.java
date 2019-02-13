@@ -2,7 +2,7 @@ package com.baijiahulian.live.ui.setting;
 
 import com.baijiahulian.live.ui.base.BasePresenter;
 import com.baijiahulian.live.ui.base.BaseView;
-import com.baijiahulian.livecore.context.LPConstants;
+import com.baijiayun.livecore.context.LPConstants;
 
 /**
  * Created by Shubo on 2017/3/2.
@@ -113,6 +113,14 @@ interface SettingContract {
 
         void switchForbidAllAudio();
 
-        boolean isSmallGroup();
+        LPConstants.LPRoomType getRoomType();
+
+        int getCDNCount();
+
+        void setUpCDNLink(int order);
+
+        void setDownCDNLink(int order);
+
+        boolean isUseWebRTC();
     }
 }

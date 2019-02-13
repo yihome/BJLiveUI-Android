@@ -1,16 +1,14 @@
 package com.baijiahulian.live.ui.utils;
 
+import android.os.Looper;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.view.View;
 
-import rx.Observable;
-import rx.Subscriber;
-import rx.Subscription;
-import rx.android.MainThreadSubscription;
-
-import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
-import static com.baijiahulian.livecore.utils.LPRxUtils.checkUiThread;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.disposables.Disposable;
 
 /**
  * Created by Shubo on 2017/2/13.
@@ -18,46 +16,53 @@ import static com.baijiahulian.livecore.utils.LPRxUtils.checkUiThread;
 
 public class RxUtils {
 
-    public static void unSubscribe(Subscription subscription) {
-        if (subscription != null && !subscription.isUnsubscribed()) {
-            subscription.unsubscribe();
-        }
+    public static void dispose(Disposable disposable) {
+        if (disposable != null && !disposable.isDisposed())
+            disposable.dispose();
     }
 
     @CheckResult
     @NonNull
-    public static Observable<Void> clicks(@NonNull View view) {
+    public static Observable<Integer> clicks(@NonNull View view) {
         checkNotNull(view, "view == null");
-        return Observable.create(new ViewClickOnSubscribe(view));
+        return Observable.create(new RxUtils.ViewClickOnSubscribe(view));
     }
 
-    private static class ViewClickOnSubscribe implements Observable.OnSubscribe<Void> {
-        View view;
+    private static class ViewClickOnSubscribe implements ObservableOnSubscribe<Integer> {
+        final View view;
 
         ViewClickOnSubscribe(View view) {
             this.view = view;
         }
 
         @Override
-        public void call(final Subscriber<? super Void> subscriber) {
+        public void subscribe(ObservableEmitter<Integer> observableEmitter) throws Exception {
             checkUiThread();
 
-            View.OnClickListener listener = new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (!subscriber.isUnsubscribed()) {
-                        subscriber.onNext(null);
-                    }
+            View.OnClickListener listener = v -> {
+                if (!observableEmitter.isDisposed()) {
+                    observableEmitter.onNext(view.getId());
                 }
             };
             view.setOnClickListener(listener);
 
-            subscriber.add(new MainThreadSubscription() {
-                @Override
-                protected void onUnsubscribe() {
-                    view.setOnClickListener(null);
-                }
+            observableEmitter.setCancellable(() -> {
+                view.setOnClickListener(null);
             });
+        }
+    }
+
+    public static <T> T checkNotNull(T value, String message) {
+        if (value == null) {
+            throw new NullPointerException(message);
+        }
+        return value;
+    }
+
+    public static void checkUiThread() {
+        if (Looper.getMainLooper() != Looper.myLooper()) {
+            throw new IllegalStateException(
+                    "Must be called from the main thread. Was: " + Thread.currentThread());
         }
     }
 }

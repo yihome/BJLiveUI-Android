@@ -25,7 +25,7 @@ import com.baijiahulian.live.ui.chat.emoji.EmojiFragment;
 import com.baijiahulian.live.ui.chat.emoji.EmojiSelectCallBack;
 import com.baijiahulian.live.ui.chat.privatechat.ChatUsersDialogFragment;
 import com.baijiahulian.live.ui.utils.QueryPlus;
-import com.baijiahulian.livecore.models.imodels.IExpressionModel;
+import com.baijiayun.livecore.models.imodels.IExpressionModel;
 
 import java.util.List;
 

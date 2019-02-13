@@ -15,7 +15,7 @@ import com.baijiahulian.live.ui.R;
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 import com.baijiahulian.live.ui.base.BaseFragment;
 import com.baijiahulian.live.ui.utils.DisplayUtils;
-import com.baijiahulian.livecore.models.imodels.IExpressionModel;
+import com.baijiayun.livecore.models.imodels.IExpressionModel;
 import com.squareup.picasso.Picasso;
 
 import static android.support.v4.view.ViewPager.SCROLL_STATE_IDLE;

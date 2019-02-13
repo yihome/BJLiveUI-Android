@@ -9,7 +9,8 @@ import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
 
-import rx.Observable;
+import io.reactivex.Observable;
+
 
 /**
  * 缓存引用，减少findViewById次数
@@ -48,7 +49,7 @@ public class QueryPlus extends Query {
         return this;
     }
 
-    public Observable<Void> clicked() {
+    public Observable<Integer> clicked() {
         return RxUtils.clicks(view);
     }
 

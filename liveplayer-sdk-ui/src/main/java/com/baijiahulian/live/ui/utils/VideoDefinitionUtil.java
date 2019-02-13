@@ -1,6 +1,6 @@
 package com.baijiahulian.live.ui.utils;
 
-import com.baijiahulian.livecore.context.LPConstants;
+import com.baijiayun.livecore.context.LPConstants;
 
 /**
  * Created by Shubo on 2018/6/21.

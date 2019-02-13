@@ -1,10 +1,10 @@
 package com.baijiahulian.live.ui.loading;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
-import com.baijiahulian.livecore.context.LPError;
-import com.baijiahulian.livecore.context.LiveRoom;
-import com.baijiahulian.livecore.launch.LPLaunchListener;
-import com.baijiahulian.livecore.models.imodels.IUserModel;
+import com.baijiayun.livecore.context.LPError;
+import com.baijiayun.livecore.context.LiveRoom;
+import com.baijiayun.livecore.listener.LPLaunchListener;
+import com.baijiayun.livecore.models.imodels.IUserModel;
 
 /**
  * Created by Shubo on 2017/2/14.

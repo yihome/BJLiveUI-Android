@@ -2,16 +2,14 @@ package com.baijiahulian.live.ui.chat.privatechat;
 
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 import com.baijiahulian.live.ui.utils.RxUtils;
-import com.baijiahulian.livecore.context.LPConstants;
-import com.baijiahulian.livecore.models.imodels.IUserModel;
-import com.baijiahulian.livecore.utils.LPBackPressureBufferedSubscriber;
-import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
+import com.baijiayun.livecore.context.LPConstants;
+import com.baijiayun.livecore.models.imodels.IUserModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 
 /**
  * Created by yangjingming on 2018/1/16.
@@ -21,7 +19,7 @@ public class ChatUsersPresenter implements ChatUsersContract.Presenter {
 
     private ChatUsersContract.View view;
     private LiveRoomRouterListener routerListener;
-    private Subscription subscriptionOfUserCountChange, subscriptionOfUserDataChange;
+    private Disposable subscriptionOfUserCountChange, subscriptionOfUserDataChange;
     private boolean isLoading = false;
     private List<IUserModel> iChatUserModels;
 
@@ -39,37 +37,30 @@ public class ChatUsersPresenter implements ChatUsersContract.Presenter {
         subscriptionOfUserCountChange = routerListener.getLiveRoom()
                 .getObservableOfUserNumberChange()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<Integer>() {
-                    @Override
-                    public void call(Integer integer) {
-                    }
+                .subscribe(integer -> {
                 });
         subscriptionOfUserDataChange = routerListener.getLiveRoom()
                 .getOnlineUserVM()
                 .getObservableOfOnlineUser()
-                .onBackpressureBuffer()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPBackPressureBufferedSubscriber<List<IUserModel>>() {
-                    @Override
-                    public void call(List<IUserModel> iUserModels) {
-                        // iUserModels == null   no more data
-                        onChatUsersChanged();
-                        if (isLoading)
-                            isLoading = false;
-                        if (!isPrivateChatUserAvailable()) {
-                            routerListener.onPrivateChatUserChange(null);
-                            view.showPrivateChatLabel(null);
-                        }
-                        view.notifyDataChanged();
+                .subscribe(iUserModels -> {
+                    // iUserModels == null   no more data
+                    onChatUsersChanged();
+                    if (isLoading)
+                        isLoading = false;
+                    if (!isPrivateChatUserAvailable()) {
+                        routerListener.onPrivateChatUserChange(null);
+                        view.showPrivateChatLabel(null);
                     }
+                    view.notifyDataChanged();
                 });
         view.notifyDataChanged();
     }
 
     @Override
     public void unSubscribe() {
-        RxUtils.unSubscribe(subscriptionOfUserCountChange);
-        RxUtils.unSubscribe(subscriptionOfUserDataChange);
+        RxUtils.dispose(subscriptionOfUserCountChange);
+        RxUtils.dispose(subscriptionOfUserDataChange);
     }
 
     @Override

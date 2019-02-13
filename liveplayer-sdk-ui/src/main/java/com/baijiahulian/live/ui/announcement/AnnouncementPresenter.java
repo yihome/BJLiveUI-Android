@@ -5,13 +5,13 @@ import android.text.TextUtils;
 import com.baijiahulian.live.ui.activity.GlobalPresenter;
 import com.baijiahulian.live.ui.activity.LiveRoomRouterListener;
 import com.baijiahulian.live.ui.utils.RxUtils;
-import com.baijiahulian.livecore.models.imodels.IAnnouncementModel;
-import com.baijiahulian.livecore.utils.LPErrorPrintSubscriber;
+import com.baijiayun.livecore.models.imodels.IAnnouncementModel;
 
 import java.util.regex.Pattern;
 
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 
 /**
  * Created by Shubo on 2017/4/19.
@@ -27,7 +27,7 @@ public class AnnouncementPresenter implements AnnouncementContract.Presenter {
 
     private String link;
 
-    private Subscription subscriptionOfAnnouncementChange;
+    private Disposable subscriptionOfAnnouncementChange;
 
     private Pattern pattern;
 
@@ -49,9 +49,9 @@ public class AnnouncementPresenter implements AnnouncementContract.Presenter {
     public void subscribe() {
         subscriptionOfAnnouncementChange = routerListener.getLiveRoom().getObservableOfAnnouncementChange()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new LPErrorPrintSubscriber<IAnnouncementModel>() {
+                .subscribe(new Consumer<IAnnouncementModel>() {
                     @Override
-                    public void call(IAnnouncementModel iAnnouncementModel) {
+                    public void accept(IAnnouncementModel iAnnouncementModel) {
                         content = iAnnouncementModel.getContent();
                         link = iAnnouncementModel.getLink();
                         view.showAnnouncementText(content);
@@ -71,7 +71,7 @@ public class AnnouncementPresenter implements AnnouncementContract.Presenter {
 
     @Override
     public void unSubscribe() {
-        RxUtils.unSubscribe(subscriptionOfAnnouncementChange);
+        RxUtils.dispose(subscriptionOfAnnouncementChange);
     }
 
     @Override
