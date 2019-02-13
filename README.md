@@ -12,14 +12,13 @@ BJLiveUI-Android
 - [更多 SDK](https://github.com/baijia)
 
 ## 百家云直播Android SDK简介
-百家云直播Android SDK提供了[Core (liveplayer-sdk-core)](https://github.com/baijia/BJLiveCore-Android)、[PPT (liveplayer-sdk-core-ppt)](link_ppt)和[UI (BJLiveUI-Android)](https://github.com/baijia/BJLiveUI-Android)三个库。
+百家云直播Android SDK提供了[Core (liveplayer-sdk-core)](https://github.com/baijia/BJLiveCore-Android)和[UI (BJLiveUI-Android)](https://github.com/baijia/BJLiveUI-Android)两个个库。
 
-- [UI](https://github.com/baijia/BJLiveUI-Android)库基于[Core](https://github.com/baijia/BJLiveCore-Android)和[PPT](link_ppt)实现，提供了一个针对教育场景下师生互动模板，主要包括师生一对一音视频互动，多人音视频互动，课件展示、文字聊天等功能，可以快速接入，集成工作量小，适合需要快速上线的同学，该库计划开源。
-- [Core](https://github.com/baijia/BJLiveCore-Android)为核心库，涵盖了直播间几乎所有的功能，包括音视频推拉流、信令服务器通信、聊天服务器通信等功能，该库不含UI资源，如果使用的是eclipse的同学可以将aar其中的jar包拿出来单独使用。
-- [PPT](link_ppt)单独把课件模块拆出来了，主要功能包含课件展示、画笔交互、动态PPT效果等，依赖于[Core](https://github.com/baijia/BJLiveCore-Android)。
+- [UI](https://github.com/baijia/BJLiveUI-Android)库基于[Core](https://github.com/baijia/BJLiveCore-Android)和[PPT](link_ppt)实现，提供了一个针对教育场景下师生互动模板，主要包括师生一对一音视频互动，多人音视频互动，课件展示、文字聊天等功能，可以快速接入，集成工作量小，适合需要快速上线的同学，该库已经开源。
+- [Core](https://github.com/baijia/BJLiveCore-Android)为核心库，涵盖了直播间几乎所有的功能，包括音视频推拉流、信令服务器通信、聊天服务器通信、PPT课件展示等功能。
 
 ## 集成SDK
-### aar依赖
+
 * 添加maven仓库
 ```groovy
 maven { url 'https://raw.github.com/baijia/maven/master/' }
@@ -28,13 +27,8 @@ maven { url 'https://raw.github.com/baijia/maven/master/' }
 ```groovy
 maven { url 'http://git.baijiashilian.com/open-android/maven/raw/master/' }
 ```
-* 在build.gradle中添加依赖
-```groovy
-dependencies {
-	implementation 'com.baijia.live:liveplayer-sdk-ui:1.4.6'
-}
-```
-### 源码依赖
+
+* 添加源码依赖
 ```groovy
 dependencies {
 	api project(':liveplayer-sdk-ui')
