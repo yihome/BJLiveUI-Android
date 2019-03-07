@@ -25,8 +25,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baijiahulian.live.ui.R;
+import com.baijiahulian.live.ui.utils.DisplayUtils;
 import com.baijiahulian.live.ui.utils.QueryPlus;
-import com.baijiayun.livecore.utils.DisplayUtils;
 
 import static com.baijiahulian.live.ui.R.id.dialog_base_title_container;
 import static com.baijiahulian.live.ui.utils.Precondition.checkNotNull;
@@ -64,8 +64,11 @@ public abstract class BaseDialogFragment extends DialogFragment {
         dialog.setCanceledOnTouchOutside(true);
         dialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         dialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            dialog.getWindow().getDecorView().setSystemUiVisibility(getActivity().getWindow().getDecorView().getSystemUiVisibility());
+        dialog.getWindow().getDecorView().setSystemUiVisibility(getActivity().getWindow().getDecorView().getSystemUiVisibility());
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+            dialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        } else {
+            dialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         }
         // 处理dialog沉浸式状态栏
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
