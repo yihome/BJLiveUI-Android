@@ -1,5 +1,10 @@
 apply plugin: 'com.android.library'
-apply plugin: 'maven'
+//apply plugin: 'maven'
+apply plugin: 'com.github.dcendents.android-maven'
+
+group = 'com.biajiayun.sdk'
+version = '1.0'
+
 
 android {
     compileSdkVersion 27

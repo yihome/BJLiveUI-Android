@@ -1,1 +1,3 @@
 include ':app', ':liveplayer-sdk-ui'
+
+rootProject.name = 'live-sdk'
